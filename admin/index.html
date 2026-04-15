@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Axe Flow Admin — Accueil</title>
+  <meta name="description" content="Accueil admin Axe Flow : nouvelles demandes, traitement en cours, alertes et accès rapide aux demandes prioritaires." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="../images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --panel:rgba(255,255,255,0.06);
+      --panel-2:rgba(255,255,255,0.04);
+      --line:rgba(255,255,255,0.09);
+      --line-strong:rgba(255,255,255,0.14);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.76);
+      --soft:rgba(244,247,251,0.58);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --warning:#ffb347;
+      --danger:#ff6b6b;
+      --info:#7cc8ff;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --max:1380px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.5;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button,input{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.68);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.95rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .page{
+      padding:28px 0 42px;
+    }
+
+    .hero{
+      margin-bottom:18px;
+      padding:28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:72ch;
+      font-size:1rem;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .kpi{
+      padding:22px 20px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .kpi-label{
+      color:var(--soft);
+      font-size:.88rem;
+      margin-bottom:10px;
+    }
+
+    .kpi-value{
+      font-size:2rem;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:-0.05em;
+    }
+
+    .kpi-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .kpi.is-danger{
+      border-color:rgba(255,107,107,0.22);
+      background:linear-gradient(180deg, rgba(255,107,107,0.10), rgba(255,255,255,0.04));
+    }
+
+    .kpi.is-warning{
+      border-color:rgba(255,179,71,0.24);
+      background:linear-gradient(180deg, rgba(255,179,71,0.10), rgba(255,255,255,0.04));
+    }
+
+    .kpi.is-success{
+      border-color:rgba(61,208,143,0.22);
+      background:linear-gradient(180deg, rgba(61,208,143,0.10), rgba(255,255,255,0.04));
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .col{
+      display:grid;
+      gap:18px;
+      min-width:0;
+      align-content:start;
+    }
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-inner{
+      padding:22px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0 0 5px;
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-sub{
+      color:var(--soft);
+      font-size:.88rem;
+    }
+
+    .mini-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.8rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .alert-list,
+    .action-list,
+    .timeline-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .alert-item,
+    .action-item,
+    .timeline-item{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .alert-item{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .alert-left{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      min-width:0;
+    }
+
+    .alert-dot{
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      margin-top:4px;
+      flex:0 0 auto;
+    }
+
+    .alert-dot.danger{
+      background:var(--danger);
+      box-shadow:0 0 0 6px rgba(255,107,107,0.12);
+    }
+
+    .alert-dot.warning{
+      background:var(--warning);
+      box-shadow:0 0 0 6px rgba(255,179,71,0.12);
+    }
+
+    .alert-dot.info{
+      background:var(--info);
+      box-shadow:0 0 0 6px rgba(124,200,255,0.12);
+    }
+
+    .alert-content strong,
+    .action-item strong,
+    .timeline-item strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .alert-content span,
+    .action-item span,
+    .timeline-item span{
+      display:block;
+      color:var(--muted);
+      font-size:.89rem;
+    }
+
+    .mini-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,127,31,0.14);
+      border:1px solid rgba(255,127,31,0.22);
+      color:#fff;
+      font-size:.84rem;
+      font-weight:800;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:840px;
+    }
+
+    th, td{
+      padding:14px 14px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      font-size:.92rem;
+      vertical-align:middle;
+    }
+
+    th{
+      color:var(--soft);
+      font-weight:700;
+      background:rgba(255,255,255,0.03);
+    }
+
+    td{
+      color:var(--muted);
+    }
+
+    tr:last-child td{border-bottom:0}
+
+    tr:hover{
+      background:rgba(255,255,255,0.03);
+    }
+
+    .client{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+
+    .client strong{
+      color:#fff;
+      font-size:.94rem;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:32px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .status.new{
+      background:rgba(124,200,255,0.14);
+      border-color:rgba(124,200,255,0.22);
+      color:#dff3ff;
+    }
+
+    .status.progress{
+      background:rgba(255,179,71,0.14);
+      border-color:rgba(255,179,71,0.22);
+      color:#ffe6c2;
+    }
+
+    .status.waiting{
+      background:rgba(255,107,107,0.14);
+      border-color:rgba(255,107,107,0.22);
+      color:#ffd9d9;
+    }
+
+    .status.done{
+      background:rgba(61,208,143,0.14);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .status.client{
+      background:rgba(255,255,255,0.06);
+      border-color:rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .mini-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-card strong{
+      display:block;
+      margin-bottom:5px;
+      color:#fff;
+      font-size:.94rem;
+    }
+
+    .mini-card span{
+      display:block;
+      color:var(--muted);
+      font-size:.89rem;
+    }
+
+    .sidebar-nav{
+      display:grid;
+      gap:10px;
+    }
+
+    .nav-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:#fff;
+      font-weight:700;
+      font-size:.92rem;
+    }
+
+    .nav-link span{
+      color:var(--muted);
+      font-weight:600;
+      font-size:.84rem;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    @media (max-width: 1180px){
+      .kpis{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 860px){
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .topbar-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .split{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .topbar-actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .hero,
+      .panel-inner{
+        padding:18px;
+      }
+
+      .kpis{
+        grid-template-columns:1fr;
+      }
+
+      .alert-item{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .mini-btn{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow Admin</span>
+          <span class="brand-sub">Accueil — traitement des demandes client</span>
+        </div>
+      </a>
+
+      <div class="topbar-actions">
+        <a href="demandes.html" class="btn btn-secondary">Voir toutes les demandes</a>
+        <a href="#" class="btn btn-primary">Nouvelle action du jour</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Cockpit admin Axe Flow
+        </div>
+        <h1>Accueil admin</h1>
+        <p>
+          Vue rapide sur les nouvelles demandes reçues, les traitements en cours, les demandes en attente client
+          et les priorités du jour. Ici, Axe Flow pilote le travail. Le client ne voit qu’un suivi publié.
+        </p>
+      </section>
+
+      <section class="kpis">
+        <article class="kpi is-danger">
+          <div class="kpi-label">Nouvelles demandes</div>
+          <div class="kpi-value">3</div>
+          <div class="kpi-note">À qualifier dès maintenant</div>
+        </article>
+
+        <article class="kpi is-warning">
+          <div class="kpi-label">Demandes en traitement</div>
+          <div class="kpi-value">8</div>
+          <div class="kpi-note">Relances, mise en demeure ou préparation</div>
+        </article>
+
+        <article class="kpi">
+          <div class="kpi-label">En attente client</div>
+          <div class="kpi-value">2</div>
+          <div class="kpi-note">Pièces ou réponse complémentaire attendues</div>
+        </article>
+
+        <article class="kpi is-success">
+          <div class="kpi-label">Clôturées</div>
+          <div class="kpi-value">14</div>
+          <div class="kpi-note">Demandes archivées ou terminées</div>
+        </article>
+      </section>
+
+      <section class="layout">
+        <div class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Alertes prioritaires</h2>
+                  <div class="panel-sub">Ce qui doit bouger aujourd’hui.</div>
+                </div>
+                <span class="mini-badge">3 urgences</span>
+              </div>
+
+              <div class="alert-list">
+                <div class="alert-item">
+                  <div class="alert-left">
+                    <div class="alert-dot danger"></div>
+                    <div class="alert-content">
+                      <strong>Nouvelle demande reçue sans qualification</strong>
+                      <span>AF-2026-021 — Sophie Martin — facture impayée reçue aujourd’hui à 09:14.</span>
+                    </div>
+                  </div>
+                  <a href="demande.html" class="mini-btn">Ouvrir</a>
+                </div>
+
+                <div class="alert-item">
+                  <div class="alert-left">
+                    <div class="alert-dot warning"></div>
+                    <div class="alert-content">
+                      <strong>Relance 2 à envoyer aujourd’hui</strong>
+                      <span>AF-2026-018 — Atelier Besson — échéance traitement prévue ce matin.</span>
+                    </div>
+                  </div>
+                  <a href="demande.html" class="mini-btn">Traiter</a>
+                </div>
+
+                <div class="alert-item">
+                  <div class="alert-left">
+                    <div class="alert-dot info"></div>
+                    <div class="alert-content">
+                      <strong>Pièce complémentaire demandée au client</strong>
+                      <span>AF-2026-016 — Agence Nova — en attente d’un devis ou d’un justificatif d’exécution.</span>
+                    </div>
+                  </div>
+                  <a href="demande.html" class="mini-btn">Voir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Demandes en cours</h2>
+                  <div class="panel-sub">Vue opérationnelle des demandes actives.</div>
+                </div>
+                <a href="demandes.html" class="mini-badge">Voir tout</a>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Créancier</th>
+                      <th>Référence</th>
+                      <th>Montant</th>
+                      <th>Statut interne</th>
+                      <th>Statut client</th>
+                      <th>Choix injonction</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="client">
+                          <strong>Sophie Martin</strong>
+                          <span>sophie.martin@email.fr</span>
+                        </div>
+                      </td>
+                      <td>AF-2026-021</td>
+                      <td>1 240 €</td>
+                      <td><span class="status new">Nouvelle demande</span></td>
+                      <td><span class="status client">Demande reçue</span></td>
+                      <td>Axe Flow</td>
+                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <div class="client">
+                          <strong>Atelier Besson</strong>
+                          <span>contact@atelier-besson.fr</span>
+                        </div>
+                      </td>
+                      <td>AF-2026-018</td>
+                      <td>860 €</td>
+                      <td><span class="status progress">Relance 2</span></td>
+                      <td><span class="status client">Traitement en cours</span></td>
+                      <td>Client</td>
+                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <div class="client">
+                          <strong>Agence Nova</strong>
+                          <span>gestion@agencenova.fr</span>
+                        </div>
+                      </td>
+                      <td>AF-2026-016</td>
+                      <td>2 450 €</td>
+                      <td><span class="status waiting">En attente client</span></td>
+                      <td><span class="status client">Pièce demandée</span></td>
+                      <td>Axe Flow</td>
+                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <div class="client">
+                          <strong>Dupont Conseil</strong>
+                          <span>admin@dupont-conseil.fr</span>
+                        </div>
+                      </td>
+                      <td>AF-2026-012</td>
+                      <td>540 €</td>
+                      <td><span class="status progress">Mise en demeure</span></td>
+                      <td><span class="status client">Traitement en cours</span></td>
+                      <td>Axe Flow</td>
+                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <div class="client">
+                          <strong>Studio Mercure</strong>
+                          <span>hello@studio-mercure.fr</span>
+                        </div>
+                      </td>
+                      <td>AF-2026-009</td>
+                      <td>1 980 €</td>
+                      <td><span class="status done">Clôturée</span></td>
+                      <td><span class="status client">Dossier clôturé</span></td>
+                      <td>Client</td>
+                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Activité récente</h2>
+                  <div class="panel-sub">Historique utile du back-office.</div>
+                </div>
+              </div>
+
+              <div class="timeline-list">
+                <div class="timeline-item">
+                  <strong>Demande reçue</strong>
+                  <span>AF-2026-021 — Sophie Martin — pièces déposées aujourd’hui à 09:14.</span>
+                </div>
+
+                <div class="timeline-item">
+                  <strong>Relance publiée côté client</strong>
+                  <span>AF-2026-018 — mise à jour du suivi client à 10:42.</span>
+                </div>
+
+                <div class="timeline-item">
+                  <strong>Message interne envoyé</strong>
+                  <span>AF-2026-016 — demande de justificatif complémentaire envoyée au client.</span>
+                </div>
+
+                <div class="timeline-item">
+                  <strong>Mise en demeure préparée</strong>
+                  <span>AF-2026-012 — brouillon validé côté admin, publication en attente.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Actions du jour</h2>
+                  <div class="panel-sub">Raccourcis concrets.</div>
+                </div>
+              </div>
+
+              <div class="action-list">
+                <div class="action-item">
+                  <strong>Qualifier les nouvelles demandes</strong>
+                  <span>Vérifier les pièces reçues, lire la facture, récupérer les coordonnées utiles.</span>
+                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Ouvrir la file</a>
+                </div>
+
+                <div class="action-item">
+                  <strong>Traiter les demandes en attente d’action</strong>
+                  <span>Relances, mise en demeure, publication du suivi client.</span>
+                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Traiter</a>
+                </div>
+
+                <div class="action-item">
+                  <strong>Vérifier les demandes en attente client</strong>
+                  <span>Contrôler les réponses, pièces complémentaires et messages non lus.</span>
+                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Vérifier</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Répartition rapide</h2>
+                  <div class="panel-sub">Vue synthétique.</div>
+                </div>
+              </div>
+
+              <div class="split">
+                <div class="mini-card">
+                  <strong>À qualifier</strong>
+                  <span>3 demandes reçues, non encore lues ou non qualifiées.</span>
+                </div>
+
+                <div class="mini-card">
+                  <strong>Relances en cours</strong>
+                  <span>4 demandes avec action de relance prévue ou engagée.</span>
+                </div>
+
+                <div class="mini-card">
+                  <strong>Mises en demeure</strong>
+                  <span>2 demandes prêtes ou en préparation.</span>
+                </div>
+
+                <div class="mini-card">
+                  <strong>Injonctions</strong>
+                  <span>1 demande à préparer selon le choix client enregistré.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Navigation admin</h2>
+                  <div class="panel-sub">Base de travail.</div>
+                </div>
+              </div>
+
+              <nav class="sidebar-nav">
+                <a href="index.html" class="nav-link">
+                  Accueil admin
+                  <span>Vue générale</span>
+                </a>
+
+                <a href="demandes.html" class="nav-link">
+                  Toutes les demandes
+                  <span>Liste complète</span>
+                </a>
+
+                <a href="demande.html" class="nav-link">
+                  Fiche demande
+                  <span>Détail + actions</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                  Messages clients
+                  <span>À prévoir</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                  Réglages
+                  <span>À prévoir</span>
+                </a>
+              </nav>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <div class="footer-note">
+        Maquette de base de l’accueil admin Axe Flow.
+      </div>
+    </div>
+  </main>
+</body>
+</html>

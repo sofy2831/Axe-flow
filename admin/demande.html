@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Axe Flow Admin — Détail demande</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="icon" type="image/png" href="../images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.72);
+      --soft:rgba(244,247,251,0.55);
+      --panel:rgba(255,255,255,0.06);
+      --line:rgba(255,255,255,0.08);
+      --accent:#ff7f1f;
+      --accent2:#ff9b4a;
+      --success:#3dd08f;
+      --danger:#ff6b6b;
+      --warning:#ffb347;
+      --shadow:0 24px 80px rgba(0,0,0,.28);
+      --radius:24px;
+      --max:1440px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
+        linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+      color:var(--text);
+    }
+
+    a{text-decoration:none;color:inherit}
+    input,textarea,select,button{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,.68);
+      border-bottom:1px solid var(--line);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand img{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+    }
+
+    .btn{
+      min-height:44px;
+      padding:0 18px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      border:1px solid transparent;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.05);
+      border-color:rgba(255,255,255,.1);
+    }
+
+    .page{
+      padding:28px 0 40px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .col{
+      display:grid;
+      gap:18px;
+    }
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .panel-inner{
+      padding:22px;
+    }
+
+    .panel h2{
+      margin:0 0 14px;
+      font-size:1.1rem;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:6px;
+      font-size:.82rem;
+      color:var(--soft);
+      font-weight:700;
+      text-transform:uppercase;
+    }
+
+    .field input,
+    .field textarea,
+    .field select{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      padding:14px;
+      outline:none;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .file-box{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px dashed rgba(255,255,255,.15);
+      margin-top:12px;
+    }
+
+    .doc-list{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .doc{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+    }
+
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .step{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+    }
+
+    .step-title{
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .actions{
+      display:grid;
+      gap:10px;
+    }
+
+    .action-btn{
+      width:100%;
+      min-height:46px;
+      border-radius:16px;
+      background:rgba(255,127,31,.14);
+      border:1px solid rgba(255,127,31,.22);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .message-box{
+      display:grid;
+      gap:10px;
+    }
+
+    .message{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+    }
+
+    .message small{
+      color:var(--soft);
+      display:block;
+      margin-bottom:6px;
+    }
+
+    @media(max-width:1100px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:700px){
+      .grid-2{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="brand">
+      <img src="../images/axe-flow-cover.png" alt="Axe Flow">
+      <div>
+        <strong>Axe Flow Admin</strong><br>
+        <small style="color:rgba(255,255,255,.6)">Détail de la demande</small>
+      </div>
+    </div>
+
+    <a href="demandes.html" class="btn btn-secondary">Retour liste</a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="container">
+    <div class="layout">
+
+      <!-- COLONNE GAUCHE -->
+      <div class="col">
+
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>Informations dossier</h2>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Référence</label>
+                <input value="AF-2026-021">
+              </div>
+
+              <div class="field">
+                <label>Montant facture</label>
+                <input value="1 240 €">
+              </div>
+
+              <div class="field">
+                <label>Créancier</label>
+                <input value="Sophie Martin">
+              </div>
+
+              <div class="field">
+                <label>Email créancier</label>
+                <input value="sophie.martin@email.fr">
+              </div>
+
+              <div class="field">
+                <label>Débiteur</label>
+                <input placeholder="Nom / société">
+              </div>
+
+              <div class="field">
+                <label>Adresse débiteur</label>
+                <input placeholder="Adresse récupérée depuis facture">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>Pièces reçues</h2>
+
+            <div class="file-box">
+              Télécharger / scanner les documents reçus du client
+            </div>
+
+            <div class="doc-list">
+              <div class="doc">Facture impayée.pdf</div>
+              <div class="doc">Devis signé.pdf</div>
+              <div class="doc">Relance mail 1.pdf</div>
+              <div class="doc">SMS client capture.png</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>Chronologie de traitement Axe Flow</h2>
+
+            <div class="timeline">
+              <div class="step">
+                <div class="step-title">Relance 1</div>
+                <div>À rédiger et publier</div>
+              </div>
+
+              <div class="step">
+                <div class="step-title">Relance 2</div>
+                <div>En attente</div>
+              </div>
+
+              <div class="step">
+                <div class="step-title">Mise en demeure</div>
+                <div>Non démarrée</div>
+              </div>
+
+              <div class="step">
+                <div class="step-title">Injonction de payer</div>
+                <div>Choix client : Axe Flow</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLONNE DROITE -->
+      <div class="col">
+
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>Actions dossier</h2>
+
+            <div class="actions">
+              <button class="action-btn">Publier relance 1</button>
+              <button class="action-btn">Publier relance 2</button>
+              <button class="action-btn">Publier relance 3</button>
+              <button class="action-btn">Générer mise en demeure</button>
+              <button class="action-btn">Préparer injonction</button>
+              <button class="action-btn">Publier côté client</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>Courrier au client</h2>
+
+            <div class="field">
+              <label>Message</label>
+              <textarea placeholder="Ex : Bonjour, la relance 1 a été envoyée ce jour..."></textarea>
+            </div>
+
+            <div style="margin-top:12px">
+              <button class="btn btn-primary">Envoyer message</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>Messagerie interne</h2>
+
+            <div class="message-box">
+              <div class="message">
+                <small>Client — aujourd’hui 09:12</small>
+                J’ai ajouté le devis signé.
+              </div>
+
+              <div class="message">
+                <small>Axe Flow — aujourd’hui 10:05</small>
+                Bien reçu, nous lançons la relance 1.
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

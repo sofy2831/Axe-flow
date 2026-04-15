@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Axe Flow — Tarifs</title>
+  <meta name="description" content="Tarifs Axe Flow : dossier ponctuel, formule Pro, transmission autonome incluse et transmission assistée en option." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --card:rgba(255,255,255,0.08);
+      --card-strong:rgba(255,255,255,0.12);
+      --line:rgba(255,255,255,0.12);
+      --line-strong:rgba(255,255,255,0.18);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.78);
+      --soft:rgba(244,247,251,0.60);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --warning:#ffb347;
+      --danger:#ff6b6b;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --max:1240px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 30%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 28%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.55;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.66);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:48px;
+      padding:0 20px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.96rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .page{
+      padding:32px 0 44px;
+    }
+
+    .hero{
+      margin-bottom:22px;
+      padding:32px;
+      border-radius:32px;
+      background:
+        radial-gradient(circle at top left, rgba(255,127,31,0.14), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(61,208,143,0.12), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:16px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2.1rem, 4.5vw, 3.8rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+      max-width:14ch;
+    }
+
+    .hero-lead{
+      margin:0;
+      color:var(--muted);
+      max-width:72ch;
+      font-size:1.02rem;
+    }
+
+    .pricing-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:18px;
+      margin-bottom:22px;
+    }
+
+    .price-card{
+      position:relative;
+      padding:30px 28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.05));
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .price-card.featured{
+      border-color:rgba(255,127,31,0.34);
+      box-shadow:0 24px 90px rgba(255,127,31,0.12);
+    }
+
+    .price-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .price-name{
+      margin:0 0 8px;
+      font-size:1.25rem;
+      letter-spacing:-0.02em;
+    }
+
+    .price-desc{
+      margin:0;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .price-badge{
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,127,31,0.14);
+      border:1px solid rgba(255,127,31,0.24);
+      color:var(--accent-2);
+      font-size:.8rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .price{
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .price-amount{
+      font-size:3.2rem;
+      line-height:.95;
+      font-weight:800;
+      letter-spacing:-0.06em;
+    }
+
+    .price-unit{
+      color:var(--muted);
+      font-weight:600;
+      padding-bottom:7px;
+    }
+
+    .price-note{
+      margin:0 0 22px;
+      color:var(--soft);
+      font-size:.9rem;
+    }
+
+    .price-list{
+      list-style:none;
+      padding:0;
+      margin:0 0 24px;
+      display:flex;
+      flex-direction:column;
+      gap:11px;
+    }
+
+    .price-list li{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      color:var(--muted);
+      font-size:.94rem;
+    }
+
+    .dot{
+      color:var(--accent);
+      font-weight:800;
+    }
+
+    .price-list strong{color:#fff}
+
+    .section{
+      margin-top:22px;
+      padding:24px;
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .section-head{
+      margin-bottom:18px;
+      max-width:78ch;
+    }
+
+    .section-tag{
+      display:inline-block;
+      color:var(--accent-2);
+      font-size:.84rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    .section-title{
+      margin:0 0 8px;
+      font-size:clamp(1.5rem, 3vw, 2.3rem);
+      line-height:1.08;
+      letter-spacing:-0.035em;
+    }
+
+    .section-text{
+      margin:0;
+      color:var(--muted);
+      font-size:1rem;
+    }
+
+    .compare-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:18px;
+    }
+
+    .compare-card{
+      padding:22px;
+      border-radius:22px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .compare-card.highlight{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .mini-tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.82rem;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+
+    .compare-card h3{
+      margin:0 0 8px;
+      font-size:1.04rem;
+      letter-spacing:-0.02em;
+    }
+
+    .compare-card p{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .compare-card ul{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .compare-card li{margin:6px 0}
+
+    .faq-grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .faq-item{
+      padding:18px 18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .faq-item h3{
+      margin:0 0 8px;
+      font-size:1rem;
+      letter-spacing:-0.02em;
+    }
+
+    .faq-item p{
+      margin:0;
+      color:var(--muted);
+      font-size:.94rem;
+    }
+
+    .cta-box{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:18px;
+      align-items:center;
+      padding:24px;
+      border-radius:28px;
+      background:
+        radial-gradient(circle at top left, rgba(255,127,31,0.16), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(61,208,143,0.14), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.05));
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:var(--shadow);
+      margin-top:22px;
+    }
+
+    .cta-box h2{
+      margin:0 0 8px;
+      font-size:clamp(1.6rem, 3vw, 2.5rem);
+      line-height:1.08;
+      letter-spacing:-0.04em;
+    }
+
+    .cta-box p{
+      margin:0;
+      color:var(--muted);
+      max-width:60ch;
+      font-size:1rem;
+    }
+
+    .footer-note{
+      margin-top:20px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    @media (max-width: 980px){
+      .pricing-grid,
+      .compare-grid{
+        grid-template-columns:1fr;
+      }
+
+      .cta-box{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 860px){
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .topbar-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .hero,
+      .section,
+      .cta-box,
+      .price-card{
+        padding-left:20px;
+        padding-right:20px;
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .topbar-actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .price-amount{
+        font-size:2.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Tarifs</span>
+        </div>
+      </a>
+
+      <div class="topbar-actions">
+        <a href="index.html" class="btn btn-secondary">Retour accueil</a>
+        <a href="connexion.html" class="btn btn-secondary">Connexion</a>
+        <a href="#offres" class="btn btn-primary">Voir les offres</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Deux offres claires. Pour un besoin ponctuel ou récurrent.
+        </div>
+
+        <h1>Choisissez la formule adaptée à votre volume de dossiers</h1>
+
+        <p class="hero-lead">
+          Avec Axe Flow, vous ouvrez votre dossier impayé, vous renseignez les informations utiles et vous suivez ensuite les étapes publiées sur votre tableau de bord client, de la relance à l’injonction. Vous choisissez ensuite le mode de transmission qui correspond à votre besoin.
+        </p>
+      </section>
+
+      <section id="offres" class="pricing-grid">
+        <article class="price-card">
+          <div class="price-top">
+            <div>
+              <h2 class="price-name">Dossier ponctuel</h2>
+              <p class="price-desc">Pour un impayé isolé à traiter proprement, sans abonnement.</p>
+            </div>
+            <span class="price-badge">Paiement unique</span>
+          </div>
+
+          <div class="price">
+            <span class="price-amount">49€</span>
+            <span class="price-unit">/ dossier</span>
+          </div>
+
+          <p class="price-note">Sans abonnement. Sans engagement. Vous payez uniquement quand vous ouvrez un dossier.</p>
+
+          <ul class="price-list">
+            <li><span class="dot">•</span><span><strong>Création d’un dossier impayé</strong> dans votre espace client</span></li>
+            <li><span class="dot">•</span><span><strong>Centralisation des informations et pièces</strong> du dossier</span></li>
+            <li><span class="dot">•</span><span><strong>Suivi chronologique</strong> des étapes publiées</span></li>
+            <li><span class="dot">•</span><span><strong>Relances et mise en demeure</strong> suivies dans le dossier</span></li>
+            <li><span class="dot">•</span><span><strong>Visibilité sur la prescription</strong> et l’état du dossier</span></li>
+            <li><span class="dot">•</span><span><strong>Préparation du dossier d’injonction</strong></span></li>
+            <li><span class="dot">•</span><span><strong>Choix de la suite après ordonnance</strong></span></li>
+          </ul>
+
+          <a href="https://buy.stripe.com/test_6oUcN4fs0fNc9bL8Lt8so00" class="btn btn-secondary">Choisir l’offre ponctuelle</a>
+        </article>
+
+        <article class="price-card featured">
+          <div class="price-top">
+            <div>
+              <h2 class="price-name">Offre Pro</h2>
+              <p class="price-desc">Pour les structures qui gèrent plusieurs impayés dans le mois.</p>
+            </div>
+            <span class="price-badge">Le plus rentable</span>
+          </div>
+
+          <div class="price">
+            <span class="price-amount">89€</span>
+            <span class="price-unit">/ mois</span>
+          </div>
+
+          <p class="price-note">3 dossiers inclus chaque mois, puis 19 € par dossier supplémentaire.</p>
+
+          <ul class="price-list">
+            <li><span class="dot">•</span><span><strong>3 dossiers inclus</strong> dès l’ouverture</span></li>
+            <li><span class="dot">•</span><span><strong>19 €</strong> par dossier supplémentaire</span></li>
+            <li><span class="dot">•</span><span><strong>Tableau de bord global</strong> des impayés</span></li>
+            <li><span class="dot">•</span><span><strong>Historique centralisé</strong> multi-dossiers</span></li>
+            <li><span class="dot">•</span><span><strong>Suivi récurrent</strong> sur plusieurs affaires</span></li>
+            <li><span class="dot">•</span><span><strong>Préparation des étapes</strong> de la relance à l’injonction</span></li>
+            <li><span class="dot">•</span><span><strong>Choix de la suite</strong> sur chaque dossier</span></li>
+          </ul>
+
+          <a href="https://buy.stripe.com/test_fZu00i4Nm6cCcnX2n58so01" class="btn btn-primary">Choisir l’offre Pro</a>
+        </article>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <span class="section-tag">Transmission</span>
+          <h2 class="section-title">Deux modes de transmission après préparation du dossier</h2>
+          <p class="section-text">
+            La préparation du dossier par Axe Flow est comprise dans l’offre choisie. Ensuite, vous pouvez soit transmettre vous-même le dossier, soit demander une transmission assistée.
+          </p>
+        </div>
+
+        <div class="compare-grid">
+          <article class="compare-card">
+            <span class="mini-tag">Inclus</span>
+            <h3>Transmission autonome</h3>
+            <p>
+              Axe Flow prépare le dossier. Vous choisissez ensuite librement votre commissaire de justice et vous transmettez vous-même les éléments nécessaires.
+            </p>
+            <ul>
+              <li>Dossier structuré</li>
+              <li>Pièces regroupées dans le suivi</li>
+              <li>Choix libre du commissaire de justice</li>
+              <li>Aucun coût supplémentaire Axe Flow</li>
+            </ul>
+          </article>
+
+          <article class="compare-card highlight">
+            <span class="mini-tag">Option payante</span>
+            <h3>Transmission assistée par Axe Flow</h3>
+            <p>
+              Axe Flow prépare le dossier et peut ensuite coordonner la transmission de l’ordonnance selon la formule complémentaire choisie.
+            </p>
+            <ul>
+              <li>Coordination de la transmission</li>
+              <li>Gain de temps sur la phase de signification</li>
+              <li>Tarification complémentaire selon le montant TTC</li>
+              <li>Option urgence 24 h possible</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <span class="section-tag">FAQ</span>
+          <h2 class="section-title">Questions fréquentes</h2>
+        </div>
+
+        <div class="faq-grid">
+          <article class="faq-item">
+            <h3>Axe Flow remplace-t-il un logiciel de facturation ?</h3>
+            <p>
+              Non. Axe Flow prend le relais quand la facture devient impayée. Vous ouvrez le dossier, vous renseignez les informations utiles et vous suivez ensuite le traitement sur votre tableau de bord.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>La transmission à un commissaire de justice est-elle incluse ?</h3>
+            <p>
+              La transmission autonome est incluse : Axe Flow prépare le dossier et vous restez libre du commissaire de justice choisi. La transmission assistée par Axe Flow constitue une option complémentaire.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>À quoi correspond l’offre Pro ?</h3>
+            <p>
+              Elle est pensée pour les structures qui suivent plusieurs impayés chaque mois et veulent un tableau de bord unique, avec 3 dossiers inclus puis 19 € par dossier supplémentaire.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Quand intervient le paiement complémentaire pour la transmission assistée ?</h3>
+            <p>
+              Il intervient plus tard, uniquement si vous choisissez cette option après publication de l’étape injonction sur votre dossier.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta-box">
+        <div>
+          <h2>Besoin ponctuel ou suivi récurrent : prends la formule adaptée.</h2>
+          <p>
+            Vous pouvez commencer avec un dossier ponctuel ou opter directement pour l’offre Pro si vous gérez plusieurs impayés. Après validation du règlement, vous accédez à votre espace Axe Flow.
+          </p>
+        </div>
+
+        <div class="topbar-actions">
+         <a href="https://buy.stripe.com/test_fZu00i4Nm6cCcnX2n58so01" class="btn btn-primary">Offre Pro</a>
+        
+        </div>
+      </section>
+
+      <div class="footer-note">
+        Axe Flow - tarification simple pour suivi ponctuel ou récurrent des impayés.
+      </div>
+    </div>
+  </main>
+</body>
+</html>

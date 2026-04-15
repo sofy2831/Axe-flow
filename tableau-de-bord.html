@@ -1,0 +1,2783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Axe Flow — Tableau de bord client</title>
+  <meta name="description" content="Tableau de bord client Axe Flow : création du dossier impayé, dépôt des pièces, suivi des publications et choix de la suite après injonction." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --panel:rgba(255,255,255,0.06);
+      --panel-2:rgba(255,255,255,0.04);
+      --line:rgba(255,255,255,0.09);
+      --line-strong:rgba(255,255,255,0.14);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.76);
+      --soft:rgba(244,247,251,0.58);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --warning:#ffb347;
+      --danger:#ff6b6b;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --max:1320px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.5;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button,input,select,textarea{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.66);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .user-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:600;
+      max-width:100%;
+      flex-wrap:wrap;
+    }
+
+    .user-email{
+      max-width:220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .status-pill.success{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .status-pill.warning{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .status-pill.danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .status-pill.neutral{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
+    .page{
+      padding:28px 0 44px;
+    }
+
+    .hero{
+      margin-bottom:18px;
+      padding:28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:none;
+      width:100%;
+      font-size:1rem;
+    }
+
+    .flash-banner{
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:18px;
+      border:1px solid rgba(61,208,143,0.22);
+      background:rgba(61,208,143,0.12);
+      color:#d9ffee;
+      font-size:.92rem;
+      display:none;
+    }
+
+    .flash-banner.show{
+      display:block;
+    }
+
+    /* ===== NOUVELLE GRILLE SIMPLE 6 BLOCS ===== */
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0,1fr));
+      gap:18px;
+      align-items:start;
+      grid-template-areas:
+        "dossiers dossiers dossiers dossiers summary summary summary summary alerts alerts alerts alerts"
+        "upload upload upload upload upload upload timeline timeline timeline timeline timeline timeline"
+        "choice choice choice choice choice choice choice choice choice choice choice choice";
+    }
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-width:0;
+    }
+
+    .panel-dossiers{grid-area:dossiers}
+    .panel-summary{grid-area:summary}
+    .panel-alerts{grid-area:alerts}
+    .panel-upload{grid-area:upload}
+    .panel-timeline{grid-area:timeline}
+    .panel-choice{grid-area:choice}
+
+    .panel-inner{
+      padding:22px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0 0 6px;
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-sub{
+      color:var(--soft);
+      font-size:.9rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.92rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .btn[disabled],
+    .btn.is-disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      pointer-events:none;
+      box-shadow:none;
+      transform:none;
+      filter:none;
+    }
+
+    .upload-grid{
+      display:grid;
+      gap:12px;
+    }
+
+    .upload-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .upload-card strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .upload-card span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+      max-width:54ch;
+    }
+
+    .upload-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      flex:0 0 auto;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .upload-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:40px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#fff;
+      font-size:.86rem;
+      font-weight:800;
+      white-space:nowrap;
+      cursor:pointer;
+    }
+
+    .upload-btn input{
+      display:none;
+    }
+
+    .file-status{
+      margin-top:8px;
+      font-size:.82rem !important;
+      color:var(--soft) !important;
+    }
+
+    .file-status.ok{
+      color:#d9ffee !important;
+    }
+
+    .note-box{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.10);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff4ea;
+      font-size:.92rem;
+    }
+
+    .note-box.soft{
+      background:rgba(255,255,255,0.04);
+      border-color:rgba(255,255,255,0.08);
+      color:var(--muted);
+    }
+
+    .note-box.success{
+      background:rgba(61,208,143,0.12);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .note-box.warning{
+      background:rgba(255,179,71,0.12);
+      border-color:rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .dossier-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .dossier-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .dossier-card:hover{
+      background:rgba(255,255,255,0.06);
+      transform:translateY(-1px);
+    }
+
+    .dossier-card.active{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .dossier-card strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .dossier-card span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .badge.included{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .badge.warning{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .badge.danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .empty-state{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px dashed rgba(255,255,255,0.12);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px;
+      margin-bottom:0;
+    }
+
+    .summary-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      min-width:0;
+    }
+
+    .summary-label{
+      color:var(--soft);
+      font-size:.84rem;
+      margin-bottom:8px;
+    }
+
+    .summary-value{
+      font-size:1.08rem;
+      line-height:1.25;
+      font-weight:800;
+      letter-spacing:-0.03em;
+      color:#fff;
+      word-break:break-word;
+    }
+
+    .summary-value.big{
+      font-size:1.42rem;
+      line-height:1.1;
+      letter-spacing:-0.04em;
+    }
+
+    .summary-note{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .timeline-item{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .timeline-main{
+      min-width:0;
+    }
+
+    .timeline-item strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .timeline-item span{
+      display:block;
+      color:var(--muted);
+      font-size:.89rem;
+    }
+
+    .timeline-meta{
+      color:var(--soft) !important;
+      font-size:.8rem !important;
+      margin-bottom:6px;
+    }
+
+    .alert-table-wrap{
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+    }
+
+    .alert-table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:640px;
+    }
+
+    .alert-table th,
+    .alert-table td{
+      padding:14px 12px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      font-size:.9rem;
+      vertical-align:top;
+    }
+
+    .alert-table th{
+      color:var(--soft);
+      font-weight:700;
+      background:rgba(255,255,255,0.03);
+    }
+
+    .alert-table td{
+      color:var(--muted);
+    }
+
+    .alert-table tr:last-child td{
+      border-bottom:0;
+    }
+
+    .alert-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .alert-pill.normal{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .alert-pill.surveillance{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .alert-pill.urgent{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .alert-pill.missing{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
+    .choice-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .choice-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .choice-card.highlight{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .choice-card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+      letter-spacing:-0.02em;
+    }
+
+    .choice-card p{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .choice-card ul{
+      margin:0 0 12px;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .choice-card li{margin:6px 0}
+
+    .choice-card a{
+      color:#fff4ea;
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+
+    .option-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin:10px 0 14px;
+      align-items:center;
+    }
+
+    .check-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:600;
+      width:max-content;
+    }
+
+    .price-box{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.12);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff;
+      margin-bottom:12px;
+    }
+
+    .price-box strong{
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .price-box.disabled{
+      opacity:.55;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(2,10,15,0.72);
+      backdrop-filter:blur(4px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:100;
+    }
+
+    .modal-backdrop.open{
+      display:flex;
+    }
+
+    .modal{
+      width:min(980px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border-radius:28px;
+      background:linear-gradient(180deg, #103448, #0a2535);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:var(--shadow);
+    }
+
+    .modal.small{
+      width:min(860px, 100%);
+    }
+
+    .modal-inner{
+      padding:22px;
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .modal h2{
+      margin:0 0 6px;
+      font-size:1.3rem;
+      letter-spacing:-0.02em;
+    }
+
+    .close-btn{
+      border:none;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      min-width:40px;
+      min-height:40px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:1.05rem;
+    }
+
+    .tarif-table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);
+      margin-top:12px;
+    }
+
+    .tarif-table th,
+    .tarif-table td{
+      padding:14px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      font-size:.9rem;
+      vertical-align:top;
+    }
+
+    .tarif-table th{
+      color:var(--soft);
+      font-weight:700;
+      background:rgba(255,255,255,0.03);
+    }
+
+    .tarif-table td{
+      color:var(--muted);
+    }
+
+    .tarif-table tr:last-child td{
+      border-bottom:0;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin:14px 0 18px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    .field label{
+      color:var(--soft);
+      font-size:.88rem;
+      font-weight:600;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      min-height:46px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:110px;
+      padding:12px 14px;
+      resize:vertical;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder{
+      color:rgba(244,247,251,0.42);
+    }
+
+    .field input[readonly]{
+      opacity:.9;
+    }
+
+    .file-list{
+      display:grid;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .file-item{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .file-item strong{
+      display:block;
+      font-size:.92rem;
+      margin-bottom:4px;
+    }
+
+    .file-item span{
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    @media (max-width: 1200px){
+      .dashboard-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+        grid-template-areas:
+          "dossiers summary"
+          "alerts alerts"
+          "upload upload"
+          "timeline timeline"
+          "choice choice";
+      }
+    }
+
+    @media (max-width: 860px){
+      .dashboard-grid{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "dossiers"
+          "summary"
+          "upload"
+          "alerts"
+          "timeline"
+          "choice";
+      }
+
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .top-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .upload-card,
+      .timeline-item,
+      .file-item{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .summary-grid,
+      .choice-grid,
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .panel-inner,
+      .hero,
+      .modal-inner{
+        padding:18px;
+      }
+
+      .upload-actions{
+        width:100%;
+      }
+
+      .upload-actions .btn,
+      .upload-actions .upload-btn{
+        width:100%;
+      }
+
+      .check-row{
+        width:100%;
+      }
+
+      .user-chip{
+        max-width:100%;
+        width:100%;
+      }
+
+      .user-email{
+        max-width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Tableau de bord client</span>
+        </div>
+      </a>
+
+      <div class="top-actions">
+        <div class="user-chip" id="userChip">
+          <span class="user-email" id="userEmail">Chargement du compte...</span>
+          <span class="status-pill neutral" id="userStatusPill">Statut à vérifier</span>
+          <span class="status-pill neutral" id="userPlanPill">Option à vérifier</span>
+        </div>
+        <button class="btn btn-secondary" type="button" id="logoutBtn">Déconnexion</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <div class="flash-banner" id="flashBanner"></div>
+
+      <section class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Création du dossier, dépôt des pièces et suivi des publications
+        </div>
+        <h1>Votre tableau de bord impayés</h1>
+        <p>
+          Créez votre dossier, déposez vos pièces, suivez les étapes publiées par Axe Flow et choisissez la suite après injonction lorsque cette étape est atteinte.
+        </p>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="panel panel-dossiers">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Vos dossiers</h2>
+                <div class="panel-sub" id="planSubtitle">Créez votre premier dossier pour démarrer.</div>
+              </div>
+              <button class="btn btn-primary" type="button" id="openCreateDossier">Ajouter un dossier</button>
+            </div>
+
+            <div class="note-box warning" id="createLimitNotice" style="display:none;margin-bottom:14px;"></div>
+
+            <div id="extraDossierBox" style="display:none;margin-bottom:14px;">
+              <div class="note-box" style="margin-bottom:10px;">
+                Vos 3 dossiers inclus sont utilisés. Pour ouvrir un dossier supplémentaire, un paiement complémentaire de 19 € est requis.
+              </div>
+              <button class="btn btn-primary" type="button" id="buyExtraDossierBtn">Débloquer un dossier supplémentaire - 19 €</button>
+            </div>
+
+            <div class="dossier-list" id="dossierList">
+              <div class="empty-state">
+                Aucun dossier créé pour le moment.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-summary">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Suivi du dossier</h2>
+                <div class="panel-sub" id="summarySubtitle">Aucun dossier sélectionné</div>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <div class="summary-label">Référence</div>
+                <div class="summary-value big" id="summaryRef">—</div>
+                <div class="summary-note" id="summaryCreated">Créez un dossier pour commencer.</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Montant TTC</div>
+                <div class="summary-value big" id="amountTTCDisplay">—</div>
+                <div class="summary-note">Facture impayée</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Débiteur</div>
+                <div class="summary-value" id="summaryDebiteur">—</div>
+                <div class="summary-note" id="summaryContact">Coordonnées non renseignées</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Adresse</div>
+                <div class="summary-value" id="summaryAddress">—</div>
+                <div class="summary-note" id="summaryCity">Adresse non renseignée</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Type de débiteur</div>
+                <div class="summary-value" id="summaryType">—</div>
+                <div class="summary-note">Particulier ou professionnel</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Échéance / facture</div>
+                <div class="summary-value" id="summaryInvoice">—</div>
+                <div class="summary-note" id="summaryStatus">Statut non défini</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-alerts">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Tableau d’alerte prescription</h2>
+                <div class="panel-sub">Vue synthétique des dossiers selon le type de débiteur et la date d’échéance.</div>
+              </div>
+            </div>
+
+            <div class="alert-table-wrap">
+              <table class="alert-table" aria-label="Tableau d’alerte prescription">
+                <thead>
+                  <tr>
+                    <th>Référence</th>
+                    <th>Débiteur</th>
+                    <th>Type</th>
+                    <th>Échéance</th>
+                    <th>Alerte</th>
+                  </tr>
+                </thead>
+                <tbody id="prescriptionTableBody">
+                  <tr>
+                    <td colspan="5" class="empty-state" style="background:none;border:0;padding:18px;">
+                      Aucun dossier pour le moment.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-upload">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Déposer vos pièces</h2>
+                <div class="panel-sub">Téléchargez les pièces utiles du dossier sélectionné. Elles seront récupérées côté admin via Storage.</div>
+              </div>
+            </div>
+
+            <div class="upload-grid">
+              <div class="upload-card" data-doc-type="quote">
+                <div>
+                  <strong>Devis / bon de commande</strong>
+                  <span>Ajoutez le document à l’origine de la créance.</span>
+                  <span class="file-status" id="status-quote">Aucun fichier envoyé.</span>
+                </div>
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="quote" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="quote">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="quote">Voir</button>
+                </div>
+              </div>
+
+              <div class="upload-card" data-doc-type="invoice">
+                <div>
+                  <strong>Facture impayée</strong>
+                  <span>Ajoutez la facture concernée par le dossier.</span>
+                  <span class="file-status" id="status-invoice">Aucun fichier envoyé.</span>
+                </div>
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="invoice" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="invoice">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="invoice">Voir</button>
+                </div>
+              </div>
+
+              <div class="upload-card" data-doc-type="recovery">
+                <div>
+                  <strong>Relances déjà faites</strong>
+                  <span>Ajoutez les relances ou mises en demeure déjà envoyées de votre côté.</span>
+                  <span class="file-status" id="status-recovery">Aucun fichier envoyé.</span>
+                </div>
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="recovery" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="recovery">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="recovery">Voir</button>
+                </div>
+              </div>
+
+              <div class="upload-card" data-doc-type="supporting">
+                <div>
+                  <strong>Échanges et justificatifs</strong>
+                  <span>Ajoutez les mails, preuves d’exécution et documents utiles au dossier.</span>
+                  <span class="file-status" id="status-supporting">Aucun fichier envoyé.</span>
+                </div>
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="supporting" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="supporting">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="supporting">Voir</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="note-box soft" style="margin-top:16px;">
+              Sélectionnez d’abord un dossier, puis envoyez les pièces une catégorie après l’autre pour garder un dossier propre.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-timeline">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Suivi chronologique</h2>
+                <div class="panel-sub">Étapes publiées par Axe Flow sur votre dossier sélectionné.</div>
+              </div>
+            </div>
+
+            <div class="timeline" id="timelineList">
+              <div class="empty-state">
+                Aucune publication pour le moment. Dès qu’une étape sera publiée côté Axe Flow, elle apparaîtra ici.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-choice">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Pour l’injonction, que préférez-vous ?</h2>
+                <div class="panel-sub">Choix de la suite après publication de l’étape injonction.</div>
+              </div>
+            </div>
+
+            <div class="note-box soft" style="margin-bottom:12px;">
+              Les frais de commissaire de justice liés à la signification de l’ordonnance sont en principe à la charge du débiteur condamné. Ils doivent toutefois être avancés par le créancier au moment de la signification.
+            </div>
+
+            <div class="note-box" style="margin-bottom:16px;" id="choiceNotice">
+              Ce bloc s’active uniquement quand l’étape injonction a été publiée.
+            </div>
+
+            <div class="choice-grid" id="choiceSection">
+              <div class="choice-card">
+                <h3>Transmission autonome</h3>
+                <p>
+                  Axe Flow prépare votre dossier complet. Une fois l’ordonnance rendue, vous restez libre de choisir le commissaire de justice compétent, proche du débiteur ou du lieu d’exécution.
+                </p>
+                <p>
+                  Vous pouvez aussi vous orienter vers une étude proposant une prise en charge en ligne, comme
+                  <a href="https://www.tggv.fr/acte-d-huissier/signification-par-huissier/" target="_blank" rel="noopener noreferrer">TGGV</a>.
+                </p>
+
+                <div class="option-row">
+                  <label class="check-row">
+                    <input type="checkbox" id="autonomousChoiceCheckbox" disabled />
+                    Je choisis la transmission autonome
+                  </label>
+                </div>
+
+                <button class="btn btn-secondary" type="button" id="validateAutonome" disabled>Enregistrer mon choix</button>
+              </div>
+
+              <div class="choice-card highlight">
+                <h3>Transmission assistée par Axe Flow</h3>
+                <p>
+                  Axe Flow prépare le dossier, coordonne la signification de l’ordonnance et gère la transmission selon le montant de la créance.
+                </p>
+                <ul>
+                  <li>Montant TTC &lt; 128 € = 85 €</li>
+                  <li>Montant TTC de 128 € à 1280 € = 140 €</li>
+                  <li>Montant TTC &gt; 1280 € = 247 €</li>
+                  <li>Urgence 24 h = + 90 €</li>
+                </ul>
+
+                <div class="option-row">
+                  <label class="check-row">
+                    <input type="checkbox" id="urgent24h" disabled />
+                    Signification en 24 h (+ 90 €)
+                  </label>
+                </div>
+
+                <div class="price-box disabled" id="priceBox">
+                  Montant à régler :
+                  <strong id="calculatedPrice">Indisponible tant que l’injonction n’est pas publiée</strong>
+                </div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                  <button class="btn btn-primary" type="button" id="payAssisted" disabled>Payer avec Stripe</button>
+                  <button class="btn btn-secondary" type="button" id="openTarifs">Voir le détail tarifaire</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-note">
+        Axe Flow - création du dossier, dépôt des pièces, suivi des publications et suite après injonction.
+      </div>
+    </div>
+  </main>
+
+  <!-- MODALE CREATION DOSSIER -->
+  <div class="modal-backdrop" id="createDossierModal">
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="createDossierTitle">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div>
+            <h2 id="createDossierTitle">Ajouter un dossier</h2>
+            <div class="panel-sub">
+              Référence générée automatiquement au format AF + année + numéro.
+            </div>
+          </div>
+          <button class="close-btn" type="button" id="closeCreateDossier" aria-label="Fermer">×</button>
+        </div>
+
+        <form id="createDossierForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="dossierLabel">Intitulé interne</label>
+              <input type="text" id="dossierLabel" name="dossierLabel" placeholder="Ex. Impayé Martin avril 2026" required />
+            </div>
+
+            <div class="field">
+              <label for="dossierRef">Référence dossier</label>
+              <input type="text" id="dossierRef" name="dossierRef" readonly />
+            </div>
+
+            <div class="field">
+              <label for="debiteurType">Type de débiteur</label>
+              <select id="debiteurType" name="debiteurType" required>
+                <option value="professionnel">Professionnel</option>
+                <option value="particulier">Particulier</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="amountTTCInput">Montant TTC (€)</label>
+              <input type="number" id="amountTTCInput" name="amountTTCInput" min="0" step="0.01" placeholder="1200" required />
+            </div>
+
+            <div class="field full">
+              <label for="debiteurName">Nom du débiteur</label>
+              <input type="text" id="debiteurName" name="debiteurName" placeholder="Ex. SARL Martin" required />
+            </div>
+
+            <div class="field">
+              <label for="debiteurEmail">Email du débiteur</label>
+              <input type="email" id="debiteurEmail" name="debiteurEmail" placeholder="contact@exemple.fr" />
+            </div>
+
+            <div class="field">
+              <label for="debiteurPhone">Téléphone du débiteur</label>
+              <input type="text" id="debiteurPhone" name="debiteurPhone" placeholder="06 00 00 00 00" />
+            </div>
+
+            <div class="field full">
+              <label for="debiteurAddress">Adresse du débiteur</label>
+              <input type="text" id="debiteurAddress" name="debiteurAddress" placeholder="Adresse complète" />
+            </div>
+
+            <div class="field">
+              <label for="debiteurZip">Code postal</label>
+              <input type="text" id="debiteurZip" name="debiteurZip" placeholder="75000" />
+            </div>
+
+            <div class="field">
+              <label for="debiteurCity">Ville</label>
+              <input type="text" id="debiteurCity" name="debiteurCity" placeholder="Paris" />
+            </div>
+
+            <div class="field">
+              <label for="invoiceRef">Référence facture</label>
+              <input type="text" id="invoiceRef" name="invoiceRef" placeholder="FAC-2026-001" />
+            </div>
+
+            <div class="field">
+              <label for="dueDate">Date d’échéance</label>
+              <input type="date" id="dueDate" name="dueDate" />
+            </div>
+
+            <div class="field full">
+              <label for="dossierSummary">Résumé du dossier</label>
+              <textarea id="dossierSummary" name="dossierSummary" placeholder="Expliquez brièvement la situation, l’origine de la créance et ce qui a déjà été fait."></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <button class="btn btn-primary" type="submit">Créer le dossier</button>
+            <button class="btn btn-secondary" type="button" id="cancelCreateDossier">Annuler</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE DETAIL TARIFAIRE -->
+  <div class="modal-backdrop" id="tarifsModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tarifsTitle">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div>
+            <h2 id="tarifsTitle">Détail tarifaire - Transmission assistée par Axe Flow</h2>
+            <div class="panel-sub">
+              Barème test selon le montant TTC de la facture et l’option urgence 24 h.
+            </div>
+          </div>
+          <button class="close-btn" type="button" id="closeTarifs" aria-label="Fermer">×</button>
+        </div>
+
+        <table class="tarif-table">
+          <thead>
+            <tr>
+              <th>Montant TTC de la facture</th>
+              <th>Transmission assistée</th>
+              <th>Option urgence 24 h</th>
+              <th>Total avec urgence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>&lt; 128 €</td>
+              <td>85 €</td>
+              <td>+ 90 €</td>
+              <td>175 €</td>
+            </tr>
+            <tr>
+              <td>De 128 € à 1280 €</td>
+              <td>140 €</td>
+              <td>+ 90 €</td>
+              <td>230 €</td>
+            </tr>
+            <tr>
+              <td>&gt; 1280 €</td>
+              <td>247 €</td>
+              <td>+ 90 €</td>
+              <td>337 €</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note-box" style="margin-top:16px;">
+          Les paiements complémentaires test renvoient directement vers le tableau de bord avec un indicateur de succès.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE FICHIERS -->
+  <div class="modal-backdrop" id="filesModal">
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="filesModalTitle">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div>
+            <h2 id="filesModalTitle">Fichiers du dossier</h2>
+            <div class="panel-sub" id="filesModalSubtitle">Aucun dossier sélectionné.</div>
+          </div>
+          <button class="close-btn" type="button" id="closeFilesModal" aria-label="Fermer">×</button>
+        </div>
+
+        <div class="file-list" id="fileListContainer">
+          <div class="empty-state">Aucun fichier trouvé pour cette catégorie.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    orderBy,
+    getDocs,
+    addDoc,
+    serverTimestamp,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    where,
+    limit,
+    runTransaction
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import {
+    getStorage,
+    ref as storageRef,
+    uploadBytes,
+    getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "295300543556",
+    appId: "1:295300543556:web:3facac2d0c612e3456b811"
+  };
+
+  const CHECKOUT_URL = "https://createcheckoutsession-pqz4ycvjmq-od.a.run.app";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // ===== DOM =====
+  const userEmail = document.getElementById("userEmail");
+  const userStatusPill = document.getElementById("userStatusPill");
+  const userPlanPill = document.getElementById("userPlanPill");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const flashBanner = document.getElementById("flashBanner");
+
+  const dossierList = document.getElementById("dossierList");
+  const timelineList = document.getElementById("timelineList");
+  const createForm = document.getElementById("createDossierForm");
+  const prescriptionTableBody = document.getElementById("prescriptionTableBody");
+
+  const summaryRef = document.getElementById("summaryRef");
+  const amountTTCDisplay = document.getElementById("amountTTCDisplay");
+  const summaryDebiteur = document.getElementById("summaryDebiteur");
+  const summarySubtitle = document.getElementById("summarySubtitle");
+  const summaryCreated = document.getElementById("summaryCreated");
+  const summaryContact = document.getElementById("summaryContact");
+  const summaryAddress = document.getElementById("summaryAddress");
+  const summaryCity = document.getElementById("summaryCity");
+  const summaryType = document.getElementById("summaryType");
+  const summaryInvoice = document.getElementById("summaryInvoice");
+  const summaryStatus = document.getElementById("summaryStatus");
+  const calculatedPrice = document.getElementById("calculatedPrice");
+  const urgent24h = document.getElementById("urgent24h");
+  const autonomousChoiceCheckbox = document.getElementById("autonomousChoiceCheckbox");
+  const validateAutonome = document.getElementById("validateAutonome");
+  const payAssisted = document.getElementById("payAssisted");
+  const choiceNotice = document.getElementById("choiceNotice");
+  const priceBox = document.getElementById("priceBox");
+  const planSubtitle = document.getElementById("planSubtitle");
+  const createLimitNotice = document.getElementById("createLimitNotice");
+  const extraDossierBox = document.getElementById("extraDossierBox");
+  const buyExtraDossierBtn = document.getElementById("buyExtraDossierBtn");
+
+  const openCreateDossier = document.getElementById("openCreateDossier");
+  const createDossierModal = document.getElementById("createDossierModal");
+  const closeCreateDossier = document.getElementById("closeCreateDossier");
+  const cancelCreateDossier = document.getElementById("cancelCreateDossier");
+
+  const openTarifs = document.getElementById("openTarifs");
+  const tarifsModal = document.getElementById("tarifsModal");
+  const closeTarifs = document.getElementById("closeTarifs");
+
+  const filesModal = document.getElementById("filesModal");
+  const closeFilesModal = document.getElementById("closeFilesModal");
+  const filesModalSubtitle = document.getElementById("filesModalSubtitle");
+  const fileListContainer = document.getElementById("fileListContainer");
+
+  const dossierLabelInput = document.getElementById("dossierLabel");
+  const dossierRefInput = document.getElementById("dossierRef");
+  const debiteurTypeInput = document.getElementById("debiteurType");
+  const debiteurNameInput = document.getElementById("debiteurName");
+  const debiteurEmailInput = document.getElementById("debiteurEmail");
+  const debiteurPhoneInput = document.getElementById("debiteurPhone");
+  const debiteurAddressInput = document.getElementById("debiteurAddress");
+  const debiteurZipInput = document.getElementById("debiteurZip");
+  const debiteurCityInput = document.getElementById("debiteurCity");
+  const amountTTCInput = document.getElementById("amountTTCInput");
+  const invoiceRefInput = document.getElementById("invoiceRef");
+  const dueDateInput = document.getElementById("dueDate");
+  const dossierSummaryInput = document.getElementById("dossierSummary");
+
+  const fileInputs = document.querySelectorAll("[data-doc-type-input]");
+  const sendButtons = document.querySelectorAll("[data-upload-send]");
+  const viewButtons = document.querySelectorAll("[data-upload-view]");
+
+  // ===== ETAT =====
+  let currentUser = null;
+  let currentDossier = null;
+  let dossiers = [];
+  let userProfile = null;
+  let dossierCounter = 0;
+  let uploadedFiles = {};
+  let entitlements = [];
+  let selectedFilesByType = {
+    quote: [],
+    invoice: [],
+    recovery: [],
+    supporting: []
+  };
+
+  // ===== CONFIG STRIPE TEST =====
+  const STRIPE_LINKS = {
+    assisted85: "https://buy.stripe.com/test_5kQ7sKbbK1WmbjT9Px8so03",
+    assisted140: "https://buy.stripe.com/test_00w5kC93C0SiafPaTB8so04",
+    assisted247: "https://buy.stripe.com/test_6oUeVc6VufNc73Df9R8so05",
+    assisted175: "https://buy.stripe.com/test_6oUbJ05RqbwW3Rr4vd8so06",
+    assisted230: "https://buy.stripe.com/test_6oU00idjS8kKbjTbXF8so07",
+    assisted337: "https://buy.stripe.com/test_bJe5kC93CeJ84Vve5N8so08"
+  };
+
+  const DOC_TYPE_LABELS = {
+    quote: "Devis / bon de commande",
+    invoice: "Facture impayée",
+    recovery: "Relances déjà faites",
+    supporting: "Échanges et justificatifs"
+  };
+
+  function openModal(modal) {
+    if (modal) modal.classList.add("open");
+  }
+
+  function closeModal(modal) {
+    if (modal) modal.classList.remove("open");
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return "Date non renseignée";
+    try {
+      const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      if (isNaN(date.getTime())) return String(dateValue);
+      return date.toLocaleDateString("fr-FR");
+    } catch {
+      return String(dateValue);
+    }
+  }
+
+  function formatCurrency(value) {
+    const amount = Number(value || 0);
+    return amount.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "EUR"
+    });
+  }
+
+  function getCurrentYear() {
+    return new Date().getFullYear();
+  }
+
+  function getNextDossierNumber() {
+    return String(dossierCounter + 1).padStart(3, "0");
+  }
+
+  function generateDossierRef() {
+    return `AF-${getCurrentYear()}-${getNextDossierNumber()}`;
+  }
+
+  function calculatePrice(amount, urgent) {
+    if (urgent) {
+      if (amount < 128) return 175;
+      if (amount <= 1280) return 230;
+      return 337;
+    }
+    if (amount < 128) return 85;
+    if (amount <= 1280) return 140;
+    return 247;
+  }
+
+  function getStripeLink(amount, urgent) {
+    if (urgent) {
+      if (amount < 128) return STRIPE_LINKS.assisted175;
+      if (amount <= 1280) return STRIPE_LINKS.assisted230;
+      return STRIPE_LINKS.assisted337;
+    }
+    if (amount < 128) return STRIPE_LINKS.assisted85;
+    if (amount <= 1280) return STRIPE_LINKS.assisted140;
+    return STRIPE_LINKS.assisted247;
+  }
+
+  function isInjunctionPublished(dossier) {
+    return dossier?.currentStep === "injunction_published" || dossier?.injunctionPublished === true;
+  }
+
+  function getStatusMeta(status) {
+    if (status === "active") {
+      return { label: "Activé", className: "success" };
+    }
+    if (status === "inactive" || status === "cancelled") {
+      return { label: "Inactif", className: "danger" };
+    }
+    return { label: "À vérifier", className: "warning" };
+  }
+
+  function getPlanMeta(plan) {
+    if (plan === "one_shot_49") {
+      return { label: "Option 49 €", className: "neutral" };
+    }
+    if (plan === "monthly_89") {
+      return { label: "Option 89 €/mois", className: "neutral" };
+    }
+    if (userProfile?.isTestAccount) {
+      return { label: "Compte test", className: "neutral" };
+    }
+    return { label: "Option inconnue", className: "warning" };
+  }
+
+  function updateTopStatus() {
+    const statusMeta = getStatusMeta(userProfile?.subscriptionStatus);
+    const planMeta = getPlanMeta(userProfile?.plan);
+
+    userStatusPill.textContent = statusMeta.label;
+    userStatusPill.className = `status-pill ${statusMeta.className}`;
+
+    userPlanPill.textContent = planMeta.label;
+    userPlanPill.className = `status-pill ${planMeta.className}`;
+  }
+
+  function showFlash(message) {
+    if (!message) return;
+    flashBanner.textContent = message;
+    flashBanner.classList.add("show");
+  }
+
+  function readPaymentParams() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      showFlash("Paiement reçu. Votre accès va apparaître après synchronisation.");
+    }
+  }
+
+  function getPrescriptionAlert(dossier) {
+    if (!dossier?.dueDate) {
+      return { label: "À renseigner", className: "missing" };
+    }
+
+    const dueDate = new Date(dossier.dueDate);
+    if (isNaN(dueDate.getTime())) {
+      return { label: "À vérifier", className: "missing" };
+    }
+
+    const now = new Date();
+    const elapsedMs = now.getTime() - dueDate.getTime();
+    const elapsedMonths = elapsedMs / (1000 * 60 * 60 * 24 * 30.4375);
+
+    const type = (dossier.debiteurType || "").toLowerCase();
+
+    if (type === "particulier") {
+      if (elapsedMonths >= 18) return { label: "Urgent", className: "urgent" };
+      if (elapsedMonths >= 12) return { label: "Surveillance", className: "surveillance" };
+      return { label: "Normal", className: "normal" };
+    }
+
+    if (elapsedMonths >= 48) return { label: "Urgent", className: "urgent" };
+    if (elapsedMonths >= 42) return { label: "Surveillance", className: "surveillance" };
+    return { label: "Normal", className: "normal" };
+  }
+
+  function renderPrescriptionTable() {
+    prescriptionTableBody.innerHTML = "";
+
+    if (!dossiers.length) {
+      prescriptionTableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-state" style="background:none;border:0;padding:18px;">
+            Aucun dossier pour le moment.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    dossiers.forEach((dossier) => {
+      const alertMeta = getPrescriptionAlert(dossier);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(dossier.ref || "—")}</td>
+        <td>${escapeHtml(dossier.debiteurName || "—")}</td>
+        <td>${escapeHtml(dossier.debiteurType || "—")}</td>
+        <td>${escapeHtml(formatDate(dossier.dueDate))}</td>
+        <td><span class="alert-pill ${alertMeta.className}">${escapeHtml(alertMeta.label)}</span></td>
+      `;
+      prescriptionTableBody.appendChild(tr);
+    });
+  }
+
+  function refreshPrice() {
+    if (!currentDossier || !isInjunctionPublished(currentDossier)) {
+      calculatedPrice.textContent = "Indisponible tant que l’injonction n’est pas publiée";
+      return;
+    }
+    const price = calculatePrice(Number(currentDossier.amountTTC || 0), urgent24h.checked);
+    calculatedPrice.textContent = `${price} € TTC`;
+  }
+
+  function setChoiceSectionState(enabled) {
+    validateAutonome.disabled = !enabled;
+    payAssisted.disabled = !enabled;
+    urgent24h.disabled = !enabled;
+    autonomousChoiceCheckbox.disabled = !enabled;
+
+    if (!enabled) {
+      urgent24h.checked = false;
+      autonomousChoiceCheckbox.checked = false;
+      priceBox.classList.add("disabled");
+      choiceNotice.textContent = "Ce bloc s’active uniquement quand l’étape injonction a été publiée.";
+    } else {
+      priceBox.classList.remove("disabled");
+      choiceNotice.textContent = "L’étape injonction est publiée. Vous pouvez maintenant choisir la suite.";
+    }
+
+    refreshPrice();
+  }
+
+  function resetSummary() {
+    currentDossier = null;
+    summaryRef.textContent = "—";
+    amountTTCDisplay.textContent = "—";
+    summaryDebiteur.textContent = "—";
+    summarySubtitle.textContent = "Aucun dossier sélectionné";
+    summaryCreated.textContent = "Créez un dossier pour commencer.";
+    summaryContact.textContent = "Coordonnées non renseignées";
+    summaryAddress.textContent = "—";
+    summaryCity.textContent = "Adresse non renseignée";
+    summaryType.textContent = "—";
+    summaryInvoice.textContent = "—";
+    summaryStatus.textContent = "Statut non défini";
+    renderTimeline([]);
+    setChoiceSectionState(false);
+    refreshUploadStatuses();
+  }
+
+  function updateSummary(dossier) {
+    currentDossier = dossier;
+
+    const addressLine = dossier.debiteurAddress?.trim() || "—";
+    const cityLine = [dossier.debiteurZip?.trim(), dossier.debiteurCity?.trim()]
+      .filter(Boolean)
+      .join(" ");
+
+    const contactParts = [dossier.debiteurEmail?.trim(), dossier.debiteurPhone?.trim()].filter(Boolean);
+    const invoiceParts = [dossier.invoiceRef?.trim(), dossier.dueDate ? formatDate(dossier.dueDate) : ""].filter(Boolean);
+
+    summaryRef.textContent = dossier.ref || "—";
+    amountTTCDisplay.textContent = formatCurrency(dossier.amountTTC || 0);
+    summaryDebiteur.textContent = dossier.debiteurName || "—";
+    summarySubtitle.textContent = dossier.label
+      ? `${dossier.label} — ${dossier.debiteurName || "Débiteur"}`
+      : "Dossier sélectionné";
+    summaryCreated.textContent = dossier.createdAtLabel || "Dossier enregistré";
+    summaryContact.textContent = contactParts.length ? contactParts.join(" — ") : "Coordonnées non renseignées";
+    summaryAddress.textContent = addressLine;
+    summaryCity.textContent = cityLine || "Adresse non renseignée";
+    summaryType.textContent = dossier.debiteurType || "—";
+    summaryInvoice.textContent = invoiceParts.length ? invoiceParts.join(" — échéance ") : "Référence non renseignée";
+    summaryStatus.textContent = dossier.statusLabel || dossier.status || "Dossier créé";
+
+    autonomousChoiceCheckbox.checked = dossier.postOrderChoice === "client_bailiff";
+    setChoiceSectionState(isInjunctionPublished(dossier));
+    loadTimelineForDossier(dossier.id);
+    loadFilesForDossier(dossier.id);
+  }
+
+  function renderDossiers() {
+    dossierList.innerHTML = "";
+
+    if (!dossiers.length) {
+      dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé pour le moment.</div>`;
+      resetSummary();
+      return;
+    }
+
+    dossiers.forEach((dossier) => {
+      const card = document.createElement("div");
+      card.className = "dossier-card" + (currentDossier && currentDossier.id === dossier.id ? " active" : "");
+
+      let badgeClass = "warning";
+      let badgeText = dossier.statusLabel || "En cours";
+
+      if (isInjunctionPublished(dossier)) {
+        badgeClass = "included";
+        badgeText = "Injonction publiée";
+      } else if ((dossier.postOrderChoice || "") === "client_bailiff") {
+        badgeClass = "warning";
+        badgeText = "Transmission autonome";
+      }
+
+      card.innerHTML = `
+        <div>
+          <strong>${escapeHtml(dossier.ref || "Sans référence")}</strong>
+          <span>${escapeHtml(dossier.debiteurName || "Débiteur non renseigné")}</span>
+          <span>${escapeHtml(formatCurrency(dossier.amountTTC || 0))}</span>
+        </div>
+        <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
+      `;
+
+      card.addEventListener("click", () => {
+        updateSummary(dossier);
+        renderDossiers();
+      });
+
+      dossierList.appendChild(card);
+    });
+  }
+
+  function renderTimeline(events = []) {
+    timelineList.innerHTML = "";
+
+    if (!events.length) {
+      timelineList.innerHTML = `
+        <div class="empty-state">
+          Aucune publication pour le moment. Dès qu’une étape sera publiée côté Axe Flow, elle apparaîtra ici.
+        </div>
+      `;
+      return;
+    }
+
+    events.forEach((event) => {
+      const item = document.createElement("div");
+      item.className = "timeline-item";
+      item.innerHTML = `
+        <div class="timeline-main">
+          <span class="timeline-meta">${escapeHtml(event.dateLabel || "Date non disponible")}</span>
+          <strong>${escapeHtml(event.title || "Étape publiée")}</strong>
+          <span>${escapeHtml(event.description || "Publication enregistrée sur le dossier.")}</span>
+        </div>
+      `;
+      timelineList.appendChild(item);
+    });
+  }
+
+  async function ensureUserProfile(user) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      userProfile = snap.data();
+      return;
+    }
+
+    const defaultProfile = {
+      uid: user.uid,
+      email: user.email || "",
+      role: "client",
+      plan: "unknown",
+      subscriptionStatus: "unknown",
+      monthlyQuota: 0,
+      monthlyUsed: 0,
+      isTestAccount: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(userRef, defaultProfile);
+    userProfile = {
+      ...defaultProfile,
+      createdAt: null,
+      updatedAt: null
+    };
+  }
+
+  function isEntitlementUsable(entitlement) {
+    if (!entitlement) return false;
+    if (entitlement.status !== "active") return false;
+
+    const granted = Number(entitlement.grantedCaseCount || 0);
+    const used = Number(entitlement.usedCaseCount || 0);
+    if (used >= granted) return false;
+
+    if (entitlement.validUntil?.toDate) {
+      const validUntil = entitlement.validUntil.toDate();
+      if (validUntil.getTime() < Date.now()) return false;
+    }
+
+    return true;
+  }
+
+  function getAvailableEntitlements() {
+    return entitlements.filter(isEntitlementUsable);
+  }
+
+  function getRemainingCredits() {
+    return getAvailableEntitlements().reduce((sum, entitlement) => {
+      const granted = Number(entitlement.grantedCaseCount || 0);
+      const used = Number(entitlement.usedCaseCount || 0);
+      return sum + Math.max(0, granted - used);
+    }, 0);
+  }
+
+  function getMonthlyActiveEntitlements() {
+    return getAvailableEntitlements().filter((item) => item.type === "monthly_89");
+  }
+
+  function getOneShotAvailableEntitlements() {
+    return getAvailableEntitlements().filter((item) => item.type === "one_shot_49");
+  }
+
+  function getExtraAvailableEntitlements() {
+    return getAvailableEntitlements().filter((item) => item.type === "extra_case_19");
+  }
+
+  function getBestEntitlementForNewCase() {
+    const available = getAvailableEntitlements();
+    if (!available.length) return null;
+
+    const priority = {
+      monthly_89: 1,
+      extra_case_19: 2,
+      one_shot_49: 3
+    };
+
+    const sorted = [...available].sort((a, b) => {
+      const pa = priority[a.type] || 99;
+      const pb = priority[b.type] || 99;
+      if (pa !== pb) return pa - pb;
+
+      const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      return aTime - bTime;
+    });
+
+    return sorted[0];
+  }
+
+  async function loadEntitlements(uid) {
+    try {
+      const entitlementsRef = collection(db, "users", uid, "entitlements");
+      const q = query(entitlementsRef, orderBy("createdAt", "asc"));
+      const snap = await getDocs(q);
+
+      entitlements = snap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+    } catch (err) {
+      console.error("Erreur loadEntitlements:", err);
+      entitlements = [];
+    }
+  }
+
+  function getCreatePermission() {
+    if (!userProfile) {
+      return {
+        allowed: false,
+        reason: "Compte en cours de chargement.",
+        extraAllowed: false,
+        ctaMode: "none"
+      };
+    }
+
+    if (userProfile.isTestAccount) {
+      return {
+        allowed: true,
+        reason: "Compte test interne actif.",
+        extraAllowed: false,
+        ctaMode: "create"
+      };
+    }
+
+    const status = userProfile.subscriptionStatus || "unknown";
+    const plan = userProfile.plan || "unknown";
+    const remainingCredits = getRemainingCredits();
+    const hasMonthly = getMonthlyActiveEntitlements().length > 0;
+    const hasOneShot = getOneShotAvailableEntitlements().length > 0;
+    const hasExtra = getExtraAvailableEntitlements().length > 0;
+
+    if (remainingCredits > 0) {
+      if (hasMonthly) {
+        return {
+          allowed: true,
+          reason: `Offre Pro active — ${remainingCredits} dossier(s) disponible(s).`,
+          extraAllowed: false,
+          ctaMode: "create"
+        };
+      }
+      if (hasExtra) {
+        return {
+          allowed: true,
+          reason: `Crédit dossier supplémentaire actif — ${remainingCredits} dossier(s) disponible(s).`,
+          extraAllowed: false,
+          ctaMode: "create"
+        };
+      }
+      if (hasOneShot) {
+        return {
+          allowed: true,
+          reason: `Crédit ponctuel actif — ${remainingCredits} dossier(s) disponible(s).`,
+          extraAllowed: false,
+          ctaMode: "create"
+        };
+      }
+      return {
+        allowed: true,
+        reason: `Crédit actif — ${remainingCredits} dossier(s) disponible(s).`,
+        extraAllowed: false,
+        ctaMode: "create"
+      };
+    }
+
+    if (status !== "active") {
+      return {
+        allowed: false,
+        reason: "Compte non activé ou paiement encore non synchronisé.",
+        extraAllowed: false,
+        ctaMode: "none"
+      };
+    }
+
+    if (plan === "monthly_89") {
+      return {
+        allowed: false,
+        reason: "Offre Pro active — vos crédits inclus sont utilisés.",
+        extraAllowed: true,
+        ctaMode: "extra"
+      };
+    }
+
+    if (plan === "one_shot_49") {
+      return {
+        allowed: false,
+        reason: "Votre crédit ponctuel a déjà été utilisé. Ouvrez un nouveau dossier avec une nouvelle commande.",
+        extraAllowed: false,
+        ctaMode: "repurchase_one_shot"
+      };
+    }
+
+    return {
+      allowed: false,
+      reason: "Aucun droit actif pour créer un dossier.",
+      extraAllowed: false,
+      ctaMode: "none"
+    };
+  }
+
+  function updatePlanSubtitle() {
+    const permission = getCreatePermission();
+    planSubtitle.textContent = permission.reason;
+
+    createLimitNotice.style.display = "none";
+    extraDossierBox.style.display = "none";
+    openCreateDossier.disabled = true;
+    openCreateDossier.textContent = "Ajouter un dossier";
+
+    if (permission.allowed) {
+      openCreateDossier.disabled = false;
+      openCreateDossier.textContent = "Ajouter un dossier";
+      return;
+    }
+
+    if (permission.ctaMode === "extra") {
+      openCreateDossier.textContent = "Quota atteint";
+      extraDossierBox.style.display = "block";
+      return;
+    }
+
+    if (permission.ctaMode === "repurchase_one_shot") {
+      createLimitNotice.textContent = permission.reason;
+      createLimitNotice.style.display = "block";
+      return;
+    }
+
+    createLimitNotice.textContent = permission.reason;
+    createLimitNotice.style.display = "block";
+  }
+
+  async function loadDossiers(uid) {
+    try {
+      const dossiersRef = collection(db, "users", uid, "requests");
+      const q = query(dossiersRef, orderBy("createdAt", "asc"));
+      const snap = await getDocs(q);
+
+      dossiers = snap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+
+        return {
+          id: docSnap.id,
+          ...data,
+          createdAtLabel: createdAt ? `Créé le ${createdAt.toLocaleDateString("fr-FR")}` : "Créé récemment",
+          statusLabel: data.statusLabel || "Dossier créé"
+        };
+      });
+
+      dossierCounter = dossiers.length;
+      renderDossiers();
+      renderPrescriptionTable();
+      updatePlanSubtitle();
+
+      if (dossiers.length) {
+        const selectedStillExists = currentDossier && dossiers.find((d) => d.id === currentDossier.id);
+        if (selectedStillExists) {
+          updateSummary(selectedStillExists);
+          renderDossiers();
+        } else {
+          updateSummary(dossiers[0]);
+          renderDossiers();
+        }
+      } else {
+        resetSummary();
+      }
+    } catch (err) {
+      console.error("Erreur loadDossiers:", err);
+      dossierList.innerHTML = `<div class="empty-state">Erreur de chargement des dossiers.</div>`;
+      prescriptionTableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-state" style="background:none;border:0;padding:18px;">
+            Erreur de chargement.
+          </td>
+        </tr>
+      `;
+      resetSummary();
+    }
+  }
+
+  async function loadTimelineForDossier(dossierId) {
+    if (!currentUser || !dossierId) {
+      renderTimeline([]);
+      return;
+    }
+
+    try {
+      const eventsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events");
+      const q = query(eventsRef, orderBy("createdAt", "asc"));
+      const snap = await getDocs(q);
+
+      const orderedDocs = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+
+      if (!orderedDocs.length) {
+        renderTimeline([]);
+        return;
+      }
+
+      const events = orderedDocs.map((data) => {
+        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+        return {
+          id: data.id,
+          title: data.title || data.label || "Étape publiée",
+          description: data.description || data.note || "Publication enregistrée sur le dossier.",
+          dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible"
+        };
+      });
+
+      renderTimeline(events);
+    } catch (err) {
+      console.error("Erreur loadTimelineForDossier:", err);
+      renderTimeline([]);
+    }
+  }
+
+  async function loadFilesForDossier(dossierId) {
+    if (!currentUser || !dossierId) {
+      uploadedFiles = {};
+      refreshUploadStatuses();
+      return;
+    }
+
+    try {
+      const filesRef = collection(db, "users", currentUser.uid, "requests", dossierId, "files");
+      const snap = await getDocs(filesRef);
+
+      uploadedFiles = {
+        quote: [],
+        invoice: [],
+        recovery: [],
+        supporting: []
+      };
+
+      snap.docs.forEach((docSnap) => {
+        const data = docSnap.data();
+        const docType = data.docType || "supporting";
+        if (!uploadedFiles[docType]) uploadedFiles[docType] = [];
+        uploadedFiles[docType].push({
+          id: docSnap.id,
+          ...data
+        });
+      });
+
+      refreshUploadStatuses();
+    } catch (err) {
+      console.error("Erreur loadFilesForDossier:", err);
+      uploadedFiles = {};
+      refreshUploadStatuses();
+    }
+  }
+
+  function refreshUploadStatuses() {
+    Object.keys(DOC_TYPE_LABELS).forEach((docType) => {
+      const statusEl = document.getElementById(`status-${docType}`);
+      if (!statusEl) return;
+
+      if (!currentDossier) {
+        statusEl.textContent = "Sélectionnez d’abord un dossier.";
+        statusEl.className = "file-status";
+        return;
+      }
+
+      const selectedCount = selectedFilesByType[docType]?.length || 0;
+      const sentCount = uploadedFiles[docType]?.length || 0;
+
+      if (selectedCount > 0) {
+        statusEl.textContent = `${selectedCount} fichier(s) sélectionné(s) — ${sentCount} déjà envoyé(s).`;
+        statusEl.className = "file-status";
+        return;
+      }
+
+      if (sentCount > 0) {
+        statusEl.textContent = `${sentCount} fichier(s) envoyé(s).`;
+        statusEl.className = "file-status ok";
+        return;
+      }
+
+      statusEl.textContent = "Aucun fichier envoyé.";
+      statusEl.className = "file-status";
+    });
+  }
+
+  function prepareCreateForm() {
+    dossierLabelInput.value = `Dossier ${dossierCounter + 1}`;
+    dossierRefInput.value = generateDossierRef();
+    debiteurTypeInput.value = "professionnel";
+    debiteurNameInput.value = "";
+    debiteurEmailInput.value = "";
+    debiteurPhoneInput.value = "";
+    debiteurAddressInput.value = "";
+    debiteurZipInput.value = "";
+    debiteurCityInput.value = "";
+    amountTTCInput.value = "";
+    invoiceRefInput.value = "";
+    dueDateInput.value = "";
+    dossierSummaryInput.value = "";
+  }
+
+  async function startCheckout(offerType) {
+    if (!currentUser) {
+      window.location.href = "connexion.html";
+      return;
+    }
+
+    try {
+      const response = await fetch(CHECKOUT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          offerType
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Erreur Stripe");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error("Erreur checkout :", error);
+      alert("Impossible de lancer le paiement.");
+    }
+  }
+
+  async function createDossier(e) {
+    e.preventDefault();
+
+    if (!currentUser) {
+      alert("Utilisateur non connecté.");
+      return;
+    }
+
+    const permission = getCreatePermission();
+    if (!permission.allowed) {
+      alert(permission.reason);
+      return;
+    }
+
+    const chosenEntitlement = getBestEntitlementForNewCase();
+    if (!chosenEntitlement) {
+      alert("Aucun droit disponible pour créer ce dossier.");
+      return;
+    }
+
+    const ref = dossierRefInput.value.trim();
+    const label = dossierLabelInput.value.trim();
+    const debiteurType = debiteurTypeInput.value.trim();
+    const debiteurName = debiteurNameInput.value.trim();
+    const debiteurEmail = debiteurEmailInput.value.trim();
+    const debiteurPhone = debiteurPhoneInput.value.trim();
+    const debiteurAddress = debiteurAddressInput.value.trim();
+    const debiteurZip = debiteurZipInput.value.trim();
+    const debiteurCity = debiteurCityInput.value.trim();
+    const amountTTC = Number(amountTTCInput.value || 0);
+    const invoiceRef = invoiceRefInput.value.trim();
+    const dueDate = dueDateInput.value || "";
+    const dossierSummary = dossierSummaryInput.value.trim();
+
+    if (!ref || !label || !debiteurType || !debiteurName || !amountTTC) {
+      alert("Complète les champs obligatoires du dossier.");
+      return;
+    }
+
+    try {
+      const entitlementRef = doc(db, "users", currentUser.uid, "entitlements", chosenEntitlement.id);
+      const requestsColRef = collection(db, "users", currentUser.uid, "requests");
+      const newRequestRef = doc(requestsColRef);
+
+      await runTransaction(db, async (transaction) => {
+        const entitlementSnap = await transaction.get(entitlementRef);
+
+        if (!entitlementSnap.exists()) {
+          throw new Error("Droit introuvable.");
+        }
+
+        const entitlementData = entitlementSnap.data();
+        const granted = Number(entitlementData.grantedCaseCount || 0);
+        const used = Number(entitlementData.usedCaseCount || 0);
+
+        if (entitlementData.status !== "active" || used >= granted) {
+          throw new Error("Aucun crédit disponible.");
+        }
+
+        if (entitlementData.validUntil?.toDate) {
+          const validUntil = entitlementData.validUntil.toDate();
+          if (validUntil.getTime() < Date.now()) {
+            throw new Error("Ce droit a expiré.");
+          }
+        }
+
+        transaction.set(newRequestRef, {
+          ref,
+          label,
+          debiteurType,
+          debiteurName,
+          debiteurEmail,
+          debiteurPhone,
+          debiteurAddress,
+          debiteurZip,
+          debiteurCity,
+          amountTTC,
+          invoiceRef,
+          dueDate,
+          dossierSummary,
+          status: "new",
+          statusLabel: "Dossier créé",
+          currentStep: "new",
+          injunctionPublished: false,
+          entitlementId: chosenEntitlement.id,
+          offerType: entitlementData.type || chosenEntitlement.type || "unknown",
+          clientUid: currentUser.uid,
+          lifecycleStatus: "open",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        transaction.update(entitlementRef, {
+          usedCaseCount: used + 1,
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      closeModal(createDossierModal);
+      createForm.reset();
+
+      await loadEntitlements(currentUser.uid);
+      await loadDossiers(currentUser.uid);
+
+      const created = dossiers.find((d) => d.id === newRequestRef.id);
+      if (created) {
+        updateSummary(created);
+        renderDossiers();
+      }
+    } catch (err) {
+      console.error("Erreur createDossier:", err);
+      alert(err?.message || "Impossible de créer le dossier.");
+    }
+  }
+
+  async function handleAutonomousChoice() {
+    if (!currentUser || !currentDossier || !isInjunctionPublished(currentDossier)) return;
+
+    if (!autonomousChoiceCheckbox.checked) {
+      alert("Cochez d’abord votre choix de transmission autonome.");
+      return;
+    }
+
+    try {
+      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
+
+      await updateDoc(requestRef, {
+        postOrderChoice: "client_bailiff",
+        updatedAt: serverTimestamp()
+      });
+
+      alert("Choix enregistré : transmission autonome.");
+      await loadDossiers(currentUser.uid);
+    } catch (err) {
+      console.error("Erreur handleAutonomousChoice:", err);
+      alert("Impossible d’enregistrer ce choix.");
+    }
+  }
+
+  async function handleAssistedPayment() {
+    if (!currentDossier || !isInjunctionPublished(currentDossier)) {
+      alert("Ce paiement n’est disponible qu’après publication de l’injonction.");
+      return;
+    }
+
+    const amount = Number(currentDossier.amountTTC || 0);
+    const link = getStripeLink(amount, urgent24h.checked);
+    window.location.href = link;
+  }
+
+  async function handleExtraDossierPayment() {
+    await startCheckout("extra_case_19");
+  }
+
+  async function handleFileSelection(event) {
+    const docType = event.target.dataset.docTypeInput;
+    selectedFilesByType[docType] = Array.from(event.target.files || []);
+    refreshUploadStatuses();
+  }
+
+  async function handleFileSend(docType) {
+    if (!currentUser) {
+      alert("Utilisateur non connecté.");
+      return;
+    }
+    if (!currentDossier) {
+      alert("Sélectionnez d’abord un dossier.");
+      return;
+    }
+
+    const files = selectedFilesByType[docType] || [];
+    if (!files.length) {
+      alert("Sélectionnez au moins un fichier.");
+      return;
+    }
+
+    try {
+      for (const file of files) {
+        const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
+        const fullPath = `users/${currentUser.uid}/requests/${currentDossier.id}/${docType}/${safeName}`;
+        const fileRef = storageRef(storage, fullPath);
+
+        await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(fileRef);
+
+        await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "files"), {
+          docType,
+          name: file.name,
+          path: fullPath,
+          url: downloadURL,
+          size: file.size,
+          contentType: file.type || "",
+          createdAt: serverTimestamp()
+        });
+      }
+
+      selectedFilesByType[docType] = [];
+      const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
+      if (input) input.value = "";
+
+      await loadFilesForDossier(currentDossier.id);
+      alert("Fichier(s) envoyé(s) avec succès.");
+    } catch (err) {
+      console.error("Erreur handleFileSend:", err);
+      alert("Impossible d’envoyer les fichiers.");
+    }
+  }
+
+  function openFilesModalForType(docType) {
+    if (!currentDossier) {
+      alert("Sélectionnez d’abord un dossier.");
+      return;
+    }
+
+    const files = uploadedFiles[docType] || [];
+    filesModalSubtitle.textContent = `${DOC_TYPE_LABELS[docType]} — ${currentDossier.ref || "Dossier"}`;
+    fileListContainer.innerHTML = "";
+
+    if (!files.length) {
+      fileListContainer.innerHTML = `<div class="empty-state">Aucun fichier trouvé pour cette catégorie.</div>`;
+      openModal(filesModal);
+      return;
+    }
+
+    files.forEach((file) => {
+      const item = document.createElement("div");
+      item.className = "file-item";
+      item.innerHTML = `
+        <div>
+          <strong>${escapeHtml(file.name || "Fichier")}</strong>
+          <span>${escapeHtml(formatDate(file.createdAt?.toDate ? file.createdAt.toDate() : file.createdAt))}</span>
+        </div>
+        <a class="btn btn-secondary" href="${escapeHtml(file.url || "#")}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+      `;
+      fileListContainer.appendChild(item);
+    });
+
+    openModal(filesModal);
+  }
+
+  async function initUserDashboard(user) {
+    currentUser = user;
+    userEmail.textContent = user.email || "Compte connecté";
+
+    await ensureUserProfile(user);
+    await loadEntitlements(user.uid);
+    updateTopStatus();
+    updatePlanSubtitle();
+    await loadDossiers(user.uid);
+    readPaymentParams();
+  }
+
+  // ===== EVENTS =====
+  urgent24h.addEventListener("change", refreshPrice);
+
+  fileInputs.forEach((input) => {
+    input.addEventListener("change", handleFileSelection);
+  });
+
+  sendButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      handleFileSend(button.dataset.uploadSend);
+    });
+  });
+
+  viewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      openFilesModalForType(button.dataset.uploadView);
+    });
+  });
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "connexion.html";
+      } catch (err) {
+        console.error("Erreur signOut:", err);
+        alert("Impossible de se déconnecter.");
+      }
+    });
+  }
+
+  if (buyExtraDossierBtn) {
+    buyExtraDossierBtn.addEventListener("click", handleExtraDossierPayment);
+  }
+
+  if (openCreateDossier) {
+    openCreateDossier.addEventListener("click", () => {
+      const permission = getCreatePermission();
+      if (!permission.allowed) {
+        if (permission.ctaMode === "extra") {
+          extraDossierBox.style.display = "block";
+          return;
+        }
+        alert(permission.reason);
+        return;
+      }
+      prepareCreateForm();
+      openModal(createDossierModal);
+    });
+  }
+
+  if (closeCreateDossier) {
+    closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+  }
+
+  if (cancelCreateDossier) {
+    cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+  }
+
+  if (openTarifs) {
+    openTarifs.addEventListener("click", () => openModal(tarifsModal));
+  }
+
+  if (closeTarifs) {
+    closeTarifs.addEventListener("click", () => closeModal(tarifsModal));
+  }
+
+  if (closeFilesModal) {
+    closeFilesModal.addEventListener("click", () => closeModal(filesModal));
+  }
+
+  if (createForm) {
+    createForm.addEventListener("submit", createDossier);
+  }
+
+  if (validateAutonome) {
+    validateAutonome.addEventListener("click", handleAutonomousChoice);
+  }
+
+  if (payAssisted) {
+    payAssisted.addEventListener("click", handleAssistedPayment);
+  }
+
+  [createDossierModal, tarifsModal, filesModal].forEach((modal) => {
+    if (!modal) return;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal(modal);
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal(createDossierModal);
+      closeModal(tarifsModal);
+      closeModal(filesModal);
+    }
+  });
+
+  // ===== AUTH INIT =====
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "connexion.html";
+      return;
+    }
+
+    try {
+      await initUserDashboard(user);
+    } catch (err) {
+      console.error("Erreur initUserDashboard:", err);
+      alert("Erreur de chargement du tableau de bord.");
+    }
+  });
+</script>
+</body>
+</html>
