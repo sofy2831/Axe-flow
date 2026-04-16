@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>Axe Flow Admin — Détail demande</title>
+  <title>Axe Flow Admin — Détail dossier</title>
   <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
 
   <link rel="icon" type="image/png" href="../images/axe-flow-cover.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,9 +26,10 @@
       --success:#3dd08f;
       --danger:#ff6b6b;
       --warning:#ffb347;
+      --info:#7cc8ff;
       --shadow:0 24px 80px rgba(0,0,0,.28);
       --radius:24px;
-      --max:1440px;
+      --max:1460px;
     }
 
     *{box-sizing:border-box}
@@ -39,6 +41,7 @@
         radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
         linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
       color:var(--text);
+      line-height:1.5;
     }
 
     a{text-decoration:none;color:inherit}
@@ -63,18 +66,34 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
+      gap:16px;
     }
 
     .brand{
       display:flex;
       align-items:center;
       gap:14px;
+      min-width:0;
     }
 
     .brand img{
       width:52px;
       height:52px;
       border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+    }
+
+    .brand small{
+      color:var(--soft);
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
     .btn{
@@ -87,24 +106,123 @@
       font-weight:700;
       border:1px solid transparent;
       cursor:pointer;
+      white-space:nowrap;
     }
 
     .btn-primary{
       background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,.22);
     }
 
     .btn-secondary{
       background:rgba(255,255,255,.05);
       border-color:rgba(255,255,255,.1);
+      color:#fff;
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,.14);
+      border-color:rgba(255,107,107,.22);
+      color:#fff;
     }
 
     .page{
       padding:28px 0 40px;
     }
 
+    .hero{
+      margin-bottom:18px;
+      padding:26px;
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:78ch;
+      font-size:1rem;
+    }
+
+    .hero-meta{
+      margin-top:18px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .pill.info{
+      background:rgba(124,200,255,.14);
+      border-color:rgba(124,200,255,.22);
+      color:#dff3ff;
+    }
+
+    .pill.warning{
+      background:rgba(255,179,71,.14);
+      border-color:rgba(255,179,71,.22);
+      color:#ffe6c2;
+    }
+
+    .pill.success{
+      background:rgba(61,208,143,.14);
+      border-color:rgba(61,208,143,.22);
+      color:#d9ffee;
+    }
+
+    .pill.danger{
+      background:rgba(255,107,107,.14);
+      border-color:rgba(255,107,107,.22);
+      color:#ffd9d9;
+    }
+
     .layout{
       display:grid;
-      grid-template-columns:1.05fr .95fr;
+      grid-template-columns:1.08fr .92fr;
       gap:18px;
       align-items:start;
     }
@@ -119,21 +237,44 @@
       background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
       border:1px solid var(--line);
       box-shadow:var(--shadow);
+      overflow:hidden;
     }
 
     .panel-inner{
       padding:22px;
     }
 
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
     .panel h2{
-      margin:0 0 14px;
+      margin:0 0 6px;
       font-size:1.1rem;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-sub{
+      color:var(--soft);
+      font-size:.88rem;
     }
 
     .grid-2{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:12px;
+    }
+
+    .field{
+      min-width:0;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
     }
 
     .field label{
@@ -143,6 +284,7 @@
       color:var(--soft);
       font-weight:700;
       text-transform:uppercase;
+      letter-spacing:.02em;
     }
 
     .field input,
@@ -157,9 +299,34 @@
       outline:none;
     }
 
-    textarea{
+    .field textarea{
       min-height:120px;
       resize:vertical;
+    }
+
+    .stack{
+      display:grid;
+      gap:12px;
+    }
+
+    .box{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+    }
+
+    .box strong{
+      display:block;
+      margin-bottom:6px;
+      color:#fff;
+      font-size:.95rem;
+    }
+
+    .box span{
+      display:block;
+      color:var(--muted);
+      font-size:.89rem;
     }
 
     .file-box{
@@ -168,6 +335,7 @@
       background:rgba(255,255,255,.04);
       border:1px dashed rgba(255,255,255,.15);
       margin-top:12px;
+      color:var(--muted);
     }
 
     .doc-list{
@@ -181,6 +349,44 @@
       border-radius:16px;
       background:rgba(255,255,255,.04);
       border:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .doc-left strong{
+      display:block;
+      font-size:.93rem;
+      margin-bottom:4px;
+      color:#fff;
+    }
+
+    .doc-left span{
+      display:block;
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .mini-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,127,31,.14);
+      border:1px solid rgba(255,127,31,.22);
+      color:#fff;
+      font-size:.83rem;
+      font-weight:800;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .mini-btn.secondary{
+      background:rgba(255,255,255,.05);
+      border-color:rgba(255,255,255,.10);
     }
 
     .timeline{
@@ -195,9 +401,35 @@
       border:1px solid var(--line);
     }
 
+    .step-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
     .step-title{
       font-weight:700;
-      margin-bottom:6px;
+      margin-bottom:4px;
+      color:#fff;
+    }
+
+    .step small{
+      color:var(--soft);
+    }
+
+    .step p{
+      margin:0;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .step-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
     }
 
     .actions{
@@ -214,6 +446,12 @@
       color:#fff;
       font-weight:700;
       cursor:pointer;
+      text-align:center;
+    }
+
+    .action-btn.secondary{
+      background:rgba(255,255,255,.05);
+      border-color:rgba(255,255,255,.10);
     }
 
     .message-box{
@@ -234,6 +472,19 @@
       margin-bottom:6px;
     }
 
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
     @media(max-width:1100px){
       .layout{
         grid-template-columns:1fr;
@@ -241,8 +492,25 @@
     }
 
     @media(max-width:700px){
-      .grid-2{
+      .grid-2,
+      .split{
         grid-template-columns:1fr;
+      }
+
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .top-actions{
+        width:100%;
+        align-items:stretch;
+      }
+
+      .btn{
+        width:100%;
       }
     }
   </style>
@@ -255,16 +523,39 @@
       <img src="../images/axe-flow-cover.png" alt="Axe Flow">
       <div>
         <strong>Axe Flow Admin</strong><br>
-        <small style="color:rgba(255,255,255,.6)">Détail de la demande</small>
+        <small>Détail du dossier</small>
       </div>
     </div>
 
-    <a href="demandes.html" class="btn btn-secondary">Retour liste</a>
+    <div class="top-actions">
+      <a href="demandes.html" class="btn btn-secondary">Retour liste</a>
+      <a href="index.html" class="btn btn-secondary">Accueil admin</a>
+    </div>
   </div>
 </header>
 
 <main class="page">
   <div class="container">
+
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Pilotage dossier Axe Flow
+      </div>
+      <h1>Dossier AF-2026-021</h1>
+      <p>
+        Cette fiche sert à lire les pièces, qualifier le dossier, choisir l’action interne,
+        publier ce qui doit l’être côté client et suivre la clôture. Ici tu travailles. Le client, lui, ne voit que le résultat publié.
+      </p>
+
+      <div class="hero-meta">
+        <span class="pill info">Demande reçue</span>
+        <span class="pill warning">À qualifier</span>
+        <span class="pill danger">Priorité haute</span>
+        <span class="pill success">Paiement validé</span>
+      </div>
+    </section>
+
     <div class="layout">
 
       <!-- COLONNE GAUCHE -->
@@ -272,7 +563,12 @@
 
         <section class="panel">
           <div class="panel-inner">
-            <h2>Informations dossier</h2>
+            <div class="panel-head">
+              <div>
+                <h2>Informations dossier</h2>
+                <div class="panel-sub">Base administrative et lecture rapide du dossier.</div>
+              </div>
+            </div>
 
             <div class="grid-2">
               <div class="field">
@@ -281,8 +577,8 @@
               </div>
 
               <div class="field">
-                <label>Montant facture</label>
-                <input value="1 240 €">
+                <label>Offre utilisée</label>
+                <input value="Dossier ponctuel 49 €">
               </div>
 
               <div class="field">
@@ -296,13 +592,46 @@
               </div>
 
               <div class="field">
+                <label>Montant facture</label>
+                <input value="1 240 €">
+              </div>
+
+              <div class="field">
+                <label>Date de réception</label>
+                <input value="13/04/2026">
+              </div>
+
+              <div class="field">
                 <label>Débiteur</label>
                 <input placeholder="Nom / société">
               </div>
 
               <div class="field">
+                <label>Type de débiteur</label>
+                <select>
+                  <option>Professionnel</option>
+                  <option>Particulier</option>
+                </select>
+              </div>
+
+              <div class="field full">
                 <label>Adresse débiteur</label>
-                <input placeholder="Adresse récupérée depuis facture">
+                <input placeholder="Adresse récupérée depuis facture ou pièces">
+              </div>
+
+              <div class="field">
+                <label>Référence facture</label>
+                <input value="FAC-2026-001">
+              </div>
+
+              <div class="field">
+                <label>Date d’échéance</label>
+                <input value="01/04/2026">
+              </div>
+
+              <div class="field full">
+                <label>Résumé / analyse interne</label>
+                <textarea placeholder="Résume ici l’origine de la créance, les points faibles, les pièces présentes, ce qu’il manque et la stratégie envisagée."></textarea>
               </div>
             </div>
           </div>
@@ -310,44 +639,185 @@
 
         <section class="panel">
           <div class="panel-inner">
-            <h2>Pièces reçues</h2>
+            <div class="panel-head">
+              <div>
+                <h2>Statuts du dossier</h2>
+                <div class="panel-sub">Double lecture : pilotage interne et visibilité client.</div>
+              </div>
+            </div>
+
+            <div class="split">
+              <div class="field">
+                <label>Statut interne</label>
+                <select>
+                  <option>À qualifier</option>
+                  <option>Pièces manquantes</option>
+                  <option>Prêt relance</option>
+                  <option>Attente client</option>
+                  <option>Prêt mise en demeure</option>
+                  <option>Prêt injonction</option>
+                  <option>Clôturé</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Statut publié client</label>
+                <select>
+                  <option>Demande reçue</option>
+                  <option>Analyse en cours</option>
+                  <option>Traitement en cours</option>
+                  <option>Pièce demandée</option>
+                  <option>Injonction publiée</option>
+                  <option>Dossier clôturé</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Priorité</label>
+                <select>
+                  <option>Haute</option>
+                  <option>Normale</option>
+                  <option>Basse</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Choix après injonction</label>
+                <select>
+                  <option>Non défini</option>
+                  <option>Axe Flow</option>
+                  <option>Client</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Pièces initiales reçues</h2>
+                <div class="panel-sub">Pièces déposées par le client lors de l’ouverture ou ensuite dans le dossier.</div>
+              </div>
+            </div>
 
             <div class="file-box">
-              Télécharger / scanner les documents reçus du client
+              Zone future : scan, upload, lecture et classement des pièces reçues.
             </div>
 
             <div class="doc-list">
-              <div class="doc">Facture impayée.pdf</div>
-              <div class="doc">Devis signé.pdf</div>
-              <div class="doc">Relance mail 1.pdf</div>
-              <div class="doc">SMS client capture.png</div>
+              <div class="doc">
+                <div class="doc-left">
+                  <strong>Facture impayée.pdf</strong>
+                  <span>Document initial — reçu le 13/04/2026</span>
+                </div>
+                <a href="#" class="mini-btn">Ouvrir</a>
+              </div>
+
+              <div class="doc">
+                <div class="doc-left">
+                  <strong>Devis signé.pdf</strong>
+                  <span>Document contractuel — reçu le 13/04/2026</span>
+                </div>
+                <a href="#" class="mini-btn">Ouvrir</a>
+              </div>
+
+              <div class="doc">
+                <div class="doc-left">
+                  <strong>Relance mail 1.pdf</strong>
+                  <span>Pièce client — déjà envoyée avant Axe Flow</span>
+                </div>
+                <a href="#" class="mini-btn">Ouvrir</a>
+              </div>
+
+              <div class="doc">
+                <div class="doc-left">
+                  <strong>SMS client capture.png</strong>
+                  <span>Justificatif complémentaire</span>
+                </div>
+                <a href="#" class="mini-btn">Ouvrir</a>
+              </div>
             </div>
           </div>
         </section>
 
         <section class="panel">
           <div class="panel-inner">
-            <h2>Chronologie de traitement Axe Flow</h2>
+            <div class="panel-head">
+              <div>
+                <h2>Étapes publiées / à publier</h2>
+                <div class="panel-sub">Cœur du traitement Axe Flow.</div>
+              </div>
+            </div>
 
             <div class="timeline">
               <div class="step">
-                <div class="step-title">Relance 1</div>
-                <div>À rédiger et publier</div>
+                <div class="step-top">
+                  <div>
+                    <div class="step-title">Relance 1</div>
+                    <small>Statut interne : prête à publier</small>
+                  </div>
+                  <span class="pill warning">À faire</span>
+                </div>
+                <p>Préparer la relance 1, publier l’étape client et attendre la preuve d’envoi si l’action revient au créancier.</p>
+                <div class="step-actions">
+                  <a href="#" class="mini-btn secondary">Voir brouillon</a>
+                  <a href="#" class="mini-btn">Publier au client</a>
+                </div>
               </div>
 
               <div class="step">
-                <div class="step-title">Relance 2</div>
-                <div>En attente</div>
+                <div class="step-top">
+                  <div>
+                    <div class="step-title">Relance 2</div>
+                    <small>Statut interne : non commencée</small>
+                  </div>
+                  <span class="pill info">En attente</span>
+                </div>
+                <p>Cette étape ne bouge qu’après retour ou absence de retour sur la première relance.</p>
               </div>
 
               <div class="step">
-                <div class="step-title">Mise en demeure</div>
-                <div>Non démarrée</div>
+                <div class="step-top">
+                  <div>
+                    <div class="step-title">Mise en demeure</div>
+                    <small>Statut interne : non commencée</small>
+                  </div>
+                  <span class="pill info">En attente</span>
+                </div>
+                <p>À déclencher uniquement quand la stratégie dossier le justifie.</p>
               </div>
 
               <div class="step">
-                <div class="step-title">Injonction de payer</div>
-                <div>Choix client : Axe Flow</div>
+                <div class="step-top">
+                  <div>
+                    <div class="step-title">Injonction de payer</div>
+                    <small>Choix client à ce stade : Axe Flow</small>
+                  </div>
+                  <span class="pill success">Prévu</span>
+                </div>
+                <p>La suite dépendra du choix client enregistré et du niveau d’avancement du dossier.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Preuves et justificatifs client</h2>
+                <div class="panel-sub">Ce bloc suit ce que le client redépose après publication d’une action.</div>
+              </div>
+            </div>
+
+            <div class="doc-list">
+              <div class="doc">
+                <div class="doc-left">
+                  <strong>Aucun justificatif déposé pour le moment</strong>
+                  <span>Les preuves d’envoi apparaîtront ici par étape publiée.</span>
+                </div>
               </div>
             </div>
           </div>
@@ -359,54 +829,141 @@
 
         <section class="panel">
           <div class="panel-inner">
-            <h2>Actions dossier</h2>
+            <div class="panel-head">
+              <div>
+                <h2>Actions dossier</h2>
+                <div class="panel-sub">Les vraies actions métier.</div>
+              </div>
+            </div>
 
             <div class="actions">
-              <button class="action-btn">Publier relance 1</button>
-              <button class="action-btn">Publier relance 2</button>
-              <button class="action-btn">Publier relance 3</button>
+              <button class="action-btn">Qualifier le dossier</button>
+              <button class="action-btn">Préparer relance 1</button>
+              <button class="action-btn">Préparer relance 2</button>
+              <button class="action-btn">Préparer relance 3</button>
               <button class="action-btn">Générer mise en demeure</button>
               <button class="action-btn">Préparer injonction</button>
-              <button class="action-btn">Publier côté client</button>
+              <button class="action-btn secondary">Publier une étape côté client</button>
+              <button class="action-btn secondary">Demander une pièce complémentaire</button>
+              <button class="action-btn secondary">Enregistrer une note interne</button>
+              <button class="action-btn secondary">Archiver / clôturer le dossier</button>
             </div>
           </div>
         </section>
 
         <section class="panel">
           <div class="panel-inner">
-            <h2>Courrier au client</h2>
+            <div class="panel-head">
+              <div>
+                <h2>Publication client</h2>
+                <div class="panel-sub">Ce que le client verra sur son tableau de bord.</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Titre de l’étape</label>
+              <input placeholder="Ex. Relance 1 publiée">
+            </div>
+
+            <div class="field" style="margin-top:12px;">
+              <label>Message publié au client</label>
+              <textarea placeholder="Ex. La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace."></textarea>
+            </div>
+
+            <div class="field" style="margin-top:12px;">
+              <label>Justificatifs demandés au client</label>
+              <input placeholder="Ex. preuve d’envoi mail, LRAR, accusé, capture écran...">
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary">Publier côté client</button>
+              <button class="btn btn-secondary">Enregistrer brouillon</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Courrier / message au client</h2>
+                <div class="panel-sub">Communication directe hors publication simple.</div>
+              </div>
+            </div>
 
             <div class="field">
               <label>Message</label>
-              <textarea placeholder="Ex : Bonjour, la relance 1 a été envoyée ce jour..."></textarea>
+              <textarea placeholder="Ex : Bonjour, nous avons bien reçu votre facture et votre devis signé. Il manque encore l’adresse complète du débiteur."></textarea>
             </div>
 
-            <div style="margin-top:12px">
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn btn-primary">Envoyer message</button>
+              <button class="btn btn-secondary">Enregistrer note</button>
             </div>
           </div>
         </section>
 
         <section class="panel">
           <div class="panel-inner">
-            <h2>Messagerie interne</h2>
+            <div class="panel-head">
+              <div>
+                <h2>Échanges internes / client</h2>
+                <div class="panel-sub">Historique utile, pas blabla décoratif.</div>
+              </div>
+            </div>
 
             <div class="message-box">
               <div class="message">
-                <small>Client — aujourd’hui 09:12</small>
-                J’ai ajouté le devis signé.
+                <small>Client — 13/04/2026 à 09:12</small>
+                J’ai ajouté le devis signé et la facture.
               </div>
 
               <div class="message">
-                <small>Axe Flow — aujourd’hui 10:05</small>
-                Bien reçu, nous lançons la relance 1.
+                <small>Axe Flow — 13/04/2026 à 10:05</small>
+                Bien reçu. Analyse du dossier en cours.
+              </div>
+
+              <div class="message">
+                <small>Note interne — 13/04/2026 à 10:14</small>
+                Adresse débiteur incomplète. Vérifier si la facture suffit ou s’il faut une pièce complémentaire.
               </div>
             </div>
           </div>
         </section>
 
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Clôture dossier</h2>
+                <div class="panel-sub">Sortie propre du circuit.</div>
+              </div>
+            </div>
+
+            <div class="stack">
+              <div class="box">
+                <strong>Motif de clôture</strong>
+                <span>Paiement obtenu, dossier abandonné, transmission externe, injonction terminée, dossier archivé, autre.</span>
+              </div>
+
+              <div class="field">
+                <label>Commentaire de clôture</label>
+                <textarea placeholder="Ex. Dossier clôturé après règlement intégral obtenu par le client."></textarea>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-danger">Clôturer le dossier</button>
+                <button class="btn btn-secondary">Archiver sans clôture</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
+    </div>
+
+    <div class="footer-note">
+      Base admin Axe Flow — fiche dossier à brancher ensuite sur Firestore et Storage.
     </div>
   </div>
 </main>
