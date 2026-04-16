@@ -2577,6 +2577,10 @@ const buyOneShotBtn = document.getElementById("buyOneShotBtn");
   }
 }
 
+async function handleOneShotRepurchase() {
+  await startCheckout("one_shot_49");
+}
+    
   async function loadFilesForDossier(dossierId) {
     if (!currentUser || !dossierId) {
       uploadedFiles = {};
@@ -2638,7 +2642,10 @@ const buyOneShotBtn = document.getElementById("buyOneShotBtn");
         statusEl.className = "file-status ok";
         return;
       }
-
+if (buyOneShotBtn) {
+  buyOneShotBtn.addEventListener("click", handleOneShotRepurchase);
+}
+      
       statusEl.textContent = "Aucun fichier envoyé.";
       statusEl.className = "file-status";
     });
