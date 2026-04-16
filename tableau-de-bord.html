@@ -2425,35 +2425,37 @@ const buyOneShotBtn = document.getElementById("buyOneShotBtn");
   }
 
   function updatePlanSubtitle() {
-    const permission = getCreatePermission();
-    planSubtitle.textContent = permission.reason;
+  const permission = getCreatePermission();
+  planSubtitle.textContent = permission.reason;
 
-    createLimitNotice.style.display = "none";
-    extraDossierBox.style.display = "none";
-    openCreateDossier.disabled = true;
+  createLimitNotice.style.display = "none";
+  extraDossierBox.style.display = "none";
+  repurchaseOneShotBox.style.display = "none";
+  openCreateDossier.disabled = true;
+  openCreateDossier.textContent = "Ajouter un dossier";
+
+  if (permission.allowed) {
+    openCreateDossier.disabled = false;
     openCreateDossier.textContent = "Ajouter un dossier";
+    return;
+  }
 
-    if (permission.allowed) {
-      openCreateDossier.disabled = false;
-      openCreateDossier.textContent = "Ajouter un dossier";
-      return;
-    }
+  if (permission.ctaMode === "extra") {
+    openCreateDossier.textContent = "Quota atteint";
+    extraDossierBox.style.display = "block";
+    return;
+  }
 
-    if (permission.ctaMode === "extra") {
-      openCreateDossier.textContent = "Quota atteint";
-      extraDossierBox.style.display = "block";
-      return;
-    }
-
-    if (permission.ctaMode === "repurchase_one_shot") {
-      createLimitNotice.textContent = permission.reason;
-      createLimitNotice.style.display = "block";
-      return;
-    }
-
+  if (permission.ctaMode === "repurchase_one_shot") {
     createLimitNotice.textContent = permission.reason;
     createLimitNotice.style.display = "block";
+    repurchaseOneShotBox.style.display = "block";
+    return;
   }
+
+  createLimitNotice.textContent = permission.reason;
+  createLimitNotice.style.display = "block";
+}
 
   async function loadDossiers(uid) {
     try {
