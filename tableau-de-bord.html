@@ -2642,9 +2642,7 @@ async function handleOneShotRepurchase() {
         statusEl.className = "file-status ok";
         return;
       }
-if (buyOneShotBtn) {
-  buyOneShotBtn.addEventListener("click", handleOneShotRepurchase);
-}
+
       
       statusEl.textContent = "Aucun fichier envoyé.";
       statusEl.className = "file-status";
