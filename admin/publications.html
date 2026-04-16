@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Axe Flow Admin — Publications</title>
+  <meta name="description" content="Publications admin Axe Flow : brouillons, étapes client publiées, pièces demandées, suivi des publications par dossier." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="../images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --panel:rgba(255,255,255,0.06);
+      --panel-2:rgba(255,255,255,0.04);
+      --line:rgba(255,255,255,0.09);
+      --line-strong:rgba(255,255,255,0.14);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.76);
+      --soft:rgba(244,247,251,0.58);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --warning:#ffb347;
+      --danger:#ff6b6b;
+      --info:#7cc8ff;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --max:1440px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.5;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button,input,select,textarea{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.68);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.95rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,0.14);
+      color:#fff;
+      border-color:rgba(255,107,107,0.20);
+    }
+
+    .page{
+      padding:28px 0 42px;
+    }
+
+    .hero{
+      margin-bottom:18px;
+      padding:28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:76ch;
+      font-size:1rem;
+    }
+
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{
+      color:#fff;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .stat{
+      padding:20px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .stat-label{
+      color:var(--soft);
+      font-size:.88rem;
+      margin-bottom:10px;
+    }
+
+    .stat-value{
+      font-size:1.95rem;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:-0.05em;
+    }
+
+    .stat-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .stat.warning{
+      border-color:rgba(255,179,71,0.24);
+      background:linear-gradient(180deg, rgba(255,179,71,0.10), rgba(255,255,255,0.04));
+    }
+
+    .stat.success{
+      border-color:rgba(61,208,143,0.22);
+      background:linear-gradient(180deg, rgba(61,208,143,0.10), rgba(255,255,255,0.04));
+    }
+
+    .stat.info{
+      border-color:rgba(124,200,255,0.22);
+      background:linear-gradient(180deg, rgba(124,200,255,0.10), rgba(255,255,255,0.04));
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .col{
+      display:grid;
+      gap:18px;
+      min-width:0;
+      align-content:start;
+    }
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-inner{
+      padding:22px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0 0 6px;
+      font-size:1.12rem;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-sub{
+      color:var(--soft);
+      font-size:.88rem;
+    }
+
+    .mini-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.8rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:1.2fr .9fr .9fr;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .field{
+      min-width:0;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    .field label{
+      display:block;
+      color:var(--soft);
+      font-size:.8rem;
+      font-weight:700;
+      margin-bottom:7px;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      min-height:46px;
+      padding:0 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:120px;
+      padding:14px;
+      resize:vertical;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder{
+      color:rgba(244,247,251,0.45);
+    }
+
+    .chips{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.86rem;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .chip.active{
+      background:rgba(255,127,31,0.14);
+      border-color:rgba(255,127,31,0.22);
+      color:#fff;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1040px;
+    }
+
+    th, td{
+      padding:14px 14px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      font-size:.92rem;
+      vertical-align:middle;
+    }
+
+    th{
+      color:var(--soft);
+      font-weight:700;
+      background:rgba(255,255,255,0.03);
+    }
+
+    td{
+      color:var(--muted);
+    }
+
+    tr:last-child td{border-bottom:0}
+    tr:hover{background:rgba(255,255,255,0.03)}
+
+    .client{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+
+    .client strong{
+      color:#fff;
+      font-size:.94rem;
+    }
+
+    .subline{
+      color:var(--soft);
+      font-size:.82rem;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:32px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .status.draft{
+      background:rgba(255,255,255,0.08);
+      border-color:rgba(255,255,255,0.12);
+      color:#fff;
+    }
+
+    .status.ready{
+      background:rgba(255,179,71,0.14);
+      border-color:rgba(255,179,71,0.22);
+      color:#ffe6c2;
+    }
+
+    .status.published{
+      background:rgba(61,208,143,0.14);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .status.waiting{
+      background:rgba(124,200,255,0.14);
+      border-color:rgba(124,200,255,0.22);
+      color:#dff3ff;
+    }
+
+    .status.closed{
+      background:rgba(255,107,107,0.14);
+      border-color:rgba(255,107,107,0.22);
+      color:#ffd9d9;
+    }
+
+    .doc-box,
+    .info-box{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .info-box strong,
+    .doc-box strong{
+      display:block;
+      color:#fff;
+      margin-bottom:6px;
+      font-size:.95rem;
+    }
+
+    .info-box span,
+    .doc-box span{
+      display:block;
+      color:var(--muted);
+      font-size:.89rem;
+    }
+
+    .doc-list,
+    .log-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .doc-item,
+    .log-item{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .doc-item strong,
+    .log-item strong{
+      display:block;
+      color:#fff;
+      font-size:.93rem;
+      margin-bottom:4px;
+    }
+
+    .doc-item span,
+    .log-item span{
+      display:block;
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .action-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    @media (max-width: 1180px){
+      .stats{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 860px){
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .topbar-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .toolbar{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .topbar-actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .hero,
+      .panel-inner{
+        padding:18px;
+      }
+
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      .action-row{
+        flex-direction:column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow Admin</span>
+          <span class="brand-sub">Publications client</span>
+        </div>
+      </a>
+
+      <div class="topbar-actions">
+        <a href="index.html" class="btn btn-secondary">Retour accueil</a>
+        <a href="demandes.html" class="btn btn-secondary">Voir les dossiers</a>
+        <button class="btn btn-primary" type="button">Nouvelle publication</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Publications et suivi client
+        </div>
+        <h1>Publications</h1>
+        <p>
+          Ici tu prépares ce qui sera visible sur le tableau de bord client : étape publiée, message associé, document éventuel, justificatifs attendus et statut de suivi.
+        </p>
+        <div class="hero-note">
+          <strong>Règle :</strong> un brouillon reste interne. Une publication envoyée devient visible côté client. C’est ici que tu contrôles le passage entre travail interne et affichage client.
+        </div>
+      </section>
+
+      <section class="stats">
+        <article class="stat warning">
+          <div class="stat-label">Brouillons</div>
+          <div class="stat-value">4</div>
+          <div class="stat-note">Étapes préparées mais non publiées</div>
+        </article>
+
+        <article class="stat success">
+          <div class="stat-label">Publiées</div>
+          <div class="stat-value">12</div>
+          <div class="stat-note">Déjà visibles côté client</div>
+        </article>
+
+        <article class="stat info">
+          <div class="stat-label">En attente client</div>
+          <div class="stat-value">3</div>
+          <div class="stat-note">Justificatifs ou retour attendus</div>
+        </article>
+
+        <article class="stat">
+          <div class="stat-label">Clôturées</div>
+          <div class="stat-value">6</div>
+          <div class="stat-note">Étapes terminées et archivables</div>
+        </article>
+      </section>
+
+      <section class="layout">
+        <div class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Liste des publications</h2>
+                  <div class="panel-sub">Vue d’ensemble par dossier et statut.</div>
+                </div>
+                <span class="mini-badge">25 publications</span>
+              </div>
+
+              <div class="toolbar">
+                <div class="field">
+                  <label for="searchPublications">Recherche</label>
+                  <input id="searchPublications" type="text" placeholder="Référence dossier, client, titre..." />
+                </div>
+
+                <div class="field">
+                  <label for="filterPublicationStatus">Statut</label>
+                  <select id="filterPublicationStatus">
+                    <option>Tous</option>
+                    <option>Brouillon</option>
+                    <option>Prête</option>
+                    <option>Publiée</option>
+                    <option>Attente client</option>
+                    <option>Clôturée</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="filterStepType">Type d’étape</label>
+                  <select id="filterStepType">
+                    <option>Tous</option>
+                    <option>Relance 1</option>
+                    <option>Relance 2</option>
+                    <option>Relance 3</option>
+                    <option>Mise en demeure</option>
+                    <option>Injonction</option>
+                    <option>Demande de pièce</option>
+                    <option>Information client</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="chips">
+                <span class="chip active">Toutes</span>
+                <span class="chip">Brouillons</span>
+                <span class="chip">À publier</span>
+                <span class="chip">Publiées</span>
+                <span class="chip">Attente client</span>
+                <span class="chip">Clôturées</span>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Dossier</th>
+                      <th>Client</th>
+                      <th>Étape</th>
+                      <th>Statut</th>
+                      <th>Publication</th>
+                      <th>Justificatifs attendus</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>AF-2026-021</td>
+                      <td>
+                        <div class="client">
+                          <strong>Sophie Martin</strong>
+                          <span class="subline">sophie.martin@email.fr</span>
+                        </div>
+                      </td>
+                      <td>Relance 1</td>
+                      <td><span class="status draft">Brouillon</span></td>
+                      <td>Non publiée</td>
+                      <td>Preuve d’envoi mail</td>
+                      <td><a href="demande.html?id=AF-2026-021" class="mini-badge">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>AF-2026-018</td>
+                      <td>
+                        <div class="client">
+                          <strong>Atelier Besson</strong>
+                          <span class="subline">contact@atelier-besson.fr</span>
+                        </div>
+                      </td>
+                      <td>Relance 2</td>
+                      <td><span class="status published">Publiée</span></td>
+                      <td>14/04/2026 — 10:42</td>
+                      <td>Capture d’envoi + accusé</td>
+                      <td><a href="demande.html?id=AF-2026-018" class="mini-badge">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>AF-2026-016</td>
+                      <td>
+                        <div class="client">
+                          <strong>Agence Nova</strong>
+                          <span class="subline">gestion@agencenova.fr</span>
+                        </div>
+                      </td>
+                      <td>Demande de pièce</td>
+                      <td><span class="status waiting">Attente client</span></td>
+                      <td>13/04/2026 — 16:15</td>
+                      <td>Devis + justificatif d’exécution</td>
+                      <td><a href="demande.html?id=AF-2026-016" class="mini-badge">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>AF-2026-012</td>
+                      <td>
+                        <div class="client">
+                          <strong>Dupont Conseil</strong>
+                          <span class="subline">admin@dupont-conseil.fr</span>
+                        </div>
+                      </td>
+                      <td>Mise en demeure</td>
+                      <td><span class="status.ready">Prête</span></td>
+                      <td>Non publiée</td>
+                      <td>LRAR + preuve d’envoi</td>
+                      <td><a href="demande.html?id=AF-2026-012" class="mini-badge">Ouvrir</a></td>
+                    </tr>
+
+                    <tr>
+                      <td>AF-2026-009</td>
+                      <td>
+                        <div class="client">
+                          <strong>Studio Mercure</strong>
+                          <span class="subline">hello@studio-mercure.fr</span>
+                        </div>
+                      </td>
+                      <td>Clôture dossier</td>
+                      <td><span class="status.closed">Clôturée</span></td>
+                      <td>09/04/2026 — 11:20</td>
+                      <td>Aucun</td>
+                      <td><a href="demande.html?id=AF-2026-009" class="mini-badge">Ouvrir</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Historique récent</h2>
+                  <div class="panel-sub">Dernières publications et changements d’état.</div>
+                </div>
+              </div>
+
+              <div class="log-list">
+                <div class="log-item">
+                  <strong>Relance 2 publiée</strong>
+                  <span>AF-2026-018 — publication envoyée au client le 14/04/2026 à 10:42.</span>
+                </div>
+
+                <div class="log-item">
+                  <strong>Demande de pièce publiée</strong>
+                  <span>AF-2026-016 — justificatif complémentaire demandé au client.</span>
+                </div>
+
+                <div class="log-item">
+                  <strong>Brouillon mise en demeure prêt</strong>
+                  <span>AF-2026-012 — publication prête, en attente de validation finale.</span>
+                </div>
+
+                <div class="log-item">
+                  <strong>Étape clôturée</strong>
+                  <span>AF-2026-009 — information de clôture publiée côté client.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Créer / modifier une publication</h2>
+                  <div class="panel-sub">Bloc de préparation avant publication réelle.</div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="publicationDossier">Dossier</label>
+                <select id="publicationDossier">
+                  <option>AF-2026-021 — Sophie Martin</option>
+                  <option>AF-2026-018 — Atelier Besson</option>
+                  <option>AF-2026-016 — Agence Nova</option>
+                  <option>AF-2026-012 — Dupont Conseil</option>
+                </select>
+              </div>
+
+              <div class="field" style="margin-top:12px;">
+                <label for="publicationType">Type d’étape</label>
+                <select id="publicationType">
+                  <option>Relance 1</option>
+                  <option>Relance 2</option>
+                  <option>Relance 3</option>
+                  <option>Mise en demeure</option>
+                  <option>Injonction</option>
+                  <option>Demande de pièce</option>
+                  <option>Information client</option>
+                  <option>Clôture dossier</option>
+                </select>
+              </div>
+
+              <div class="field" style="margin-top:12px;">
+                <label for="publicationTitle">Titre visible côté client</label>
+                <input id="publicationTitle" type="text" placeholder="Ex. Relance 1 préparée" />
+              </div>
+
+              <div class="field" style="margin-top:12px;">
+                <label for="publicationMessage">Message publié au client</label>
+                <textarea id="publicationMessage" placeholder="Ex. Votre relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace client."></textarea>
+              </div>
+
+              <div class="field" style="margin-top:12px;">
+                <label for="publicationProofs">Justificatifs demandés</label>
+                <input id="publicationProofs" type="text" placeholder="Ex. preuve d’envoi mail, capture écran, LRAR, accusé..." />
+              </div>
+
+              <div class="field" style="margin-top:12px;">
+                <label for="publicationDocument">Document lié à l’étape</label>
+                <input id="publicationDocument" type="text" placeholder="Ex. Relance-1-AF-2026-021.pdf" />
+              </div>
+
+              <div class="action-row">
+                <button class="btn btn-primary" type="button">Publier côté client</button>
+                <button class="btn btn-secondary" type="button">Enregistrer brouillon</button>
+                <button class="btn btn-danger" type="button">Annuler</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Contrôle qualité publication</h2>
+                  <div class="panel-sub">Checklist avant envoi client.</div>
+                </div>
+              </div>
+
+              <div class="doc-list">
+                <div class="doc-item">
+                  <strong>Titre clair</strong>
+                  <span>Le client doit comprendre en 2 secondes ce qui se passe.</span>
+                </div>
+
+                <div class="doc-item">
+                  <strong>Message exploitable</strong>
+                  <span>Pas de blabla, uniquement l’action attendue et l’état réel.</span>
+                </div>
+
+                <div class="doc-item">
+                  <strong>Justificatifs demandés précis</strong>
+                  <span>Ne demande pas “des preuves”, demande exactement lesquelles.</span>
+                </div>
+
+                <div class="doc-item">
+                  <strong>Document cohérent</strong>
+                  <span>Si tu annonces un courrier prêt, il doit être réellement prêt.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Navigation admin</h2>
+                  <div class="panel-sub">Suite logique du back-office.</div>
+                </div>
+              </div>
+
+              <div class="doc-list">
+                <a href="index.html" class="doc-item">
+                  <strong>Accueil admin</strong>
+                  <span>Vue générale des dossiers et alertes.</span>
+                </a>
+
+                <a href="demandes.html" class="doc-item">
+                  <strong>Dossiers</strong>
+                  <span>Liste complète des dossiers clients.</span>
+                </a>
+
+                <a href="demande.html?id=AF-2026-021" class="doc-item">
+                  <strong>Fiche dossier</strong>
+                  <span>Traitement détaillé d’un dossier.</span>
+                </a>
+
+                <a href="publications.html" class="doc-item">
+                  <strong>Publications</strong>
+                  <span>Brouillons, publications et suivi client.</span>
+                </a>
+
+                <a href="reglages.html" class="doc-item">
+                  <strong>Réglages</strong>
+                  <span>Paramètres généraux Axe Flow.</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Logique métier</h2>
+                  <div class="panel-sub">Pour garder le cap.</div>
+                </div>
+              </div>
+
+              <div class="info-box">
+                <strong>1. Dossier traité côté admin</strong>
+                <span>Tu avances réellement le dossier dans la fiche admin.</span>
+              </div>
+
+              <div class="info-box" style="margin-top:12px;">
+                <strong>2. Publication créée ici</strong>
+                <span>Tu transformes ce travail en message clair visible côté client.</span>
+              </div>
+
+              <div class="info-box" style="margin-top:12px;">
+                <strong>3. Retour client contrôlé ensuite</strong>
+                <span>Justificatifs déposés, réponse reçue, étape clôturée ou dossier poursuivi.</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <div class="footer-note">
+        Base admin Axe Flow — publications client à brancher ensuite sur Firestore et sur le tableau de bord client.
+      </div>
+    </div>
+  </main>
+</body>
+</html>
