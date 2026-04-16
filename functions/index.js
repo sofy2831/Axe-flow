@@ -185,9 +185,12 @@ exports.stripeWebhook = onRequest(
           updatedAt: now,
         });
 
+        const userSnap = await userRef.get();
+        const currentPlan = userSnap.exists ? userSnap.data().plan || "unknown" : "unknown";
+
         const userUpdate = {
           email,
-          plan: offerType === "extra_case_19" ? "monthly_89" : offerType,
+          plan: offerType === "extra_case_19" ? currentPlan : offerType,
           subscriptionStatus: "active",
           updatedAt: now,
         };
