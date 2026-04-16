@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Axe Flow — Tableau de bord client</title>
+  <meta name="description" content="Tableau de bord client Axe Flow : dossiers, étapes publiées, pièces, justificatifs, messages et suite après injonction." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --panel:rgba(255,255,255,0.06);
+      --panel-2:rgba(255,255,255,0.04);
+      --line:rgba(255,255,255,0.09);
+      --line-strong:rgba(255,255,255,0.14);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.76);
+      --soft:rgba(244,247,251,0.58);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --warning:#ffb347;
+      --danger:#ff6b6b;
+      --info:#7cc8ff;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --max:1380px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.5;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button,input,select,textarea{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.68);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .user-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:600;
+      max-width:100%;
+      flex-wrap:wrap;
+    }
+
+    .user-email{
+      max-width:220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.95rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .btn[disabled]{
+      opacity:.5;
+      pointer-events:none;
+      cursor:not-allowed;
+    }
+
+    .page{
+      padding:28px 0 42px;
+    }
+
+    .hero{
+      margin-bottom:18px;
+      padding:28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:76ch;
+      font-size:1rem;
+    }
+
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{
+      color:#fff;
+    }
+
+    .flash-banner{
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:18px;
+      border:1px solid rgba(61,208,143,0.22);
+      background:rgba(61,208,143,0.12);
+      color:#d9ffee;
+      font-size:.92rem;
+      display:none;
+    }
+
+    .flash-banner.show{
+      display:block;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .col{
+      display:grid;
+      gap:18px;
+      align-content:start;
+      min-width:0;
+    }
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-width:0;
+    }
+
+    .panel-inner{
+      padding:22px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0 0 5px;
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-sub{
+      color:var(--soft);
+      font-size:.88rem;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:800;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .pill.info{
+      background:rgba(124,200,255,0.14);
+      border-color:rgba(124,200,255,0.22);
+      color:#dff3ff;
+    }
+
+    .pill.warning{
+      background:rgba(255,179,71,0.14);
+      border-color:rgba(255,179,71,0.22);
+      color:#ffe6c2;
+    }
+
+    .pill.success{
+      background:rgba(61,208,143,0.14);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .pill.danger{
+      background:rgba(255,107,107,0.14);
+      border-color:rgba(255,107,107,0.22);
+      color:#ffd9d9;
+    }
+
+    .dossier-list,
+    .message-list,
+    .file-list,
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .dossier-card,
+    .message-item,
+    .file-item,
+    .timeline-item,
+    .choice-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .dossier-card{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .dossier-card:hover{
+      background:rgba(255,255,255,0.06);
+      transform:translateY(-1px);
+    }
+
+    .dossier-card.active{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .dossier-card strong,
+    .file-item strong,
+    .message-item strong,
+    .timeline-item strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .dossier-card span,
+    .file-item span,
+    .message-item span,
+    .timeline-item span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .summary-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .summary-label{
+      color:var(--soft);
+      font-size:.84rem;
+      margin-bottom:8px;
+    }
+
+    .summary-value{
+      font-size:1.08rem;
+      line-height:1.25;
+      font-weight:800;
+      letter-spacing:-0.03em;
+      color:#fff;
+      word-break:break-word;
+    }
+
+    .summary-value.big{
+      font-size:1.42rem;
+      line-height:1.1;
+      letter-spacing:-0.04em;
+    }
+
+    .summary-note{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .note-box{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .note-box.warning{
+      background:rgba(255,179,71,0.12);
+      border-color:rgba(255,179,71,0.22);
+      color:#ffe7c2;
+    }
+
+    .note-box.success{
+      background:rgba(61,208,143,0.12);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .timeline-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .timeline-meta{
+      color:var(--soft) !important;
+      font-size:.8rem !important;
+      margin-bottom:6px;
+    }
+
+    .timeline-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .mini-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,127,31,0.14);
+      border:1px solid rgba(255,127,31,0.22);
+      color:#fff;
+      font-size:.83rem;
+      font-weight:800;
+      white-space:nowrap;
+      cursor:pointer;
+    }
+
+    .mini-btn.secondary{
+      background:rgba(255,255,255,0.05);
+      border-color:rgba(255,255,255,0.10);
+    }
+
+    .choice-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .choice-card.highlight{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .choice-card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+      letter-spacing:-0.02em;
+    }
+
+    .choice-card p{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .choice-card ul{
+      margin:0 0 12px;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .choice-card li{margin:6px 0}
+
+    .option-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin:10px 0 14px;
+      align-items:center;
+    }
+
+    .check-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:600;
+      width:max-content;
+    }
+
+    .price-box{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.12);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff;
+      margin-bottom:12px;
+    }
+
+    .price-box strong{
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .empty-state{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px dashed rgba(255,255,255,0.12);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(2,10,15,0.72);
+      backdrop-filter:blur(4px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:100;
+    }
+
+    .modal-backdrop.open{
+      display:flex;
+    }
+
+    .modal{
+      width:min(920px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border-radius:28px;
+      background:linear-gradient(180deg, #103448, #0a2535);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:var(--shadow);
+    }
+
+    .modal.small{
+      width:min(760px, 100%);
+    }
+
+    .modal-inner{
+      padding:22px;
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .modal h2{
+      margin:0 0 6px;
+      font-size:1.3rem;
+      letter-spacing:-0.02em;
+    }
+
+    .close-btn{
+      border:none;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      min-width:40px;
+      min-height:40px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:1.05rem;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .field label{
+      color:var(--soft);
+      font-size:.88rem;
+      font-weight:600;
+    }
+
+    .field input,
+    .field textarea{
+      min-height:46px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:110px;
+      padding:12px 14px;
+      resize:vertical;
+    }
+
+    .field input[readonly]{
+      opacity:.9;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder{
+      color:rgba(244,247,251,0.42);
+    }
+
+    @media (max-width: 1180px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 860px){
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .topbar-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .summary-grid,
+      .choice-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .topbar-actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .hero,
+      .panel-inner,
+      .modal-inner{
+        padding:18px;
+      }
+
+      .check-row{
+        width:100%;
+      }
+
+      .user-chip{
+        width:100%;
+      }
+
+      .user-email{
+        max-width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Tableau de bord client</span>
+        </div>
+      </a>
+
+      <div class="topbar-actions">
+        <div class="user-chip">
+          <span class="user-email" id="userEmail">client@email.fr</span>
+        </div>
+        <button class="btn btn-secondary" type="button" id="logoutBtn">Déconnexion</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <div class="flash-banner" id="flashBanner"></div>
+
+      <section class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Dossiers, étapes publiées, pièces et justificatifs
+        </div>
+        <h1>Votre espace client</h1>
+        <p>
+          Ici vous suivez uniquement l’avancement utile de vos dossiers : pièces déposées, étapes publiées par Axe Flow,
+          documents à récupérer, actions à faire de votre côté et clôture du dossier.
+        </p>
+        <div class="hero-note">
+          <strong>Important :</strong> vous ne voyez pas la cuisine interne. Vous voyez seulement ce qu’Axe Flow vous publie,
+          ce que vous devez envoyer, et les justificatifs éventuels à redéposer.
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Vos dossiers</h2>
+                  <div class="panel-sub">Choisissez un dossier pour afficher son suivi.</div>
+                </div>
+                <button class="btn btn-primary" type="button" id="openCreateDossier">Ajouter un dossier</button>
+              </div>
+
+              <div class="dossier-list" id="dossierList">
+                <div class="dossier-card active">
+                  <div>
+                    <strong>AF-2026-021</strong>
+                    <span>SARL Martin</span>
+                    <span>1 240 € TTC</span>
+                  </div>
+                  <span class="pill warning">Traitement en cours</span>
+                </div>
+
+                <div class="dossier-card">
+                  <div>
+                    <strong>AF-2026-018</strong>
+                    <span>Atelier Besson</span>
+                    <span>860 € TTC</span>
+                  </div>
+                  <span class="pill info">Pièce demandée</span>
+                </div>
+
+                <div class="dossier-card">
+                  <div>
+                    <strong>AF-2026-009</strong>
+                    <span>Studio Mercure</span>
+                    <span>1 980 € TTC</span>
+                  </div>
+                  <span class="pill success">Clôturé</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Synthèse du dossier</h2>
+                  <div class="panel-sub">Vue simple et utile du dossier sélectionné.</div>
+                </div>
+              </div>
+
+              <div class="summary-grid">
+                <div class="summary-card">
+                  <div class="summary-label">Référence</div>
+                  <div class="summary-value big" id="summaryRef">AF-2026-021</div>
+                  <div class="summary-note">Créé le 13/04/2026</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-label">Montant TTC</div>
+                  <div class="summary-value big" id="summaryAmount">1 240 €</div>
+                  <div class="summary-note">Facture impayée</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-label">Débiteur</div>
+                  <div class="summary-value" id="summaryDebiteur">SARL Martin</div>
+                  <div class="summary-note">Professionnel</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-label">Statut publié</div>
+                  <div class="summary-value" id="summaryStatus">Traitement en cours</div>
+                  <div class="summary-note">Dernière mise à jour : aujourd’hui</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-label">Choix après injonction</div>
+                  <div class="summary-value" id="summaryChoice">Non défini</div>
+                  <div class="summary-note">Bloc actif seulement à la bonne étape</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-label">Clôture</div>
+                  <div class="summary-value" id="summaryClose">Dossier actif</div>
+                  <div class="summary-note">Aucune clôture publiée</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Pièces du dossier</h2>
+                  <div class="panel-sub">Documents initiaux déposés dans le dossier sélectionné.</div>
+                </div>
+              </div>
+
+              <div class="file-list" id="fileList">
+                <div class="file-item">
+                  <div>
+                    <strong>Facture impayée.pdf</strong>
+                    <span>Document initial — déposé le 13/04/2026</span>
+                  </div>
+                  <button class="mini-btn secondary" type="button">Ouvrir</button>
+                </div>
+
+                <div class="file-item">
+                  <div>
+                    <strong>Devis signé.pdf</strong>
+                    <span>Document contractuel — déposé le 13/04/2026</span>
+                  </div>
+                  <button class="mini-btn secondary" type="button">Ouvrir</button>
+                </div>
+
+                <div class="file-item">
+                  <div>
+                    <strong>Mail relance précédent.pdf</strong>
+                    <span>Pièce complémentaire — déposé le 13/04/2026</span>
+                  </div>
+                  <button class="mini-btn secondary" type="button">Ouvrir</button>
+                </div>
+              </div>
+
+              <div class="note-box" style="margin-top:16px;">
+                Les pièces initiales restent ici. Les justificatifs demandés après publication d’une étape se redéposent dans l’étape concernée.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Messages et informations utiles</h2>
+                  <div class="panel-sub">Messages publiés par Axe Flow dans le cadre du dossier.</div>
+                </div>
+              </div>
+
+              <div class="message-list">
+                <div class="message-item">
+                  <strong>Axe Flow — aujourd’hui à 10:05</strong>
+                  <span>Votre dossier a bien été reçu. Analyse des pièces en cours.</span>
+                </div>
+
+                <div class="message-item">
+                  <strong>Axe Flow — aujourd’hui à 11:18</strong>
+                  <span>La première relance est prête à être publiée dès validation finale.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Suivi chronologique</h2>
+                  <div class="panel-sub">Étapes publiées par Axe Flow pour ce dossier.</div>
+                </div>
+              </div>
+
+              <div class="timeline" id="timelineList">
+                <div class="timeline-item">
+                  <div class="timeline-top">
+                    <div>
+                      <span class="timeline-meta">13/04/2026</span>
+                      <strong>Demande reçue</strong>
+                    </div>
+                    <span class="pill info">Publié</span>
+                  </div>
+                  <span>Votre dossier a été ouvert et les pièces ont bien été récupérées.</span>
+                </div>
+
+                <div class="timeline-item">
+                  <div class="timeline-top">
+                    <div>
+                      <span class="timeline-meta">14/04/2026</span>
+                      <strong>Analyse en cours</strong>
+                    </div>
+                    <span class="pill.warning">En cours</span>
+                  </div>
+                  <span>Lecture des pièces, contrôle des informations débiteur et préparation de la première étape utile.</span>
+                </div>
+
+                <div class="timeline-item">
+                  <div class="timeline-top">
+                    <div>
+                      <span class="timeline-meta">15/04/2026</span>
+                      <strong>Relance 1 publiée</strong>
+                    </div>
+                    <span class="pill warning">Action requise</span>
+                  </div>
+                  <span>Merci d’envoyer la relance préparée puis de déposer la preuve d’envoi dans cette étape.</span>
+
+                  <div class="note-box warning" style="margin-top:12px;">
+                    <strong style="display:block;margin-bottom:6px;color:#fff;">Document à récupérer</strong>
+                    Relance-1-AF-2026-021.pdf
+                  </div>
+
+                  <div class="note-box" style="margin-top:12px;">
+                    <strong style="display:block;margin-bottom:6px;color:#fff;">Justificatifs attendus</strong>
+                    Preuve d’envoi mail, capture écran ou accusé d’envoi.
+                  </div>
+
+                  <div class="timeline-actions">
+                    <button class="mini-btn secondary" type="button">Télécharger le document</button>
+                    <button class="mini-btn" type="button" id="openProofModalBtn">Déposer un justificatif</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Suite après injonction</h2>
+                  <div class="panel-sub">Ce bloc s’active uniquement quand l’étape injonction est publiée.</div>
+                </div>
+              </div>
+
+              <div class="note-box warning" style="margin-bottom:16px;">
+                Pour l’instant, ce bloc est inactif. Il deviendra utilisable uniquement si Axe Flow publie l’étape injonction dans votre dossier.
+              </div>
+
+              <div class="choice-grid">
+                <div class="choice-card">
+                  <h3>Transmission autonome</h3>
+                  <p>
+                    Vous récupérez le dossier préparé et choisissez vous-même le commissaire de justice compétent.
+                  </p>
+
+                  <div class="option-row">
+                    <label class="check-row">
+                      <input type="checkbox" disabled />
+                      Je choisis la transmission autonome
+                    </label>
+                  </div>
+
+                  <button class="btn btn-secondary" type="button" disabled>Enregistrer mon choix</button>
+                </div>
+
+                <div class="choice-card highlight">
+                  <h3>Transmission assistée par Axe Flow</h3>
+                  <p>
+                    Axe Flow prépare le dossier et coordonne la transmission selon le montant de la créance.
+                  </p>
+                  <ul>
+                    <li>Montant TTC &lt; 128 € = 85 €</li>
+                    <li>Montant TTC de 128 € à 1280 € = 140 €</li>
+                    <li>Montant TTC &gt; 1280 € = 247 €</li>
+                    <li>Urgence 24 h = + 90 €</li>
+                  </ul>
+
+                  <div class="price-box">
+                    Montant à régler :
+                    <strong>Indisponible tant que l’injonction n’est pas publiée</strong>
+                  </div>
+
+                  <button class="btn btn-primary" type="button" disabled>Payer avec Stripe</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Clôture du dossier</h2>
+                  <div class="panel-sub">Information de sortie du circuit lorsque le dossier est terminé.</div>
+                </div>
+              </div>
+
+              <div class="note-box success">
+                Aucun avis de clôture publié pour ce dossier.
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <div class="footer-note">
+        Base client Axe Flow — tableau de bord à brancher ensuite sur Firebase / Firestore / Storage.
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="createDossierModal">
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="createDossierTitle">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div>
+            <h2 id="createDossierTitle">Ajouter un dossier</h2>
+            <div class="panel-sub">Formulaire simple de création d’un nouveau dossier.</div>
+          </div>
+          <button class="close-btn" type="button" id="closeCreateDossier" aria-label="Fermer">×</button>
+        </div>
+
+        <div class="field">
+          <label for="dossierLabel">Intitulé interne</label>
+          <input id="dossierLabel" type="text" placeholder="Ex. Impayé Martin avril 2026" />
+        </div>
+
+        <div class="field">
+          <label for="debiteurName">Nom du débiteur</label>
+          <input id="debiteurName" type="text" placeholder="Ex. SARL Martin" />
+        </div>
+
+        <div class="field">
+          <label for="amountTTC">Montant TTC</label>
+          <input id="amountTTC" type="number" placeholder="1240" />
+        </div>
+
+        <div class="field">
+          <label for="dossierSummary">Résumé du dossier</label>
+          <textarea id="dossierSummary" placeholder="Expliquez brièvement l’origine de la créance et la situation."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button">Créer le dossier</button>
+          <button class="btn btn-secondary" type="button" id="cancelCreateDossier">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="proofModal">
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="proofModalTitle">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div>
+            <h2 id="proofModalTitle">Déposer un justificatif</h2>
+            <div class="panel-sub">Déposez ici la preuve d’envoi demandée pour l’étape sélectionnée.</div>
+          </div>
+          <button class="close-btn" type="button" id="closeProofModal" aria-label="Fermer">×</button>
+        </div>
+
+        <div class="field">
+          <label for="proofFile">Fichier</label>
+          <input id="proofFile" type="file" />
+        </div>
+
+        <div class="field">
+          <label for="proofComment">Commentaire</label>
+          <textarea id="proofComment" placeholder="Ex. Envoi mail effectué ce matin à 09:32 avec copie du message."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button">Envoyer le justificatif</button>
+          <button class="btn btn-secondary" type="button" id="cancelProofModal">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const flashBanner = document.getElementById("flashBanner");
+    const openCreateDossier = document.getElementById("openCreateDossier");
+    const createDossierModal = document.getElementById("createDossierModal");
+    const closeCreateDossier = document.getElementById("closeCreateDossier");
+    const cancelCreateDossier = document.getElementById("cancelCreateDossier");
+
+    const proofModal = document.getElementById("proofModal");
+    const openProofModalBtn = document.getElementById("openProofModalBtn");
+    const closeProofModal = document.getElementById("closeProofModal");
+    const cancelProofModal = document.getElementById("cancelProofModal");
+
+    function openModal(modal){
+      if(modal) modal.classList.add("open");
+    }
+
+    function closeModal(modal){
+      if(modal) modal.classList.remove("open");
+    }
+
+    function showFlash(message){
+      if(!message) return;
+      flashBanner.textContent = message;
+      flashBanner.classList.add("show");
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if(params.get("payment") === "success"){
+      showFlash("Paiement reçu. Votre dossier ou votre option va apparaître après synchronisation.");
+    }
+
+    if(openCreateDossier){
+      openCreateDossier.addEventListener("click", () => openModal(createDossierModal));
+    }
+
+    if(closeCreateDossier){
+      closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+    }
+
+    if(cancelCreateDossier){
+      cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+    }
+
+    if(openProofModalBtn){
+      openProofModalBtn.addEventListener("click", () => openModal(proofModal));
+    }
+
+    if(closeProofModal){
+      closeProofModal.addEventListener("click", () => closeModal(proofModal));
+    }
+
+    if(cancelProofModal){
+      cancelProofModal.addEventListener("click", () => closeModal(proofModal));
+    }
+
+    [createDossierModal, proofModal].forEach((modal) => {
+      if(!modal) return;
+      modal.addEventListener("click", (e) => {
+        if(e.target === modal) closeModal(modal);
+      });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape"){
+        closeModal(createDossierModal);
+        closeModal(proofModal);
+      }
+    });
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if(logoutBtn){
+      logoutBtn.addEventListener("click", () => {
+        window.location.href = "connexion.html";
+      });
+    }
+  </script>
+</body>
+</html>
