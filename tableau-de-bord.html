@@ -2495,44 +2495,75 @@
   }
 
   async function loadTimelineForDossier(dossierId) {
-    if (!currentUser || !dossierId) {
+  if (!currentUser || !dossierId) {
+    timelineEventsCache = [];
+    renderTimeline([]);
+    return;
+  }
+
+  try {
+    const eventsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events");
+    const q = query(eventsRef, orderBy("createdAt", "asc"));
+    const snap = await getDocs(q);
+
+    if (!snap.docs.length) {
       timelineEventsCache = [];
       renderTimeline([]);
       return;
     }
 
-    try {
-      const eventsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events");
-      const q = query(eventsRef, orderBy("createdAt", "asc"));
-      const snap = await getDocs(q);
-
-      const orderedDocs = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-
-      if (!orderedDocs.length) {
-        timelineEventsCache = [];
-        renderTimeline([]);
-        return;
-      }
-
-      const events = orderedDocs.map((data) => {
+    const events = await Promise.all(
+      snap.docs.map(async (docSnap) => {
+        const data = docSnap.data();
         const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+
+        // lecture des proofs de l’event
+        const proofsRef = collection(
+          db,
+          "users",
+          currentUser.uid,
+          "requests",
+          dossierId,
+          "events",
+          docSnap.id,
+          "proofs"
+        );
+
+        const proofsSnap = await getDocs(proofsRef);
+
+        const proofFiles = proofsSnap.docs.map((proofDoc) => {
+          const proofData = proofDoc.data();
+          return {
+            id: proofDoc.id,
+            name: proofData.name || "Justificatif",
+            type: proofData.type || "other",
+            url: proofData.url || "",
+            uploadedAt: proofData.uploadedAt?.toDate
+              ? proofData.uploadedAt.toDate()
+              : proofData.uploadedAt || null
+          };
+        });
+
         return {
-          id: data.id,
+          id: docSnap.id,
           ...data,
           title: data.title || data.label || "Étape publiée",
           description: data.description || data.note || "Publication enregistrée sur le dossier.",
-          dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible"
+          dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible",
+          clientProofFiles: proofFiles,
+          clientProofCount: proofFiles.length
         };
-      });
+      })
+    );
 
-      timelineEventsCache = events;
-      renderTimeline(events);
-    } catch (err) {
-      console.error("Erreur loadTimelineForDossier:", err);
-      timelineEventsCache = [];
-      renderTimeline([]);
-    }
+    timelineEventsCache = events;
+    renderTimeline(events);
+  } catch (err) {
+    console.error("Erreur loadTimelineForDossier:", err);
+    timelineEventsCache = [];
+    renderTimeline([]);
   }
+}
 
   async function loadFilesForDossier(dossierId) {
     if (!currentUser || !dossierId) {
