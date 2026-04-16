@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow Admin — Accueil</title>
-  <meta name="description" content="Accueil admin Axe Flow : nouvelles demandes, traitement en cours, alertes et accès rapide aux demandes prioritaires." />
+  <meta name="description" content="Accueil admin Axe Flow : nouveaux dossiers reçus, traitements en cours, attentes client, alertes et accès rapide aux dossiers prioritaires." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -208,8 +208,22 @@
     .hero p{
       margin:0;
       color:var(--muted);
-      max-width:72ch;
+      max-width:74ch;
       font-size:1rem;
+    }
+
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{
+      color:#fff;
     }
 
     .kpis{
@@ -417,7 +431,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:840px;
+      min-width:980px;
     }
 
     th, td{
@@ -625,13 +639,13 @@
         <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
         <div class="brand-text">
           <span class="brand-title">Axe Flow Admin</span>
-          <span class="brand-sub">Accueil — traitement des demandes client</span>
+          <span class="brand-sub">Accueil — pilotage des dossiers clients</span>
         </div>
       </a>
 
       <div class="topbar-actions">
-        <a href="demandes.html" class="btn btn-secondary">Voir toutes les demandes</a>
-        <a href="#" class="btn btn-primary">Nouvelle action du jour</a>
+        <a href="demandes.html" class="btn btn-secondary">Voir tous les dossiers</a>
+        <a href="demandes.html?filter=to_review" class="btn btn-primary">Traiter les nouveaux dossiers</a>
       </div>
     </div>
   </header>
@@ -645,34 +659,40 @@
         </div>
         <h1>Accueil admin</h1>
         <p>
-          Vue rapide sur les nouvelles demandes reçues, les traitements en cours, les demandes en attente client
-          et les priorités du jour. Ici, Axe Flow pilote le travail. Le client ne voit qu’un suivi publié.
+          Vue rapide sur les nouveaux dossiers reçus, les traitements en cours, les attentes client,
+          les publications à surveiller et les priorités du jour. Ici, Axe Flow pilote le back-office.
+          Le client, lui, ne voit que le suivi publié sur son tableau de bord.
         </p>
+        <div class="hero-note">
+          <strong>Structure métier retenue :</strong> un dossier reçu, qualifié, traité, publié au client,
+          éventuellement complété par des justificatifs, puis clôturé. L’accueil admin doit servir à voir immédiatement
+          ce qui entre, ce qui bloque et ce qui doit être publié.
+        </div>
       </section>
 
       <section class="kpis">
         <article class="kpi is-danger">
-          <div class="kpi-label">Nouvelles demandes</div>
+          <div class="kpi-label">Nouveaux dossiers</div>
           <div class="kpi-value">3</div>
           <div class="kpi-note">À qualifier dès maintenant</div>
         </article>
 
         <article class="kpi is-warning">
-          <div class="kpi-label">Demandes en traitement</div>
+          <div class="kpi-label">Dossiers en traitement</div>
           <div class="kpi-value">8</div>
-          <div class="kpi-note">Relances, mise en demeure ou préparation</div>
+          <div class="kpi-note">Qualification, relance, mise en demeure ou injonction</div>
         </article>
 
         <article class="kpi">
-          <div class="kpi-label">En attente client</div>
+          <div class="kpi-label">Attentes client</div>
           <div class="kpi-value">2</div>
-          <div class="kpi-note">Pièces ou réponse complémentaire attendues</div>
+          <div class="kpi-note">Pièces, preuve d’envoi ou retour client attendus</div>
         </article>
 
         <article class="kpi is-success">
-          <div class="kpi-label">Clôturées</div>
+          <div class="kpi-label">Dossiers clôturés</div>
           <div class="kpi-value">14</div>
-          <div class="kpi-note">Demandes archivées ou terminées</div>
+          <div class="kpi-note">Terminés, archivés ou sortis du circuit actif</div>
         </article>
       </section>
 
@@ -693,33 +713,33 @@
                   <div class="alert-left">
                     <div class="alert-dot danger"></div>
                     <div class="alert-content">
-                      <strong>Nouvelle demande reçue sans qualification</strong>
-                      <span>AF-2026-021 — Sophie Martin — facture impayée reçue aujourd’hui à 09:14.</span>
+                      <strong>Dossier reçu sans qualification</strong>
+                      <span>AF-2026-021 — Sophie Martin — paiement reçu, pièces déposées aujourd’hui à 09:14.</span>
                     </div>
                   </div>
-                  <a href="demande.html" class="mini-btn">Ouvrir</a>
+                  <a href="demande.html?id=AF-2026-021" class="mini-btn">Ouvrir</a>
                 </div>
 
                 <div class="alert-item">
                   <div class="alert-left">
                     <div class="alert-dot warning"></div>
                     <div class="alert-content">
-                      <strong>Relance 2 à envoyer aujourd’hui</strong>
-                      <span>AF-2026-018 — Atelier Besson — échéance traitement prévue ce matin.</span>
+                      <strong>Publication relance à contrôler</strong>
+                      <span>AF-2026-018 — Atelier Besson — relance 2 prévue aujourd’hui, pièce prête à être publiée.</span>
                     </div>
                   </div>
-                  <a href="demande.html" class="mini-btn">Traiter</a>
+                  <a href="demande.html?id=AF-2026-018" class="mini-btn">Traiter</a>
                 </div>
 
                 <div class="alert-item">
                   <div class="alert-left">
                     <div class="alert-dot info"></div>
                     <div class="alert-content">
-                      <strong>Pièce complémentaire demandée au client</strong>
-                      <span>AF-2026-016 — Agence Nova — en attente d’un devis ou d’un justificatif d’exécution.</span>
+                      <strong>Client en attente de réponse</strong>
+                      <span>AF-2026-016 — Agence Nova — devis ou justificatif d’exécution toujours manquant.</span>
                     </div>
                   </div>
-                  <a href="demande.html" class="mini-btn">Voir</a>
+                  <a href="demande.html?id=AF-2026-016" class="mini-btn">Voir</a>
                 </div>
               </div>
             </div>
@@ -729,8 +749,8 @@
             <div class="panel-inner">
               <div class="panel-head">
                 <div>
-                  <h2 class="panel-title">Demandes en cours</h2>
-                  <div class="panel-sub">Vue opérationnelle des demandes actives.</div>
+                  <h2 class="panel-title">File active des dossiers</h2>
+                  <div class="panel-sub">Vue opérationnelle des dossiers vivants.</div>
                 </div>
                 <a href="demandes.html" class="mini-badge">Voir tout</a>
               </div>
@@ -758,10 +778,10 @@
                       </td>
                       <td>AF-2026-021</td>
                       <td>1 240 €</td>
-                      <td><span class="status new">Nouvelle demande</span></td>
+                      <td><span class="status new">À qualifier</span></td>
                       <td><span class="status client">Demande reçue</span></td>
-                      <td>Axe Flow</td>
-                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                      <td>Non défini</td>
+                      <td><a href="demande.html?id=AF-2026-021" class="mini-btn">Ouvrir</a></td>
                     </tr>
 
                     <tr>
@@ -773,10 +793,10 @@
                       </td>
                       <td>AF-2026-018</td>
                       <td>860 €</td>
-                      <td><span class="status progress">Relance 2</span></td>
+                      <td><span class="status progress">Relance en cours</span></td>
                       <td><span class="status client">Traitement en cours</span></td>
                       <td>Client</td>
-                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                      <td><a href="demande.html?id=AF-2026-018" class="mini-btn">Ouvrir</a></td>
                     </tr>
 
                     <tr>
@@ -791,7 +811,7 @@
                       <td><span class="status waiting">En attente client</span></td>
                       <td><span class="status client">Pièce demandée</span></td>
                       <td>Axe Flow</td>
-                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                      <td><a href="demande.html?id=AF-2026-016" class="mini-btn">Ouvrir</a></td>
                     </tr>
 
                     <tr>
@@ -806,7 +826,7 @@
                       <td><span class="status progress">Mise en demeure</span></td>
                       <td><span class="status client">Traitement en cours</span></td>
                       <td>Axe Flow</td>
-                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                      <td><a href="demande.html?id=AF-2026-012" class="mini-btn">Ouvrir</a></td>
                     </tr>
 
                     <tr>
@@ -818,10 +838,10 @@
                       </td>
                       <td>AF-2026-009</td>
                       <td>1 980 €</td>
-                      <td><span class="status done">Clôturée</span></td>
+                      <td><span class="status done">Clôturé</span></td>
                       <td><span class="status client">Dossier clôturé</span></td>
                       <td>Client</td>
-                      <td><a href="demande.html" class="mini-btn">Ouvrir</a></td>
+                      <td><a href="demande.html?id=AF-2026-009" class="mini-btn">Ouvrir</a></td>
                     </tr>
                   </tbody>
                 </table>
@@ -834,29 +854,29 @@
               <div class="panel-head">
                 <div>
                   <h2 class="panel-title">Activité récente</h2>
-                  <div class="panel-sub">Historique utile du back-office.</div>
+                  <div class="panel-sub">Ce qui est entré ou a bougé récemment dans le back-office.</div>
                 </div>
               </div>
 
               <div class="timeline-list">
                 <div class="timeline-item">
-                  <strong>Demande reçue</strong>
-                  <span>AF-2026-021 — Sophie Martin — pièces déposées aujourd’hui à 09:14.</span>
+                  <strong>Nouveau dossier reçu</strong>
+                  <span>AF-2026-021 — Sophie Martin — paiement validé, dossier ouvert et pièces déposées aujourd’hui à 09:14.</span>
                 </div>
 
                 <div class="timeline-item">
-                  <strong>Relance publiée côté client</strong>
-                  <span>AF-2026-018 — mise à jour du suivi client à 10:42.</span>
+                  <strong>Étape publiée côté client</strong>
+                  <span>AF-2026-018 — relance 2 publiée sur le tableau de bord client à 10:42.</span>
                 </div>
 
                 <div class="timeline-item">
-                  <strong>Message interne envoyé</strong>
-                  <span>AF-2026-016 — demande de justificatif complémentaire envoyée au client.</span>
+                  <strong>Attente de pièce complémentaire</strong>
+                  <span>AF-2026-016 — justificatif demandé au client, retour toujours attendu.</span>
                 </div>
 
                 <div class="timeline-item">
-                  <strong>Mise en demeure préparée</strong>
-                  <span>AF-2026-012 — brouillon validé côté admin, publication en attente.</span>
+                  <strong>Brouillon prêt à publication</strong>
+                  <span>AF-2026-012 — mise en demeure préparée côté admin, vérification finale restante.</span>
                 </div>
               </div>
             </div>
@@ -869,27 +889,27 @@
               <div class="panel-head">
                 <div>
                   <h2 class="panel-title">Actions du jour</h2>
-                  <div class="panel-sub">Raccourcis concrets.</div>
+                  <div class="panel-sub">Raccourcis opérationnels.</div>
                 </div>
               </div>
 
               <div class="action-list">
                 <div class="action-item">
-                  <strong>Qualifier les nouvelles demandes</strong>
-                  <span>Vérifier les pièces reçues, lire la facture, récupérer les coordonnées utiles.</span>
-                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Ouvrir la file</a>
+                  <strong>Qualifier les nouveaux dossiers</strong>
+                  <span>Lire les pièces, vérifier la facture, contrôler le débiteur et poser un premier statut interne propre.</span>
+                  <a href="demandes.html?filter=to_review" class="mini-btn" style="margin-top:12px;">Ouvrir la file</a>
                 </div>
 
                 <div class="action-item">
-                  <strong>Traiter les demandes en attente d’action</strong>
-                  <span>Relances, mise en demeure, publication du suivi client.</span>
-                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Traiter</a>
+                  <strong>Traiter les dossiers actifs</strong>
+                  <span>Préparer relances, mises en demeure, injonctions et publier les étapes prêtes côté client.</span>
+                  <a href="demandes.html?filter=active" class="mini-btn" style="margin-top:12px;">Traiter</a>
                 </div>
 
                 <div class="action-item">
-                  <strong>Vérifier les demandes en attente client</strong>
-                  <span>Contrôler les réponses, pièces complémentaires et messages non lus.</span>
-                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Vérifier</a>
+                  <strong>Contrôler les attentes client</strong>
+                  <span>Vérifier les pièces manquantes, preuves d’envoi, retours et réponses laissées en attente.</span>
+                  <a href="demandes.html?filter=waiting_client" class="mini-btn" style="margin-top:12px;">Vérifier</a>
                 </div>
               </div>
             </div>
@@ -899,30 +919,58 @@
             <div class="panel-inner">
               <div class="panel-head">
                 <div>
-                  <h2 class="panel-title">Répartition rapide</h2>
-                  <div class="panel-sub">Vue synthétique.</div>
+                  <h2 class="panel-title">Vue par statut</h2>
+                  <div class="panel-sub">Répartition rapide des dossiers.</div>
                 </div>
               </div>
 
               <div class="split">
                 <div class="mini-card">
                   <strong>À qualifier</strong>
-                  <span>3 demandes reçues, non encore lues ou non qualifiées.</span>
+                  <span>3 dossiers reçus, encore non qualifiés ou non lus côté admin.</span>
                 </div>
 
                 <div class="mini-card">
                   <strong>Relances en cours</strong>
-                  <span>4 demandes avec action de relance prévue ou engagée.</span>
+                  <span>4 dossiers avec action de relance prévue, en rédaction ou déjà publiée.</span>
                 </div>
 
                 <div class="mini-card">
                   <strong>Mises en demeure</strong>
-                  <span>2 demandes prêtes ou en préparation.</span>
+                  <span>2 dossiers prêts à envoyer ou déjà engagés côté client.</span>
                 </div>
 
                 <div class="mini-card">
                   <strong>Injonctions</strong>
-                  <span>1 demande à préparer selon le choix client enregistré.</span>
+                  <span>1 dossier prêt à être préparé selon le choix de suite enregistré.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Entrées récentes</h2>
+                  <div class="panel-sub">Ce qui vient d’arriver dans le système.</div>
+                </div>
+              </div>
+
+              <div class="action-list">
+                <div class="action-item">
+                  <strong>Nouveau paiement reçu</strong>
+                  <span>1 règlement dossier ponctuel validé ce matin.</span>
+                </div>
+
+                <div class="action-item">
+                  <strong>Nouveau dossier ouvert</strong>
+                  <span>1 dossier client créé avec pièces initiales complètes.</span>
+                </div>
+
+                <div class="action-item">
+                  <strong>Dernier justificatif déposé</strong>
+                  <span>Preuve d’envoi reçue sur AF-2026-018, à vérifier côté admin.</span>
                 </div>
               </div>
             </div>
@@ -944,23 +992,18 @@
                 </a>
 
                 <a href="demandes.html" class="nav-link">
-                  Toutes les demandes
+                  Tous les dossiers
                   <span>Liste complète</span>
                 </a>
 
-                <a href="demande.html" class="nav-link">
-                  Fiche demande
+                <a href="demande.html?id=AF-2026-021" class="nav-link">
+                  Fiche dossier
                   <span>Détail + actions</span>
                 </a>
 
-                <a href="#" class="nav-link">
-                  Messages clients
-                  <span>À prévoir</span>
-                </a>
-
-                <a href="#" class="nav-link">
+                <a href="reglages.html" class="nav-link">
                   Réglages
-                  <span>À prévoir</span>
+                  <span>Paramètres back-office</span>
                 </a>
               </nav>
             </div>
@@ -969,7 +1012,7 @@
       </section>
 
       <div class="footer-note">
-        Maquette de base de l’accueil admin Axe Flow.
+        Base admin Axe Flow — accueil structuré pour brancher ensuite les données Firestore.
       </div>
     </div>
   </main>
