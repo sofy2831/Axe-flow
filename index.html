@@ -262,10 +262,24 @@
     }
 
     .hero-lead{
-      margin:0 0 26px;
+      margin:0 0 18px;
       color:var(--muted);
       font-size:1.08rem;
       max-width:62ch;
+    }
+
+    .role-note{
+      margin:0 0 26px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .role-note strong{
+      color:#fff;
     }
 
     .hero-actions{
@@ -1094,6 +1108,10 @@
             jusqu’au <strong>dossier d’injonction</strong>.
           </p>
 
+          <div class="role-note">
+            <strong>Cadre d’intervention :</strong> Axe Flow prépare les relances, mises en demeure et documents nécessaires à l’avancement du dossier. Sauf mandat spécifique, l’envoi au débiteur reste effectué par le créancier, qui dépose ensuite les justificatifs dans son espace client.
+          </div>
+
           <div class="hero-actions">
             <button type="button" class="btn btn-primary" onclick="startCheckout('one_shot_49')">
               Créer un dossier - 49 €
@@ -1120,11 +1138,11 @@
             </div>
             <div class="point">
               <span class="point-mark">03</span>
-              <span>Retrouvez sur votre tableau de bord les documents et étapes publiés au fur et à mesure.</span>
+              <span>Axe Flow publie dans votre espace les relances, mises en demeure et documents préparés pour la suite du dossier.</span>
             </div>
             <div class="point">
               <span class="point-mark">04</span>
-              <span>Après l’ordonnance, choisissez librement votre commissaire de justice ou poursuivez avec Axe Flow.</span>
+              <span>Le créancier effectue l’envoi au débiteur, puis dépose dans son espace les justificatifs demandés.</span>
             </div>
           </div>
         </div>
@@ -1199,7 +1217,7 @@
                   <span class="timeline-dot"></span>
                   <div class="timeline-box">
                     <div class="timeline-step">Relance publiée</div>
-                    <p class="timeline-text">La première étape du dossier apparaît sur le tableau de bord client.</p>
+                    <p class="timeline-text">La première étape du dossier apparaît sur le tableau de bord client avec les consignes d’envoi.</p>
                   </div>
                 </li>
 
@@ -1208,7 +1226,7 @@
                   <span class="timeline-dot"></span>
                   <div class="timeline-box">
                     <div class="timeline-step">Mise en demeure publiée</div>
-                    <p class="timeline-text">Le document est disponible dans l’espace client avec conservation des pièces.</p>
+                    <p class="timeline-text">Le document est disponible dans l’espace client avec dépôt attendu des justificatifs après envoi.</p>
                   </div>
                 </li>
               </ol>
@@ -1266,20 +1284,20 @@
 
           <article class="feature">
             <div class="feature-icon">06</div>
-            <h3>Mise en demeure publiée</h3>
-            <p>Le client retrouve dans son espace la mise en demeure et les éléments utiles liés au dossier.</p>
+            <h3>Documents préparés</h3>
+            <p>Axe Flow publie les relances, mises en demeure et pièces utiles directement dans l’espace client.</p>
           </article>
 
           <article class="feature">
             <div class="feature-icon">07</div>
-            <h3>Dossier d’injonction</h3>
-            <p>Le suivi continue jusqu’à la préparation du dossier d’injonction de payer.</p>
+            <h3>Consignes d’action</h3>
+            <p>Chaque étape indique clairement ce que le client doit envoyer au débiteur et ce qu’il doit déposer ensuite.</p>
           </article>
 
           <article class="feature">
             <div class="feature-icon">08</div>
-            <h3>Pièces prêtes pour la suite</h3>
-            <p>Le dossier reste organisé pour faciliter la transmission selon l’option choisie par le client.</p>
+            <h3>Justificatifs centralisés</h3>
+            <p>Le client dépose les preuves d’envoi et conserve une trace propre dans le dossier.</p>
           </article>
 
           <article class="feature">
@@ -1385,8 +1403,8 @@
               <li><span class="point-mark">•</span><span><strong>Suivi des étapes</strong> publiées sur le dossier</span></li>
               <li><span class="point-mark">•</span><span><strong>Historique chronologique</strong> du traitement</span></li>
               <li><span class="point-mark">•</span><span><strong>Alerte prescription</strong> et visibilité dossier</span></li>
-              <li><span class="point-mark">•</span><span><strong>Mise en demeure</strong> publiée dans l’espace client</span></li>
-              <li><span class="point-mark">•</span><span><strong>Dossier d’injonction</strong> préparé et suivi</span></li>
+              <li><span class="point-mark">•</span><span><strong>Documents préparés</strong> publiés dans l’espace client</span></li>
+              <li><span class="point-mark">•</span><span><strong>Justificatifs d’envoi</strong> déposés dans le dossier</span></li>
               <li><span class="point-mark">•</span><span><strong>Choix de la suite après ordonnance</strong></span></li>
             </ul>
 
@@ -1418,7 +1436,7 @@
               <li><span class="point-mark">•</span><span><strong>Historique centralisé</strong> sur l’ensemble des impayés</span></li>
               <li><span class="point-mark">•</span><span><strong>Suivi récurrent</strong> dans le temps</span></li>
               <li><span class="point-mark">•</span><span><strong>Visibilité claire</strong> sur les dossiers actifs</span></li>
-              <li><span class="point-mark">•</span><span><strong>Dossier d’injonction</strong> suivi sur chaque affaire</span></li>
+              <li><span class="point-mark">•</span><span><strong>Documents et consignes</strong> publiés sur chaque affaire</span></li>
               <li><span class="point-mark">•</span><span><strong>Suite après ordonnance</strong> selon le choix du client</span></li>
             </ul>
 
@@ -1480,8 +1498,13 @@
                   <td class="yes">Oui</td>
                 </tr>
                 <tr>
-                  <td>Mise en demeure suivie</td>
-                  <td>Rare</td>
+                  <td>Consignes d’envoi</td>
+                  <td class="no">Non</td>
+                  <td class="yes">Oui</td>
+                </tr>
+                <tr>
+                  <td>Justificatifs déposés</td>
+                  <td class="no">Non</td>
                   <td class="yes">Oui</td>
                 </tr>
                 <tr>
@@ -1524,7 +1547,7 @@
             </div>
 
             <div class="mail-note">
-              Le client ouvre son dossier. Dépose ses pièces. Suit ensuite chaque étape publiée sur son espace.
+              Axe Flow prépare les documents et publie les étapes. Le créancier effectue l’envoi au débiteur et dépose ensuite ses justificatifs dans son espace client.
             </div>
           </article>
         </div>
