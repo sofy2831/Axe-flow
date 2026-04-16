@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Axe Flow Admin — Demandes</title>
-  <meta name="description" content="Liste admin des demandes client Axe Flow : nouvelles demandes, traitement en cours, attente client, clôturées." />
+  <title>Axe Flow Admin — Dossiers</title>
+  <meta name="description" content="Liste admin Axe Flow : nouveaux dossiers, qualification, traitement, attente client, injonction et clôture." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -212,6 +212,20 @@
       font-size:1rem;
     }
 
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{
+      color:#fff;
+    }
+
     .summary-row{
       display:grid;
       grid-template-columns:repeat(4, minmax(0,1fr));
@@ -384,7 +398,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1220px;
+      min-width:1320px;
     }
 
     th, td{
@@ -580,13 +594,13 @@
         <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
         <div class="brand-text">
           <span class="brand-title">Axe Flow Admin</span>
-          <span class="brand-sub">Liste des demandes client</span>
+          <span class="brand-sub">Liste des dossiers clients</span>
         </div>
       </a>
 
       <div class="topbar-actions">
         <a href="index.html" class="btn btn-secondary">Retour accueil</a>
-        <a href="demande.html" class="btn btn-primary">Ouvrir une demande</a>
+        <a href="demandes.html?filter=to_review" class="btn btn-primary">Voir les nouveaux dossiers</a>
       </div>
     </div>
   </header>
@@ -598,36 +612,40 @@
           <span class="eyebrow-dot"></span>
           File de traitement Axe Flow
         </div>
-        <h1>Toutes les demandes</h1>
+        <h1>Tous les dossiers</h1>
         <p>
-          Cette page centralise les demandes reçues, leur statut interne, le statut publié côté client,
-          le choix d’injonction et la prochaine action utile. C’est la vraie file de travail, pas une vitrine.
+          Cette page centralise les dossiers reçus, leur statut interne, le statut publié côté client,
+          le choix de suite après injonction et la prochaine action utile. C’est la vraie file de travail du back-office.
         </p>
+        <div class="hero-note">
+          <strong>Règle simple :</strong> un dossier entre, il est qualifié, traité, publié au client si nécessaire,
+          complété par des justificatifs, puis clôturé. La liste doit te permettre de trier vite, pas de réfléchir à ce qui manque.
+        </div>
       </section>
 
       <section class="summary-row">
         <article class="summary-card danger">
-          <div class="summary-label">Nouvelles demandes</div>
+          <div class="summary-label">Nouveaux dossiers</div>
           <div class="summary-value">3</div>
           <div class="summary-note">À qualifier ou ouvrir</div>
         </article>
 
         <article class="summary-card warning">
-          <div class="summary-label">En traitement</div>
+          <div class="summary-label">Dossiers en traitement</div>
           <div class="summary-value">8</div>
-          <div class="summary-note">Relances, mises en demeure, préparation</div>
+          <div class="summary-note">Qualification, relance, mise en demeure ou injonction</div>
         </article>
 
         <article class="summary-card">
-          <div class="summary-label">Attente client</div>
+          <div class="summary-label">Attentes client</div>
           <div class="summary-value">2</div>
-          <div class="summary-note">Pièces ou réponse manquantes</div>
+          <div class="summary-note">Pièces, preuve d’envoi ou retour manquants</div>
         </article>
 
         <article class="summary-card success">
-          <div class="summary-label">Clôturées</div>
+          <div class="summary-label">Dossiers clôturés</div>
           <div class="summary-value">14</div>
-          <div class="summary-note">Terminées ou archivées</div>
+          <div class="summary-note">Terminés, archivés ou sortis du circuit actif</div>
         </article>
       </section>
 
@@ -636,9 +654,9 @@
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Filtrer et parcourir</h2>
-              <div class="panel-sub">Base de travail pour le traitement quotidien.</div>
+              <div class="panel-sub">Base de travail quotidienne.</div>
             </div>
-            <span class="mini-badge">27 demandes</span>
+            <span class="mini-badge">27 dossiers</span>
           </div>
 
           <div class="toolbar">
@@ -647,7 +665,7 @@
               <input
                 id="searchDemandes"
                 type="text"
-                placeholder="Référence, créancier, email, montant..."
+                placeholder="Référence, créancier, email, débiteur..."
               />
             </div>
 
@@ -655,15 +673,13 @@
               <label for="filterInternal">Statut interne</label>
               <select id="filterInternal">
                 <option>Tous</option>
-                <option>Nouvelles demandes</option>
                 <option>À qualifier</option>
-                <option>Relance 1</option>
-                <option>Relance 2</option>
-                <option>Relance 3</option>
-                <option>Mise en demeure</option>
-                <option>Injonction</option>
-                <option>En attente client</option>
-                <option>Clôturées</option>
+                <option>Pièces manquantes</option>
+                <option>Prêt relance</option>
+                <option>Attente client</option>
+                <option>Prêt mise en demeure</option>
+                <option>Prêt injonction</option>
+                <option>Clôturé</option>
               </select>
             </div>
 
@@ -675,30 +691,30 @@
                 <option>Analyse en cours</option>
                 <option>Traitement en cours</option>
                 <option>Pièce demandée</option>
-                <option>Mise en demeure envoyée</option>
-                <option>Injonction en préparation</option>
-                <option>Clôturée</option>
+                <option>Injonction publiée</option>
+                <option>Dossier clôturé</option>
               </select>
             </div>
 
             <div class="select-wrap">
-              <label for="filterChoice">Choix injonction</label>
+              <label for="filterChoice">Choix de suite</label>
               <select id="filterChoice">
                 <option>Tous</option>
                 <option>Axe Flow</option>
                 <option>Client</option>
+                <option>Non défini</option>
               </select>
             </div>
           </div>
 
           <div class="filter-chips">
-            <span class="chip active">Toutes</span>
-            <span class="chip">Nouvelles</span>
-            <span class="chip">À traiter aujourd’hui</span>
+            <span class="chip active">Tous</span>
+            <span class="chip">Nouveaux</span>
+            <span class="chip">À qualifier</span>
             <span class="chip">Attente client</span>
-            <span class="chip">Mises en demeure</span>
-            <span class="chip">Injonctions</span>
-            <span class="chip">Clôturées</span>
+            <span class="chip">Prêt mise en demeure</span>
+            <span class="chip">Prêt injonction</span>
+            <span class="chip">Clôturés</span>
           </div>
 
           <div class="table-wrap">
@@ -708,10 +724,11 @@
                   <th>Créancier</th>
                   <th>Référence</th>
                   <th>Réception</th>
+                  <th>Débiteur</th>
                   <th>Montant</th>
                   <th>Statut interne</th>
                   <th>Statut client</th>
-                  <th>Choix injonction</th>
+                  <th>Choix de suite</th>
                   <th>Priorité</th>
                   <th>Prochaine action</th>
                   <th>Action</th>
@@ -727,16 +744,22 @@
                   </td>
                   <td>AF-2026-021</td>
                   <td>13/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>SARL Martin</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>1 240 €</td>
-                  <td><span class="status new">Nouvelle demande</span></td>
+                  <td><span class="status new">À qualifier</span></td>
                   <td><span class="status client">Demande reçue</span></td>
-                  <td><span class="status choice">Axe Flow</span></td>
+                  <td><span class="status choice">Non défini</span></td>
                   <td><span class="status priority">Urgente</span></td>
-                  <td>Qualifier les pièces reçues</td>
+                  <td>Lire les pièces et poser le statut initial</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Traiter</a>
+                      <a href="demande.html?id=AF-2026-021" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-021" class="mini-btn secondary">Traiter</a>
                     </div>
                   </td>
                 </tr>
@@ -750,16 +773,22 @@
                   </td>
                   <td>AF-2026-018</td>
                   <td>11/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Atelier Besson</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>860 €</td>
-                  <td><span class="status progress">Relance 2</span></td>
+                  <td><span class="status progress">Prêt relance</span></td>
                   <td><span class="status client">Traitement en cours</span></td>
                   <td><span class="status choice">Client</span></td>
                   <td><span class="status normal">Normale</span></td>
-                  <td>Envoyer relance 2</td>
+                  <td>Contrôler puis publier la relance 2</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Publier</a>
+                      <a href="demande.html?id=AF-2026-018" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-018" class="mini-btn secondary">Publier</a>
                     </div>
                   </td>
                 </tr>
@@ -773,16 +802,22 @@
                   </td>
                   <td>AF-2026-016</td>
                   <td>10/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Agence Nova</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>2 450 €</td>
-                  <td><span class="status waiting">En attente client</span></td>
+                  <td><span class="status waiting">Attente client</span></td>
                   <td><span class="status client">Pièce demandée</span></td>
                   <td><span class="status choice">Axe Flow</span></td>
                   <td><span class="status priority">Suivi</span></td>
-                  <td>Relancer le client pour justificatif</td>
+                  <td>Vérifier le justificatif complémentaire demandé</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Message</a>
+                      <a href="demande.html?id=AF-2026-016" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-016" class="mini-btn secondary">Relancer</a>
                     </div>
                   </td>
                 </tr>
@@ -796,16 +831,22 @@
                   </td>
                   <td>AF-2026-012</td>
                   <td>08/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Dupont Conseil</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>540 €</td>
-                  <td><span class="status progress">Mise en demeure</span></td>
+                  <td><span class="status progress">Prêt mise en demeure</span></td>
                   <td><span class="status client">Traitement en cours</span></td>
                   <td><span class="status choice">Axe Flow</span></td>
                   <td><span class="status normal">Normale</span></td>
                   <td>Finaliser et publier la mise en demeure</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Publier</a>
+                      <a href="demande.html?id=AF-2026-012" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-012" class="mini-btn secondary">Publier</a>
                     </div>
                   </td>
                 </tr>
@@ -819,15 +860,21 @@
                   </td>
                   <td>AF-2026-009</td>
                   <td>05/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Studio Mercure</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>1 980 €</td>
-                  <td><span class="status done">Clôturée</span></td>
-                  <td><span class="status client">Clôturée</span></td>
+                  <td><span class="status done">Clôturé</span></td>
+                  <td><span class="status client">Dossier clôturé</span></td>
                   <td><span class="status choice">Client</span></td>
                   <td><span class="status normal">Terminée</span></td>
                   <td>Aucune</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-009" class="mini-btn">Ouvrir</a>
                     </div>
                   </td>
                 </tr>
@@ -841,16 +888,22 @@
                   </td>
                   <td>AF-2026-008</td>
                   <td>04/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Cabinet Lemoine</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>3 120 €</td>
-                  <td><span class="status progress">Injonction</span></td>
-                  <td><span class="status client">Injonction en préparation</span></td>
+                  <td><span class="status progress">Prêt injonction</span></td>
+                  <td><span class="status client">Traitement en cours</span></td>
                   <td><span class="status choice">Axe Flow</span></td>
                   <td><span class="status priority">Prioritaire</span></td>
-                  <td>Préparer transmission injonction</td>
+                  <td>Préparer l’étape injonction et la suite choisie</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Traiter</a>
+                      <a href="demande.html?id=AF-2026-008" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-008" class="mini-btn secondary">Traiter</a>
                     </div>
                   </td>
                 </tr>
@@ -864,16 +917,22 @@
                   </td>
                   <td>AF-2026-007</td>
                   <td>03/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Morel Services</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>690 €</td>
-                  <td><span class="status progress">Relance 1</span></td>
+                  <td><span class="status progress">Prêt relance</span></td>
                   <td><span class="status client">Analyse en cours</span></td>
                   <td><span class="status choice">Client</span></td>
                   <td><span class="status normal">Normale</span></td>
-                  <td>Rédiger relance 1</td>
+                  <td>Préparer la relance 1</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Traiter</a>
+                      <a href="demande.html?id=AF-2026-007" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-007" class="mini-btn secondary">Traiter</a>
                     </div>
                   </td>
                 </tr>
@@ -887,16 +946,22 @@
                   </td>
                   <td>AF-2026-006</td>
                   <td>02/04/2026</td>
+                  <td>
+                    <div class="client">
+                      <strong>Entreprise Varnier</strong>
+                      <span class="subline">Professionnel</span>
+                    </div>
+                  </td>
                   <td>4 480 €</td>
-                  <td><span class="status progress">À qualifier</span></td>
+                  <td><span class="status new">À qualifier</span></td>
                   <td><span class="status client">Demande reçue</span></td>
                   <td><span class="status choice">Axe Flow</span></td>
                   <td><span class="status priority">Urgente</span></td>
-                  <td>Scanner la facture et récupérer les coordonnées</td>
+                  <td>Scanner la facture et contrôler les coordonnées débiteur</td>
                   <td>
                     <div class="table-actions">
-                      <a href="demande.html" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html" class="mini-btn secondary">Qualifier</a>
+                      <a href="demande.html?id=AF-2026-006" class="mini-btn">Ouvrir</a>
+                      <a href="demande.html?id=AF-2026-006" class="mini-btn secondary">Qualifier</a>
                     </div>
                   </td>
                 </tr>
@@ -907,7 +972,7 @@
       </section>
 
       <div class="footer-note">
-        Maquette de base de la liste admin Axe Flow.
+        Base admin Axe Flow — liste des dossiers à brancher ensuite sur Firestore.
       </div>
     </div>
   </main>
