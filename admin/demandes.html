@@ -380,6 +380,7 @@
       font-size:.86rem;
       font-weight:700;
       white-space:nowrap;
+      cursor:pointer;
     }
 
     .chip.active{
@@ -534,6 +535,16 @@
       text-align:center;
     }
 
+    .empty-state{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px dashed rgba(255,255,255,0.12);
+      color:var(--muted);
+      font-size:.92rem;
+      text-align:center;
+    }
+
     @media (max-width: 1180px){
       .summary-row{
         grid-template-columns:repeat(2, minmax(0,1fr));
@@ -619,32 +630,32 @@
         </p>
         <div class="hero-note">
           <strong>Règle simple :</strong> un dossier entre, il est qualifié, traité, publié au client si nécessaire,
-          complété par des justificatifs, puis clôturé. La liste doit te permettre de trier vite, pas de réfléchir à ce qui manque.
+          complété par des justificatifs, puis clôturé.
         </div>
       </section>
 
       <section class="summary-row">
         <article class="summary-card danger">
           <div class="summary-label">Nouveaux dossiers</div>
-          <div class="summary-value">3</div>
+          <div class="summary-value" id="kpiNew">0</div>
           <div class="summary-note">À qualifier ou ouvrir</div>
         </article>
 
         <article class="summary-card warning">
           <div class="summary-label">Dossiers en traitement</div>
-          <div class="summary-value">8</div>
+          <div class="summary-value" id="kpiProgress">0</div>
           <div class="summary-note">Qualification, relance, mise en demeure ou injonction</div>
         </article>
 
         <article class="summary-card">
           <div class="summary-label">Attentes client</div>
-          <div class="summary-value">2</div>
+          <div class="summary-value" id="kpiWaiting">0</div>
           <div class="summary-note">Pièces, preuve d’envoi ou retour manquants</div>
         </article>
 
         <article class="summary-card success">
           <div class="summary-label">Dossiers clôturés</div>
-          <div class="summary-value">14</div>
+          <div class="summary-value" id="kpiDone">0</div>
           <div class="summary-note">Terminés, archivés ou sortis du circuit actif</div>
         </article>
       </section>
@@ -656,7 +667,7 @@
               <h2 class="panel-title">Filtrer et parcourir</h2>
               <div class="panel-sub">Base de travail quotidienne.</div>
             </div>
-            <span class="mini-badge">27 dossiers</span>
+            <span class="mini-badge" id="totalBadge">0 dossier</span>
           </div>
 
           <div class="toolbar">
@@ -672,49 +683,50 @@
             <div class="select-wrap">
               <label for="filterInternal">Statut interne</label>
               <select id="filterInternal">
-                <option>Tous</option>
-                <option>À qualifier</option>
-                <option>Pièces manquantes</option>
-                <option>Prêt relance</option>
-                <option>Attente client</option>
-                <option>Prêt mise en demeure</option>
-                <option>Prêt injonction</option>
-                <option>Clôturé</option>
+                <option value="Tous">Tous</option>
+                <option value="À qualifier">À qualifier</option>
+                <option value="Pièces manquantes">Pièces manquantes</option>
+                <option value="Prêt relance">Prêt relance</option>
+                <option value="Attente client">Attente client</option>
+                <option value="Prêt mise en demeure">Prêt mise en demeure</option>
+                <option value="Prêt injonction">Prêt injonction</option>
+                <option value="Clôturé">Clôturé</option>
+                <option value="Archivé">Archivé</option>
               </select>
             </div>
 
             <div class="select-wrap">
               <label for="filterClient">Statut client</label>
               <select id="filterClient">
-                <option>Tous</option>
-                <option>Demande reçue</option>
-                <option>Analyse en cours</option>
-                <option>Traitement en cours</option>
-                <option>Pièce demandée</option>
-                <option>Injonction publiée</option>
-                <option>Dossier clôturé</option>
+                <option value="Tous">Tous</option>
+                <option value="Demande reçue">Demande reçue</option>
+                <option value="Analyse en cours">Analyse en cours</option>
+                <option value="Traitement en cours">Traitement en cours</option>
+                <option value="Pièce demandée">Pièce demandée</option>
+                <option value="Injonction publiée">Injonction publiée</option>
+                <option value="Dossier clôturé">Dossier clôturé</option>
               </select>
             </div>
 
             <div class="select-wrap">
               <label for="filterChoice">Choix de suite</label>
               <select id="filterChoice">
-                <option>Tous</option>
-                <option>Axe Flow</option>
-                <option>Client</option>
-                <option>Non défini</option>
+                <option value="Tous">Tous</option>
+                <option value="Axe Flow">Axe Flow</option>
+                <option value="Client">Client</option>
+                <option value="Non défini">Non défini</option>
               </select>
             </div>
           </div>
 
           <div class="filter-chips">
-            <span class="chip active">Tous</span>
-            <span class="chip">Nouveaux</span>
-            <span class="chip">À qualifier</span>
-            <span class="chip">Attente client</span>
-            <span class="chip">Prêt mise en demeure</span>
-            <span class="chip">Prêt injonction</span>
-            <span class="chip">Clôturés</span>
+            <span class="chip active" data-chip="Tous">Tous</span>
+            <span class="chip" data-chip="Nouveaux">Nouveaux</span>
+            <span class="chip" data-chip="À qualifier">À qualifier</span>
+            <span class="chip" data-chip="Attente client">Attente client</span>
+            <span class="chip" data-chip="Prêt mise en demeure">Prêt mise en demeure</span>
+            <span class="chip" data-chip="Prêt injonction">Prêt injonction</span>
+            <span class="chip" data-chip="Clôturés">Clôturés</span>
           </div>
 
           <div class="table-wrap">
@@ -734,235 +746,10 @@
                   <th>Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="requestsTableBody">
                 <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Sophie Martin</strong>
-                      <span class="subline">sophie.martin@email.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-021</td>
-                  <td>13/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>SARL Martin</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>1 240 €</td>
-                  <td><span class="status new">À qualifier</span></td>
-                  <td><span class="status client">Demande reçue</span></td>
-                  <td><span class="status choice">Non défini</span></td>
-                  <td><span class="status priority">Urgente</span></td>
-                  <td>Lire les pièces et poser le statut initial</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-021" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-021" class="mini-btn secondary">Traiter</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Atelier Besson</strong>
-                      <span class="subline">contact@atelier-besson.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-018</td>
-                  <td>11/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Atelier Besson</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>860 €</td>
-                  <td><span class="status progress">Prêt relance</span></td>
-                  <td><span class="status client">Traitement en cours</span></td>
-                  <td><span class="status choice">Client</span></td>
-                  <td><span class="status normal">Normale</span></td>
-                  <td>Contrôler puis publier la relance 2</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-018" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-018" class="mini-btn secondary">Publier</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Agence Nova</strong>
-                      <span class="subline">gestion@agencenova.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-016</td>
-                  <td>10/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Agence Nova</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>2 450 €</td>
-                  <td><span class="status waiting">Attente client</span></td>
-                  <td><span class="status client">Pièce demandée</span></td>
-                  <td><span class="status choice">Axe Flow</span></td>
-                  <td><span class="status priority">Suivi</span></td>
-                  <td>Vérifier le justificatif complémentaire demandé</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-016" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-016" class="mini-btn secondary">Relancer</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Dupont Conseil</strong>
-                      <span class="subline">admin@dupont-conseil.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-012</td>
-                  <td>08/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Dupont Conseil</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>540 €</td>
-                  <td><span class="status progress">Prêt mise en demeure</span></td>
-                  <td><span class="status client">Traitement en cours</span></td>
-                  <td><span class="status choice">Axe Flow</span></td>
-                  <td><span class="status normal">Normale</span></td>
-                  <td>Finaliser et publier la mise en demeure</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-012" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-012" class="mini-btn secondary">Publier</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Studio Mercure</strong>
-                      <span class="subline">hello@studio-mercure.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-009</td>
-                  <td>05/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Studio Mercure</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>1 980 €</td>
-                  <td><span class="status done">Clôturé</span></td>
-                  <td><span class="status client">Dossier clôturé</span></td>
-                  <td><span class="status choice">Client</span></td>
-                  <td><span class="status normal">Terminée</span></td>
-                  <td>Aucune</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-009" class="mini-btn">Ouvrir</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Cabinet Lemoine</strong>
-                      <span class="subline">cabinet.lemoine@email.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-008</td>
-                  <td>04/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Cabinet Lemoine</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>3 120 €</td>
-                  <td><span class="status progress">Prêt injonction</span></td>
-                  <td><span class="status client">Traitement en cours</span></td>
-                  <td><span class="status choice">Axe Flow</span></td>
-                  <td><span class="status priority">Prioritaire</span></td>
-                  <td>Préparer l’étape injonction et la suite choisie</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-008" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-008" class="mini-btn secondary">Traiter</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Morel Services</strong>
-                      <span class="subline">contact@morel-services.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-007</td>
-                  <td>03/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Morel Services</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>690 €</td>
-                  <td><span class="status progress">Prêt relance</span></td>
-                  <td><span class="status client">Analyse en cours</span></td>
-                  <td><span class="status choice">Client</span></td>
-                  <td><span class="status normal">Normale</span></td>
-                  <td>Préparer la relance 1</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-007" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-007" class="mini-btn secondary">Traiter</a>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="client">
-                      <strong>Entreprise Varnier</strong>
-                      <span class="subline">facturation@varnier.fr</span>
-                    </div>
-                  </td>
-                  <td>AF-2026-006</td>
-                  <td>02/04/2026</td>
-                  <td>
-                    <div class="client">
-                      <strong>Entreprise Varnier</strong>
-                      <span class="subline">Professionnel</span>
-                    </div>
-                  </td>
-                  <td>4 480 €</td>
-                  <td><span class="status new">À qualifier</span></td>
-                  <td><span class="status client">Demande reçue</span></td>
-                  <td><span class="status choice">Axe Flow</span></td>
-                  <td><span class="status priority">Urgente</span></td>
-                  <td>Scanner la facture et contrôler les coordonnées débiteur</td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="demande.html?id=AF-2026-006" class="mini-btn">Ouvrir</a>
-                      <a href="demande.html?id=AF-2026-006" class="mini-btn secondary">Qualifier</a>
-                    </div>
+                  <td colspan="11">
+                    <div class="empty-state">Chargement des dossiers…</div>
                   </td>
                 </tr>
               </tbody>
@@ -972,9 +759,335 @@
       </section>
 
       <div class="footer-note">
-        Base admin Axe Flow — liste des dossiers à brancher ensuite sur Firestore.
+        Base admin Axe Flow — liste des dossiers branchée Firestore.
       </div>
     </div>
   </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      collectionGroup,
+      getDocs,
+      query,
+      orderBy,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+      authDomain: "axe-flow.firebaseapp.com",
+      projectId: "axe-flow",
+      storageBucket: "axe-flow.firebasestorage.app",
+      messagingSenderId: "295300543556",
+      appId: "1:295300543556:web:3facac2d0c612e3456b811"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const searchDemandes = document.getElementById("searchDemandes");
+    const filterInternal = document.getElementById("filterInternal");
+    const filterClient = document.getElementById("filterClient");
+    const filterChoice = document.getElementById("filterChoice");
+    const requestsTableBody = document.getElementById("requestsTableBody");
+    const totalBadge = document.getElementById("totalBadge");
+
+    const kpiNew = document.getElementById("kpiNew");
+    const kpiProgress = document.getElementById("kpiProgress");
+    const kpiWaiting = document.getElementById("kpiWaiting");
+    const kpiDone = document.getElementById("kpiDone");
+
+    let allRequests = [];
+    let currentChip = "Tous";
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(dateValue) {
+      if (!dateValue) return "—";
+      const date =
+        dateValue?.toDate ? dateValue.toDate() :
+        dateValue instanceof Date ? dateValue :
+        new Date(dateValue);
+      if (isNaN(date.getTime())) return "—";
+      return date.toLocaleDateString("fr-FR");
+    }
+
+    function formatAmount(value) {
+      const n = Number(value || 0);
+      return n.toLocaleString("fr-FR", {
+        style: "currency",
+        currency: "EUR"
+      });
+    }
+
+    function buildStatusClass(type, value) {
+      const v = (value || "").toLowerCase();
+
+      if (type === "internal") {
+        if (v.includes("qualifier")) return "new";
+        if (v.includes("attente")) return "waiting";
+        if (v.includes("clôt") || v.includes("archiv")) return "done";
+        return "progress";
+      }
+
+      if (type === "client") {
+        if (v.includes("clôt")) return "done";
+        return "client";
+      }
+
+      if (type === "choice") return "choice";
+
+      if (type === "priority") {
+        if (v.includes("haute") || v.includes("urgent") || v.includes("prioritaire")) return "priority";
+        return "normal";
+      }
+
+      return "normal";
+    }
+
+    function computeNextAction(item) {
+      if (item.lifecycleStatus === "closed" || item.lifecycleStatus === "archived" || (item.internalStatus || "").toLowerCase().includes("clôt")) {
+        return "Aucune";
+      }
+
+      if ((item.internalStatus || "") === "À qualifier") return "Lire les pièces et poser le statut initial";
+      if ((item.internalStatus || "") === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
+      if ((item.internalStatus || "") === "Attente client") return "Contrôler le retour ou relancer";
+      if ((item.internalStatus || "") === "Prêt relance") return "Préparer ou publier la relance";
+      if ((item.internalStatus || "") === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
+      if ((item.internalStatus || "") === "Prêt injonction") return "Préparer l’étape injonction";
+      return "Ouvrir et analyser";
+    }
+
+    function extractUidFromPath(path = "") {
+      const parts = path.split("/");
+      const usersIndex = parts.indexOf("users");
+      if (usersIndex >= 0 && parts[usersIndex + 1]) return parts[usersIndex + 1];
+      return "";
+    }
+
+    function renderKPIs(items) {
+      const newCount = items.filter(i => (i.internalStatus || "") === "À qualifier").length;
+      const waitingCount = items.filter(i => (i.internalStatus || "") === "Attente client").length;
+      const doneCount = items.filter(i =>
+        i.lifecycleStatus === "closed" ||
+        i.lifecycleStatus === "archived" ||
+        (i.internalStatus || "").includes("Clôturé") ||
+        (i.internalStatus || "").includes("Archivé")
+      ).length;
+      const progressCount = items.length - newCount - waitingCount - doneCount;
+
+      kpiNew.textContent = newCount;
+      kpiProgress.textContent = Math.max(progressCount, 0);
+      kpiWaiting.textContent = waitingCount;
+      kpiDone.textContent = doneCount;
+    }
+
+    function matchChip(item) {
+      if (currentChip === "Tous") return true;
+      if (currentChip === "Nouveaux") return (item.internalStatus || "") === "À qualifier";
+      if (currentChip === "Clôturés") {
+        return item.lifecycleStatus === "closed" ||
+               item.lifecycleStatus === "archived" ||
+               (item.internalStatus || "").includes("Clôturé") ||
+               (item.internalStatus || "").includes("Archivé");
+      }
+      return (item.internalStatus || "") === currentChip;
+    }
+
+    function applyFilters() {
+      const search = (searchDemandes.value || "").trim().toLowerCase();
+      const internal = filterInternal.value;
+      const client = filterClient.value;
+      const choice = filterChoice.value;
+
+      const filtered = allRequests.filter((item) => {
+        const haystack = [
+          item.ref,
+          item.creditorName,
+          item.clientName,
+          item.creditorEmail,
+          item.clientEmail,
+          item.debiteurName,
+          item.debiteurAddress,
+          item.invoiceRef
+        ].join(" ").toLowerCase();
+
+        if (search && !haystack.includes(search)) return false;
+        if (internal !== "Tous" && (item.internalStatus || "") !== internal) return false;
+        if (client !== "Tous" && (item.clientStatus || "") !== client) return false;
+        if (choice !== "Tous" && (item.postOrderChoice || "Non défini") !== choice) return false;
+        if (!matchChip(item)) return false;
+
+        return true;
+      });
+
+      renderTable(filtered);
+      totalBadge.textContent = `${filtered.length} dossier${filtered.length > 1 ? "s" : ""}`;
+    }
+
+    function renderTable(items) {
+      requestsTableBody.innerHTML = "";
+
+      if (!items.length) {
+        requestsTableBody.innerHTML = `
+          <tr>
+            <td colspan="11">
+              <div class="empty-state">Aucun dossier trouvé.</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      items.forEach((item) => {
+        const creditor = item.creditorName || item.clientName || "Client";
+        const creditorEmail = item.creditorEmail || item.clientEmail || "—";
+        const debtor = item.debiteurName || "Débiteur non renseigné";
+        const debtorType = item.debiteurType || "—";
+        const internalStatus = item.internalStatus || "À qualifier";
+        const clientStatus = item.clientStatus || "Demande reçue";
+        const choice = item.postOrderChoice || "Non défini";
+        const priority = item.priority || "Normale";
+        const nextAction = computeNextAction(item);
+        const detailUrl = `demande.html?uid=${encodeURIComponent(item.uid)}&id=${encodeURIComponent(item.id)}`;
+
+        requestsTableBody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>
+              <div class="client">
+                <strong>${escapeHtml(creditor)}</strong>
+                <span class="subline">${escapeHtml(creditorEmail)}</span>
+              </div>
+            </td>
+            <td>${escapeHtml(item.ref || item.id)}</td>
+            <td>${escapeHtml(formatDate(item.createdAt))}</td>
+            <td>
+              <div class="client">
+                <strong>${escapeHtml(debtor)}</strong>
+                <span class="subline">${escapeHtml(debtorType)}</span>
+              </div>
+            </td>
+            <td>${escapeHtml(formatAmount(item.amountTTC || item.invoiceAmount || 0))}</td>
+            <td><span class="status ${buildStatusClass("internal", internalStatus)}">${escapeHtml(internalStatus)}</span></td>
+            <td><span class="status ${buildStatusClass("client", clientStatus)}">${escapeHtml(clientStatus)}</span></td>
+            <td><span class="status ${buildStatusClass("choice", choice)}">${escapeHtml(choice)}</span></td>
+            <td><span class="status ${buildStatusClass("priority", priority)}">${escapeHtml(priority)}</span></td>
+            <td>${escapeHtml(nextAction)}</td>
+            <td>
+              <div class="table-actions">
+                <a href="${detailUrl}" class="mini-btn">Ouvrir</a>
+                <a href="${detailUrl}" class="mini-btn secondary">Traiter</a>
+              </div>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
+    async function loadRequests() {
+      requestsTableBody.innerHTML = `
+        <tr>
+          <td colspan="11">
+            <div class="empty-state">Chargement des dossiers…</div>
+          </td>
+        </tr>
+      `;
+
+      const q = query(collectionGroup(db, "requests"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+
+      allRequests = snap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        const uid = extractUidFromPath(docSnap.ref.path);
+
+        return {
+          id: docSnap.id,
+          uid,
+          ...data,
+          creditorName: data.creditorName || data.clientName || "",
+          creditorEmail: data.creditorEmail || data.clientEmail || ""
+        };
+      });
+
+      renderKPIs(allRequests);
+      applyInitialFilterFromUrl();
+      applyFilters();
+    }
+
+    function applyInitialFilterFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const filter = params.get("filter");
+
+      if (filter === "to_review") {
+        filterInternal.value = "À qualifier";
+        currentChip = "Nouveaux";
+        document.querySelectorAll(".chip").forEach(chip => {
+          chip.classList.toggle("active", chip.dataset.chip === "Nouveaux");
+        });
+      }
+    }
+
+    function wireFilters() {
+      searchDemandes.addEventListener("input", applyFilters);
+      filterInternal.addEventListener("change", applyFilters);
+      filterClient.addEventListener("change", applyFilters);
+      filterChoice.addEventListener("change", applyFilters);
+
+      document.querySelectorAll(".chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          currentChip = chip.dataset.chip || "Tous";
+          applyFilters();
+        });
+      });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "../connexion.html";
+        return;
+      }
+
+      try {
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const profile = userSnap.exists() ? userSnap.data() : null;
+
+        if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
+          alert("Accès admin refusé.");
+          window.location.href = "../index.html";
+          return;
+        }
+
+        wireFilters();
+        await loadRequests();
+      } catch (err) {
+        console.error("Erreur chargement demandes admin:", err);
+        requestsTableBody.innerHTML = `
+          <tr>
+            <td colspan="11">
+              <div class="empty-state">Erreur de chargement des dossiers.</div>
+            </td>
+          </tr>
+        `;
+      }
+    });
+  </script>
 </body>
 </html>
