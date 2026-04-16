@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <title>Axe Flow Admin — Détail dossier</title>
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
@@ -542,23 +541,21 @@
         <span class="eyebrow-dot"></span>
         Pilotage dossier Axe Flow
       </div>
-      <h1>Dossier AF-2026-021</h1>
-      <p>
-        Cette fiche sert à lire les pièces, qualifier le dossier, choisir l’action interne,
-        publier ce qui doit l’être côté client et suivre la clôture. Ici tu travailles. Le client, lui, ne voit que le résultat publié.
+      <h1 id="heroTitle">Dossier</h1>
+      <p id="heroDescription">
+        Cette fiche sert à lire les pièces, qualifier le dossier, choisir l’action interne, publier ce qui doit l’être côté client et suivre la clôture.
       </p>
 
       <div class="hero-meta">
-        <span class="pill info">Demande reçue</span>
-        <span class="pill warning">À qualifier</span>
-        <span class="pill danger">Priorité haute</span>
-        <span class="pill success">Paiement validé</span>
+        <span class="pill info" id="pillClientStatus">Demande reçue</span>
+        <span class="pill warning" id="pillInternalStatus">À qualifier</span>
+        <span class="pill danger" id="pillPriority">Priorité</span>
+        <span class="pill success" id="pillPaymentStatus">Paiement</span>
       </div>
     </section>
 
     <div class="layout">
 
-      <!-- COLONNE GAUCHE -->
       <div class="col">
 
         <section class="panel">
@@ -573,65 +570,65 @@
             <div class="grid-2">
               <div class="field">
                 <label>Référence</label>
-                <input value="AF-2026-021">
+                <input id="requestRef" />
               </div>
 
               <div class="field">
                 <label>Offre utilisée</label>
-                <input value="Dossier ponctuel 49 €">
+                <input id="requestOffer" />
               </div>
 
               <div class="field">
                 <label>Créancier</label>
-                <input value="Sophie Martin">
+                <input id="creditorName" />
               </div>
 
               <div class="field">
                 <label>Email créancier</label>
-                <input value="sophie.martin@email.fr">
+                <input id="creditorEmail" />
               </div>
 
               <div class="field">
                 <label>Montant facture</label>
-                <input value="1 240 €">
+                <input id="invoiceAmount" />
               </div>
 
               <div class="field">
                 <label>Date de réception</label>
-                <input value="13/04/2026">
+                <input id="receivedAt" />
               </div>
 
               <div class="field">
                 <label>Débiteur</label>
-                <input placeholder="Nom / société">
+                <input id="debtorName" placeholder="Nom / société">
               </div>
 
               <div class="field">
                 <label>Type de débiteur</label>
-                <select>
-                  <option>Professionnel</option>
-                  <option>Particulier</option>
+                <select id="debtorType">
+                  <option>professionnel</option>
+                  <option>particulier</option>
                 </select>
               </div>
 
               <div class="field full">
                 <label>Adresse débiteur</label>
-                <input placeholder="Adresse récupérée depuis facture ou pièces">
+                <input id="debtorAddress" placeholder="Adresse récupérée depuis facture ou pièces">
               </div>
 
               <div class="field">
                 <label>Référence facture</label>
-                <input value="FAC-2026-001">
+                <input id="invoiceRef">
               </div>
 
               <div class="field">
                 <label>Date d’échéance</label>
-                <input value="01/04/2026">
+                <input id="dueDate" type="date">
               </div>
 
               <div class="field full">
                 <label>Résumé / analyse interne</label>
-                <textarea placeholder="Résume ici l’origine de la créance, les points faibles, les pièces présentes, ce qu’il manque et la stratégie envisagée."></textarea>
+                <textarea id="internalSummary" placeholder="Résume ici l’origine de la créance, les points faibles, les pièces présentes, ce qu’il manque et la stratégie envisagée."></textarea>
               </div>
             </div>
           </div>
@@ -649,7 +646,7 @@
             <div class="split">
               <div class="field">
                 <label>Statut interne</label>
-                <select>
+                <select id="internalStatusSelect">
                   <option>À qualifier</option>
                   <option>Pièces manquantes</option>
                   <option>Prêt relance</option>
@@ -657,12 +654,13 @@
                   <option>Prêt mise en demeure</option>
                   <option>Prêt injonction</option>
                   <option>Clôturé</option>
+                  <option>Archivé</option>
                 </select>
               </div>
 
               <div class="field">
                 <label>Statut publié client</label>
-                <select>
+                <select id="clientStatusSelect">
                   <option>Demande reçue</option>
                   <option>Analyse en cours</option>
                   <option>Traitement en cours</option>
@@ -674,7 +672,7 @@
 
               <div class="field">
                 <label>Priorité</label>
-                <select>
+                <select id="prioritySelect">
                   <option>Haute</option>
                   <option>Normale</option>
                   <option>Basse</option>
@@ -683,7 +681,7 @@
 
               <div class="field">
                 <label>Choix après injonction</label>
-                <select>
+                <select id="injunctionChoiceSelect">
                   <option>Non défini</option>
                   <option>Axe Flow</option>
                   <option>Client</option>
@@ -703,40 +701,15 @@
             </div>
 
             <div class="file-box">
-              Zone future : scan, upload, lecture et classement des pièces reçues.
+              Lecture directe des pièces stockées dans le dossier client.
             </div>
 
-            <div class="doc-list">
+            <div class="doc-list" id="initialFilesList">
               <div class="doc">
                 <div class="doc-left">
-                  <strong>Facture impayée.pdf</strong>
-                  <span>Document initial — reçu le 13/04/2026</span>
+                  <strong>Chargement des pièces…</strong>
+                  <span>Merci de patienter.</span>
                 </div>
-                <a href="#" class="mini-btn">Ouvrir</a>
-              </div>
-
-              <div class="doc">
-                <div class="doc-left">
-                  <strong>Devis signé.pdf</strong>
-                  <span>Document contractuel — reçu le 13/04/2026</span>
-                </div>
-                <a href="#" class="mini-btn">Ouvrir</a>
-              </div>
-
-              <div class="doc">
-                <div class="doc-left">
-                  <strong>Relance mail 1.pdf</strong>
-                  <span>Pièce client — déjà envoyée avant Axe Flow</span>
-                </div>
-                <a href="#" class="mini-btn">Ouvrir</a>
-              </div>
-
-              <div class="doc">
-                <div class="doc-left">
-                  <strong>SMS client capture.png</strong>
-                  <span>Justificatif complémentaire</span>
-                </div>
-                <a href="#" class="mini-btn">Ouvrir</a>
               </div>
             </div>
           </div>
@@ -751,53 +724,10 @@
               </div>
             </div>
 
-            <div class="timeline">
+            <div class="timeline" id="eventsTimeline">
               <div class="step">
-                <div class="step-top">
-                  <div>
-                    <div class="step-title">Relance 1</div>
-                    <small>Statut interne : prête à publier</small>
-                  </div>
-                  <span class="pill warning">À faire</span>
-                </div>
-                <p>Préparer la relance 1, publier l’étape client et attendre la preuve d’envoi si l’action revient au créancier.</p>
-                <div class="step-actions">
-                  <a href="#" class="mini-btn secondary">Voir brouillon</a>
-                  <a href="#" class="mini-btn">Publier au client</a>
-                </div>
-              </div>
-
-              <div class="step">
-                <div class="step-top">
-                  <div>
-                    <div class="step-title">Relance 2</div>
-                    <small>Statut interne : non commencée</small>
-                  </div>
-                  <span class="pill info">En attente</span>
-                </div>
-                <p>Cette étape ne bouge qu’après retour ou absence de retour sur la première relance.</p>
-              </div>
-
-              <div class="step">
-                <div class="step-top">
-                  <div>
-                    <div class="step-title">Mise en demeure</div>
-                    <small>Statut interne : non commencée</small>
-                  </div>
-                  <span class="pill info">En attente</span>
-                </div>
-                <p>À déclencher uniquement quand la stratégie dossier le justifie.</p>
-              </div>
-
-              <div class="step">
-                <div class="step-top">
-                  <div>
-                    <div class="step-title">Injonction de payer</div>
-                    <small>Choix client à ce stade : Axe Flow</small>
-                  </div>
-                  <span class="pill success">Prévu</span>
-                </div>
-                <p>La suite dépendra du choix client enregistré et du niveau d’avancement du dossier.</p>
+                <div class="step-title">Chargement des étapes…</div>
+                <p>Merci de patienter.</p>
               </div>
             </div>
           </div>
@@ -812,11 +742,11 @@
               </div>
             </div>
 
-            <div class="doc-list">
+            <div class="doc-list" id="proofsList">
               <div class="doc">
                 <div class="doc-left">
-                  <strong>Aucun justificatif déposé pour le moment</strong>
-                  <span>Les preuves d’envoi apparaîtront ici par étape publiée.</span>
+                  <strong>Chargement des justificatifs…</strong>
+                  <span>Merci de patienter.</span>
                 </div>
               </div>
             </div>
@@ -824,7 +754,6 @@
         </section>
       </div>
 
-      <!-- COLONNE DROITE -->
       <div class="col">
 
         <section class="panel">
@@ -837,16 +766,16 @@
             </div>
 
             <div class="actions">
-              <button class="action-btn">Qualifier le dossier</button>
-              <button class="action-btn">Préparer relance 1</button>
-              <button class="action-btn">Préparer relance 2</button>
-              <button class="action-btn">Préparer relance 3</button>
-              <button class="action-btn">Générer mise en demeure</button>
-              <button class="action-btn">Préparer injonction</button>
-              <button class="action-btn secondary">Publier une étape côté client</button>
-              <button class="action-btn secondary">Demander une pièce complémentaire</button>
-              <button class="action-btn secondary">Enregistrer une note interne</button>
-              <button class="action-btn secondary">Archiver / clôturer le dossier</button>
+              <button class="action-btn" id="qualifyBtn">Qualifier le dossier</button>
+              <button class="action-btn" id="prepareR1Btn">Préparer relance 1</button>
+              <button class="action-btn" id="prepareR2Btn">Préparer relance 2</button>
+              <button class="action-btn" id="prepareR3Btn">Préparer relance 3</button>
+              <button class="action-btn" id="prepareFormalNoticeBtn">Générer mise en demeure</button>
+              <button class="action-btn" id="prepareInjunctionBtn">Préparer injonction</button>
+              <button class="action-btn secondary" id="publishStepQuickBtn">Publier une étape côté client</button>
+              <button class="action-btn secondary" id="requestMissingPieceBtn">Demander une pièce complémentaire</button>
+              <button class="action-btn secondary" id="saveInternalNoteQuickBtn">Enregistrer une note interne</button>
+              <button class="action-btn secondary" id="archiveQuickBtn">Archiver / clôturer le dossier</button>
             </div>
           </div>
         </section>
@@ -862,22 +791,22 @@
 
             <div class="field">
               <label>Titre de l’étape</label>
-              <input placeholder="Ex. Relance 1 publiée">
+              <input id="publishTitle" placeholder="Ex. Relance 1 publiée">
             </div>
 
             <div class="field" style="margin-top:12px;">
               <label>Message publié au client</label>
-              <textarea placeholder="Ex. La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace."></textarea>
+              <textarea id="publishMessage" placeholder="Ex. La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace."></textarea>
             </div>
 
             <div class="field" style="margin-top:12px;">
               <label>Justificatifs demandés au client</label>
-              <input placeholder="Ex. preuve d’envoi mail, LRAR, accusé, capture écran...">
+              <input id="publishProofs" placeholder="Ex. preuve d’envoi mail, LRAR, accusé, capture écran...">
             </div>
 
             <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn btn-primary">Publier côté client</button>
-              <button class="btn btn-secondary">Enregistrer brouillon</button>
+              <button class="btn btn-primary" id="publishClientBtn">Publier côté client</button>
+              <button class="btn btn-secondary" id="saveDraftBtn">Enregistrer brouillon</button>
             </div>
           </div>
         </section>
@@ -893,12 +822,12 @@
 
             <div class="field">
               <label>Message</label>
-              <textarea placeholder="Ex : Bonjour, nous avons bien reçu votre facture et votre devis signé. Il manque encore l’adresse complète du débiteur."></textarea>
+              <textarea id="clientMessage" placeholder="Ex : Bonjour, nous avons bien reçu votre facture et votre devis signé. Il manque encore l’adresse complète du débiteur."></textarea>
             </div>
 
             <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn btn-primary">Envoyer message</button>
-              <button class="btn btn-secondary">Enregistrer note</button>
+              <button class="btn btn-primary" id="sendClientMessageBtn">Envoyer message</button>
+              <button class="btn btn-secondary" id="saveInternalNoteBtn">Enregistrer note</button>
             </div>
           </div>
         </section>
@@ -912,20 +841,10 @@
               </div>
             </div>
 
-            <div class="message-box">
+            <div class="message-box" id="messagesList">
               <div class="message">
-                <small>Client — 13/04/2026 à 09:12</small>
-                J’ai ajouté le devis signé et la facture.
-              </div>
-
-              <div class="message">
-                <small>Axe Flow — 13/04/2026 à 10:05</small>
-                Bien reçu. Analyse du dossier en cours.
-              </div>
-
-              <div class="message">
-                <small>Note interne — 13/04/2026 à 10:14</small>
-                Adresse débiteur incomplète. Vérifier si la facture suffit ou s’il faut une pièce complémentaire.
+                <small>Chargement…</small>
+                Historique en cours de chargement.
               </div>
             </div>
           </div>
@@ -941,19 +860,27 @@
             </div>
 
             <div class="stack">
-              <div class="box">
-                <strong>Motif de clôture</strong>
-                <span>Paiement obtenu, dossier abandonné, transmission externe, injonction terminée, dossier archivé, autre.</span>
+              <div class="field">
+                <label>Motif de clôture</label>
+                <select id="closureReason">
+                  <option value="">Choisir un motif</option>
+                  <option value="paid">Paiement obtenu</option>
+                  <option value="abandoned">Dossier abandonné</option>
+                  <option value="external_transfer">Transmission externe</option>
+                  <option value="injunction_completed">Injonction terminée</option>
+                  <option value="archived">Dossier archivé</option>
+                  <option value="other">Autre</option>
+                </select>
               </div>
 
               <div class="field">
                 <label>Commentaire de clôture</label>
-                <textarea placeholder="Ex. Dossier clôturé après règlement intégral obtenu par le client."></textarea>
+                <textarea id="closureComment" placeholder="Ex. Dossier clôturé après règlement intégral obtenu par le client."></textarea>
               </div>
 
               <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn btn-danger">Clôturer le dossier</button>
-                <button class="btn btn-secondary">Archiver sans clôture</button>
+                <button class="btn btn-danger" id="closeRequestBtn">Clôturer le dossier</button>
+                <button class="btn btn-secondary" id="archiveRequestBtn">Archiver sans clôture</button>
               </div>
             </div>
           </div>
@@ -963,10 +890,639 @@
     </div>
 
     <div class="footer-note">
-      Base admin Axe Flow — fiche dossier à brancher ensuite sur Firestore et Storage.
+      Base admin Axe Flow — fiche dossier branchée Firestore.
     </div>
   </div>
 </main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    updateDoc,
+    collection,
+    getDocs,
+    addDoc,
+    serverTimestamp,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "295300543556",
+    appId: "1:295300543556:web:3facac2d0c612e3456b811"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentAdmin = null;
+  let currentRequest = null;
+  let currentRequestId = null;
+  let currentClientUid = null;
+
+  const qs = new URLSearchParams(window.location.search);
+  currentRequestId = qs.get("id");
+  currentClientUid = qs.get("uid");
+
+  const heroTitle = document.getElementById("heroTitle");
+  const heroDescription = document.getElementById("heroDescription");
+  const pillClientStatus = document.getElementById("pillClientStatus");
+  const pillInternalStatus = document.getElementById("pillInternalStatus");
+  const pillPriority = document.getElementById("pillPriority");
+  const pillPaymentStatus = document.getElementById("pillPaymentStatus");
+
+  const requestRef = document.getElementById("requestRef");
+  const requestOffer = document.getElementById("requestOffer");
+  const creditorName = document.getElementById("creditorName");
+  const creditorEmail = document.getElementById("creditorEmail");
+  const invoiceAmount = document.getElementById("invoiceAmount");
+  const receivedAt = document.getElementById("receivedAt");
+  const debtorName = document.getElementById("debtorName");
+  const debtorType = document.getElementById("debtorType");
+  const debtorAddress = document.getElementById("debtorAddress");
+  const invoiceRef = document.getElementById("invoiceRef");
+  const dueDate = document.getElementById("dueDate");
+  const internalSummary = document.getElementById("internalSummary");
+
+  const internalStatusSelect = document.getElementById("internalStatusSelect");
+  const clientStatusSelect = document.getElementById("clientStatusSelect");
+  const prioritySelect = document.getElementById("prioritySelect");
+  const injunctionChoiceSelect = document.getElementById("injunctionChoiceSelect");
+
+  const initialFilesList = document.getElementById("initialFilesList");
+  const eventsTimeline = document.getElementById("eventsTimeline");
+  const proofsList = document.getElementById("proofsList");
+  const messagesList = document.getElementById("messagesList");
+
+  const qualifyBtn = document.getElementById("qualifyBtn");
+  const prepareR1Btn = document.getElementById("prepareR1Btn");
+  const prepareR2Btn = document.getElementById("prepareR2Btn");
+  const prepareR3Btn = document.getElementById("prepareR3Btn");
+  const prepareFormalNoticeBtn = document.getElementById("prepareFormalNoticeBtn");
+  const prepareInjunctionBtn = document.getElementById("prepareInjunctionBtn");
+  const publishStepQuickBtn = document.getElementById("publishStepQuickBtn");
+  const requestMissingPieceBtn = document.getElementById("requestMissingPieceBtn");
+  const saveInternalNoteQuickBtn = document.getElementById("saveInternalNoteQuickBtn");
+  const archiveQuickBtn = document.getElementById("archiveQuickBtn");
+
+  const publishTitle = document.getElementById("publishTitle");
+  const publishMessage = document.getElementById("publishMessage");
+  const publishProofs = document.getElementById("publishProofs");
+  const publishClientBtn = document.getElementById("publishClientBtn");
+  const saveDraftBtn = document.getElementById("saveDraftBtn");
+
+  const clientMessage = document.getElementById("clientMessage");
+  const sendClientMessageBtn = document.getElementById("sendClientMessageBtn");
+  const saveInternalNoteBtn = document.getElementById("saveInternalNoteBtn");
+
+  const closureReason = document.getElementById("closureReason");
+  const closureComment = document.getElementById("closureComment");
+  const closeRequestBtn = document.getElementById("closeRequestBtn");
+  const archiveRequestBtn = document.getElementById("archiveRequestBtn");
+
+  function formatDate(dateValue) {
+    if (!dateValue) return "—";
+    const date =
+      dateValue?.toDate ? dateValue.toDate() :
+      dateValue instanceof Date ? dateValue :
+      new Date(dateValue);
+    if (isNaN(date.getTime())) return "—";
+    return date.toLocaleDateString("fr-FR");
+  }
+
+  function formatDateTime(dateValue) {
+    if (!dateValue) return "—";
+    const date =
+      dateValue?.toDate ? dateValue.toDate() :
+      dateValue instanceof Date ? dateValue :
+      new Date(dateValue);
+    if (isNaN(date.getTime())) return "—";
+    return date.toLocaleDateString("fr-FR") + " à " + date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function formatAmount(value) {
+    const n = Number(value || 0);
+    return n.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "EUR"
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function setPill(el, text, mode = "info") {
+    if (!el) return;
+    el.textContent = text || "—";
+    el.className = `pill ${mode}`;
+  }
+
+  function getPaymentLabel(data) {
+    if (data?.paymentStatus === "paid") return ["Paiement validé", "success"];
+    if (data?.paymentStatus === "pending") return ["Paiement en attente", "warning"];
+    return ["Paiement non défini", "danger"];
+  }
+
+  function getPriorityMode(priority) {
+    const p = (priority || "").toLowerCase();
+    if (p === "haute" || p === "urgent" || p === "prioritaire") return "danger";
+    if (p === "normale") return "warning";
+    if (p === "basse") return "info";
+    return "info";
+  }
+
+  function getInternalMode(status) {
+    const s = (status || "").toLowerCase();
+    if (s.includes("clôt") || s.includes("archiv")) return "success";
+    if (s.includes("attente") || s.includes("qualifier")) return "warning";
+    return "info";
+  }
+
+  function getClientMode(status) {
+    const s = (status || "").toLowerCase();
+    if (s.includes("clôt")) return "success";
+    if (s.includes("pièce")) return "warning";
+    return "info";
+  }
+
+  function buildRequestPath() {
+    return doc(db, "users", currentClientUid, "requests", currentRequestId);
+  }
+
+  async function loadRequest() {
+    const snap = await getDoc(buildRequestPath());
+    if (!snap.exists()) {
+      alert("Dossier introuvable.");
+      return;
+    }
+    currentRequest = { id: snap.id, ...snap.data() };
+    renderRequest();
+  }
+
+  function renderRequest() {
+    if (!currentRequest) return;
+
+    const paymentMeta = getPaymentLabel(currentRequest);
+
+    heroTitle.textContent = `Dossier ${currentRequest.ref || currentRequest.id}`;
+    heroDescription.textContent =
+      "Cette fiche sert à lire les pièces, qualifier le dossier, choisir l’action interne, publier ce qui doit l’être côté client et suivre la clôture.";
+
+    setPill(pillClientStatus, currentRequest.clientStatus || "Demande reçue", getClientMode(currentRequest.clientStatus));
+    setPill(pillInternalStatus, currentRequest.internalStatus || "À qualifier", getInternalMode(currentRequest.internalStatus));
+    setPill(pillPriority, currentRequest.priority || "Normale", getPriorityMode(currentRequest.priority));
+    setPill(pillPaymentStatus, paymentMeta[0], paymentMeta[1]);
+
+    requestRef.value = currentRequest.ref || "";
+    requestOffer.value = currentRequest.offerType || currentRequest.plan || "";
+    creditorName.value = currentRequest.creditorName || currentRequest.clientName || "";
+    creditorEmail.value = currentRequest.creditorEmail || currentRequest.clientEmail || "";
+    invoiceAmount.value = formatAmount(currentRequest.amountTTC || currentRequest.invoiceAmount || 0);
+    receivedAt.value = formatDate(currentRequest.createdAt);
+    debtorName.value = currentRequest.debiteurName || "";
+    debtorType.value = currentRequest.debiteurType || "professionnel";
+    debtorAddress.value = currentRequest.debiteurAddress || "";
+    invoiceRef.value = currentRequest.invoiceRef || "";
+    dueDate.value = currentRequest.dueDate || "";
+    internalSummary.value = currentRequest.internalSummary || currentRequest.dossierSummary || "";
+
+    internalStatusSelect.value = currentRequest.internalStatus || "À qualifier";
+    clientStatusSelect.value = currentRequest.clientStatus || "Demande reçue";
+    prioritySelect.value = currentRequest.priority || "Normale";
+    injunctionChoiceSelect.value = currentRequest.postOrderChoice || "Non défini";
+  }
+
+  async function loadFiles() {
+    initialFilesList.innerHTML = "";
+
+    const filesRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "files");
+    const snap = await getDocs(query(filesRef, orderBy("createdAt", "asc")));
+
+    if (snap.empty) {
+      initialFilesList.innerHTML = `
+        <div class="doc">
+          <div class="doc-left">
+            <strong>Aucune pièce reçue</strong>
+            <span>Le client n’a encore rien déposé.</span>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const html = `
+        <div class="doc">
+          <div class="doc-left">
+            <strong>${escapeHtml(data.name || "Fichier")}</strong>
+            <span>${escapeHtml(data.docType || "document")} — reçu le ${escapeHtml(formatDate(data.createdAt))}</span>
+          </div>
+          <a href="${escapeHtml(data.url || "#")}" class="mini-btn" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+        </div>
+      `;
+      initialFilesList.insertAdjacentHTML("beforeend", html);
+    });
+  }
+
+  async function loadEvents() {
+    eventsTimeline.innerHTML = "";
+    proofsList.innerHTML = "";
+
+    const eventsRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "events");
+    const snap = await getDocs(query(eventsRef, orderBy("createdAt", "asc")));
+
+    if (snap.empty) {
+      eventsTimeline.innerHTML = `
+        <div class="step">
+          <div class="step-title">Aucune étape pour le moment</div>
+          <p>Les relances, mises en demeure et publications apparaîtront ici.</p>
+        </div>
+      `;
+      proofsList.innerHTML = `
+        <div class="doc">
+          <div class="doc-left">
+            <strong>Aucun justificatif déposé</strong>
+            <span>Les preuves client apparaîtront ici.</span>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    let proofCount = 0;
+
+    for (const eventDoc of snap.docs) {
+      const data = eventDoc.data();
+
+      eventsTimeline.insertAdjacentHTML("beforeend", `
+        <div class="step">
+          <div class="step-top">
+            <div>
+              <div class="step-title">${escapeHtml(data.title || "Étape publiée")}</div>
+              <small>${escapeHtml(formatDateTime(data.createdAt))}</small>
+            </div>
+            <span class="pill info">${escapeHtml(data.status || "Publié")}</span>
+          </div>
+          <p>${escapeHtml(data.description || data.message || "Aucune description.")}</p>
+          <div class="step-actions">
+            ${data.documentUrl ? `<a href="${escapeHtml(data.documentUrl)}" target="_blank" rel="noopener noreferrer" class="mini-btn secondary">Voir document</a>` : ""}
+          </div>
+        </div>
+      `);
+
+      const proofsRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "events", eventDoc.id, "proofs");
+      const proofsSnap = await getDocs(query(proofsRef, orderBy("uploadedAt", "asc")));
+
+      proofsSnap.forEach((proofDoc) => {
+        const proof = proofDoc.data();
+        proofCount += 1;
+
+        proofsList.insertAdjacentHTML("beforeend", `
+          <div class="doc">
+            <div class="doc-left">
+              <strong>${escapeHtml(proof.name || "Justificatif")}</strong>
+              <span>${escapeHtml(data.title || "Étape")} — déposé le ${escapeHtml(formatDate(proof.uploadedAt))}</span>
+            </div>
+            <a href="${escapeHtml(proof.url || "#")}" class="mini-btn" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+          </div>
+        `);
+      });
+    }
+
+    if (proofCount === 0) {
+      proofsList.innerHTML = `
+        <div class="doc">
+          <div class="doc-left">
+            <strong>Aucun justificatif déposé</strong>
+            <span>Le client n’a encore redéposé aucune preuve.</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  async function loadMessages() {
+    messagesList.innerHTML = "";
+
+    const messagesRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "messages");
+    const snap = await getDocs(query(messagesRef, orderBy("createdAt", "asc")));
+
+    if (snap.empty) {
+      messagesList.innerHTML = `
+        <div class="message">
+          <small>Aucun échange</small>
+          Aucun message ni note interne pour le moment.
+        </div>
+      `;
+      return;
+    }
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      messagesList.insertAdjacentHTML("beforeend", `
+        <div class="message">
+          <small>${escapeHtml(data.authorType || "system")} — ${escapeHtml(formatDateTime(data.createdAt))}</small>
+          ${escapeHtml(data.body || "")}
+        </div>
+      `);
+    });
+  }
+
+  async function saveMainFields() {
+    if (!currentRequest) return;
+
+    await updateDoc(buildRequestPath(), {
+      debiteurName: debtorName.value.trim(),
+      debiteurType: debtorType.value,
+      debiteurAddress: debtorAddress.value.trim(),
+      invoiceRef: invoiceRef.value.trim(),
+      dueDate: dueDate.value.trim(),
+      internalSummary: internalSummary.value.trim(),
+      internalStatus: internalStatusSelect.value,
+      clientStatus: clientStatusSelect.value,
+      priority: prioritySelect.value,
+      postOrderChoice: injunctionChoiceSelect.value,
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  async function publishClientStep(mode = "published") {
+    const title = publishTitle.value.trim();
+    const message = publishMessage.value.trim();
+    const proofs = publishProofs.value.trim();
+
+    if (!title || !message) {
+      alert("Titre et message obligatoires.");
+      return;
+    }
+
+    await addDoc(
+      collection(db, "users", currentClientUid, "requests", currentRequestId, "events"),
+      {
+        title,
+        description: message,
+        requiredProofs: proofs ? proofs.split(",").map(x => x.trim()).filter(Boolean) : [],
+        status: mode === "draft" ? "Brouillon" : "Publié",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    if (mode !== "draft") {
+      await updateDoc(buildRequestPath(), {
+        clientStatus: "Traitement en cours",
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    publishTitle.value = "";
+    publishMessage.value = "";
+    publishProofs.value = "";
+
+    await loadRequest();
+    await loadEvents();
+  }
+
+  async function addMessage(authorType, body, kind = "message") {
+    if (!body.trim()) {
+      alert("Message vide.");
+      return;
+    }
+
+    await addDoc(
+      collection(db, "users", currentClientUid, "requests", currentRequestId, "messages"),
+      {
+        authorType,
+        kind,
+        body: body.trim(),
+        createdAt: serverTimestamp()
+      }
+    );
+
+    await loadMessages();
+  }
+
+  async function closeRequest(mode = "closed") {
+    const reason = closureReason.value;
+    const comment = closureComment.value.trim();
+
+    if (mode === "closed" && !reason) {
+      alert("Choisis un motif de clôture.");
+      return;
+    }
+
+    await updateDoc(buildRequestPath(), {
+      lifecycleStatus: mode,
+      internalStatus: mode === "closed" ? "Clôturé" : "Archivé",
+      clientStatus: mode === "closed" ? "Dossier clôturé" : (currentRequest?.clientStatus || "Traitement en cours"),
+      closureReason: reason || "",
+      closureComment: comment || "",
+      closedAt: mode === "closed" ? serverTimestamp() : null,
+      archivedAt: mode === "archived" ? serverTimestamp() : null,
+      updatedAt: serverTimestamp()
+    });
+
+    if (comment) {
+      await addMessage("admin", `Clôture dossier : ${comment}`, "closure_note");
+    }
+
+    await loadRequest();
+    await loadMessages();
+  }
+
+  function wireQuickActions() {
+    qualifyBtn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "À qualifier";
+      clientStatusSelect.value = "Analyse en cours";
+      await saveMainFields();
+      await loadRequest();
+      alert("Dossier passé en qualification.");
+    });
+
+    prepareR1Btn?.addEventListener("click", async () => {
+      publishTitle.value = "Relance 1 publiée";
+      publishMessage.value = "La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace.";
+      publishProofs.value = "preuve d’envoi mail, capture écran, LRAR si utilisée";
+      internalStatusSelect.value = "Prêt relance";
+      await saveMainFields();
+      await loadRequest();
+    });
+
+    prepareR2Btn?.addEventListener("click", async () => {
+      publishTitle.value = "Relance 2 publiée";
+      publishMessage.value = "La relance 2 est prête. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
+      publishProofs.value = "preuve d’envoi relance 2";
+      await saveMainFields();
+    });
+
+    prepareR3Btn?.addEventListener("click", async () => {
+      publishTitle.value = "Relance 3 publiée";
+      publishMessage.value = "La relance 3 est prête. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
+      publishProofs.value = "preuve d’envoi relance 3";
+      await saveMainFields();
+    });
+
+    prepareFormalNoticeBtn?.addEventListener("click", async () => {
+      publishTitle.value = "Mise en demeure préparée";
+      publishMessage.value = "La mise en demeure a été préparée. Merci de procéder à l’envoi puis de déposer le justificatif dans votre espace.";
+      publishProofs.value = "preuve LRAR, accusé, justificatif d’envoi";
+      internalStatusSelect.value = "Prêt mise en demeure";
+      await saveMainFields();
+      await loadRequest();
+    });
+
+    prepareInjunctionBtn?.addEventListener("click", async () => {
+      publishTitle.value = "Injonction en préparation";
+      publishMessage.value = "Le dossier d’injonction est en préparation selon le choix enregistré.";
+      publishProofs.value = "";
+      internalStatusSelect.value = "Prêt injonction";
+      await saveMainFields();
+      await loadRequest();
+    });
+
+    publishStepQuickBtn?.addEventListener("click", async () => {
+      await publishClientStep("published");
+      alert("Étape publiée côté client.");
+    });
+
+    requestMissingPieceBtn?.addEventListener("click", async () => {
+      const msg = prompt("Pièce à demander au client :");
+      if (!msg) return;
+
+      await addMessage("admin", `Pièce complémentaire demandée : ${msg}`, "missing_piece");
+      clientStatusSelect.value = "Pièce demandée";
+      internalStatusSelect.value = "Attente client";
+      await saveMainFields();
+      await loadRequest();
+      alert("Demande de pièce enregistrée.");
+    });
+
+    saveInternalNoteQuickBtn?.addEventListener("click", async () => {
+      const note = prompt("Note interne :");
+      if (!note) return;
+      await addMessage("admin", note, "internal_note");
+      alert("Note interne enregistrée.");
+    });
+
+    archiveQuickBtn?.addEventListener("click", async () => {
+      await closeRequest("archived");
+      alert("Dossier archivé.");
+    });
+  }
+
+  function wireMainButtons() {
+    publishClientBtn?.addEventListener("click", async () => {
+      await publishClientStep("published");
+      alert("Publication client enregistrée.");
+    });
+
+    saveDraftBtn?.addEventListener("click", async () => {
+      await publishClientStep("draft");
+      alert("Brouillon enregistré.");
+    });
+
+    sendClientMessageBtn?.addEventListener("click", async () => {
+      await addMessage("admin", clientMessage.value, "client_message");
+      clientMessage.value = "";
+      alert("Message enregistré.");
+    });
+
+    saveInternalNoteBtn?.addEventListener("click", async () => {
+      await addMessage("admin", clientMessage.value, "internal_note");
+      clientMessage.value = "";
+      alert("Note interne enregistrée.");
+    });
+
+    closeRequestBtn?.addEventListener("click", async () => {
+      await closeRequest("closed");
+      alert("Dossier clôturé.");
+    });
+
+    archiveRequestBtn?.addEventListener("click", async () => {
+      await closeRequest("archived");
+      alert("Dossier archivé.");
+    });
+
+    [
+      debtorName,
+      debtorType,
+      debtorAddress,
+      invoiceRef,
+      dueDate,
+      internalSummary,
+      internalStatusSelect,
+      clientStatusSelect,
+      prioritySelect,
+      injunctionChoiceSelect
+    ].forEach((el) => {
+      el?.addEventListener("change", async () => {
+        await saveMainFields();
+        await loadRequest();
+      });
+    });
+  }
+
+  async function bootstrap() {
+    if (!currentClientUid || !currentRequestId) {
+      alert("URL invalide. Il faut ?uid=...&id=...");
+      return;
+    }
+
+    await loadRequest();
+    await loadFiles();
+    await loadEvents();
+    await loadMessages();
+    wireQuickActions();
+    wireMainButtons();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "../connexion.html";
+      return;
+    }
+
+    currentAdmin = user;
+
+    try {
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      const profile = userSnap.exists() ? userSnap.data() : null;
+
+      if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
+        alert("Accès admin refusé.");
+        window.location.href = "../index.html";
+        return;
+      }
+
+      await bootstrap();
+    } catch (err) {
+      console.error("Erreur bootstrap admin:", err);
+      alert("Erreur de chargement du dossier admin.");
+    }
+  });
+</script>
 
 </body>
 </html>
