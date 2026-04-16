@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow — Tableau de bord client</title>
-  <meta name="description" content="Tableau de bord client Axe Flow : création du dossier impayé, dépôt des pièces, suivi des publications et choix de la suite après injonction." />
+  <meta name="description" content="Tableau de bord client Axe Flow : création du dossier impayé, dépôt des pièces, suivi des étapes publiées, actions client et dépôt des justificatifs." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -233,6 +233,20 @@
       font-size:1rem;
     }
 
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{
+      color:#fff;
+    }
+
     .flash-banner{
       margin-bottom:18px;
       padding:14px 16px;
@@ -248,7 +262,6 @@
       display:block;
     }
 
-    /* ===== NOUVELLE GRILLE SIMPLE 6 BLOCS ===== */
     .dashboard-grid{
       display:grid;
       grid-template-columns:repeat(12, minmax(0,1fr));
@@ -514,6 +527,12 @@
       color:#ffdede;
     }
 
+    .badge.neutral{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
     .empty-state{
       padding:18px;
       border-radius:18px;
@@ -563,45 +582,6 @@
       margin-top:8px;
       color:var(--muted);
       font-size:.84rem;
-    }
-
-    .timeline{
-      display:grid;
-      gap:12px;
-    }
-
-    .timeline-item{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-    }
-
-    .timeline-main{
-      min-width:0;
-    }
-
-    .timeline-item strong{
-      display:block;
-      color:#fff;
-      font-size:.95rem;
-      margin-bottom:4px;
-    }
-
-    .timeline-item span{
-      display:block;
-      color:var(--muted);
-      font-size:.89rem;
-    }
-
-    .timeline-meta{
-      color:var(--soft) !important;
-      font-size:.8rem !important;
-      margin-bottom:6px;
     }
 
     .alert-table-wrap{
@@ -976,7 +956,6 @@
       }
 
       .upload-card,
-      .timeline-item,
       .file-item{
         flex-direction:column;
         align-items:flex-start;
@@ -1057,12 +1036,15 @@
       <section class="hero">
         <div class="eyebrow">
           <span class="eyebrow-dot"></span>
-          Création du dossier, dépôt des pièces et suivi des publications
+          Dossier, pièces, étapes publiées et justificatifs d’envoi
         </div>
         <h1>Votre tableau de bord impayés</h1>
         <p>
-          Créez votre dossier, déposez vos pièces, suivez les étapes publiées par Axe Flow et choisissez la suite après injonction lorsque cette étape est atteinte.
+          Créez votre dossier, déposez vos pièces, consultez chaque étape publiée par Axe Flow et déposez ensuite les justificatifs demandés lorsque l’action vous revient.
         </p>
+        <div class="hero-note">
+          <strong>Rappel :</strong> Axe Flow prépare les relances, mises en demeure et documents nécessaires au dossier. Sauf mandat spécifique, l’envoi au débiteur reste effectué par le créancier, qui dépose ensuite les justificatifs dans son espace client.
+        </div>
       </section>
 
       <section class="dashboard-grid">
@@ -1097,7 +1079,7 @@
           <div class="panel-inner">
             <div class="panel-head">
               <div>
-                <h2 class="panel-title">Suivi du dossier</h2>
+                <h2 class="panel-title">Synthèse du dossier</h2>
                 <div class="panel-sub" id="summarySubtitle">Aucun dossier sélectionné</div>
               </div>
             </div>
@@ -1178,8 +1160,8 @@
           <div class="panel-inner">
             <div class="panel-head">
               <div>
-                <h2 class="panel-title">Déposer vos pièces</h2>
-                <div class="panel-sub">Téléchargez les pièces utiles du dossier sélectionné. Elles seront récupérées côté admin via Storage.</div>
+                <h2 class="panel-title">Pièces du dossier</h2>
+                <div class="panel-sub">Déposez ici les pièces initiales de votre dossier sélectionné. Les justificatifs liés aux étapes publiées se déposent plus bas, dans chaque étape concernée.</div>
               </div>
             </div>
 
@@ -1250,23 +1232,22 @@
             </div>
 
             <div class="note-box soft" style="margin-top:16px;">
-              Sélectionnez d’abord un dossier, puis envoyez les pièces une catégorie après l’autre pour garder un dossier propre.
+              Sélectionnez d’abord un dossier, puis envoyez les pièces une catégorie après l’autre pour garder un dossier propre. Les preuves d’envoi demandées après une relance ou une mise en demeure se déposeront directement dans l’étape publiée.
             </div>
           </div>
         </div>
-
-        <div class="panel panel-timeline">
+                <div class="panel panel-timeline">
           <div class="panel-inner">
             <div class="panel-head">
               <div>
-                <h2 class="panel-title">Suivi chronologique</h2>
-                <div class="panel-sub">Étapes publiées par Axe Flow sur votre dossier sélectionné.</div>
+                <h2 class="panel-title">Suivi chronologique des étapes</h2>
+                <div class="panel-sub">Chaque étape publiée par Axe Flow précise le document préparé, l’action attendue du créancier et les justificatifs à déposer ensuite.</div>
               </div>
             </div>
 
             <div class="timeline" id="timelineList">
               <div class="empty-state">
-                Aucune publication pour le moment. Dès qu’une étape sera publiée côté Axe Flow, elle apparaîtra ici.
+                Aucune publication pour le moment. Dès qu’une étape sera publiée côté Axe Flow, elle apparaîtra ici avec ses consignes et la zone de dépôt des justificatifs.
               </div>
             </div>
           </div>
@@ -1345,7 +1326,7 @@
       </section>
 
       <div class="footer-note">
-        Axe Flow - création du dossier, dépôt des pièces, suivi des publications et suite après injonction.
+        Axe Flow - création du dossier, dépôt des pièces, étapes publiées, actions client et suite après injonction.
       </div>
     </div>
   </main>
@@ -1515,7 +1496,25 @@
     </div>
   </div>
 
-<script type="module">
+  <!-- MODALE ETAPE -->
+  <div class="modal-backdrop" id="eventModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div>
+            <h2 id="eventModalTitle">Détail de l’étape</h2>
+            <div class="panel-sub" id="eventModalSubtitle">Aucun dossier sélectionné.</div>
+          </div>
+          <button class="close-btn" type="button" id="closeEventModal" aria-label="Fermer">×</button>
+        </div>
+
+        <div class="file-list" id="eventModalContent">
+          <div class="empty-state">Aucune donnée disponible.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
     getAuth,
@@ -1534,8 +1533,6 @@
     getDoc,
     setDoc,
     updateDoc,
-    where,
-    limit,
     runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import {
@@ -1610,6 +1607,11 @@
   const filesModalSubtitle = document.getElementById("filesModalSubtitle");
   const fileListContainer = document.getElementById("fileListContainer");
 
+  const eventModal = document.getElementById("eventModal");
+  const closeEventModal = document.getElementById("closeEventModal");
+  const eventModalSubtitle = document.getElementById("eventModalSubtitle");
+  const eventModalContent = document.getElementById("eventModalContent");
+
   const dossierLabelInput = document.getElementById("dossierLabel");
   const dossierRefInput = document.getElementById("dossierRef");
   const debiteurTypeInput = document.getElementById("debiteurType");
@@ -1636,6 +1638,7 @@
   let dossierCounter = 0;
   let uploadedFiles = {};
   let entitlements = [];
+  let timelineEventsCache = [];
   let selectedFilesByType = {
     quote: [],
     invoice: [],
@@ -1658,6 +1661,16 @@
     invoice: "Facture impayée",
     recovery: "Relances déjà faites",
     supporting: "Échanges et justificatifs"
+  };
+
+  const EVENT_STATUS_LABELS = {
+    draft: "Brouillon Axe Flow",
+    to_publish: "À publier",
+    published: "Publié au client",
+    client_action_required: "Action client en attente",
+    proofs_submitted: "Preuves déposées",
+    reviewed: "Vérifié par Axe Flow",
+    closed: "Étape clôturée"
   };
 
   function openModal(modal) {
@@ -1683,6 +1696,17 @@
       const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
       if (isNaN(date.getTime())) return String(dateValue);
       return date.toLocaleDateString("fr-FR");
+    } catch {
+      return String(dateValue);
+    }
+  }
+
+  function formatDateTime(dateValue) {
+    if (!dateValue) return "Date non renseignée";
+    try {
+      const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      if (isNaN(date.getTime())) return String(dateValue);
+      return date.toLocaleDateString("fr-FR") + " à " + date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     } catch {
       return String(dateValue);
     }
@@ -1794,7 +1818,6 @@
     const now = new Date();
     const elapsedMs = now.getTime() - dueDate.getTime();
     const elapsedMonths = elapsedMs / (1000 * 60 * 60 * 24 * 30.4375);
-
     const type = (dossier.debiteurType || "").toLowerCase();
 
     if (type === "particulier") {
@@ -1866,6 +1889,7 @@
 
   function resetSummary() {
     currentDossier = null;
+    timelineEventsCache = [];
     summaryRef.textContent = "—";
     amountTTCDisplay.textContent = "—";
     summaryDebiteur.textContent = "—";
@@ -1955,13 +1979,75 @@
     });
   }
 
+  function normaliseEventStatus(rawStatus, rawCurrentStep) {
+    if (rawStatus && EVENT_STATUS_LABELS[rawStatus]) return rawStatus;
+    if (rawCurrentStep === "published") return "published";
+    if (rawCurrentStep === "client_action_required") return "client_action_required";
+    if (rawCurrentStep === "proofs_submitted") return "proofs_submitted";
+    if (rawCurrentStep === "reviewed") return "reviewed";
+    if (rawCurrentStep === "closed") return "closed";
+    return "published";
+  }
+
+  function buildChecklistItems(event) {
+    if (Array.isArray(event.checklist) && event.checklist.length) {
+      return event.checklist.map((item) => ({
+        label: typeof item === "string" ? item : (item?.label || "Élément"),
+        done: Boolean(item?.done)
+      }));
+    }
+
+    if (Array.isArray(event.clientChecklist) && event.clientChecklist.length) {
+      return event.clientChecklist.map((item) => ({
+        label: typeof item === "string" ? item : (item?.label || "Élément"),
+        done: Boolean(item?.done)
+      }));
+    }
+
+    return [];
+  }
+
+  function buildProofItems(event) {
+    if (Array.isArray(event.requiredProofs) && event.requiredProofs.length) {
+      return event.requiredProofs.map((item) => typeof item === "string" ? item : (item?.label || "Justificatif"));
+    }
+
+    if (Array.isArray(event.proofRequests) && event.proofRequests.length) {
+      return event.proofRequests.map((item) => typeof item === "string" ? item : (item?.label || "Justificatif"));
+    }
+
+    return [];
+  }
+
+  function buildInstructions(event) {
+    if (event.instructions) return String(event.instructions);
+    if (event.clientInstructions) return String(event.clientInstructions);
+    if (event.description) return String(event.description);
+    return "Aucune consigne particulière renseignée pour cette étape.";
+  }
+
+  function buildEventDocLabel(event) {
+    return event.documentLabel || event.documentName || event.fileLabel || "Document de l’étape";
+  }
+
+  function buildEventDocUrl(event) {
+    return event.documentUrl || event.fileUrl || event.url || "";
+  }
+
+  function buildEventNotes(event) {
+    if (event.clientComment) return String(event.clientComment);
+    if (event.comment) return String(event.comment);
+    if (event.note) return String(event.note);
+    return "";
+  }
+
   function renderTimeline(events = []) {
     timelineList.innerHTML = "";
 
     if (!events.length) {
       timelineList.innerHTML = `
         <div class="empty-state">
-          Aucune publication pour le moment. Dès qu’une étape sera publiée côté Axe Flow, elle apparaîtra ici.
+          Aucune publication pour le moment. Dès qu’une étape sera publiée côté Axe Flow, elle apparaîtra ici avec ses consignes et la zone de dépôt des justificatifs.
         </div>
       `;
       return;
@@ -1970,15 +2056,159 @@
     events.forEach((event) => {
       const item = document.createElement("div");
       item.className = "timeline-item";
+
+      const statusKey = normaliseEventStatus(event.status, event.currentStep);
+      const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié au client";
+      const checklist = buildChecklistItems(event);
+      const proofs = buildProofItems(event);
+      const instructions = buildInstructions(event);
+      const documentUrl = buildEventDocUrl(event);
+      const documentLabel = buildEventDocLabel(event);
+      const note = buildEventNotes(event);
+      const proofCount = Array.isArray(event.clientProofFiles) ? event.clientProofFiles.length : Number(event.clientProofCount || 0);
+
       item.innerHTML = `
         <div class="timeline-main">
           <span class="timeline-meta">${escapeHtml(event.dateLabel || "Date non disponible")}</span>
           <strong>${escapeHtml(event.title || "Étape publiée")}</strong>
-          <span>${escapeHtml(event.description || "Publication enregistrée sur le dossier.")}</span>
+          <span style="margin-bottom:8px;">${escapeHtml(statusLabel)}</span>
+
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
+            ${escapeHtml(instructions)}
+          </div>
+
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">Document à télécharger</strong>
+            ${
+              documentUrl
+                ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
+                : `<span>${escapeHtml(documentLabel)} non disponible pour le moment.</span>`
+            }
+          </div>
+
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">Checklist d’actions client</strong>
+            ${
+              checklist.length
+                ? `<ul style="margin:0;padding-left:18px;">${checklist.map((item) => `<li>${item.done ? "✓ " : ""}${escapeHtml(item.label)}</li>`).join("")}</ul>`
+                : `<span>Aucune checklist renseignée pour cette étape.</span>`
+            }
+          </div>
+
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">Justificatifs à déposer</strong>
+            ${
+              proofs.length
+                ? `<ul style="margin:0;padding-left:18px;">${proofs.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+                : `<span>Aucun justificatif demandé pour le moment.</span>`
+            }
+          </div>
+
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">État des preuves</strong>
+            <span>${proofCount > 0 ? `${proofCount} justificatif(s) déjà déposé(s).` : "Aucun justificatif déposé pour cette étape."}</span>
+          </div>
+
+          ${
+            note
+              ? `<div class="note-box soft" style="margin-top:10px;">
+                  <strong style="display:block;margin-bottom:6px;color:#fff;">Note / commentaire lié à l’étape</strong>
+                  ${escapeHtml(note)}
+                </div>`
+              : ""
+          }
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:180px;">
+          <span class="badge neutral">${escapeHtml(statusLabel)}</span>
+          <button class="btn btn-secondary" type="button" data-event-open="${escapeHtml(event.id || "")}">Ouvrir l’étape</button>
         </div>
       `;
+
       timelineList.appendChild(item);
     });
+
+    timelineList.querySelectorAll("[data-event-open]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const eventId = button.dataset.eventOpen;
+        const found = timelineEventsCache.find((item) => item.id === eventId);
+        if (found) openEventModal(found);
+      });
+    });
+  }
+
+  function openEventModal(event) {
+    const statusKey = normaliseEventStatus(event.status, event.currentStep);
+    const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié au client";
+    const checklist = buildChecklistItems(event);
+    const proofs = buildProofItems(event);
+    const instructions = buildInstructions(event);
+    const documentUrl = buildEventDocUrl(event);
+    const documentLabel = buildEventDocLabel(event);
+    const note = buildEventNotes(event);
+    const proofFiles = Array.isArray(event.clientProofFiles) ? event.clientProofFiles : [];
+
+    eventModalSubtitle.textContent = `${currentDossier?.ref || "Dossier"} — ${event.dateLabel || "Date non disponible"}`;
+    eventModalContent.innerHTML = `
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Titre de l’étape</strong>
+        ${escapeHtml(event.title || "Étape publiée")}
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Statut</strong>
+        ${escapeHtml(statusLabel)}
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Document à télécharger</strong>
+        ${
+          documentUrl
+            ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
+            : `<span>${escapeHtml(documentLabel)} non disponible pour le moment.</span>`
+        }
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes précises</strong>
+        ${escapeHtml(instructions)}
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Checklist d’actions client</strong>
+        ${
+          checklist.length
+            ? `<ul style="margin:0;padding-left:18px;">${checklist.map((item) => `<li>${item.done ? "✓ " : ""}${escapeHtml(item.label)}</li>`).join("")}</ul>`
+            : `<span>Aucune checklist renseignée pour cette étape.</span>`
+        }
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Zone dépôt de preuves attendues</strong>
+        ${
+          proofs.length
+            ? `<ul style="margin:0;padding-left:18px;">${proofs.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+            : `<span>Aucun justificatif demandé pour cette étape.</span>`
+        }
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Justificatifs déjà déposés</strong>
+        ${
+          proofFiles.length
+            ? `<ul style="margin:0;padding-left:18px;">${proofFiles.map((file) => `<li>${escapeHtml(file.name || "Justificatif")}</li>`).join("")}</ul>`
+            : `<span>Aucun justificatif déposé pour le moment.</span>`
+        }
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Note / commentaire lié à l’étape</strong>
+        ${note ? escapeHtml(note) : "Aucun commentaire renseigné pour cette étape."}
+      </div>
+    `;
+
+    openModal(eventModal);
   }
 
   async function ensureUserProfile(user) {
@@ -2266,6 +2496,7 @@
 
   async function loadTimelineForDossier(dossierId) {
     if (!currentUser || !dossierId) {
+      timelineEventsCache = [];
       renderTimeline([]);
       return;
     }
@@ -2278,6 +2509,7 @@
       const orderedDocs = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
 
       if (!orderedDocs.length) {
+        timelineEventsCache = [];
         renderTimeline([]);
         return;
       }
@@ -2286,15 +2518,18 @@
         const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
         return {
           id: data.id,
+          ...data,
           title: data.title || data.label || "Étape publiée",
           description: data.description || data.note || "Publication enregistrée sur le dossier.",
           dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible"
         };
       });
 
+      timelineEventsCache = events;
       renderTimeline(events);
     } catch (err) {
       console.error("Erreur loadTimelineForDossier:", err);
+      timelineEventsCache = [];
       renderTimeline([]);
     }
   }
@@ -2737,6 +2972,10 @@
     closeFilesModal.addEventListener("click", () => closeModal(filesModal));
   }
 
+  if (closeEventModal) {
+    closeEventModal.addEventListener("click", () => closeModal(eventModal));
+  }
+
   if (createForm) {
     createForm.addEventListener("submit", createDossier);
   }
@@ -2749,7 +2988,7 @@
     payAssisted.addEventListener("click", handleAssistedPayment);
   }
 
-  [createDossierModal, tarifsModal, filesModal].forEach((modal) => {
+  [createDossierModal, tarifsModal, filesModal, eventModal].forEach((modal) => {
     if (!modal) return;
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeModal(modal);
@@ -2761,6 +3000,7 @@
       closeModal(createDossierModal);
       closeModal(tarifsModal);
       closeModal(filesModal);
+      closeModal(eventModal);
     }
   });
 
