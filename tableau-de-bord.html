@@ -2991,16 +2991,19 @@ if (buyOneShotBtn) {
   if (openCreateDossier) {
     openCreateDossier.addEventListener("click", () => {
       const permission = getCreatePermission();
-     if (permission.ctaMode === "repurchase_one_shot") {
-  repurchaseOneShotBox.style.display = "block";
-  return;
-}
+     
       
       if (!permission.allowed) {
         if (permission.ctaMode === "extra") {
           extraDossierBox.style.display = "block";
           return;
         }
+        
+        if (permission.ctaMode === "repurchase_one_shot") {
+  repurchaseOneShotBox.style.display = "block";
+  return;
+}
+        
         alert(permission.reason);
         return;
       }
