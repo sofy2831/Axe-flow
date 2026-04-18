@@ -33,10 +33,6 @@
       --danger:#ff6b6b;
       --info:#7cc8ff;
       --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:18px;
-      --radius-sm:14px;
       --max:1420px;
     }
 
@@ -226,6 +222,13 @@
       color:#fff;
     }
 
+    .hero-actions{
+      margin-top:16px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     .summary-row{
       display:grid;
       grid-template-columns:repeat(4, minmax(0,1fr));
@@ -399,7 +402,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1320px;
+      min-width:1280px;
     }
 
     th, td{
@@ -611,6 +614,7 @@
 
       <div class="topbar-actions">
         <a href="index.html" class="btn btn-secondary">Retour accueil</a>
+        <a href="clients.html" class="btn btn-secondary">Clients</a>
         <a href="demandes.html?filter=to_review" class="btn btn-primary">Voir les nouveaux dossiers</a>
       </div>
     </div>
@@ -623,8 +627,8 @@
           <span class="eyebrow-dot"></span>
           File de traitement Axe Flow
         </div>
-        <h1>Tous les dossiers</h1>
-        <p>
+        <h1 id="heroTitle">Tous les dossiers</h1>
+        <p id="heroText">
           Cette page centralise les dossiers reçus, leur statut interne, le statut publié côté client,
           le choix de suite après injonction et la prochaine action utile. C’est la vraie file de travail du back-office.
         </p>
@@ -632,6 +636,7 @@
           <strong>Règle simple :</strong> un dossier entre, il est qualifié, traité, publié au client si nécessaire,
           complété par des justificatifs, puis clôturé.
         </div>
+        <div class="hero-actions" id="heroActions"></div>
       </section>
 
       <section class="summary-row">
@@ -665,7 +670,7 @@
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Filtrer et parcourir</h2>
-              <div class="panel-sub">Base de travail quotidienne.</div>
+              <div class="panel-sub" id="panelSub">Base de travail quotidienne.</div>
             </div>
             <span class="mini-badge" id="totalBadge">0 dossier</span>
           </div>
@@ -800,13 +805,21 @@
     const requestsTableBody = document.getElementById("requestsTableBody");
     const totalBadge = document.getElementById("totalBadge");
 
+    const heroTitle = document.getElementById("heroTitle");
+    const heroText = document.getElementById("heroText");
+    const heroActions = document.getElementById("heroActions");
+    const panelSub = document.getElementById("panelSub");
+
     const kpiNew = document.getElementById("kpiNew");
     const kpiProgress = document.getElementById("kpiProgress");
     const kpiWaiting = document.getElementById("kpiWaiting");
     const kpiDone = document.getElementById("kpiDone");
 
     let allRequests = [];
+    let scopedRequests = [];
     let currentChip = "Tous";
+    let currentUidFilter = "";
+    let currentClientProfile = null;
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -861,7 +874,11 @@
     }
 
     function computeNextAction(item) {
-      if (item.lifecycleStatus === "closed" || item.lifecycleStatus === "archived" || (item.internalStatus || "").toLowerCase().includes("clôt")) {
+      if (
+        item.lifecycleStatus === "closed" ||
+        item.lifecycleStatus === "archived" ||
+        (item.internalStatus || "").toLowerCase().includes("clôt")
+      ) {
         return "Aucune";
       }
 
@@ -910,13 +927,40 @@
       return (item.internalStatus || "") === currentChip;
     }
 
+    function renderHeroContext() {
+      heroActions.innerHTML = "";
+
+      if (currentUidFilter && currentClientProfile) {
+        const clientLabel =
+          currentClientProfile.displayName ||
+          currentClientProfile.fullName ||
+          currentClientProfile.companyName ||
+          currentClientProfile.email ||
+          currentUidFilter;
+
+        heroTitle.textContent = `Dossiers du client`;
+        heroText.textContent = `Vue filtrée sur le compte ${clientLabel}. Tu restes dans la file de travail, mais limitée à ce client.`;
+        panelSub.textContent = `Base de travail pour un client précis.`;
+
+        heroActions.innerHTML = `
+          <a href="clients.html" class="btn btn-secondary">Retour clients</a>
+          <a href="demandes.html" class="btn btn-primary">Voir tous les dossiers</a>
+        `;
+        return;
+      }
+
+      heroTitle.textContent = `Tous les dossiers`;
+      heroText.textContent = `Cette page centralise les dossiers reçus, leur statut interne, le statut publié côté client, le choix de suite après injonction et la prochaine action utile. C’est la vraie file de travail du back-office.`;
+      panelSub.textContent = `Base de travail quotidienne.`;
+    }
+
     function applyFilters() {
       const search = (searchDemandes.value || "").trim().toLowerCase();
       const internal = filterInternal.value;
       const client = filterClient.value;
       const choice = filterChoice.value;
 
-      const filtered = allRequests.filter((item) => {
+      const filtered = scopedRequests.filter((item) => {
         const haystack = [
           item.ref,
           item.creditorName,
@@ -925,7 +969,8 @@
           item.clientEmail,
           item.debiteurName,
           item.debiteurAddress,
-          item.invoiceRef
+          item.invoiceRef,
+          item.uid
         ].join(" ").toLowerCase();
 
         if (search && !haystack.includes(search)) return false;
@@ -992,12 +1037,26 @@
             <td>
               <div class="table-actions">
                 <a href="${detailUrl}" class="mini-btn">Ouvrir</a>
-                <a href="${detailUrl}" class="mini-btn secondary">Traiter</a>
               </div>
             </td>
           </tr>
         `);
       });
+    }
+
+    async function loadClientProfileIfNeeded() {
+      if (!currentUidFilter) {
+        currentClientProfile = null;
+        return;
+      }
+
+      try {
+        const snap = await getDoc(doc(db, "users", currentUidFilter));
+        currentClientProfile = snap.exists() ? snap.data() : null;
+      } catch (err) {
+        console.error("Erreur chargement client filtre uid:", err);
+        currentClientProfile = null;
+      }
     }
 
     async function loadRequests() {
@@ -1025,7 +1084,12 @@
         };
       });
 
-      renderKPIs(allRequests);
+      scopedRequests = currentUidFilter
+        ? allRequests.filter(item => item.uid === currentUidFilter)
+        : allRequests;
+
+      renderKPIs(scopedRequests);
+      renderHeroContext();
       applyInitialFilterFromUrl();
       applyFilters();
     }
@@ -1075,7 +1139,11 @@
           return;
         }
 
+        const params = new URLSearchParams(window.location.search);
+        currentUidFilter = params.get("uid") || "";
+
         wireFilters();
+        await loadClientProfileIfNeeded();
         await loadRequests();
       } catch (err) {
         console.error("Erreur chargement demandes admin:", err);
