@@ -20,7 +20,6 @@
       --bg-2:#0b3145;
       --bg-3:#0f3e56;
       --panel:rgba(255,255,255,0.06);
-      --panel-2:rgba(255,255,255,0.04);
       --line:rgba(255,255,255,0.09);
       --text:#f4f7fb;
       --muted:rgba(244,247,251,0.76);
@@ -32,7 +31,7 @@
       --danger:#ff6b6b;
       --info:#7cc8ff;
       --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --max:1320px;
+      --max:1280px;
     }
 
     *{box-sizing:border-box}
@@ -203,7 +202,7 @@
     .hero p{
       margin:0;
       color:var(--muted);
-      max-width:74ch;
+      max-width:72ch;
       font-size:1rem;
     }
 
@@ -279,7 +278,7 @@
 
     .layout{
       display:grid;
-      grid-template-columns:1.1fr .9fr;
+      grid-template-columns:1.15fr .85fr;
       gap:18px;
       align-items:start;
     }
@@ -423,7 +422,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:920px;
+      min-width:860px;
     }
 
     th, td{
@@ -521,6 +520,12 @@
       font-size:.84rem;
     }
 
+    .nav-link.active{
+      background:rgba(255,127,31,0.14);
+      border-color:rgba(255,127,31,0.22);
+      pointer-events:none;
+    }
+
     .footer-note{
       margin-top:18px;
       color:var(--soft);
@@ -603,13 +608,12 @@
         <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
         <div class="brand-text">
           <span class="brand-title">Axe Flow Admin</span>
-          <span class="brand-sub">Accueil — pilotage des dossiers clients</span>
+          <span class="brand-sub">Accueil — pilotage global</span>
         </div>
       </a>
 
       <div class="topbar-actions">
         <a href="demandes.html" class="btn btn-secondary">Tous les dossiers</a>
-        <a href="demandes.html?filter=to_review" class="btn btn-primary">Nouveaux dossiers</a>
         <a href="clients.html" class="btn btn-secondary">Clients</a>
       </div>
     </div>
@@ -627,12 +631,10 @@
           Vue globale, alertes utiles et accès rapide aux vraies pages de travail.
         </p>
         <div class="hero-note">
-          <strong>Logique retenue :</strong> accueil pour voir l’ensemble, dossiers pour traiter, fiche dossier pour agir, clients pour retrouver les comptes.
+          <strong>Logique retenue :</strong> ici on regarde l’ensemble. Le traitement se fait dans les dossiers. Les comptes se retrouvent dans clients.
         </div>
         <div class="hero-actions">
-          <a href="demandes.html" class="btn btn-secondary">Voir tous les dossiers</a>
-          <a href="demandes.html?filter=to_review" class="btn btn-primary">Traiter les nouveaux</a>
-          <a href="clients.html" class="btn btn-secondary">Voir les clients</a>
+          <a href="demandes.html?filter=to_review" class="btn btn-primary">Traiter les nouveaux dossiers</a>
         </div>
       </section>
 
@@ -687,7 +689,7 @@
                   <h2 class="panel-title">File active</h2>
                   <div class="panel-sub">Quelques dossiers vivants, pas toute l’usine.</div>
                 </div>
-                <a href="demandes.html" class="mini-badge">Voir tous les dossiers</a>
+                <a href="demandes.html" class="mini-badge">Voir la file complète</a>
               </div>
 
               <div class="table-wrap">
@@ -721,15 +723,15 @@
               <div class="panel-head">
                 <div>
                   <h2 class="panel-title">Navigation admin</h2>
-                  <div class="panel-sub">Le vrai plan de circulation.</div>
+                  <div class="panel-sub">Le plan de circulation.</div>
                 </div>
               </div>
 
               <nav class="sidebar-nav">
-                <a href="index.html" class="nav-link">
+                <div class="nav-link active">
                   Accueil admin
                   <span>Vue générale</span>
-                </a>
+                </div>
 
                 <a href="demandes.html" class="nav-link">
                   Tous les dossiers
