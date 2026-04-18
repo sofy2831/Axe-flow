@@ -27,11 +27,11 @@
       --warning:#ffb347;
       --info:#7cc8ff;
       --shadow:0 24px 80px rgba(0,0,0,.28);
-      --radius:24px;
-      --max:1460px;
+      --max:1400px;
     }
 
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
       font-family:Inter,sans-serif;
@@ -116,7 +116,7 @@
 
     .btn-secondary{
       background:rgba(255,255,255,.05);
-      border-color:rgba(255,255,255,.1);
+      border-color:rgba(255,255,255,.10);
       color:#fff;
     }
 
@@ -171,7 +171,7 @@
     .hero p{
       margin:0;
       color:var(--muted);
-      max-width:78ch;
+      max-width:76ch;
       font-size:1rem;
     }
 
@@ -221,7 +221,7 @@
 
     .layout{
       display:grid;
-      grid-template-columns:1.08fr .92fr;
+      grid-template-columns:1.05fr .95fr;
       gap:18px;
       align-items:start;
     }
@@ -253,7 +253,7 @@
 
     .panel h2{
       margin:0 0 6px;
-      font-size:1.1rem;
+      font-size:1.08rem;
       letter-spacing:-0.02em;
     }
 
@@ -299,72 +299,74 @@
     }
 
     .field textarea{
-      min-height:120px;
+      min-height:110px;
       resize:vertical;
     }
 
-    .stack{
-      display:grid;
-      gap:12px;
-    }
-
-    .box{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-    }
-
-    .box strong{
-      display:block;
-      margin-bottom:6px;
-      color:#fff;
-      font-size:.95rem;
-    }
-
-    .box span{
-      display:block;
-      color:var(--muted);
-      font-size:.89rem;
-    }
-
-    .file-box{
-      padding:18px;
-      border-radius:18px;
-      background:rgba(255,255,255,.04);
-      border:1px dashed rgba(255,255,255,.15);
-      margin-top:12px;
-      color:var(--muted);
-    }
-
-    .doc-list{
+    .doc-list,
+    .timeline,
+    .message-box,
+    .actions{
       display:grid;
       gap:10px;
-      margin-top:14px;
     }
 
-    .doc{
+    .doc,
+    .step,
+    .message{
       padding:14px;
       border-radius:16px;
       background:rgba(255,255,255,.04);
       border:1px solid var(--line);
+    }
+
+    .doc{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:12px;
     }
 
-    .doc-left strong{
+    .doc-left strong,
+    .step-title{
       display:block;
       font-size:.93rem;
       margin-bottom:4px;
       color:#fff;
+      font-weight:700;
     }
 
-    .doc-left span{
-      display:block;
+    .doc-left span,
+    .message,
+    .step p{
       color:var(--muted);
-      font-size:.84rem;
+      font-size:.88rem;
+    }
+
+    .step-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .step small,
+    .message small{
+      color:var(--soft);
+      display:block;
+      margin-bottom:6px;
+    }
+
+    .step p{
+      margin:0;
+    }
+
+    .step-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
     }
 
     .mini-btn{
@@ -388,54 +390,6 @@
       border-color:rgba(255,255,255,.10);
     }
 
-    .timeline{
-      display:grid;
-      gap:12px;
-    }
-
-    .step{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-    }
-
-    .step-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-    }
-
-    .step-title{
-      font-weight:700;
-      margin-bottom:4px;
-      color:#fff;
-    }
-
-    .step small{
-      color:var(--soft);
-    }
-
-    .step p{
-      margin:0;
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .step-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:12px;
-    }
-
-    .actions{
-      display:grid;
-      gap:10px;
-    }
-
     .action-btn{
       width:100%;
       min-height:46px;
@@ -453,27 +407,8 @@
       border-color:rgba(255,255,255,.10);
     }
 
-    .message-box{
+    .section-stack{
       display:grid;
-      gap:10px;
-    }
-
-    .message{
-      padding:14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-    }
-
-    .message small{
-      color:var(--soft);
-      display:block;
-      margin-bottom:6px;
-    }
-
-    .split{
-      display:grid;
-      grid-template-columns:1fr 1fr;
       gap:12px;
     }
 
@@ -484,6 +419,16 @@
       text-align:center;
     }
 
+    .empty-state{
+      padding:18px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px dashed rgba(255,255,255,.12);
+      color:var(--muted);
+      font-size:.92rem;
+      text-align:center;
+    }
+
     @media(max-width:1100px){
       .layout{
         grid-template-columns:1fr;
@@ -491,8 +436,7 @@
     }
 
     @media(max-width:700px){
-      .grid-2,
-      .split{
+      .grid-2{
         grid-template-columns:1fr;
       }
 
@@ -522,13 +466,13 @@
       <img src="../images/axe-flow-cover.png" alt="Axe Flow">
       <div>
         <strong>Axe Flow Admin</strong><br>
-        <small>Détail du dossier</small>
+        <small>Dossier précis — traitement métier</small>
       </div>
     </div>
 
     <div class="top-actions">
-      <a href="demandes.html" class="btn btn-secondary">Retour liste</a>
-      <a href="index.html" class="btn btn-secondary">Accueil admin</a>
+      <a href="demandes.html" class="btn btn-secondary">Retour dossiers</a>
+      <a href="clients.html" class="btn btn-secondary">Clients</a>
     </div>
   </div>
 </header>
@@ -543,7 +487,7 @@
       </div>
       <h1 id="heroTitle">Dossier</h1>
       <p id="heroDescription">
-        Cette fiche sert à lire les pièces, qualifier le dossier, choisir l’action interne, publier ce qui doit l’être côté client et suivre la clôture.
+        Cette fiche sert à lire les pièces, qualifier le dossier, préparer les étapes et suivre ce qui est publié côté client.
       </p>
 
       <div class="hero-meta">
@@ -563,39 +507,39 @@
             <div class="panel-head">
               <div>
                 <h2>Informations dossier</h2>
-                <div class="panel-sub">Base administrative et lecture rapide du dossier.</div>
+                <div class="panel-sub">Lecture, qualification et base administrative.</div>
               </div>
             </div>
 
             <div class="grid-2">
               <div class="field">
                 <label>Référence</label>
-                <input id="requestRef" />
+                <input id="requestRef" readonly />
               </div>
 
               <div class="field">
                 <label>Offre utilisée</label>
-                <input id="requestOffer" />
+                <input id="requestOffer" readonly />
               </div>
 
               <div class="field">
                 <label>Créancier</label>
-                <input id="creditorName" />
+                <input id="creditorName" readonly />
               </div>
 
               <div class="field">
                 <label>Email créancier</label>
-                <input id="creditorEmail" />
+                <input id="creditorEmail" readonly />
               </div>
 
               <div class="field">
                 <label>Montant facture</label>
-                <input id="invoiceAmount" />
+                <input id="invoiceAmount" readonly />
               </div>
 
               <div class="field">
                 <label>Date de réception</label>
-                <input id="receivedAt" />
+                <input id="receivedAt" readonly />
               </div>
 
               <div class="field">
@@ -638,12 +582,60 @@
           <div class="panel-inner">
             <div class="panel-head">
               <div>
-                <h2>Statuts du dossier</h2>
-                <div class="panel-sub">Double lecture : pilotage interne et visibilité client.</div>
+                <h2>Pièces reçues</h2>
+                <div class="panel-sub">Dépôts initiaux du client.</div>
               </div>
             </div>
 
-            <div class="split">
+            <div class="doc-list" id="initialFilesList">
+              <div class="empty-state">Chargement des pièces…</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Étapes publiées</h2>
+                <div class="panel-sub">Historique visible et production publiée.</div>
+              </div>
+            </div>
+
+            <div class="timeline" id="eventsTimeline">
+              <div class="empty-state">Chargement des étapes…</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Justificatifs client</h2>
+                <div class="panel-sub">Preuves redéposées après publication.</div>
+              </div>
+            </div>
+
+            <div class="doc-list" id="proofsList">
+              <div class="empty-state">Chargement des justificatifs…</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col">
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Statuts du dossier</h2>
+                <div class="panel-sub">Pilotage interne et visibilité client.</div>
+              </div>
+            </div>
+
+            <div class="grid-2">
               <div class="field">
                 <label>Statut interne</label>
                 <select id="internalStatusSelect">
@@ -695,73 +687,8 @@
           <div class="panel-inner">
             <div class="panel-head">
               <div>
-                <h2>Pièces initiales reçues</h2>
-                <div class="panel-sub">Pièces déposées par le client lors de l’ouverture ou ensuite dans le dossier.</div>
-              </div>
-            </div>
-
-            <div class="file-box">
-              Lecture directe des pièces stockées dans le dossier client.
-            </div>
-
-            <div class="doc-list" id="initialFilesList">
-              <div class="doc">
-                <div class="doc-left">
-                  <strong>Chargement des pièces…</strong>
-                  <span>Merci de patienter.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Étapes publiées / à publier</h2>
-                <div class="panel-sub">Cœur du traitement Axe Flow.</div>
-              </div>
-            </div>
-
-            <div class="timeline" id="eventsTimeline">
-              <div class="step">
-                <div class="step-title">Chargement des étapes…</div>
-                <p>Merci de patienter.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Preuves et justificatifs client</h2>
-                <div class="panel-sub">Ce bloc suit ce que le client redépose après publication d’une action.</div>
-              </div>
-            </div>
-
-            <div class="doc-list" id="proofsList">
-              <div class="doc">
-                <div class="doc-left">
-                  <strong>Chargement des justificatifs…</strong>
-                  <span>Merci de patienter.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <div class="col">
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Actions dossier</h2>
-                <div class="panel-sub">Les vraies actions métier.</div>
+                <h2>Actions rapides</h2>
+                <div class="panel-sub">Les raccourcis métier qui servent vraiment.</div>
               </div>
             </div>
 
@@ -770,12 +697,11 @@
               <button class="action-btn" id="prepareR1Btn">Préparer relance 1</button>
               <button class="action-btn" id="prepareR2Btn">Préparer relance 2</button>
               <button class="action-btn" id="prepareR3Btn">Préparer relance 3</button>
-              <button class="action-btn" id="prepareFormalNoticeBtn">Générer mise en demeure</button>
+              <button class="action-btn" id="prepareFormalNoticeBtn">Préparer mise en demeure</button>
               <button class="action-btn" id="prepareInjunctionBtn">Préparer injonction</button>
-              <button class="action-btn secondary" id="publishStepQuickBtn">Publier une étape côté client</button>
-              <button class="action-btn secondary" id="requestMissingPieceBtn">Demander une pièce complémentaire</button>
-              <button class="action-btn secondary" id="saveInternalNoteQuickBtn">Enregistrer une note interne</button>
-              <button class="action-btn secondary" id="archiveQuickBtn">Archiver / clôturer le dossier</button>
+              <button class="action-btn secondary" id="requestMissingPieceBtn">Demander une pièce</button>
+              <button class="action-btn secondary" id="saveInternalNoteQuickBtn">Note interne rapide</button>
+              <button class="action-btn secondary" id="archiveQuickBtn">Archiver le dossier</button>
             </div>
           </div>
         </section>
@@ -785,102 +711,52 @@
             <div class="panel-head">
               <div>
                 <h2>Publication client</h2>
-                <div class="panel-sub">Ce que le client verra sur son tableau de bord.</div>
+                <div class="panel-sub">Étape ou document rendu visible au client.</div>
               </div>
             </div>
 
-            <div class="field">
-              <label>Titre de l’étape</label>
-              <input id="publishTitle" placeholder="Ex. Relance 1 publiée">
-            </div>
-
-            <div class="field" style="margin-top:12px;">
-              <label>Message publié au client</label>
-              <textarea id="publishMessage" placeholder="Ex. La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace."></textarea>
-            </div>
-
-            <div class="field" style="margin-top:12px;">
-              <label>Justificatifs demandés au client</label>
-              <input id="publishProofs" placeholder="Ex. preuve d’envoi mail, LRAR, accusé, capture écran...">
-            </div>
-
-            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn btn-primary" id="publishClientBtn">Publier côté client</button>
-              <button class="btn btn-secondary" id="saveDraftBtn">Enregistrer brouillon</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Courrier / message au client</h2>
-                <div class="panel-sub">Communication directe hors publication simple.</div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Message</label>
-              <textarea id="clientMessage" placeholder="Ex : Bonjour, nous avons bien reçu votre facture et votre devis signé. Il manque encore l’adresse complète du débiteur."></textarea>
-            </div>
-
-            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn btn-primary" id="sendClientMessageBtn">Envoyer message</button>
-              <button class="btn btn-secondary" id="saveInternalNoteBtn">Enregistrer note</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Échanges internes / client</h2>
-                <div class="panel-sub">Historique utile, pas blabla décoratif.</div>
-              </div>
-            </div>
-
-            <div class="message-box" id="messagesList">
-              <div class="message">
-                <small>Chargement…</small>
-                Historique en cours de chargement.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Clôture dossier</h2>
-                <div class="panel-sub">Sortie propre du circuit.</div>
-              </div>
-            </div>
-
-            <div class="stack">
+            <div class="section-stack">
               <div class="field">
-                <label>Motif de clôture</label>
-                <select id="closureReason">
-                  <option value="">Choisir un motif</option>
-                  <option value="paid">Paiement obtenu</option>
-                  <option value="abandoned">Dossier abandonné</option>
-                  <option value="external_transfer">Transmission externe</option>
-                  <option value="injunction_completed">Injonction terminée</option>
-                  <option value="archived">Dossier archivé</option>
-                  <option value="other">Autre</option>
-                </select>
+                <label>Titre de l’étape</label>
+                <input id="publishTitle" placeholder="Ex. Relance 1 publiée">
               </div>
 
               <div class="field">
-                <label>Commentaire de clôture</label>
-                <textarea id="closureComment" placeholder="Ex. Dossier clôturé après règlement intégral obtenu par le client."></textarea>
+                <label>Message publié</label>
+                <textarea id="publishMessage" placeholder="Ex. La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace."></textarea>
+              </div>
+
+              <div class="field">
+                <label>Justificatifs demandés</label>
+                <input id="publishProofs" placeholder="Ex. preuve d’envoi mail, LRAR, accusé, capture écran...">
               </div>
 
               <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn btn-danger" id="closeRequestBtn">Clôturer le dossier</button>
-                <button class="btn btn-secondary" id="archiveRequestBtn">Archiver sans clôture</button>
+                <button class="btn btn-primary" id="publishClientBtn">Publier côté client</button>
+                <button class="btn btn-secondary" id="saveDraftBtn">Enregistrer brouillon</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2>Message / note</h2>
+                <div class="panel-sub">Échange utile ou note interne.</div>
+              </div>
+            </div>
+
+            <div class="section-stack">
+              <div class="field">
+                <label>Contenu</label>
+                <textarea id="clientMessage" placeholder="Ex. Il manque encore l’adresse complète du débiteur."></textarea>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-primary" id="sendClientMessageBtn">Envoyer message</button>
+                <button class="btn btn-secondary" id="saveInternalNoteBtn">Enregistrer note</button>
               </div>
             </div>
           </div>
@@ -888,6 +764,57 @@
       </div>
 
     </div>
+
+    <section class="panel" style="margin-top:18px;">
+      <div class="panel-inner">
+        <div class="panel-head">
+          <div>
+            <h2>Historique des échanges</h2>
+            <div class="panel-sub">Utile seulement. Pas de blabla décoratif.</div>
+          </div>
+        </div>
+
+        <div class="message-box" id="messagesList">
+          <div class="empty-state">Chargement de l’historique…</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:18px;">
+      <div class="panel-inner">
+        <div class="panel-head">
+          <div>
+            <h2>Clôture dossier</h2>
+            <div class="panel-sub">Sortie propre du circuit.</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Motif de clôture</label>
+            <select id="closureReason">
+              <option value="">Choisir un motif</option>
+              <option value="paid">Paiement obtenu</option>
+              <option value="abandoned">Dossier abandonné</option>
+              <option value="external_transfer">Transmission externe</option>
+              <option value="injunction_completed">Injonction terminée</option>
+              <option value="archived">Dossier archivé</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Commentaire de clôture</label>
+            <textarea id="closureComment" placeholder="Ex. Dossier clôturé après règlement intégral obtenu par le client."></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+          <button class="btn btn-danger" id="closeRequestBtn">Clôturer le dossier</button>
+          <button class="btn btn-secondary" id="archiveRequestBtn">Archiver sans clôture</button>
+        </div>
+      </div>
+    </section>
 
     <div class="footer-note">
       Base admin Axe Flow — fiche dossier branchée Firestore.
@@ -972,7 +899,6 @@
   const prepareR3Btn = document.getElementById("prepareR3Btn");
   const prepareFormalNoticeBtn = document.getElementById("prepareFormalNoticeBtn");
   const prepareInjunctionBtn = document.getElementById("prepareInjunctionBtn");
-  const publishStepQuickBtn = document.getElementById("publishStepQuickBtn");
   const requestMissingPieceBtn = document.getElementById("requestMissingPieceBtn");
   const saveInternalNoteQuickBtn = document.getElementById("saveInternalNoteQuickBtn");
   const archiveQuickBtn = document.getElementById("archiveQuickBtn");
@@ -1087,7 +1013,7 @@
 
     heroTitle.textContent = `Dossier ${currentRequest.ref || currentRequest.id}`;
     heroDescription.textContent =
-      "Cette fiche sert à lire les pièces, qualifier le dossier, choisir l’action interne, publier ce qui doit l’être côté client et suivre la clôture.";
+      "Cette fiche sert à lire les pièces, qualifier le dossier, préparer les étapes et suivre ce qui est publié côté client.";
 
     setPill(pillClientStatus, currentRequest.clientStatus || "Demande reçue", getClientMode(currentRequest.clientStatus));
     setPill(pillInternalStatus, currentRequest.internalStatus || "À qualifier", getInternalMode(currentRequest.internalStatus));
@@ -1120,14 +1046,7 @@
     const snap = await getDocs(query(filesRef, orderBy("createdAt", "asc")));
 
     if (snap.empty) {
-      initialFilesList.innerHTML = `
-        <div class="doc">
-          <div class="doc-left">
-            <strong>Aucune pièce reçue</strong>
-            <span>Le client n’a encore rien déposé.</span>
-          </div>
-        </div>
-      `;
+      initialFilesList.innerHTML = `<div class="empty-state">Aucune pièce reçue.</div>`;
       return;
     }
 
@@ -1154,20 +1073,8 @@
     const snap = await getDocs(query(eventsRef, orderBy("createdAt", "asc")));
 
     if (snap.empty) {
-      eventsTimeline.innerHTML = `
-        <div class="step">
-          <div class="step-title">Aucune étape pour le moment</div>
-          <p>Les relances, mises en demeure et publications apparaîtront ici.</p>
-        </div>
-      `;
-      proofsList.innerHTML = `
-        <div class="doc">
-          <div class="doc-left">
-            <strong>Aucun justificatif déposé</strong>
-            <span>Les preuves client apparaîtront ici.</span>
-          </div>
-        </div>
-      `;
+      eventsTimeline.innerHTML = `<div class="empty-state">Aucune étape pour le moment.</div>`;
+      proofsList.innerHTML = `<div class="empty-state">Aucun justificatif déposé.</div>`;
       return;
     }
 
@@ -1212,14 +1119,7 @@
     }
 
     if (proofCount === 0) {
-      proofsList.innerHTML = `
-        <div class="doc">
-          <div class="doc-left">
-            <strong>Aucun justificatif déposé</strong>
-            <span>Le client n’a encore redéposé aucune preuve.</span>
-          </div>
-        </div>
-      `;
+      proofsList.innerHTML = `<div class="empty-state">Aucun justificatif déposé.</div>`;
     }
   }
 
@@ -1230,12 +1130,7 @@
     const snap = await getDocs(query(messagesRef, orderBy("createdAt", "asc")));
 
     if (snap.empty) {
-      messagesList.innerHTML = `
-        <div class="message">
-          <small>Aucun échange</small>
-          Aucun message ni note interne pour le moment.
-        </div>
-      `;
+      messagesList.innerHTML = `<div class="empty-state">Aucun échange ni note interne.</div>`;
       return;
     }
 
@@ -1400,11 +1295,6 @@
       internalStatusSelect.value = "Prêt injonction";
       await saveMainFields();
       await loadRequest();
-    });
-
-    publishStepQuickBtn?.addEventListener("click", async () => {
-      await publishClientStep("published");
-      alert("Étape publiée côté client.");
     });
 
     requestMissingPieceBtn?.addEventListener("click", async () => {
