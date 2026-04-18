@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Axe Flow Admin — Connexion</title>
+  <meta name="description" content="Connexion sécurisée à l'espace admin Axe Flow." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="../images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --panel:rgba(255,255,255,0.07);
+      --panel-2:rgba(255,255,255,0.04);
+      --line:rgba(255,255,255,0.10);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.76);
+      --soft:rgba(244,247,251,0.58);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --danger:#ff6b6b;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
+
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 30%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 26%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.5;
+    }
+
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.66);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .top-links{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .top-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:42px;
+      padding:0 16px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .top-link:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .page{
+      padding:42px 0 44px;
+    }
+
+    .auth-shell{
+      display:grid;
+      grid-template-columns:minmax(0, 1.05fr) minmax(380px, .95fr);
+      gap:24px;
+      align-items:stretch;
+    }
+
+    .hero-card,
+    .auth-card{
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-width:0;
+    }
+
+    .hero-card{
+      padding:34px 32px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:26px;
+      min-height:560px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width:max-content;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:16px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(2rem, 4vw, 3.2rem);
+      line-height:1.02;
+      letter-spacing:-0.045em;
+      max-width:12ch;
+    }
+
+    .hero-text{
+      margin:0;
+      color:var(--muted);
+      font-size:1rem;
+      max-width:58ch;
+    }
+
+    .hero-points{
+      display:grid;
+      gap:14px;
+    }
+
+    .point{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .point-mark{
+      width:30px;
+      height:30px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+      font-weight:800;
+      color:var(--accent);
+      background:rgba(255,127,31,0.14);
+      border:1px solid rgba(255,127,31,0.22);
+    }
+
+    .point strong{
+      display:block;
+      margin-bottom:4px;
+      font-size:.95rem;
+      color:#fff;
+    }
+
+    .point span{
+      display:block;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .hero-note{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.10);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff4ea;
+      font-size:.92rem;
+    }
+
+    .auth-card{
+      padding:28px 24px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+    }
+
+    .panel-head{
+      margin-bottom:18px;
+    }
+
+    .panel-head h2{
+      margin:0 0 8px;
+      font-size:1.35rem;
+      letter-spacing:-0.03em;
+    }
+
+    .panel-head p{
+      margin:0;
+      color:var(--muted);
+      font-size:.94rem;
+    }
+
+    .form-grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field label{
+      color:var(--soft);
+      font-size:.88rem;
+      font-weight:600;
+    }
+
+    .field input{
+      min-height:50px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      outline:none;
+    }
+
+    .field input::placeholder{
+      color:rgba(244,247,251,0.42);
+    }
+
+    .field input:focus{
+      border-color:rgba(255,127,31,0.34);
+      box-shadow:0 0 0 4px rgba(255,127,31,0.10);
+    }
+
+    .password-wrap{
+      position:relative;
+    }
+
+    .password-wrap input{
+      width:100%;
+      padding-right:90px;
+    }
+
+    .password-toggle{
+      position:absolute;
+      top:50%;
+      right:12px;
+      transform:translateY(-50%);
+      border:none;
+      background:none;
+      color:rgba(244,247,251,0.78);
+      cursor:pointer;
+      font-size:.82rem;
+      font-weight:700;
+      padding:4px 0;
+      line-height:1;
+    }
+
+    .password-toggle:hover{
+      color:#fff;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:800;
+      font-size:.95rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.10);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:2px;
+    }
+
+    .muted-actions{
+      margin-top:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .text-btn{
+      border:none;
+      background:none;
+      color:#fff4ea;
+      text-decoration:underline;
+      text-underline-offset:3px;
+      font-weight:700;
+      cursor:pointer;
+      padding:0;
+    }
+
+    .status-box{
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+      color:var(--muted);
+      font-size:.9rem;
+      display:none;
+    }
+
+    .status-box.show{
+      display:block;
+    }
+
+    .status-box.success{
+      background:rgba(61,208,143,0.12);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .status-box.error{
+      background:rgba(255,107,107,0.12);
+      border-color:rgba(255,107,107,0.22);
+      color:#ffdede;
+    }
+
+    .status-box.info{
+      background:rgba(255,255,255,0.05);
+      border-color:rgba(255,255,255,0.10);
+      color:var(--muted);
+    }
+
+    .loading{
+      opacity:.75;
+      pointer-events:none;
+    }
+
+    .footer-note{
+      margin-top:22px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    @media (max-width: 980px){
+      .auth-shell{
+        grid-template-columns:1fr;
+      }
+
+      .hero-card{
+        min-height:auto;
+      }
+
+      h1{
+        max-width:none;
+      }
+    }
+
+    @media (max-width: 720px){
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .top-links{
+        width:100%;
+        justify-content:flex-start;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .hero-card,
+      .auth-card{
+        padding:20px 18px;
+        border-radius:24px;
+      }
+
+      .actions,
+      .muted-actions{
+        flex-direction:column;
+      }
+
+      .btn,
+      .top-link{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow Admin</span>
+          <span class="brand-sub">Connexion sécurisée back-office</span>
+        </div>
+      </a>
+
+      <div class="top-links">
+        <a class="top-link" href="../index.html">Retour site</a>
+        <a class="top-link" href="index.html">Accueil admin</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="auth-shell">
+        <div class="hero-card">
+          <div>
+            <div class="eyebrow">
+              <span class="eyebrow-dot"></span>
+              Espace administrateur
+            </div>
+
+            <h1>Connecte-toi au back-office Axe Flow</h1>
+
+            <p class="hero-text">
+              Ici on ne gère pas le vernis. On gère les dossiers, les pièces, les publications, les relances,
+              les mises en demeure, les injonctions et le suivi client.
+            </p>
+          </div>
+
+          <div class="hero-points">
+            <div class="point">
+              <div class="point-mark">01</div>
+              <div>
+                <strong>Accès réservé admin</strong>
+                <span>La connexion réussit seulement si le profil Firestore porte le rôle admin ou superadmin.</span>
+              </div>
+            </div>
+
+            <div class="point">
+              <div class="point-mark">02</div>
+              <div>
+                <strong>Redirection propre</strong>
+                <span>Après connexion, tu arrives directement sur l’accueil admin et non sur le tableau de bord client.</span>
+              </div>
+            </div>
+
+            <div class="point">
+              <div class="point-mark">03</div>
+              <div>
+                <strong>Réinitialisation possible</strong>
+                <span>En cas d’oubli, lien de reset envoyé sur l’adresse saisie.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-note">
+            Compte prévu pour le test admin : <strong>s.dumas974@gmail.com</strong>.
+            Si le rôle n’est pas bon dans Firestore, la page te jettera dehors. Normal.
+          </div>
+        </div>
+
+        <div class="auth-card">
+          <div class="panel-head">
+            <h2>Connexion admin</h2>
+            <p>Entre ton email admin et ton mot de passe.</p>
+          </div>
+
+          <form id="loginForm" class="form-grid">
+            <div class="field">
+              <label for="loginEmail">Email admin</label>
+              <input type="email" id="loginEmail" name="loginEmail" placeholder="admin@exemple.fr" required />
+            </div>
+
+            <div class="field">
+              <label for="loginPassword">Mot de passe</label>
+              <div class="password-wrap">
+                <input type="password" id="loginPassword" name="loginPassword" placeholder="Votre mot de passe" required />
+                <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Afficher le mot de passe">Afficher</button>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-primary" type="submit" id="loginSubmit">Se connecter</button>
+            </div>
+          </form>
+
+          <div class="muted-actions">
+            <button class="text-btn" type="button" id="forgotPasswordBtn">Mot de passe oublié</button>
+          </div>
+
+          <div class="status-box info show" id="statusBox">
+            Connexion admin Axe Flow.
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-note">
+        Axe Flow — accès back-office sécurisé.
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+      authDomain: "axe-flow.firebaseapp.com",
+      projectId: "axe-flow",
+      storageBucket: "axe-flow.firebasestorage.app",
+      messagingSenderId: "295300543556",
+      appId: "1:295300543556:web:3facac2d0c612e3456b811"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginForm = document.getElementById("loginForm");
+    const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+    const statusBox = document.getElementById("statusBox");
+    const loginSubmit = document.getElementById("loginSubmit");
+
+    document.querySelectorAll(".password-toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.target);
+        const isHidden = input.type === "password";
+
+        input.type = isHidden ? "text" : "password";
+        btn.textContent = isHidden ? "Masquer" : "Afficher";
+        btn.setAttribute(
+          "aria-label",
+          isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe"
+        );
+      });
+    });
+
+    function setStatus(message, type = "info") {
+      statusBox.className = `status-box show ${type}`;
+      statusBox.textContent = message;
+    }
+
+    function setLoading(button, isLoading, loadingText) {
+      if (!button) return;
+
+      if (isLoading) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = loadingText;
+        button.classList.add("loading");
+        button.disabled = true;
+      } else {
+        button.textContent = button.dataset.originalText || button.textContent;
+        button.classList.remove("loading");
+        button.disabled = false;
+      }
+    }
+
+    function mapAuthError(error) {
+      const code = error?.code || "";
+
+      switch (code) {
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+          return "Identifiants invalides.";
+        case "auth/invalid-email":
+          return "Adresse email invalide.";
+        case "auth/too-many-requests":
+          return "Trop de tentatives. Réessaie plus tard.";
+        case "auth/network-request-failed":
+          return "Erreur réseau. Vérifie ta connexion.";
+        default:
+          return "Une erreur est survenue. Regarde la console si besoin.";
+      }
+    }
+
+    async function checkAdminAccess(user) {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (!snap.exists()) return false;
+
+      const data = snap.data() || {};
+      return data.role === "admin" || data.role === "superadmin";
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (!email || !password) {
+        setStatus("Complète l’email et le mot de passe.", "error");
+        return;
+      }
+
+      try {
+        setLoading(loginSubmit, true, "Connexion...");
+        setStatus("Connexion admin en cours...", "info");
+
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const allowed = await checkAdminAccess(cred.user);
+
+        if (!allowed) {
+          await signOut(auth);
+          setStatus("Compte connecté mais accès admin refusé. Vérifie le rôle Firestore.", "error");
+          return;
+        }
+
+        setStatus("Connexion admin réussie. Redirection...", "success");
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Erreur connexion admin:", error);
+        setStatus(mapAuthError(error), "error");
+      } finally {
+        setLoading(loginSubmit, false);
+      }
+    });
+
+    forgotPasswordBtn.addEventListener("click", async () => {
+      const loginEmail = document.getElementById("loginEmail").value.trim();
+
+      if (!loginEmail) {
+        setStatus("Entre d’abord ton email admin pour recevoir le lien de réinitialisation.", "error");
+        return;
+      }
+
+      try {
+        setStatus("Envoi de l’email de réinitialisation...", "info");
+        await sendPasswordResetEmail(auth, loginEmail);
+        setStatus("Email de réinitialisation envoyé.", "success");
+      } catch (error) {
+        console.error("Erreur reset password admin:", error);
+        setStatus(mapAuthError(error), "error");
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      try {
+        const allowed = await checkAdminAccess(user);
+
+        if (!allowed) {
+          await signOut(auth);
+          setStatus("Ce compte n’a pas les droits admin.", "error");
+          return;
+        }
+
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Erreur contrôle accès admin:", error);
+        setStatus("Impossible de vérifier les droits admin.", "error");
+      }
+    });
+  </script>
+</body>
+</html>
