@@ -889,389 +889,374 @@
     </div>
   </main>
 
-  <script type="module">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collectionGroup,
+    getDocs,
+    query,
+    orderBy,
+    doc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-    
-      onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "../connexion.html";
-    return;
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "295300543556",
+    appId: "1:295300543556:web:3facac2d0c612e3456b811"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const kpiNew = document.getElementById("kpiNew");
+  const kpiProgress = document.getElementById("kpiProgress");
+  const kpiWaiting = document.getElementById("kpiWaiting");
+  const kpiDone = document.getElementById("kpiDone");
+
+  const urgentBadge = document.getElementById("urgentBadge");
+  const alertList = document.getElementById("alertList");
+  const activeTableBody = document.getElementById("activeTableBody");
+  const activityList = document.getElementById("activityList");
+  const recentEntries = document.getElementById("recentEntries");
+
+  const boxToReview = document.getElementById("boxToReview");
+  const boxRelances = document.getElementById("boxRelances");
+  const boxMiseEnDemeure = document.getElementById("boxMiseEnDemeure");
+  const boxInjonctions = document.getElementById("boxInjonctions");
+
+  let allRequests = [];
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-    alert("Accès refusé.");
-    window.location.href = "../tableau-de-bord.html";
-    return;
+  function formatAmount(value) {
+    const n = Number(value || 0);
+    return n.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "EUR"
+    });
   }
 
-  try {
-    await initAdminPage(user);
-  } catch (err) {
-    console.error("Erreur initAdminPage:", err);
-    alert("Erreur de chargement admin.");
+  function extractUidFromPath(path = "") {
+    const parts = path.split("/");
+    const usersIndex = parts.indexOf("users");
+    if (usersIndex >= 0 && parts[usersIndex + 1]) return parts[usersIndex + 1];
+    return "";
   }
-});
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore,
-      collectionGroup,
-      getDocs,
-      query,
-      orderBy,
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-      authDomain: "axe-flow.firebaseapp.com",
-      projectId: "axe-flow",
-      storageBucket: "axe-flow.firebasestorage.app",
-      messagingSenderId: "295300543556",
-      appId: "1:295300543556:web:3facac2d0c612e3456b811"
-    };
+  function getChoiceLabel(item) {
+    const raw = item.postOrderChoice || "";
+    if (!raw) return "Non défini";
+    if (raw === "client_bailiff") return "Client";
+    if (raw === "axe_flow" || raw === "assisted") return "Axe Flow";
+    return raw;
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const ADMIN_EMAIL = "s.dumas974@gmail.com";
+  function getInternalStatus(item) {
+    return item.internalStatus || "À qualifier";
+  }
 
-    const kpiNew = document.getElementById("kpiNew");
-    const kpiProgress = document.getElementById("kpiProgress");
-    const kpiWaiting = document.getElementById("kpiWaiting");
-    const kpiDone = document.getElementById("kpiDone");
+  function getClientStatus(item) {
+    return item.clientStatus || "Demande reçue";
+  }
 
-    const urgentBadge = document.getElementById("urgentBadge");
-    const alertList = document.getElementById("alertList");
-    const activeTableBody = document.getElementById("activeTableBody");
-    const activityList = document.getElementById("activityList");
-    const recentEntries = document.getElementById("recentEntries");
+  function getPriority(item) {
+    return item.priority || "Normale";
+  }
 
-    const boxToReview = document.getElementById("boxToReview");
-    const boxRelances = document.getElementById("boxRelances");
-    const boxMiseEnDemeure = document.getElementById("boxMiseEnDemeure");
-    const boxInjonctions = document.getElementById("boxInjonctions");
+  function getDetailUrl(item) {
+    return `demande.html?uid=${encodeURIComponent(item.uid)}&id=${encodeURIComponent(item.id)}`;
+  }
 
-    let allRequests = [];
+  function buildStatusClass(type, value) {
+    const v = (value || "").toLowerCase();
 
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    if (type === "internal") {
+      if (v.includes("qualifier")) return "new";
+      if (v.includes("attente")) return "waiting";
+      if (v.includes("clôt") || v.includes("archiv")) return "done";
+      return "progress";
     }
 
-    function formatDate(dateValue) {
-      if (!dateValue) return "—";
-      const date =
-        dateValue?.toDate ? dateValue.toDate() :
-        dateValue instanceof Date ? dateValue :
-        new Date(dateValue);
-      if (isNaN(date.getTime())) return "—";
-      return date.toLocaleDateString("fr-FR");
-    }
-
-    function formatDateTime(dateValue) {
-      if (!dateValue) return "—";
-      const date =
-        dateValue?.toDate ? dateValue.toDate() :
-        dateValue instanceof Date ? dateValue :
-        new Date(dateValue);
-      if (isNaN(date.getTime())) return "—";
-      return date.toLocaleDateString("fr-FR") + " à " + date.toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-    }
-
-    function formatAmount(value) {
-      const n = Number(value || 0);
-      return n.toLocaleString("fr-FR", {
-        style: "currency",
-        currency: "EUR"
-      });
-    }
-
-    function extractUidFromPath(path = "") {
-      const parts = path.split("/");
-      const usersIndex = parts.indexOf("users");
-      if (usersIndex >= 0 && parts[usersIndex + 1]) return parts[usersIndex + 1];
-      return "";
-    }
-
-    function getChoiceLabel(item) {
-      const raw = item.postOrderChoice || "";
-      if (!raw) return "Non défini";
-      if (raw === "client_bailiff") return "Client";
-      if (raw === "axe_flow" || raw === "assisted") return "Axe Flow";
-      return raw;
-    }
-
-    function getInternalStatus(item) {
-      return item.internalStatus || "À qualifier";
-    }
-
-    function getClientStatus(item) {
-      return item.clientStatus || "Demande reçue";
-    }
-
-    function getPriority(item) {
-      return item.priority || "Normale";
-    }
-
-    function getDetailUrl(item) {
-      return `demande.html?uid=${encodeURIComponent(item.uid)}&id=${encodeURIComponent(item.id)}`;
-    }
-
-    function buildStatusClass(type, value) {
-      const v = (value || "").toLowerCase();
-
-      if (type === "internal") {
-        if (v.includes("qualifier")) return "new";
-        if (v.includes("attente")) return "waiting";
-        if (v.includes("clôt") || v.includes("archiv")) return "done";
-        return "progress";
-      }
-
-      if (type === "client") {
-        if (v.includes("clôt")) return "done";
-        return "client";
-      }
-
+    if (type === "client") {
+      if (v.includes("clôt")) return "done";
       return "client";
     }
 
-    function computeKPIs(items) {
-      const newCount = items.filter(i => getInternalStatus(i) === "À qualifier").length;
-      const waitingCount = items.filter(i => getInternalStatus(i) === "Attente client").length;
-      const doneCount = items.filter(i => {
-        const status = getInternalStatus(i);
-        return status === "Clôturé" || status === "Archivé" || i.lifecycleStatus === "closed" || i.lifecycleStatus === "archived";
-      }).length;
-      const progressCount = items.length - newCount - waitingCount - doneCount;
+    return "client";
+  }
 
-      kpiNew.textContent = newCount;
-      kpiProgress.textContent = Math.max(progressCount, 0);
-      kpiWaiting.textContent = waitingCount;
-      kpiDone.textContent = doneCount;
+  function computeNextAction(item) {
+    const internal = getInternalStatus(item);
 
-      boxToReview.textContent = `${newCount} dossier${newCount > 1 ? "s" : ""}`;
-      boxRelances.textContent = `${items.filter(i => getInternalStatus(i).toLowerCase().includes("relance")).length} dossier${items.filter(i => getInternalStatus(i).toLowerCase().includes("relance")).length > 1 ? "s" : ""}`;
-      boxMiseEnDemeure.textContent = `${items.filter(i => getInternalStatus(i).toLowerCase().includes("mise en demeure")).length} dossier${items.filter(i => getInternalStatus(i).toLowerCase().includes("mise en demeure")).length > 1 ? "s" : ""}`;
-      boxInjonctions.textContent = `${items.filter(i => getInternalStatus(i).toLowerCase().includes("injonction")).length} dossier${items.filter(i => getInternalStatus(i).toLowerCase().includes("injonction")).length > 1 ? "s" : ""}`;
+    if (internal === "À qualifier") return "Lire les pièces et poser le statut initial";
+    if (internal === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
+    if (internal === "Attente client") return "Contrôler le retour ou relancer";
+    if (internal === "Prêt relance") return "Préparer ou publier la relance";
+    if (internal === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
+    if (internal === "Prêt injonction") return "Préparer l’étape injonction";
+    if (internal === "Clôturé") return "Aucune";
+    return "Ouvrir et analyser";
+  }
+
+  function computeKPIs(items) {
+    const newCount = items.filter(i => getInternalStatus(i) === "À qualifier").length;
+    const waitingCount = items.filter(i => getInternalStatus(i) === "Attente client").length;
+    const doneCount = items.filter(i => {
+      const status = getInternalStatus(i);
+      return (
+        status === "Clôturé" ||
+        status === "Archivé" ||
+        i.lifecycleStatus === "closed" ||
+        i.lifecycleStatus === "archived"
+      );
+    }).length;
+    const progressCount = items.length - newCount - waitingCount - doneCount;
+
+    const relancesCount = items.filter(i => getInternalStatus(i).toLowerCase().includes("relance")).length;
+    const medCount = items.filter(i => getInternalStatus(i).toLowerCase().includes("mise en demeure")).length;
+    const injCount = items.filter(i => getInternalStatus(i).toLowerCase().includes("injonction")).length;
+
+    kpiNew.textContent = newCount;
+    kpiProgress.textContent = Math.max(progressCount, 0);
+    kpiWaiting.textContent = waitingCount;
+    kpiDone.textContent = doneCount;
+
+    boxToReview.textContent = `${newCount} dossier${newCount > 1 ? "s" : ""}`;
+    boxRelances.textContent = `${relancesCount} dossier${relancesCount > 1 ? "s" : ""}`;
+    boxMiseEnDemeure.textContent = `${medCount} dossier${medCount > 1 ? "s" : ""}`;
+    boxInjonctions.textContent = `${injCount} dossier${injCount > 1 ? "s" : ""}`;
+  }
+
+  function renderAlerts(items) {
+    const urgentItems = items
+      .filter(i => {
+        const priority = getPriority(i).toLowerCase();
+        const internal = getInternalStatus(i).toLowerCase();
+        return (
+          priority.includes("urgent") ||
+          priority.includes("haute") ||
+          priority.includes("prioritaire") ||
+          internal.includes("qualifier") ||
+          internal.includes("attente")
+        );
+      })
+      .slice(0, 3);
+
+    urgentBadge.textContent = `${urgentItems.length} urgence${urgentItems.length > 1 ? "s" : ""}`;
+
+    if (!urgentItems.length) {
+      alertList.innerHTML = `<div class="empty-state">Aucune alerte prioritaire.</div>`;
+      return;
     }
 
-    function renderAlerts(items) {
-      const urgentItems = items
-        .filter(i => {
-          const priority = getPriority(i).toLowerCase();
-          const internal = getInternalStatus(i).toLowerCase();
-          return priority.includes("urgent") || priority.includes("haute") || priority.includes("prioritaire") || internal.includes("qualifier") || internal.includes("attente");
-        })
-        .slice(0, 3);
+    alertList.innerHTML = "";
 
-      urgentBadge.textContent = `${urgentItems.length} urgence${urgentItems.length > 1 ? "s" : ""}`;
+    urgentItems.forEach((item, index) => {
+      const dotClass = index === 0 ? "danger" : index === 1 ? "warning" : "info";
+      const detailUrl = getDetailUrl(item);
 
-      if (!urgentItems.length) {
-        alertList.innerHTML = `<div class="empty-state">Aucune alerte prioritaire.</div>`;
-        return;
-      }
+      const title =
+        getInternalStatus(item) === "À qualifier"
+          ? "Dossier reçu sans qualification"
+          : getInternalStatus(item) === "Attente client"
+            ? "Client en attente de réponse"
+            : "Dossier prioritaire à traiter";
 
-      alertList.innerHTML = "";
+      const summary = `${item.ref || item.id} — ${item.creditorName || item.clientName || "Client"} — ${computeNextAction(item)}.`;
 
-      urgentItems.forEach((item, index) => {
-        const dotClass = index === 0 ? "danger" : index === 1 ? "warning" : "info";
-        const detailUrl = getDetailUrl(item);
-        const title =
-          getInternalStatus(item) === "À qualifier" ? "Dossier reçu sans qualification" :
-          getInternalStatus(item) === "Attente client" ? "Client en attente de réponse" :
-          "Dossier prioritaire à traiter";
-
-        const summary = `${item.ref || item.id} — ${item.creditorName || item.clientName || "Client"} — ${computeNextAction(item)}.`;
-
-        alertList.insertAdjacentHTML("beforeend", `
-          <div class="alert-item">
-            <div class="alert-left">
-              <div class="alert-dot ${dotClass}"></div>
-              <div class="alert-content">
-                <strong>${escapeHtml(title)}</strong>
-                <span>${escapeHtml(summary)}</span>
-              </div>
+      alertList.insertAdjacentHTML("beforeend", `
+        <div class="alert-item">
+          <div class="alert-left">
+            <div class="alert-dot ${dotClass}"></div>
+            <div class="alert-content">
+              <strong>${escapeHtml(title)}</strong>
+              <span>${escapeHtml(summary)}</span>
             </div>
-            <a href="${detailUrl}" class="mini-btn">Ouvrir</a>
           </div>
-        `);
-      });
-    }
-
-    function computeNextAction(item) {
-      const internal = getInternalStatus(item);
-
-      if (internal === "À qualifier") return "Lire les pièces et poser le statut initial";
-      if (internal === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
-      if (internal === "Attente client") return "Contrôler le retour ou relancer";
-      if (internal === "Prêt relance") return "Préparer ou publier la relance";
-      if (internal === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
-      if (internal === "Prêt injonction") return "Préparer l’étape injonction";
-      if (internal === "Clôturé") return "Aucune";
-      return "Ouvrir et analyser";
-    }
-
-    function renderActiveTable(items) {
-      const activeItems = items.slice(0, 5);
-
-      if (!activeItems.length) {
-        activeTableBody.innerHTML = `
-          <tr>
-            <td colspan="7">
-              <div class="empty-state">Aucun dossier actif.</div>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      activeTableBody.innerHTML = "";
-
-      activeItems.forEach((item) => {
-        const detailUrl = getDetailUrl(item);
-
-        activeTableBody.insertAdjacentHTML("beforeend", `
-          <tr>
-            <td>
-              <div class="client">
-                <strong>${escapeHtml(item.creditorName || item.clientName || "Client")}</strong>
-                <span>${escapeHtml(item.creditorEmail || item.clientEmail || "—")}</span>
-              </div>
-            </td>
-            <td>${escapeHtml(item.ref || item.id)}</td>
-            <td>${escapeHtml(formatAmount(item.amountTTC || item.invoiceAmount || 0))}</td>
-            <td><span class="status ${buildStatusClass("internal", getInternalStatus(item))}">${escapeHtml(getInternalStatus(item))}</span></td>
-            <td><span class="status ${buildStatusClass("client", getClientStatus(item))}">${escapeHtml(getClientStatus(item))}</span></td>
-            <td>${escapeHtml(getChoiceLabel(item))}</td>
-            <td><a href="${detailUrl}" class="mini-btn">Ouvrir</a></td>
-          </tr>
-        `);
-      });
-    }
-
-    function renderActivity(items) {
-      const recent = [...items].slice(0, 4);
-
-      if (!recent.length) {
-        activityList.innerHTML = `<div class="empty-state">Aucune activité récente.</div>`;
-        return;
-      }
-
-      activityList.innerHTML = "";
-
-      recent.forEach((item) => {
-        const title =
-          getInternalStatus(item) === "À qualifier" ? "Nouveau dossier reçu" :
-          getInternalStatus(item) === "Attente client" ? "Attente de pièce complémentaire" :
-          getInternalStatus(item) === "Prêt mise en demeure" ? "Brouillon prêt à publication" :
-          "Dossier mis à jour";
-
-        const text = `${item.ref || item.id} — ${item.creditorName || item.clientName || "Client"} — ${computeNextAction(item)}.`;
-
-        activityList.insertAdjacentHTML("beforeend", `
-          <div class="timeline-item">
-            <strong>${escapeHtml(title)}</strong>
-            <span>${escapeHtml(text)}</span>
-          </div>
-        `);
-      });
-    }
-
-    function renderRecentEntries(items) {
-      const newPayments = items.filter(i => i.offerType).length;
-      const newRequests = items.filter(i => getInternalStatus(i) === "À qualifier").length;
-      const newProofs = items.filter(i => getInternalStatus(i) === "Attente client").length;
-
-      recentEntries.innerHTML = `
-        <div class="action-item">
-          <strong>Nouveaux paiements reçus</strong>
-          <span>${newPayments} dossier${newPayments > 1 ? "s" : ""} avec paiement enregistré.</span>
+          <a href="${detailUrl}" class="mini-btn">Ouvrir</a>
         </div>
-
-        <div class="action-item">
-          <strong>Nouveaux dossiers ouverts</strong>
-          <span>${newRequests} dossier${newRequests > 1 ? "s" : ""} à qualifier.</span>
-        </div>
-
-        <div class="action-item">
-          <strong>Derniers justificatifs / attentes</strong>
-          <span>${newProofs} dossier${newProofs > 1 ? "s" : ""} en attente de retour client.</span>
-        </div>
-      `;
-    }
-
-    async function loadRequests() {
-      const q = query(collectionGroup(db, "requests"), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-
-      allRequests = snap.docs.map((docSnap) => {
-        const data = docSnap.data();
-        const uid = extractUidFromPath(docSnap.ref.path);
-
-        return {
-          id: docSnap.id,
-          uid,
-          ...data,
-          creditorName: data.creditorName || data.clientName || "",
-          creditorEmail: data.creditorEmail || data.clientEmail || ""
-        };
-      });
-
-      const activeItems = allRequests.filter((item) => {
-        const status = getInternalStatus(item);
-        return status !== "Clôturé" && status !== "Archivé" && item.lifecycleStatus !== "closed" && item.lifecycleStatus !== "archived";
-      });
-
-      computeKPIs(allRequests);
-      renderAlerts(activeItems);
-      renderActiveTable(activeItems);
-      renderActivity(allRequests);
-      renderRecentEntries(allRequests);
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "../connexion.html";
-        return;
-      }
-
-      try {
-        const userSnap = await getDoc(doc(db, "users", user.uid));
-        const profile = userSnap.exists() ? userSnap.data() : null;
-
-        if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
-          alert("Accès admin refusé.");
-          window.location.href = "../index.html";
-          return;
-        }
-
-        await loadRequests();
-      } catch (err) {
-        console.error("Erreur chargement accueil admin:", err);
-        alertList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
-        activeTableBody.innerHTML = `
-          <tr>
-            <td colspan="7">
-              <div class="empty-state">Erreur de chargement.</div>
-            </td>
-          </tr>
-        `;
-        activityList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
-        recentEntries.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
-      }
+      `);
     });
-  </script>
+  }
+
+  function renderActiveTable(items) {
+    const activeItems = items.slice(0, 5);
+
+    if (!activeItems.length) {
+      activeTableBody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">Aucun dossier actif.</div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    activeTableBody.innerHTML = "";
+
+    activeItems.forEach((item) => {
+      const detailUrl = getDetailUrl(item);
+
+      activeTableBody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>
+            <div class="client">
+              <strong>${escapeHtml(item.creditorName || item.clientName || "Client")}</strong>
+              <span>${escapeHtml(item.creditorEmail || item.clientEmail || "—")}</span>
+            </div>
+          </td>
+          <td>${escapeHtml(item.ref || item.id)}</td>
+          <td>${escapeHtml(formatAmount(item.amountTTC || item.invoiceAmount || 0))}</td>
+          <td><span class="status ${buildStatusClass("internal", getInternalStatus(item))}">${escapeHtml(getInternalStatus(item))}</span></td>
+          <td><span class="status ${buildStatusClass("client", getClientStatus(item))}">${escapeHtml(getClientStatus(item))}</span></td>
+          <td>${escapeHtml(getChoiceLabel(item))}</td>
+          <td><a href="${detailUrl}" class="mini-btn">Ouvrir</a></td>
+        </tr>
+      `);
+    });
+  }
+
+  function renderActivity(items) {
+    const recent = [...items].slice(0, 4);
+
+    if (!recent.length) {
+      activityList.innerHTML = `<div class="empty-state">Aucune activité récente.</div>`;
+      return;
+    }
+
+    activityList.innerHTML = "";
+
+    recent.forEach((item) => {
+      const title =
+        getInternalStatus(item) === "À qualifier"
+          ? "Nouveau dossier reçu"
+          : getInternalStatus(item) === "Attente client"
+            ? "Attente de pièce complémentaire"
+            : getInternalStatus(item) === "Prêt mise en demeure"
+              ? "Brouillon prêt à publication"
+              : "Dossier mis à jour";
+
+      const text = `${item.ref || item.id} — ${item.creditorName || item.clientName || "Client"} — ${computeNextAction(item)}.`;
+
+      activityList.insertAdjacentHTML("beforeend", `
+        <div class="timeline-item">
+          <strong>${escapeHtml(title)}</strong>
+          <span>${escapeHtml(text)}</span>
+        </div>
+      `);
+    });
+  }
+
+  function renderRecentEntries(items) {
+    const newPayments = items.filter(i => i.offerType).length;
+    const newRequests = items.filter(i => getInternalStatus(i) === "À qualifier").length;
+    const newProofs = items.filter(i => getInternalStatus(i) === "Attente client").length;
+
+    recentEntries.innerHTML = `
+      <div class="action-item">
+        <strong>Nouveaux paiements reçus</strong>
+        <span>${newPayments} dossier${newPayments > 1 ? "s" : ""} avec paiement enregistré.</span>
+      </div>
+
+      <div class="action-item">
+        <strong>Nouveaux dossiers ouverts</strong>
+        <span>${newRequests} dossier${newRequests > 1 ? "s" : ""} à qualifier.</span>
+      </div>
+
+      <div class="action-item">
+        <strong>Derniers justificatifs / attentes</strong>
+        <span>${newProofs} dossier${newProofs > 1 ? "s" : ""} en attente de retour client.</span>
+      </div>
+    `;
+  }
+
+  async function loadRequests() {
+    const q = query(collectionGroup(db, "requests"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+
+    allRequests = snap.docs.map((docSnap) => {
+      const data = docSnap.data();
+      const uid = extractUidFromPath(docSnap.ref.path);
+
+      return {
+        id: docSnap.id,
+        uid,
+        ...data,
+        creditorName: data.creditorName || data.clientName || "",
+        creditorEmail: data.creditorEmail || data.clientEmail || ""
+      };
+    });
+
+    const activeItems = allRequests.filter((item) => {
+      const status = getInternalStatus(item);
+      return (
+        status !== "Clôturé" &&
+        status !== "Archivé" &&
+        item.lifecycleStatus !== "closed" &&
+        item.lifecycleStatus !== "archived"
+      );
+    });
+
+    computeKPIs(allRequests);
+    renderAlerts(activeItems);
+    renderActiveTable(activeItems);
+    renderActivity(allRequests);
+    renderRecentEntries(allRequests);
+  }
+
+  async function initAdminPage(user) {
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+    const profile = userSnap.exists() ? userSnap.data() : null;
+
+    if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
+      alert("Accès admin refusé.");
+      window.location.href = "../index.html";
+      return;
+    }
+
+    await loadRequests();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "../connexion.html";
+      return;
+    }
+
+    try {
+      await initAdminPage(user);
+    } catch (err) {
+      console.error("Erreur chargement accueil admin:", err);
+      alertList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
+      activeTableBody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">Erreur de chargement.</div>
+          </td>
+        </tr>
+      `;
+      activityList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
+      recentEntries.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
+    }
+  });
+</script>
 </body>
 </html>
