@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow Admin — Clients</title>
-  <meta name="description" content="Liste admin Axe Flow : clients, comptes test, dossiers associés et accès rapide à leur activité." />
+  <meta name="description" content="Liste admin Axe Flow : comptes clients et accès rapide à leurs dossiers." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -20,9 +20,7 @@
       --bg-2:#0b3145;
       --bg-3:#0f3e56;
       --panel:rgba(255,255,255,0.06);
-      --panel-2:rgba(255,255,255,0.04);
       --line:rgba(255,255,255,0.09);
-      --line-strong:rgba(255,255,255,0.14);
       --text:#f4f7fb;
       --muted:rgba(244,247,251,0.76);
       --soft:rgba(244,247,251,0.58);
@@ -33,7 +31,7 @@
       --danger:#ff6b6b;
       --info:#7cc8ff;
       --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --max:1420px;
+      --max:1280px;
     }
 
     *{box-sizing:border-box}
@@ -204,57 +202,85 @@
     .hero p{
       margin:0;
       color:var(--muted);
-      max-width:78ch;
+      max-width:70ch;
       font-size:1rem;
     }
 
-    .summary-row{
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{
+      color:#fff;
+    }
+
+    .kpis{
       display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
+      grid-template-columns:repeat(3, minmax(0,1fr));
       gap:16px;
       margin-bottom:18px;
     }
 
-    .summary-card{
-      padding:20px;
+    .kpi{
+      padding:22px 20px;
       border-radius:24px;
       background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
       border:1px solid rgba(255,255,255,0.08);
       box-shadow:var(--shadow);
     }
 
-    .summary-label{
+    .kpi-label{
       color:var(--soft);
       font-size:.88rem;
       margin-bottom:10px;
     }
 
-    .summary-value{
-      font-size:1.9rem;
+    .kpi-value{
+      font-size:2rem;
       line-height:1;
       font-weight:800;
       letter-spacing:-0.05em;
     }
 
-    .summary-note{
+    .kpi-note{
       margin-top:10px;
       color:var(--muted);
       font-size:.86rem;
     }
 
-    .summary-card.success{
+    .kpi.is-success{
       border-color:rgba(61,208,143,0.22);
       background:linear-gradient(180deg, rgba(61,208,143,0.10), rgba(255,255,255,0.04));
     }
 
-    .summary-card.warning{
+    .kpi.is-warning{
       border-color:rgba(255,179,71,0.24);
       background:linear-gradient(180deg, rgba(255,179,71,0.10), rgba(255,255,255,0.04));
     }
 
-    .summary-card.info{
+    .kpi.is-info{
       border-color:rgba(124,200,255,0.24);
       background:linear-gradient(180deg, rgba(124,200,255,0.10), rgba(255,255,255,0.04));
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .col{
+      display:grid;
+      gap:18px;
+      min-width:0;
+      align-content:start;
     }
 
     .panel{
@@ -352,7 +378,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1200px;
+      min-width:920px;
     }
 
     th, td{
@@ -417,12 +443,6 @@
       color:#ffe6c2;
     }
 
-    .status.info{
-      background:rgba(124,200,255,0.14);
-      border-color:rgba(124,200,255,0.22);
-      color:#dff3ff;
-    }
-
     .status.normal{
       background:rgba(255,255,255,0.06);
       border-color:rgba(255,255,255,0.10);
@@ -451,10 +471,35 @@
       white-space:nowrap;
     }
 
-    .mini-btn.secondary{
-      background:rgba(255,255,255,0.05);
-      border-color:rgba(255,255,255,0.10);
+    .sidebar-nav{
+      display:grid;
+      gap:12px;
+    }
+
+    .nav-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
       color:#fff;
+      font-weight:700;
+      font-size:.92rem;
+    }
+
+    .nav-link span{
+      color:var(--muted);
+      font-weight:600;
+      font-size:.84rem;
+    }
+
+    .nav-link.active{
+      background:rgba(255,127,31,0.14);
+      border-color:rgba(255,127,31,0.22);
+      pointer-events:none;
     }
 
     .empty-state{
@@ -475,8 +520,12 @@
     }
 
     @media (max-width: 1180px){
-      .summary-row{
+      .kpis{
         grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .layout{
+        grid-template-columns:1fr;
       }
 
       .toolbar{
@@ -521,7 +570,7 @@
         padding:18px;
       }
 
-      .summary-row{
+      .kpis{
         grid-template-columns:1fr;
       }
     }
@@ -534,13 +583,13 @@
         <img class="brand-logo" src="../images/axe-flow-cover.png" alt="Axe Flow" />
         <div class="brand-text">
           <span class="brand-title">Axe Flow Admin</span>
-          <span class="brand-sub">Liste des clients</span>
+          <span class="brand-sub">Clients — comptes et accès aux dossiers</span>
         </div>
       </a>
 
       <div class="topbar-actions">
-        <a href="index.html" class="btn btn-secondary">Retour accueil</a>
-        <a href="demandes.html" class="btn btn-primary">Voir les dossiers</a>
+        <a href="demandes.html" class="btn btn-secondary">Tous les dossiers</a>
+        <a href="index.html" class="btn btn-secondary">Accueil admin</a>
       </div>
     </div>
   </header>
@@ -554,101 +603,138 @@
         </div>
         <h1>Clients</h1>
         <p>
-          Cette page centralise les comptes clients utiles : email, statut test ou réel,
-          nombre de dossiers, dernière activité détectée et accès rapide à leurs demandes.
+          Ici tu retrouves les comptes clients et tu remontes vers leurs dossiers. Rien d’autre.
         </p>
+        <div class="hero-note">
+          <strong>Logique retenue :</strong> clients pour retrouver un compte, puis ouverture des dossiers via la file filtrée.
+        </div>
       </section>
 
-      <section class="summary-row">
-        <article class="summary-card success">
-          <div class="summary-label">Clients réels</div>
-          <div class="summary-value" id="kpiReal">0</div>
-          <div class="summary-note">Comptes actifs hors test</div>
+      <section class="kpis">
+        <article class="kpi is-success">
+          <div class="kpi-label">Clients réels</div>
+          <div class="kpi-value" id="kpiReal">0</div>
+          <div class="kpi-note">Hors comptes test</div>
         </article>
 
-        <article class="summary-card warning">
-          <div class="summary-label">Comptes test</div>
-          <div class="summary-value" id="kpiTest">0</div>
-          <div class="summary-note">Tests et comptes techniques</div>
+        <article class="kpi is-warning">
+          <div class="kpi-label">Comptes test</div>
+          <div class="kpi-value" id="kpiTest">0</div>
+          <div class="kpi-note">Tests et technique</div>
         </article>
 
-        <article class="summary-card info">
-          <div class="summary-label">Total dossiers</div>
-          <div class="summary-value" id="kpiRequests">0</div>
-          <div class="summary-note">Dossiers liés aux clients listés</div>
-        </article>
-
-        <article class="summary-card">
-          <div class="summary-label">Clients avec dossier</div>
-          <div class="summary-value" id="kpiWithRequests">0</div>
-          <div class="summary-note">Comptes ayant au moins une demande</div>
+        <article class="kpi is-info">
+          <div class="kpi-label">Total dossiers</div>
+          <div class="kpi-value" id="kpiRequests">0</div>
+          <div class="kpi-note">Liés aux clients affichés</div>
         </article>
       </section>
 
-      <section class="panel">
-        <div class="panel-inner">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Filtrer et parcourir</h2>
-              <div class="panel-sub">On garde l’utile : pas les admins, pas le bruit.</div>
-            </div>
-            <span class="mini-badge" id="totalBadge">0 client</span>
-          </div>
+      <section class="layout">
+        <div class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Filtrer et parcourir</h2>
+                  <div class="panel-sub">Pas les admins. Pas le bruit.</div>
+                </div>
+                <span class="mini-badge" id="totalBadge">0 client</span>
+              </div>
 
-          <div class="toolbar">
-            <div class="field">
-              <label for="searchClients">Recherche</label>
-              <input
-                id="searchClients"
-                type="text"
-                placeholder="Nom, email, uid..."
-              />
-            </div>
+              <div class="toolbar">
+                <div class="field">
+                  <label for="searchClients">Recherche</label>
+                  <input
+                    id="searchClients"
+                    type="text"
+                    placeholder="Nom, email, uid..."
+                  />
+                </div>
 
-            <div class="select-wrap">
-              <label for="filterAccountType">Type de compte</label>
-              <select id="filterAccountType">
-                <option value="Tous">Tous</option>
-                <option value="Reel">Réel</option>
-                <option value="Test">Test</option>
-              </select>
-            </div>
+                <div class="select-wrap">
+                  <label for="filterAccountType">Type de compte</label>
+                  <select id="filterAccountType">
+                    <option value="Tous">Tous</option>
+                    <option value="Reel">Réel</option>
+                    <option value="Test">Test</option>
+                  </select>
+                </div>
 
-            <div class="select-wrap">
-              <label for="filterHasRequests">Dossiers</label>
-              <select id="filterHasRequests">
-                <option value="Tous">Tous</option>
-                <option value="Avec dossier">Avec dossier</option>
-                <option value="Sans dossier">Sans dossier</option>
-              </select>
-            </div>
-          </div>
+                <div class="select-wrap">
+                  <label for="filterHasRequests">Dossiers</label>
+                  <select id="filterHasRequests">
+                    <option value="Tous">Tous</option>
+                    <option value="Avec dossier">Avec dossier</option>
+                    <option value="Sans dossier">Sans dossier</option>
+                  </select>
+                </div>
+              </div>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>UID</th>
-                  <th>Type</th>
-                  <th>Plan</th>
-                  <th>Dossiers</th>
-                  <th>Dernier dossier</th>
-                  <th>Créé le</th>
-                  <th>Dernière mise à jour</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="clientsTableBody">
-                <tr>
-                  <td colspan="9">
-                    <div class="empty-state">Chargement des clients…</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Type</th>
+                      <th>Plan</th>
+                      <th>Dossiers</th>
+                      <th>Dernier dossier</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="clientsTableBody">
+                    <tr>
+                      <td colspan="6">
+                        <div class="empty-state">Chargement des clients…</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
+
+        <aside class="col">
+          <div class="panel">
+            <div class="panel-inner">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Navigation admin</h2>
+                  <div class="panel-sub">Le plan de circulation.</div>
+                </div>
+              </div>
+
+              <nav class="sidebar-nav">
+                <a href="index.html" class="nav-link">
+                  Accueil admin
+                  <span>Vue générale</span>
+                </a>
+
+                <a href="demandes.html" class="nav-link">
+                  Tous les dossiers
+                  <span>File complète</span>
+                </a>
+
+                <a href="demandes.html?filter=to_review" class="nav-link">
+                  Nouveaux dossiers
+                  <span>À qualifier</span>
+                </a>
+
+                <div class="nav-link active">
+                  Clients
+                  <span>Base comptes clients</span>
+                </div>
+
+                <a href="reglages.html" class="nav-link">
+                  Réglages
+                  <span>Paramètres back-office</span>
+                </a>
+              </nav>
+            </div>
+          </div>
+        </aside>
       </section>
 
       <div class="footer-note">
@@ -696,7 +782,6 @@
     const kpiReal = document.getElementById("kpiReal");
     const kpiTest = document.getElementById("kpiTest");
     const kpiRequests = document.getElementById("kpiRequests");
-    const kpiWithRequests = document.getElementById("kpiWithRequests");
 
     let allClients = [];
 
@@ -738,12 +823,10 @@
       const realCount = items.filter(item => !item.isTestAccount).length;
       const testCount = items.filter(item => item.isTestAccount).length;
       const requestCount = items.reduce((sum, item) => sum + (item.requestsCount || 0), 0);
-      const withRequestsCount = items.filter(item => (item.requestsCount || 0) > 0).length;
 
       kpiReal.textContent = realCount;
       kpiTest.textContent = testCount;
       kpiRequests.textContent = requestCount;
-      kpiWithRequests.textContent = withRequestsCount;
     }
 
     function applyFilters() {
@@ -761,7 +844,6 @@
 
         if (search && !haystack.includes(search)) return false;
         if (accountType !== "Tous" && getAccountType(item) !== accountType) return false;
-
         if (hasRequests === "Avec dossier" && (item.requestsCount || 0) === 0) return false;
         if (hasRequests === "Sans dossier" && (item.requestsCount || 0) > 0) return false;
 
@@ -778,7 +860,7 @@
       if (!items.length) {
         clientsTableBody.innerHTML = `
           <tr>
-            <td colspan="9">
+            <td colspan="6">
               <div class="empty-state">Aucun client trouvé.</div>
             </td>
           </tr>
@@ -788,29 +870,27 @@
 
       items.forEach((item) => {
         const dossiersUrl = `demandes.html?uid=${encodeURIComponent(item.uid)}`;
-        const firstName = item.displayName || item.email || "Client";
+        const clientName = item.displayName || item.email || "Client";
         const lastRequestRef = item.lastRequestRef || "—";
+        const lastRequestDate = item.lastRequestDate ? formatDate(item.lastRequestDate) : "—";
 
         clientsTableBody.insertAdjacentHTML("beforeend", `
           <tr>
             <td>
               <div class="client">
-                <strong>${escapeHtml(firstName)}</strong>
+                <strong>${escapeHtml(clientName)}</strong>
                 <span class="subline">${escapeHtml(item.email || "Email non renseigné")}</span>
               </div>
             </td>
-            <td>${escapeHtml(item.uid || "—")}</td>
             <td><span class="status ${getAccountStatusClass(item)}">${escapeHtml(getAccountType(item))}</span></td>
             <td>${escapeHtml(item.plan || "—")}</td>
             <td>${escapeHtml(item.requestsCount || 0)}</td>
             <td>
               <div class="client">
                 <strong>${escapeHtml(lastRequestRef)}</strong>
-                <span class="subline">${escapeHtml(item.lastRequestDate ? formatDate(item.lastRequestDate) : "—")}</span>
+                <span class="subline">${escapeHtml(lastRequestDate)}</span>
               </div>
             </td>
-            <td>${escapeHtml(formatDate(item.createdAt))}</td>
-            <td>${escapeHtml(formatDate(item.updatedAt))}</td>
             <td>
               <div class="table-actions">
                 <a href="${dossiersUrl}" class="mini-btn">Voir dossiers</a>
@@ -824,7 +904,7 @@
     async function loadClients() {
       clientsTableBody.innerHTML = `
         <tr>
-          <td colspan="9">
+          <td colspan="6">
             <div class="empty-state">Chargement des clients…</div>
           </td>
         </tr>
@@ -871,19 +951,13 @@
             role,
             plan: data.plan || data.offerType || "",
             isTestAccount: !!data.isTestAccount,
-            createdAt: data.createdAt || null,
-            updatedAt: data.updatedAt || null,
             requestsCount: sortedRequests.length,
             lastRequestRef: lastRequest?.ref || lastRequest?.id || "",
             lastRequestDate: lastRequest?.createdAt || null
           };
         })
         .filter((item) => item.role !== "admin" && item.role !== "superadmin")
-        .sort((a, b) => {
-          const da = a.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : 0;
-          const db = b.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : 0;
-          return db - da;
-        });
+        .sort((a, b) => (b.requestsCount || 0) - (a.requestsCount || 0));
 
       renderKPIs(allClients);
       applyFilters();
@@ -917,7 +991,7 @@
         console.error("Erreur chargement clients admin:", err);
         clientsTableBody.innerHTML = `
           <tr>
-            <td colspan="9">
+            <td colspan="6">
               <div class="empty-state">Erreur de chargement des clients.</div>
             </td>
           </tr>
