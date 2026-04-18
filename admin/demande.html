@@ -400,6 +400,10 @@
       font-weight:700;
       cursor:pointer;
       text-align:center;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
     }
 
     .action-btn.secondary{
@@ -699,42 +703,10 @@
               <button class="action-btn" id="prepareR3Btn">Préparer relance 3</button>
               <button class="action-btn" id="prepareFormalNoticeBtn">Préparer mise en demeure</button>
               <button class="action-btn" id="prepareInjunctionBtn">Préparer injonction</button>
+              <a class="action-btn" id="openPublicationBtn" href="#">Gérer la publication</a>
               <button class="action-btn secondary" id="requestMissingPieceBtn">Demander une pièce</button>
               <button class="action-btn secondary" id="saveInternalNoteQuickBtn">Note interne rapide</button>
               <button class="action-btn secondary" id="archiveQuickBtn">Archiver le dossier</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2>Publication client</h2>
-                <div class="panel-sub">Étape ou document rendu visible au client.</div>
-              </div>
-            </div>
-
-            <div class="section-stack">
-              <div class="field">
-                <label>Titre de l’étape</label>
-                <input id="publishTitle" placeholder="Ex. Relance 1 publiée">
-              </div>
-
-              <div class="field">
-                <label>Message publié</label>
-                <textarea id="publishMessage" placeholder="Ex. La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace."></textarea>
-              </div>
-
-              <div class="field">
-                <label>Justificatifs demandés</label>
-                <input id="publishProofs" placeholder="Ex. preuve d’envoi mail, LRAR, accusé, capture écran...">
-              </div>
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn btn-primary" id="publishClientBtn">Publier côté client</button>
-                <button class="btn btn-secondary" id="saveDraftBtn">Enregistrer brouillon</button>
-              </div>
             </div>
           </div>
         </section>
@@ -899,15 +871,10 @@
   const prepareR3Btn = document.getElementById("prepareR3Btn");
   const prepareFormalNoticeBtn = document.getElementById("prepareFormalNoticeBtn");
   const prepareInjunctionBtn = document.getElementById("prepareInjunctionBtn");
+  const openPublicationBtn = document.getElementById("openPublicationBtn");
   const requestMissingPieceBtn = document.getElementById("requestMissingPieceBtn");
   const saveInternalNoteQuickBtn = document.getElementById("saveInternalNoteQuickBtn");
   const archiveQuickBtn = document.getElementById("archiveQuickBtn");
-
-  const publishTitle = document.getElementById("publishTitle");
-  const publishMessage = document.getElementById("publishMessage");
-  const publishProofs = document.getElementById("publishProofs");
-  const publishClientBtn = document.getElementById("publishClientBtn");
-  const saveDraftBtn = document.getElementById("saveDraftBtn");
 
   const clientMessage = document.getElementById("clientMessage");
   const sendClientMessageBtn = document.getElementById("sendClientMessageBtn");
@@ -1163,43 +1130,6 @@
     });
   }
 
-  async function publishClientStep(mode = "published") {
-    const title = publishTitle.value.trim();
-    const message = publishMessage.value.trim();
-    const proofs = publishProofs.value.trim();
-
-    if (!title || !message) {
-      alert("Titre et message obligatoires.");
-      return;
-    }
-
-    await addDoc(
-      collection(db, "users", currentClientUid, "requests", currentRequestId, "events"),
-      {
-        title,
-        description: message,
-        requiredProofs: proofs ? proofs.split(",").map(x => x.trim()).filter(Boolean) : [],
-        status: mode === "draft" ? "Brouillon" : "Publié",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
-    );
-
-    if (mode !== "draft") {
-      await updateDoc(buildRequestPath(), {
-        clientStatus: "Traitement en cours",
-        updatedAt: serverTimestamp()
-      });
-    }
-
-    publishTitle.value = "";
-    publishMessage.value = "";
-    publishProofs.value = "";
-
-    await loadRequest();
-    await loadEvents();
-  }
-
   async function addMessage(authorType, body, kind = "message") {
     if (!body.trim()) {
       alert("Message vide.");
@@ -1257,44 +1187,38 @@
     });
 
     prepareR1Btn?.addEventListener("click", async () => {
-      publishTitle.value = "Relance 1 publiée";
-      publishMessage.value = "La relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace.";
-      publishProofs.value = "preuve d’envoi mail, capture écran, LRAR si utilisée";
       internalStatusSelect.value = "Prêt relance";
       await saveMainFields();
       await loadRequest();
+      alert("Relance 1 préparée. Passe ensuite par Gérer la publication.");
     });
 
     prepareR2Btn?.addEventListener("click", async () => {
-      publishTitle.value = "Relance 2 publiée";
-      publishMessage.value = "La relance 2 est prête. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
-      publishProofs.value = "preuve d’envoi relance 2";
+      internalStatusSelect.value = "Prêt relance";
       await saveMainFields();
+      await loadRequest();
+      alert("Relance 2 préparée. Passe ensuite par Gérer la publication.");
     });
 
     prepareR3Btn?.addEventListener("click", async () => {
-      publishTitle.value = "Relance 3 publiée";
-      publishMessage.value = "La relance 3 est prête. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
-      publishProofs.value = "preuve d’envoi relance 3";
+      internalStatusSelect.value = "Prêt relance";
       await saveMainFields();
+      await loadRequest();
+      alert("Relance 3 préparée. Passe ensuite par Gérer la publication.");
     });
 
     prepareFormalNoticeBtn?.addEventListener("click", async () => {
-      publishTitle.value = "Mise en demeure préparée";
-      publishMessage.value = "La mise en demeure a été préparée. Merci de procéder à l’envoi puis de déposer le justificatif dans votre espace.";
-      publishProofs.value = "preuve LRAR, accusé, justificatif d’envoi";
       internalStatusSelect.value = "Prêt mise en demeure";
       await saveMainFields();
       await loadRequest();
+      alert("Mise en demeure préparée. Passe ensuite par Gérer la publication.");
     });
 
     prepareInjunctionBtn?.addEventListener("click", async () => {
-      publishTitle.value = "Injonction en préparation";
-      publishMessage.value = "Le dossier d’injonction est en préparation selon le choix enregistré.";
-      publishProofs.value = "";
       internalStatusSelect.value = "Prêt injonction";
       await saveMainFields();
       await loadRequest();
+      alert("Injonction préparée. Passe ensuite par Gérer la publication.");
     });
 
     requestMissingPieceBtn?.addEventListener("click", async () => {
@@ -1323,15 +1247,9 @@
   }
 
   function wireMainButtons() {
-    publishClientBtn?.addEventListener("click", async () => {
-      await publishClientStep("published");
-      alert("Publication client enregistrée.");
-    });
-
-    saveDraftBtn?.addEventListener("click", async () => {
-      await publishClientStep("draft");
-      alert("Brouillon enregistré.");
-    });
+    if (openPublicationBtn) {
+      openPublicationBtn.href = `publications.html?uid=${encodeURIComponent(currentClientUid)}&id=${encodeURIComponent(currentRequestId)}`;
+    }
 
     sendClientMessageBtn?.addEventListener("click", async () => {
       await addMessage("admin", clientMessage.value, "client_message");
