@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow Admin — Accueil</title>
-  <meta name="description" content="Accueil admin Axe Flow : nouveaux dossiers reçus, traitements en cours, attentes client, alertes et accès rapide aux dossiers prioritaires." />
+  <meta name="description" content="Accueil admin Axe Flow : vue globale, alertes prioritaires et accès rapide aux dossiers et clients." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -22,7 +22,6 @@
       --panel:rgba(255,255,255,0.06);
       --panel-2:rgba(255,255,255,0.04);
       --line:rgba(255,255,255,0.09);
-      --line-strong:rgba(255,255,255,0.14);
       --text:#f4f7fb;
       --muted:rgba(244,247,251,0.76);
       --soft:rgba(244,247,251,0.58);
@@ -33,11 +32,7 @@
       --danger:#ff6b6b;
       --info:#7cc8ff;
       --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:18px;
-      --radius-sm:14px;
-      --max:1380px;
+      --max:1320px;
     }
 
     *{box-sizing:border-box}
@@ -226,6 +221,13 @@
       color:#fff;
     }
 
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:16px;
+    }
+
     .kpis{
       display:grid;
       grid-template-columns:repeat(4, minmax(0,1fr));
@@ -336,19 +338,9 @@
     }
 
     .alert-list,
-    .action-list,
-    .timeline-list{
+    .sidebar-nav{
       display:grid;
       gap:12px;
-    }
-
-    .alert-item,
-    .action-item,
-    .timeline-item{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
     }
 
     .alert-item{
@@ -356,6 +348,10 @@
       align-items:flex-start;
       justify-content:space-between;
       gap:12px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
     }
 
     .alert-left{
@@ -388,18 +384,14 @@
       box-shadow:0 0 0 6px rgba(124,200,255,0.12);
     }
 
-    .alert-content strong,
-    .action-item strong,
-    .timeline-item strong{
+    .alert-content strong{
       display:block;
       color:#fff;
       font-size:.95rem;
       margin-bottom:4px;
     }
 
-    .alert-content span,
-    .action-item span,
-    .timeline-item span{
+    .alert-content span{
       display:block;
       color:var(--muted);
       font-size:.89rem;
@@ -431,7 +423,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:980px;
+      min-width:920px;
     }
 
     th, td{
@@ -453,10 +445,7 @@
     }
 
     tr:last-child td{border-bottom:0}
-
-    tr:hover{
-      background:rgba(255,255,255,0.03);
-    }
+    tr:hover{background:rgba(255,255,255,0.03)}
 
     .client{
       display:flex;
@@ -510,37 +499,6 @@
       background:rgba(255,255,255,0.06);
       border-color:rgba(255,255,255,0.10);
       color:#fff;
-    }
-
-    .split{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-
-    .mini-card{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-    }
-
-    .mini-card strong{
-      display:block;
-      margin-bottom:5px;
-      color:#fff;
-      font-size:.94rem;
-    }
-
-    .mini-card span{
-      display:block;
-      color:var(--muted);
-      font-size:.89rem;
-    }
-
-    .sidebar-nav{
-      display:grid;
-      gap:10px;
     }
 
     .nav-link{
@@ -602,10 +560,6 @@
         width:100%;
         justify-content:flex-start;
       }
-
-      .split{
-        grid-template-columns:1fr;
-      }
     }
 
     @media (max-width: 560px){
@@ -654,8 +608,9 @@
       </a>
 
       <div class="topbar-actions">
-        <a href="demandes.html" class="btn btn-secondary">Voir tous les dossiers</a>
-        <a href="demandes.html?filter=to_review" class="btn btn-primary">Traiter les nouveaux dossiers</a>
+        <a href="demandes.html" class="btn btn-secondary">Tous les dossiers</a>
+        <a href="demandes.html?filter=to_review" class="btn btn-primary">Nouveaux dossiers</a>
+        <a href="clients.html" class="btn btn-secondary">Clients</a>
       </div>
     </div>
   </header>
@@ -669,12 +624,15 @@
         </div>
         <h1>Accueil admin</h1>
         <p>
-          Vue rapide sur les nouveaux dossiers reçus, les traitements en cours, les attentes client,
-          les publications à surveiller et les priorités du jour.
+          Vue globale, alertes utiles et accès rapide aux vraies pages de travail.
         </p>
         <div class="hero-note">
-          <strong>Structure métier retenue :</strong> un dossier reçu, qualifié, traité, publié au client,
-          éventuellement complété par des justificatifs, puis clôturé.
+          <strong>Logique retenue :</strong> accueil pour voir l’ensemble, dossiers pour traiter, fiche dossier pour agir, clients pour retrouver les comptes.
+        </div>
+        <div class="hero-actions">
+          <a href="demandes.html" class="btn btn-secondary">Voir tous les dossiers</a>
+          <a href="demandes.html?filter=to_review" class="btn btn-primary">Traiter les nouveaux</a>
+          <a href="clients.html" class="btn btn-secondary">Voir les clients</a>
         </div>
       </section>
 
@@ -682,25 +640,25 @@
         <article class="kpi is-danger">
           <div class="kpi-label">Nouveaux dossiers</div>
           <div class="kpi-value" id="kpiNew">0</div>
-          <div class="kpi-note">À qualifier dès maintenant</div>
+          <div class="kpi-note">À qualifier</div>
         </article>
 
         <article class="kpi is-warning">
           <div class="kpi-label">Dossiers en traitement</div>
           <div class="kpi-value" id="kpiProgress">0</div>
-          <div class="kpi-note">Qualification, relance, mise en demeure ou injonction</div>
+          <div class="kpi-note">Relance, mise en demeure, injonction</div>
         </article>
 
         <article class="kpi">
           <div class="kpi-label">Attentes client</div>
           <div class="kpi-value" id="kpiWaiting">0</div>
-          <div class="kpi-note">Pièces, preuve d’envoi ou retour client attendus</div>
+          <div class="kpi-note">Pièces ou retours attendus</div>
         </article>
 
         <article class="kpi is-success">
           <div class="kpi-label">Dossiers clôturés</div>
           <div class="kpi-value" id="kpiDone">0</div>
-          <div class="kpi-note">Terminés, archivés ou sortis du circuit actif</div>
+          <div class="kpi-note">Sortis du circuit actif</div>
         </article>
       </section>
 
@@ -711,7 +669,7 @@
               <div class="panel-head">
                 <div>
                   <h2 class="panel-title">Alertes prioritaires</h2>
-                  <div class="panel-sub">Ce qui doit bouger aujourd’hui.</div>
+                  <div class="panel-sub">Le minimum utile à traiter vite.</div>
                 </div>
                 <span class="mini-badge" id="urgentBadge">0 urgence</span>
               </div>
@@ -726,10 +684,10 @@
             <div class="panel-inner">
               <div class="panel-head">
                 <div>
-                  <h2 class="panel-title">File active des dossiers</h2>
-                  <div class="panel-sub">Vue opérationnelle des dossiers vivants.</div>
+                  <h2 class="panel-title">File active</h2>
+                  <div class="panel-sub">Quelques dossiers vivants, pas toute l’usine.</div>
                 </div>
-                <a href="demandes.html" class="mini-badge">Voir tout</a>
+                <a href="demandes.html" class="mini-badge">Voir tous les dossiers</a>
               </div>
 
               <div class="table-wrap">
@@ -741,33 +699,17 @@
                       <th>Montant</th>
                       <th>Statut interne</th>
                       <th>Statut client</th>
-                      <th>Choix injonction</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody id="activeTableBody">
                     <tr>
-                      <td colspan="7">
+                      <td colspan="6">
                         <div class="empty-state">Chargement des dossiers…</div>
                       </td>
                     </tr>
                   </tbody>
                 </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-inner">
-              <div class="panel-head">
-                <div>
-                  <h2 class="panel-title">Activité récente</h2>
-                  <div class="panel-sub">Ce qui est entré ou a bougé récemment dans le back-office.</div>
-                </div>
-              </div>
-
-              <div class="timeline-list" id="activityList">
-                <div class="empty-state">Chargement de l’activité…</div>
               </div>
             </div>
           </div>
@@ -778,87 +720,8 @@
             <div class="panel-inner">
               <div class="panel-head">
                 <div>
-                  <h2 class="panel-title">Actions du jour</h2>
-                  <div class="panel-sub">Raccourcis opérationnels.</div>
-                </div>
-              </div>
-
-              <div class="action-list">
-                <div class="action-item">
-                  <strong>Qualifier les nouveaux dossiers</strong>
-                  <span>Lire les pièces, vérifier la facture, contrôler le débiteur et poser un premier statut interne propre.</span>
-                  <a href="demandes.html?filter=to_review" class="mini-btn" style="margin-top:12px;">Ouvrir la file</a>
-                </div>
-
-                <div class="action-item">
-                  <strong>Traiter les dossiers actifs</strong>
-                  <span>Préparer relances, mises en demeure, injonctions et publier les étapes prêtes côté client.</span>
-                  <a href="demandes.html" class="mini-btn" style="margin-top:12px;">Traiter</a>
-                </div>
-
-                <div class="action-item">
-                  <strong>Contrôler les attentes client</strong>
-                  <span>Vérifier les pièces manquantes, preuves d’envoi, retours et réponses laissées en attente.</span>
-                  <a href="demandes.html?filter=waiting_client" class="mini-btn" style="margin-top:12px;">Vérifier</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-inner">
-              <div class="panel-head">
-                <div>
-                  <h2 class="panel-title">Vue par statut</h2>
-                  <div class="panel-sub">Répartition rapide des dossiers.</div>
-                </div>
-              </div>
-
-              <div class="split">
-                <div class="mini-card">
-                  <strong>À qualifier</strong>
-                  <span id="boxToReview">0 dossier</span>
-                </div>
-
-                <div class="mini-card">
-                  <strong>Relances en cours</strong>
-                  <span id="boxRelances">0 dossier</span>
-                </div>
-
-                <div class="mini-card">
-                  <strong>Mises en demeure</strong>
-                  <span id="boxMiseEnDemeure">0 dossier</span>
-                </div>
-
-                <div class="mini-card">
-                  <strong>Injonctions</strong>
-                  <span id="boxInjonctions">0 dossier</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-inner">
-              <div class="panel-head">
-                <div>
-                  <h2 class="panel-title">Entrées récentes</h2>
-                  <div class="panel-sub">Ce qui vient d’arriver dans le système.</div>
-                </div>
-              </div>
-
-              <div class="action-list" id="recentEntries">
-                <div class="empty-state">Chargement des entrées…</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-inner">
-              <div class="panel-head">
-                <div>
                   <h2 class="panel-title">Navigation admin</h2>
-                  <div class="panel-sub">Base de travail.</div>
+                  <div class="panel-sub">Le vrai plan de circulation.</div>
                 </div>
               </div>
 
@@ -870,14 +733,19 @@
 
                 <a href="demandes.html" class="nav-link">
                   Tous les dossiers
-                  <span>Liste complète</span>
+                  <span>File complète</span>
                 </a>
 
-<a href="clients.html" class="nav-link">
-  Clients
-  <span>Base comptes clients</span>
-</a>
-                
+                <a href="demandes.html?filter=to_review" class="nav-link">
+                  Nouveaux dossiers
+                  <span>À qualifier</span>
+                </a>
+
+                <a href="clients.html" class="nav-link">
+                  Clients
+                  <span>Base comptes clients</span>
+                </a>
+
                 <a href="reglages.html" class="nav-link">
                   Réglages
                   <span>Paramètres back-office</span>
@@ -931,13 +799,6 @@
   const urgentBadge = document.getElementById("urgentBadge");
   const alertList = document.getElementById("alertList");
   const activeTableBody = document.getElementById("activeTableBody");
-  const activityList = document.getElementById("activityList");
-  const recentEntries = document.getElementById("recentEntries");
-
-  const boxToReview = document.getElementById("boxToReview");
-  const boxRelances = document.getElementById("boxRelances");
-  const boxMiseEnDemeure = document.getElementById("boxMiseEnDemeure");
-  const boxInjonctions = document.getElementById("boxInjonctions");
 
   let allRequests = [];
 
@@ -963,14 +824,6 @@
     const usersIndex = parts.indexOf("users");
     if (usersIndex >= 0 && parts[usersIndex + 1]) return parts[usersIndex + 1];
     return "";
-  }
-
-  function getChoiceLabel(item) {
-    const raw = item.postOrderChoice || "";
-    if (!raw) return "Non défini";
-    if (raw === "client_bailiff") return "Client";
-    if (raw === "axe_flow" || raw === "assisted") return "Axe Flow";
-    return raw;
   }
 
   function getInternalStatus(item) {
@@ -1034,19 +887,10 @@
     }).length;
     const progressCount = items.length - newCount - waitingCount - doneCount;
 
-    const relancesCount = items.filter(i => getInternalStatus(i).toLowerCase().includes("relance")).length;
-    const medCount = items.filter(i => getInternalStatus(i).toLowerCase().includes("mise en demeure")).length;
-    const injCount = items.filter(i => getInternalStatus(i).toLowerCase().includes("injonction")).length;
-
     kpiNew.textContent = newCount;
     kpiProgress.textContent = Math.max(progressCount, 0);
     kpiWaiting.textContent = waitingCount;
     kpiDone.textContent = doneCount;
-
-    boxToReview.textContent = `${newCount} dossier${newCount > 1 ? "s" : ""}`;
-    boxRelances.textContent = `${relancesCount} dossier${relancesCount > 1 ? "s" : ""}`;
-    boxMiseEnDemeure.textContent = `${medCount} dossier${medCount > 1 ? "s" : ""}`;
-    boxInjonctions.textContent = `${injCount} dossier${injCount > 1 ? "s" : ""}`;
   }
 
   function renderAlerts(items) {
@@ -1062,7 +906,7 @@
           internal.includes("attente")
         );
       })
-      .slice(0, 3);
+      .slice(0, 4);
 
     urgentBadge.textContent = `${urgentItems.length} urgence${urgentItems.length > 1 ? "s" : ""}`;
 
@@ -1079,10 +923,10 @@
 
       const title =
         getInternalStatus(item) === "À qualifier"
-          ? "Dossier reçu sans qualification"
+          ? "Dossier à ouvrir"
           : getInternalStatus(item) === "Attente client"
-            ? "Client en attente de réponse"
-            : "Dossier prioritaire à traiter";
+            ? "Retour client attendu"
+            : "Dossier prioritaire";
 
       const summary = `${item.ref || item.id} — ${item.creditorName || item.clientName || "Client"} — ${computeNextAction(item)}.`;
 
@@ -1102,12 +946,12 @@
   }
 
   function renderActiveTable(items) {
-    const activeItems = items.slice(0, 5);
+    const activeItems = items.slice(0, 6);
 
     if (!activeItems.length) {
       activeTableBody.innerHTML = `
         <tr>
-          <td colspan="7">
+          <td colspan="6">
             <div class="empty-state">Aucun dossier actif.</div>
           </td>
         </tr>
@@ -1132,65 +976,10 @@
           <td>${escapeHtml(formatAmount(item.amountTTC || item.invoiceAmount || 0))}</td>
           <td><span class="status ${buildStatusClass("internal", getInternalStatus(item))}">${escapeHtml(getInternalStatus(item))}</span></td>
           <td><span class="status ${buildStatusClass("client", getClientStatus(item))}">${escapeHtml(getClientStatus(item))}</span></td>
-          <td>${escapeHtml(getChoiceLabel(item))}</td>
           <td><a href="${detailUrl}" class="mini-btn">Ouvrir</a></td>
         </tr>
       `);
     });
-  }
-
-  function renderActivity(items) {
-    const recent = [...items].slice(0, 4);
-
-    if (!recent.length) {
-      activityList.innerHTML = `<div class="empty-state">Aucune activité récente.</div>`;
-      return;
-    }
-
-    activityList.innerHTML = "";
-
-    recent.forEach((item) => {
-      const title =
-        getInternalStatus(item) === "À qualifier"
-          ? "Nouveau dossier reçu"
-          : getInternalStatus(item) === "Attente client"
-            ? "Attente de pièce complémentaire"
-            : getInternalStatus(item) === "Prêt mise en demeure"
-              ? "Brouillon prêt à publication"
-              : "Dossier mis à jour";
-
-      const text = `${item.ref || item.id} — ${item.creditorName || item.clientName || "Client"} — ${computeNextAction(item)}.`;
-
-      activityList.insertAdjacentHTML("beforeend", `
-        <div class="timeline-item">
-          <strong>${escapeHtml(title)}</strong>
-          <span>${escapeHtml(text)}</span>
-        </div>
-      `);
-    });
-  }
-
-  function renderRecentEntries(items) {
-    const newPayments = items.filter(i => i.offerType).length;
-    const newRequests = items.filter(i => getInternalStatus(i) === "À qualifier").length;
-    const newProofs = items.filter(i => getInternalStatus(i) === "Attente client").length;
-
-    recentEntries.innerHTML = `
-      <div class="action-item">
-        <strong>Nouveaux paiements reçus</strong>
-        <span>${newPayments} dossier${newPayments > 1 ? "s" : ""} avec paiement enregistré.</span>
-      </div>
-
-      <div class="action-item">
-        <strong>Nouveaux dossiers ouverts</strong>
-        <span>${newRequests} dossier${newRequests > 1 ? "s" : ""} à qualifier.</span>
-      </div>
-
-      <div class="action-item">
-        <strong>Derniers justificatifs / attentes</strong>
-        <span>${newProofs} dossier${newProofs > 1 ? "s" : ""} en attente de retour client.</span>
-      </div>
-    `;
   }
 
   async function loadRequests() {
@@ -1223,8 +1012,6 @@
     computeKPIs(allRequests);
     renderAlerts(activeItems);
     renderActiveTable(activeItems);
-    renderActivity(allRequests);
-    renderRecentEntries(allRequests);
   }
 
   async function initAdminPage(user) {
@@ -1242,7 +1029,7 @@
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-     window.location.href = "connexion.html";
+      window.location.href = "connexion.html";
       return;
     }
 
@@ -1253,13 +1040,11 @@
       alertList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
       activeTableBody.innerHTML = `
         <tr>
-          <td colspan="7">
+          <td colspan="6">
             <div class="empty-state">Erreur de chargement.</div>
           </td>
         </tr>
       `;
-      activityList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
-      recentEntries.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
     }
   });
 </script>
