@@ -1112,7 +1112,7 @@
     });
   }
 
- async function saveMainFields(extraData = {}) {
+async function saveMainFields(extraData = {}) {
   if (!currentRequest) return;
 
   const nextInternalStatus = internalStatusSelect.value;
@@ -1136,6 +1136,18 @@
   };
 
   await updateDoc(buildRequestPath(), payload);
+}
+
+function getStepFromInternalStatus(internalStatus) {
+  if (internalStatus === "À qualifier") return "new";
+  if (internalStatus === "Pièces manquantes") return "missing_pieces";
+  if (internalStatus === "Prêt relance") return "relance_ready";
+  if (internalStatus === "Attente client") return "waiting_client";
+  if (internalStatus === "Prêt mise en demeure") return "formal_notice_ready";
+  if (internalStatus === "Prêt injonction") return "injunction_ready";
+  if (internalStatus === "Clôturé") return "closed";
+  if (internalStatus === "Archivé") return "archived";
+  return "in_progress";
 }
  
   async function addMessage(authorType, body, kind = "message") {
