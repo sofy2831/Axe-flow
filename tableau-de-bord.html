@@ -1029,6 +1029,13 @@
                 <div class="summary-value" id="summaryRef">—</div>
               </div>
 
+              <div class="note-box warning" id="nextActionBox" style="margin-top:16px;">
+  <strong id="nextActionTitle" style="display:block;margin-bottom:6px;color:#fff;">
+    Ce que vous devez faire maintenant
+  </strong>
+  <div id="nextActionText">Sélectionnez un dossier pour voir la prochaine action.</div>
+</div>
+              
               <div class="summary-card">
                 <div class="summary-label">Montant</div>
                 <div class="summary-value" id="amountTTCDisplay">—</div>
@@ -1315,1386 +1322,1544 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      orderBy,
-      getDocs,
-      addDoc,
-      serverTimestamp,
-      doc,
-      getDoc,
-      setDoc,
-      updateDoc,
-      runTransaction,
-      deleteDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import {
-      getStorage,
-      ref as storageRef,
-      uploadBytes,
-      getDownloadURL,
-      deleteObject
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    orderBy,
+    getDocs,
+    addDoc,
+    serverTimestamp,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    runTransaction,
+    deleteDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import {
+    getStorage,
+    ref as storageRef,
+    uploadBytes,
+    getDownloadURL,
+    deleteObject
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-      authDomain: "axe-flow.firebaseapp.com",
-      projectId: "axe-flow",
-      storageBucket: "axe-flow.firebasestorage.app",
-      messagingSenderId: "295300543556",
-      appId: "1:295300543556:web:3facac2d0c612e3456b811"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "295300543556",
+    appId: "1:295300543556:web:3facac2d0c612e3456b811"
+  };
 
-    const STRIPE_LINKS = {
-      one_shot_49: "https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01",
-      monthly_89: "https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02",
-      extra_case_19: "https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03",
+  const STRIPE_LINKS = {
+    one_shot_49: "https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01",
+    monthly_89: "https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02",
+    extra_case_19: "https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03",
 
-      assisted_85: "https://buy.stripe.com/test_5kQfZgej00ZReZR0yz7Vm04",
-      assisted_140: "https://buy.stripe.com/test_bJe9AS2AicIzeZR5ST7Vm05",
-      assisted_247: "https://buy.stripe.com/test_eVqdR8ej037Z191dll7Vm06",
+    assisted_85: "https://buy.stripe.com/test_5kQfZgej00ZReZR0yz7Vm04",
+    assisted_140: "https://buy.stripe.com/test_bJe9AS2AicIzeZR5ST7Vm05",
+    assisted_247: "https://buy.stripe.com/test_eVqdR8ej037Z191dll7Vm06",
 
-      assisted_175: "https://buy.stripe.com/test_4gMeVcej037Z7xp5ST7Vm07",
-      assisted_230: "https://buy.stripe.com/test_8x2eVcfn4dMD04Xdll7Vm08",
-      assisted_337: "https://buy.stripe.com/test_14A4gy3Em37Z04Xa997Vm09"
-    };
+    assisted_175: "https://buy.stripe.com/test_4gMeVcej037Z7xp5ST7Vm07",
+    assisted_230: "https://buy.stripe.com/test_8x2eVcfn4dMD04Xdll7Vm08",
+    assisted_337: "https://buy.stripe.com/test_14A4gy3Em37Z04Xa997Vm09"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
-    const userEmail = document.getElementById("userEmail");
-    const userStatusPill = document.getElementById("userStatusPill");
-    const userPlanPill = document.getElementById("userPlanPill");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const flashBanner = document.getElementById("flashBanner");
+  const userEmail = document.getElementById("userEmail");
+  const userStatusPill = document.getElementById("userStatusPill");
+  const userPlanPill = document.getElementById("userPlanPill");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const flashBanner = document.getElementById("flashBanner");
 
-    const planSubtitle = document.getElementById("planSubtitle");
-    const createLimitNotice = document.getElementById("createLimitNotice");
-    const extraDossierBox = document.getElementById("extraDossierBox");
-    const repurchaseOneShotBox = document.getElementById("repurchaseOneShotBox");
-    const upgradeMonthlyBox = document.getElementById("upgradeMonthlyBox");
+  const planSubtitle = document.getElementById("planSubtitle");
+  const createLimitNotice = document.getElementById("createLimitNotice");
+  const extraDossierBox = document.getElementById("extraDossierBox");
+  const repurchaseOneShotBox = document.getElementById("repurchaseOneShotBox");
+  const upgradeMonthlyBox = document.getElementById("upgradeMonthlyBox");
 
-    const buyExtraDossierBtn = document.getElementById("buyExtraDossierBtn");
-    const buyOneShotBtn = document.getElementById("buyOneShotBtn");
-    const buyMonthlyBtn = document.getElementById("buyMonthlyBtn");
+  const buyExtraDossierBtn = document.getElementById("buyExtraDossierBtn");
+  const buyOneShotBtn = document.getElementById("buyOneShotBtn");
+  const buyMonthlyBtn = document.getElementById("buyMonthlyBtn");
 
-    const openCreateDossier = document.getElementById("openCreateDossier");
-    const dossierList = document.getElementById("dossierList");
+  const openCreateDossier = document.getElementById("openCreateDossier");
+  const dossierList = document.getElementById("dossierList");
 
-    const summaryRef = document.getElementById("summaryRef");
-    const amountTTCDisplay = document.getElementById("amountTTCDisplay");
-    const summaryDebiteur = document.getElementById("summaryDebiteur");
-    const summaryType = document.getElementById("summaryType");
-    const summaryInvoice = document.getElementById("summaryInvoice");
-    const summaryStatus = document.getElementById("summaryStatus");
+  const summaryRef = document.getElementById("summaryRef");
+  const amountTTCDisplay = document.getElementById("amountTTCDisplay");
+  const summaryDebiteur = document.getElementById("summaryDebiteur");
+  const summaryType = document.getElementById("summaryType");
+  const summaryInvoice = document.getElementById("summaryInvoice");
+  const summaryStatus = document.getElementById("summaryStatus");
 
-    const timelineList = document.getElementById("timelineList");
+  const nextActionBox = document.getElementById("nextActionBox");
+  const nextActionTitle = document.getElementById("nextActionTitle");
+  const nextActionText = document.getElementById("nextActionText");
 
-    const calculatedPrice = document.getElementById("calculatedPrice");
-    const validateAutonome = document.getElementById("validateAutonome");
-    const payAssisted = document.getElementById("payAssisted");
-    const choiceNotice = document.getElementById("choiceNotice");
-    const panelChoice = document.querySelector(".panel-choice");
+  const timelineList = document.getElementById("timelineList");
 
-    const fileInputs = document.querySelectorAll("[data-doc-type-input]");
-    const sendButtons = document.querySelectorAll("[data-upload-send]");
-    const viewButtons = document.querySelectorAll("[data-upload-view]");
-    const deleteButtons = document.querySelectorAll("[data-upload-delete]");
+  const calculatedPrice = document.getElementById("calculatedPrice");
+  const validateAutonome = document.getElementById("validateAutonome");
+  const payAssisted = document.getElementById("payAssisted");
+  const choiceNotice = document.getElementById("choiceNotice");
+  const panelChoice = document.querySelector(".panel-choice");
 
-    const createDossierModal = document.getElementById("createDossierModal");
-    const createDossierForm = document.getElementById("createDossierForm");
-    const closeCreateDossier = document.getElementById("closeCreateDossier");
-    const cancelCreateDossier = document.getElementById("cancelCreateDossier");
+  const fileInputs = document.querySelectorAll("[data-doc-type-input]");
+  const sendButtons = document.querySelectorAll("[data-upload-send]");
+  const viewButtons = document.querySelectorAll("[data-upload-view]");
+  const deleteButtons = document.querySelectorAll("[data-upload-delete]");
 
-    const dossierLabelInput = document.getElementById("dossierLabel");
-    const dossierRefInput = document.getElementById("dossierRef");
-    const debiteurTypeInput = document.getElementById("debiteurType");
-    const amountTTCInput = document.getElementById("amountTTCInput");
-    const debiteurNameInput = document.getElementById("debiteurName");
-    const invoiceRefInput = document.getElementById("invoiceRefInput");
-    const dueDateInput = document.getElementById("dueDateInput");
-    const dossierSummaryInput = document.getElementById("dossierSummaryInput");
-    const createDossierTitle = document.getElementById("createDossierTitle");
+  const createDossierModal = document.getElementById("createDossierModal");
+  const createDossierForm = document.getElementById("createDossierForm");
+  const closeCreateDossier = document.getElementById("closeCreateDossier");
+  const cancelCreateDossier = document.getElementById("cancelCreateDossier");
 
-    const filesModal = document.getElementById("filesModal");
-    const closeFilesModal = document.getElementById("closeFilesModal");
-    const filesModalSubtitle = document.getElementById("filesModalSubtitle");
-    const fileListContainer = document.getElementById("fileListContainer");
+  const dossierLabelInput = document.getElementById("dossierLabel");
+  const dossierRefInput = document.getElementById("dossierRef");
+  const debiteurTypeInput = document.getElementById("debiteurType");
+  const amountTTCInput = document.getElementById("amountTTCInput");
+  const debiteurNameInput = document.getElementById("debiteurName");
+  const invoiceRefInput = document.getElementById("invoiceRefInput");
+  const dueDateInput = document.getElementById("dueDateInput");
+  const dossierSummaryInput = document.getElementById("dossierSummaryInput");
+  const createDossierTitle = document.getElementById("createDossierTitle");
 
-    const eventModal = document.getElementById("eventModal");
-    const closeEventModal = document.getElementById("closeEventModal");
-    const eventModalSubtitle = document.getElementById("eventModalSubtitle");
-    const eventModalContent = document.getElementById("eventModalContent");
+  const filesModal = document.getElementById("filesModal");
+  const closeFilesModal = document.getElementById("closeFilesModal");
+  const filesModalSubtitle = document.getElementById("filesModalSubtitle");
+  const fileListContainer = document.getElementById("fileListContainer");
 
-    let currentUser = null;
-    let currentDossier = null;
-    let dossiers = [];
-    let userProfile = null;
-    let entitlements = [];
-    let uploadedFiles = {
-      quote: [],
-      invoice: [],
-      recovery: [],
-      supporting: []
-    };
-    let timelineEventsCache = [];
-    let editingDossierId = null;
-    let dossierCounter = 0;
+  const eventModal = document.getElementById("eventModal");
+  const closeEventModal = document.getElementById("closeEventModal");
+  const eventModalSubtitle = document.getElementById("eventModalSubtitle");
+  const eventModalContent = document.getElementById("eventModalContent");
 
-    let selectedFilesByType = {
-      quote: [],
-      invoice: [],
-      recovery: [],
-      supporting: []
-    };
+  let currentUser = null;
+  let currentDossier = null;
+  let dossiers = [];
+  let userProfile = null;
+  let entitlements = [];
+  let uploadedFiles = {
+    quote: [],
+    invoice: [],
+    recovery: [],
+    supporting: []
+  };
+  let timelineEventsCache = [];
+  let editingDossierId = null;
+  let dossierCounter = 0;
 
-    const DOC_TYPE_LABELS = {
-      quote: "Devis / bon de commande",
-      invoice: "Facture impayée",
-      recovery: "Relances déjà faites",
-      supporting: "Autres justificatifs"
-    };
+  let selectedFilesByType = {
+    quote: [],
+    invoice: [],
+    recovery: [],
+    supporting: []
+  };
 
-    const EVENT_STATUS_LABELS = {
-      draft: "Brouillon",
-      to_publish: "À publier",
-      published: "Publié",
-      client_action_required: "Action client",
-      proofs_submitted: "Preuves déposées",
-      reviewed: "Vérifié",
-      closed: "Clôturé"
-    };
+  const DOC_TYPE_LABELS = {
+    quote: "Devis / bon de commande",
+    invoice: "Facture impayée",
+    recovery: "Relances déjà faites",
+    supporting: "Autres justificatifs"
+  };
 
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+  const EVENT_STATUS_LABELS = {
+    draft: "Brouillon",
+    to_publish: "À publier",
+    published: "Publié",
+    client_action_required: "Action requise",
+    proofs_submitted: "Preuves déposées",
+    reviewed: "Vérifié",
+    closed: "Clôturé"
+  };
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "Non renseignée";
+    try {
+      const date = value instanceof Date ? value : new Date(value);
+      if (isNaN(date.getTime())) return String(value);
+      return date.toLocaleDateString("fr-FR");
+    } catch {
+      return String(value);
     }
+  }
 
-    function formatDate(value) {
-      if (!value) return "Non renseignée";
-      try {
-        const date = value instanceof Date ? value : new Date(value);
-        if (isNaN(date.getTime())) return String(value);
-        return date.toLocaleDateString("fr-FR");
-      } catch {
-        return String(value);
-      }
+  function formatDateTime(value) {
+    if (!value) return "Non renseignée";
+    try {
+      const date = value instanceof Date ? value : new Date(value);
+      if (isNaN(date.getTime())) return String(value);
+      return `${date.toLocaleDateString("fr-FR")} à ${date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+    } catch {
+      return String(value);
     }
+  }
 
-    function formatCurrency(value) {
-      const amount = Number(value || 0);
-      return amount.toLocaleString("fr-FR", {
-        style: "currency",
-        currency: "EUR"
-      });
+  function formatCurrency(value) {
+    const amount = Number(value || 0);
+    return amount.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "EUR"
+    });
+  }
+
+  function showFlash(message) {
+    if (!message) return;
+    flashBanner.textContent = message;
+    flashBanner.classList.add("show");
+  }
+
+  function readPaymentParams() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      showFlash("Paiement reçu. Vérifiez maintenant vos accès et votre dossier.");
     }
+  }
 
-    function showFlash(message) {
-      if (!message) return;
-      flashBanner.textContent = message;
-      flashBanner.classList.add("show");
+  function openModal(modal) {
+    if (modal) modal.classList.add("open");
+  }
+
+  function closeModal(modal) {
+    if (modal) modal.classList.remove("open");
+  }
+
+  function getCurrentYear() {
+    return new Date().getFullYear();
+  }
+
+  function getNextDossierNumber() {
+    return String(dossierCounter + 1).padStart(3, "0");
+  }
+
+  function generateDossierRef() {
+    return `AF-${getCurrentYear()}-${getNextDossierNumber()}`;
+  }
+
+  function calculatePrice(amount) {
+    if (amount < 128) return 85;
+    if (amount <= 1280) return 140;
+    return 247;
+  }
+
+  function getStatusMeta(status) {
+    if (status === "active") return { label: "Activé", className: "success" };
+    if (status === "inactive" || status === "cancelled") return { label: "Inactif", className: "danger" };
+    return { label: "À vérifier", className: "warning" };
+  }
+
+  function getPlanMeta(plan) {
+    if (plan === "one_shot_49") return { label: "Option 49 €", className: "neutral" };
+    if (plan === "monthly_89") return { label: "Option 89 €/mois", className: "neutral" };
+    if (userProfile?.isTestAccount) return { label: "Compte test", className: "neutral" };
+    return { label: "Offre inconnue", className: "warning" };
+  }
+
+  function updateTopStatus() {
+    const statusMeta = getStatusMeta(userProfile?.subscriptionStatus);
+    const planMeta = getPlanMeta(userProfile?.plan);
+
+    userStatusPill.textContent = statusMeta.label;
+    userStatusPill.className = `status-pill ${statusMeta.className}`;
+
+    userPlanPill.textContent = planMeta.label;
+    userPlanPill.className = `status-pill ${planMeta.className}`;
+  }
+
+  function isDossierClosable(dossier) {
+    return (dossier?.lifecycleStatus || "open") !== "closed";
+  }
+
+  function normaliseEventStatus(rawStatus, rawCurrentStep) {
+    const status = String(rawStatus || "").toLowerCase();
+
+    if (status === "draft" || status === "brouillon") return "draft";
+    if (status === "published" || status === "publié") return "published";
+    if (status === "client_action_required") return "client_action_required";
+    if (status === "proofs_submitted") return "proofs_submitted";
+    if (status === "reviewed") return "reviewed";
+    if (status === "closed") return "closed";
+
+    if (rawCurrentStep === "published") return "published";
+    if (rawCurrentStep === "client_action_required") return "client_action_required";
+    if (rawCurrentStep === "proofs_submitted") return "proofs_submitted";
+    if (rawCurrentStep === "reviewed") return "reviewed";
+    if (rawCurrentStep === "closed") return "closed";
+
+    return "published";
+  }
+
+  function buildInstructions(event) {
+    if (event.instructions) return String(event.instructions);
+    if (event.clientInstructions) return String(event.clientInstructions);
+    if (event.description) return String(event.description);
+    return "Aucune consigne particulière.";
+  }
+
+  function buildEventDocLabel(event) {
+    return event.documentLabel || event.documentName || event.fileLabel || "Document";
+  }
+
+  function buildEventDocUrl(event) {
+    return event.documentUrl || event.fileUrl || event.url || "";
+  }
+
+  function getRequiredProofs(event) {
+    if (Array.isArray(event.requiredProofs)) {
+      return event.requiredProofs.filter(Boolean).map((x) => String(x));
     }
-
-    function readPaymentParams() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("payment") === "success") {
-        showFlash("Paiement reçu. Vérifiez maintenant vos accès et votre dossier.");
-      }
+    if (typeof event.requiredProofs === "string" && event.requiredProofs.trim()) {
+      return event.requiredProofs.split(",").map((x) => x.trim()).filter(Boolean);
     }
+    return [];
+  }
 
-    function openModal(modal) {
-      if (modal) modal.classList.add("open");
-    }
+  function isPublishedEvent(event) {
+    const s = String(event?.status || "").toLowerCase();
+    return s === "published" || s === "publié" || (!s && !String(event?.title || "").toLowerCase().includes("brouillon"));
+  }
 
-    function closeModal(modal) {
-      if (modal) modal.classList.remove("open");
-    }
+  function eventNeedsClientAction(event) {
+    const proofs = getRequiredProofs(event);
+    return proofs.length > 0;
+  }
 
-    function getCurrentYear() {
-      return new Date().getFullYear();
-    }
+  function isInjunctionEvent(event) {
+    const haystack = [
+      event.type,
+      event.stepType,
+      event.currentStep,
+      event.title,
+      event.label
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-    function getNextDossierNumber() {
-      return String(dossierCounter + 1).padStart(3, "0");
-    }
+    return haystack.includes("injonction") || haystack.includes("injunction");
+  }
 
-    function generateDossierRef() {
-      return `AF-${getCurrentYear()}-${getNextDossierNumber()}`;
-    }
+  function isInjunctionPublished(dossier) {
+    if (!dossier) return false;
 
-    function calculatePrice(amount) {
-      if (amount < 128) return 85;
-      if (amount <= 1280) return 140;
-      return 247;
-    }
-
-    function getStatusMeta(status) {
-      if (status === "active") return { label: "Activé", className: "success" };
-      if (status === "inactive" || status === "cancelled") return { label: "Inactif", className: "danger" };
-      return { label: "À vérifier", className: "warning" };
-    }
-
-    function getPlanMeta(plan) {
-      if (plan === "one_shot_49") return { label: "Option 49 €", className: "neutral" };
-      if (plan === "monthly_89") return { label: "Option 89 €/mois", className: "neutral" };
-      if (userProfile?.isTestAccount) return { label: "Compte test", className: "neutral" };
-      return { label: "Offre inconnue", className: "warning" };
-    }
-
-    function updateTopStatus() {
-      const statusMeta = getStatusMeta(userProfile?.subscriptionStatus);
-      const planMeta = getPlanMeta(userProfile?.plan);
-
-      userStatusPill.textContent = statusMeta.label;
-      userStatusPill.className = `status-pill ${statusMeta.className}`;
-
-      userPlanPill.textContent = planMeta.label;
-      userPlanPill.className = `status-pill ${planMeta.className}`;
-    }
-
-    function isDossierClosable(dossier) {
-      return (dossier?.lifecycleStatus || "open") !== "closed";
-    }
-
-    function normaliseEventStatus(rawStatus, rawCurrentStep) {
-      if (rawStatus && EVENT_STATUS_LABELS[rawStatus]) return rawStatus;
-      if (rawCurrentStep === "published") return "published";
-      if (rawCurrentStep === "client_action_required") return "client_action_required";
-      if (rawCurrentStep === "proofs_submitted") return "proofs_submitted";
-      if (rawCurrentStep === "reviewed") return "reviewed";
-      if (rawCurrentStep === "closed") return "closed";
-      return "published";
-    }
-
-    function buildInstructions(event) {
-      if (event.instructions) return String(event.instructions);
-      if (event.clientInstructions) return String(event.clientInstructions);
-      if (event.description) return String(event.description);
-      return "Aucune consigne particulière.";
-    }
-
-    function buildEventDocLabel(event) {
-      return event.documentLabel || event.documentName || event.fileLabel || "Document";
-    }
-
-    function buildEventDocUrl(event) {
-      return event.documentUrl || event.fileUrl || event.url || "";
-    }
-
-    function isInjunctionPublished(dossier) {
-      if (!dossier) return false;
-
-      if (dossier.currentStep === "injunction_published" || dossier.injunctionPublished === true) {
-        return true;
-      }
-
-      return timelineEventsCache.some((event) => {
-        const haystack = [
-          event.type,
-          event.stepType,
-          event.currentStep,
-          event.title,
-          event.label
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return haystack.includes("injonction") || haystack.includes("injunction");
-      });
-    }
-
-    function setChoiceSectionState(enabled) {
-      if (panelChoice) {
-        panelChoice.style.display = enabled ? "" : "none";
-      }
-
-      validateAutonome.disabled = !enabled;
-      payAssisted.disabled = !enabled;
-
-      if (!enabled) {
-        choiceNotice.textContent = "Disponible après publication de l’injonction.";
-        calculatedPrice.textContent = "—";
-        return;
-      }
-
-      choiceNotice.textContent = "L’injonction est publiée. Vous pouvez choisir la suite.";
-      calculatedPrice.textContent = formatCurrency(calculatePrice(Number(currentDossier?.amountTTC || 0)));
-    }
-
-    function resetSummary() {
-      currentDossier = null;
-      timelineEventsCache = [];
-
-      summaryRef.textContent = "—";
-      amountTTCDisplay.textContent = "—";
-      summaryDebiteur.textContent = "—";
-      summaryType.textContent = "—";
-      summaryInvoice.textContent = "—";
-      summaryStatus.textContent = "—";
-
-      timelineList.innerHTML = `<div class="empty-state">Aucune publication pour le moment.</div>`;
-      setChoiceSectionState(false);
-      refreshUploadStatuses();
-    }
-
-    function updateSummary(dossier) {
-      currentDossier = dossier;
-
-      summaryRef.textContent = dossier.ref || "—";
-      amountTTCDisplay.textContent = formatCurrency(dossier.amountTTC || 0);
-      summaryDebiteur.textContent = dossier.debiteurName || "—";
-      summaryType.textContent = dossier.debiteurType || "—";
-      summaryInvoice.textContent = dossier.dueDate ? formatDate(dossier.dueDate) : (dossier.invoiceRef || "—");
-      summaryStatus.textContent = dossier.statusLabel || dossier.status || "Dossier créé";
-
-      loadFilesForDossier(dossier.id);
-      loadTimelineForDossier(dossier.id);
-    }
-
-    async function ensureUserProfile(user) {
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-
-      if (snap.exists()) {
-        userProfile = snap.data();
-        return;
-      }
-
-      const defaultProfile = {
-        uid: user.uid,
-        email: user.email || "",
-        role: "client",
-        plan: "unknown",
-        subscriptionStatus: "unknown",
-        monthlyQuota: 0,
-        monthlyUsed: 0,
-        isTestAccount: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-
-      await setDoc(userRef, defaultProfile);
-      userProfile = {
-        ...defaultProfile,
-        createdAt: null,
-        updatedAt: null
-      };
-    }
-
-    function isEntitlementUsable(entitlement) {
-      if (!entitlement) return false;
-      if (entitlement.status !== "active") return false;
-
-      const granted = Number(entitlement.grantedCaseCount || 0);
-      const used = Number(entitlement.usedCaseCount || 0);
-      if (used >= granted) return false;
-
-      if (entitlement.validUntil?.toDate) {
-        const validUntil = entitlement.validUntil.toDate();
-        if (validUntil.getTime() < Date.now()) return false;
-      }
-
+    if (dossier.currentStep === "injunction_published" || dossier.injunctionPublished === true) {
       return true;
     }
 
-    function getAvailableEntitlements() {
-      return entitlements.filter(isEntitlementUsable);
+    return timelineEventsCache.some((event) => isPublishedEvent(event) && isInjunctionEvent(event));
+  }
+
+  function setChoiceSectionState(enabled) {
+    if (panelChoice) {
+      panelChoice.style.display = enabled ? "" : "none";
     }
 
-    function getRemainingCredits() {
-      return getAvailableEntitlements().reduce((sum, entitlement) => {
-        const granted = Number(entitlement.grantedCaseCount || 0);
-        const used = Number(entitlement.usedCaseCount || 0);
-        return sum + Math.max(0, granted - used);
-      }, 0);
+    validateAutonome.disabled = !enabled;
+    payAssisted.disabled = !enabled;
+
+    if (!enabled) {
+      choiceNotice.textContent = "Disponible après publication de l’injonction.";
+      calculatedPrice.textContent = "—";
+      return;
     }
 
-    function getMonthlyActiveEntitlements() {
-      return getAvailableEntitlements().filter((item) => item.type === "monthly_89");
+    choiceNotice.textContent = "L’injonction est publiée. Vous pouvez choisir la suite.";
+    calculatedPrice.textContent = formatCurrency(calculatePrice(Number(currentDossier?.amountTTC || 0)));
+  }
+
+  function updateNextActionBox(dossier, events = []) {
+    if (!nextActionBox || !nextActionTitle || !nextActionText) return;
+
+    if (!dossier) {
+      nextActionTitle.textContent = "Ce que vous devez faire maintenant";
+      nextActionText.textContent = "Sélectionnez un dossier pour voir la prochaine action.";
+      nextActionBox.className = "note-box warning";
+      return;
     }
 
-    function getOneShotAvailableEntitlements() {
-      return getAvailableEntitlements().filter((item) => item.type === "one_shot_49");
+    if (isInjunctionPublished(dossier) && !dossier.postOrderChoice) {
+      nextActionTitle.textContent = "Choix attendu";
+      nextActionText.textContent = "L’injonction a été publiée. Choisissez maintenant entre transmission autonome et transmission assistée.";
+      nextActionBox.className = "note-box warning";
+      return;
     }
 
-    function getExtraAvailableEntitlements() {
-      return getAvailableEntitlements().filter((item) => item.type === "extra_case_19");
-    }
-
-    function getBestEntitlementForNewCase() {
-      const available = getAvailableEntitlements();
-      if (!available.length) return null;
-
-      const priority = {
-        monthly_89: 1,
-        extra_case_19: 2,
-        one_shot_49: 3
-      };
-
-      return [...available].sort((a, b) => {
-        const pa = priority[a.type] || 99;
-        const pb = priority[b.type] || 99;
-        if (pa !== pb) return pa - pb;
-
-        const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-        const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-        return aTime - bTime;
+    const actionableEvent = [...events]
+      .filter((event) => isPublishedEvent(event) && eventNeedsClientAction(event))
+      .sort((a, b) => {
+        const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
+        const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
+        return bt - at;
       })[0];
+
+    if (actionableEvent) {
+      const proofs = getRequiredProofs(actionableEvent);
+      nextActionTitle.textContent = "Action requise";
+      nextActionText.textContent =
+        proofs.length
+          ? `${actionableEvent.title || "Étape publiée"} — vous devez agir puis déposer : ${proofs.join(", ")}.`
+          : `${actionableEvent.title || "Étape publiée"} — une action est attendue de votre part.`;
+      nextActionBox.className = "note-box warning";
+      return;
     }
 
-    async function loadEntitlements(uid) {
-      try {
-        const entitlementsRef = collection(db, "users", uid, "entitlements");
-        const q = query(entitlementsRef, orderBy("createdAt", "asc"));
-        const snap = await getDocs(q);
-
-        entitlements = snap.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data()
-        }));
-      } catch (err) {
-        console.error("Erreur loadEntitlements:", err);
-        entitlements = [];
-      }
+    if (!events.length) {
+      nextActionTitle.textContent = "Aucune action immédiate";
+      nextActionText.textContent = "Aucune publication Axe Flow n’a encore été envoyée sur ce dossier.";
+      nextActionBox.className = "note-box soft";
+      return;
     }
 
-    function getCreatePermission() {
-      if (!userProfile) {
-        return { allowed: false, reason: "Chargement du compte.", extraAllowed: false, ctaMode: "none" };
-      }
+    const latestPublished = [...events]
+      .filter(isPublishedEvent)
+      .sort((a, b) => {
+        const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
+        const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
+        return bt - at;
+      })[0];
 
-      if (userProfile.isTestAccount) {
-        return { allowed: true, reason: "Compte test actif.", extraAllowed: false, ctaMode: "create" };
-      }
-
-      const status = userProfile.subscriptionStatus || "unknown";
-      const plan = userProfile.plan || "unknown";
-      const remainingCredits = getRemainingCredits();
-      const hasMonthly = getMonthlyActiveEntitlements().length > 0;
-      const hasOneShot = getOneShotAvailableEntitlements().length > 0;
-      const hasExtra = getExtraAvailableEntitlements().length > 0;
-
-      if (remainingCredits > 0) {
-        if (hasMonthly) return { allowed: true, reason: `Offre Pro active — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-        if (hasExtra) return { allowed: true, reason: `Crédit supplémentaire actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-        if (hasOneShot) return { allowed: true, reason: `Crédit ponctuel actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-        return { allowed: true, reason: `Crédit actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-      }
-
-      if (status !== "active") {
-        return { allowed: false, reason: "Compte non activé ou paiement non synchronisé.", extraAllowed: false, ctaMode: "none" };
-      }
-
-      if (plan === "monthly_89") {
-        return { allowed: false, reason: "Offre Pro active — vos 3 crédits sont utilisés.", extraAllowed: true, ctaMode: "extra" };
-      }
-
-      if (plan === "one_shot_49") {
-        return { allowed: false, reason: "Le crédit ponctuel a déjà été utilisé.", extraAllowed: false, ctaMode: "repurchase_one_shot" };
-      }
-
-      return { allowed: false, reason: "Aucun droit actif pour créer un dossier.", extraAllowed: false, ctaMode: "none" };
+    if (latestPublished) {
+      nextActionTitle.textContent = "Dernière mise à jour";
+      nextActionText.textContent = `${latestPublished.title || "Étape publiée"} — aucune action immédiate n’est demandée pour le moment.`;
+      nextActionBox.className = "note-box success";
+      return;
     }
 
-    function updatePlanSubtitle() {
-      const permission = getCreatePermission();
-      planSubtitle.textContent = permission.reason;
+    nextActionTitle.textContent = "Aucune action immédiate";
+    nextActionText.textContent = "Votre dossier est en cours de traitement.";
+    nextActionBox.className = "note-box soft";
+  }
 
-      createLimitNotice.style.display = "none";
-      extraDossierBox.style.display = "none";
-      repurchaseOneShotBox.style.display = "none";
-      upgradeMonthlyBox.style.display = "none";
+  function resetSummary() {
+    currentDossier = null;
+    timelineEventsCache = [];
 
-      openCreateDossier.disabled = true;
-      openCreateDossier.textContent = "Ajouter un dossier";
+    summaryRef.textContent = "—";
+    amountTTCDisplay.textContent = "—";
+    summaryDebiteur.textContent = "—";
+    summaryType.textContent = "—";
+    summaryInvoice.textContent = "—";
+    summaryStatus.textContent = "—";
 
-      const showMonthlyUpgrade = userProfile && !userProfile.isTestAccount && userProfile.plan !== "monthly_89";
-      if (showMonthlyUpgrade) {
-        upgradeMonthlyBox.style.display = "block";
-      }
+    timelineList.innerHTML = `<div class="empty-state">Aucune publication pour le moment.</div>`;
+    updateNextActionBox(null, []);
+    setChoiceSectionState(false);
+    refreshUploadStatuses();
+  }
 
-      if (permission.allowed) {
-        openCreateDossier.disabled = false;
-        return;
-      }
+  function updateSummary(dossier) {
+    currentDossier = dossier;
 
-      if (permission.ctaMode === "extra") {
-        openCreateDossier.textContent = "Quota atteint";
-        extraDossierBox.style.display = "block";
-        return;
-      }
+    summaryRef.textContent = dossier.ref || "—";
+    amountTTCDisplay.textContent = formatCurrency(dossier.amountTTC || 0);
+    summaryDebiteur.textContent = dossier.debiteurName || "—";
+    summaryType.textContent = dossier.debiteurType || "—";
+    summaryInvoice.textContent = dossier.invoiceRef
+      ? `${dossier.invoiceRef}${dossier.dueDate ? " — " + formatDate(dossier.dueDate) : ""}`
+      : (dossier.dueDate ? formatDate(dossier.dueDate) : "—");
+    summaryStatus.textContent = dossier.statusLabel || dossier.status || "Dossier créé";
 
-      if (permission.ctaMode === "repurchase_one_shot") {
-        createLimitNotice.textContent = permission.reason;
-        createLimitNotice.style.display = "block";
-        repurchaseOneShotBox.style.display = "block";
-        return;
-      }
+    loadFilesForDossier(dossier.id);
+    loadTimelineForDossier(dossier.id);
+  }
 
+  async function ensureUserProfile(user) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      userProfile = snap.data();
+      return;
+    }
+
+    const defaultProfile = {
+      uid: user.uid,
+      email: user.email || "",
+      role: "client",
+      plan: "unknown",
+      subscriptionStatus: "unknown",
+      monthlyQuota: 0,
+      monthlyUsed: 0,
+      isTestAccount: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(userRef, defaultProfile);
+    userProfile = {
+      ...defaultProfile,
+      createdAt: null,
+      updatedAt: null
+    };
+  }
+
+  function isEntitlementUsable(entitlement) {
+    if (!entitlement) return false;
+    if (entitlement.status !== "active") return false;
+
+    const granted = Number(entitlement.grantedCaseCount || 0);
+    const used = Number(entitlement.usedCaseCount || 0);
+    if (used >= granted) return false;
+
+    if (entitlement.validUntil?.toDate) {
+      const validUntil = entitlement.validUntil.toDate();
+      if (validUntil.getTime() < Date.now()) return false;
+    }
+
+    return true;
+  }
+
+  function getAvailableEntitlements() {
+    return entitlements.filter(isEntitlementUsable);
+  }
+
+  function getRemainingCredits() {
+    return getAvailableEntitlements().reduce((sum, entitlement) => {
+      const granted = Number(entitlement.grantedCaseCount || 0);
+      const used = Number(entitlement.usedCaseCount || 0);
+      return sum + Math.max(0, granted - used);
+    }, 0);
+  }
+
+  function getMonthlyActiveEntitlements() {
+    return getAvailableEntitlements().filter((item) => item.type === "monthly_89");
+  }
+
+  function getOneShotAvailableEntitlements() {
+    return getAvailableEntitlements().filter((item) => item.type === "one_shot_49");
+  }
+
+  function getExtraAvailableEntitlements() {
+    return getAvailableEntitlements().filter((item) => item.type === "extra_case_19");
+  }
+
+  function getBestEntitlementForNewCase() {
+    const available = getAvailableEntitlements();
+    if (!available.length) return null;
+
+    const priority = {
+      monthly_89: 1,
+      extra_case_19: 2,
+      one_shot_49: 3
+    };
+
+    return [...available].sort((a, b) => {
+      const pa = priority[a.type] || 99;
+      const pb = priority[b.type] || 99;
+      if (pa !== pb) return pa - pb;
+
+      const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      return aTime - bTime;
+    })[0];
+  }
+
+  async function loadEntitlements(uid) {
+    try {
+      const entitlementsRef = collection(db, "users", uid, "entitlements");
+      const q = query(entitlementsRef, orderBy("createdAt", "asc"));
+      const snap = await getDocs(q);
+
+      entitlements = snap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+    } catch (err) {
+      console.error("Erreur loadEntitlements:", err);
+      entitlements = [];
+    }
+  }
+
+  function getCreatePermission() {
+    if (!userProfile) {
+      return { allowed: false, reason: "Chargement du compte.", extraAllowed: false, ctaMode: "none" };
+    }
+
+    if (userProfile.isTestAccount) {
+      return { allowed: true, reason: "Compte test actif.", extraAllowed: false, ctaMode: "create" };
+    }
+
+    const status = userProfile.subscriptionStatus || "unknown";
+    const plan = userProfile.plan || "unknown";
+    const remainingCredits = getRemainingCredits();
+    const hasMonthly = getMonthlyActiveEntitlements().length > 0;
+    const hasOneShot = getOneShotAvailableEntitlements().length > 0;
+    const hasExtra = getExtraAvailableEntitlements().length > 0;
+
+    if (remainingCredits > 0) {
+      if (hasMonthly) return { allowed: true, reason: `Offre Pro active — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
+      if (hasExtra) return { allowed: true, reason: `Crédit supplémentaire actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
+      if (hasOneShot) return { allowed: true, reason: `Crédit ponctuel actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
+      return { allowed: true, reason: `Crédit actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
+    }
+
+    if (status !== "active") {
+      return { allowed: false, reason: "Compte non activé ou paiement non synchronisé.", extraAllowed: false, ctaMode: "none" };
+    }
+
+    if (plan === "monthly_89") {
+      return { allowed: false, reason: "Offre Pro active — vos 3 crédits sont utilisés.", extraAllowed: true, ctaMode: "extra" };
+    }
+
+    if (plan === "one_shot_49") {
+      return { allowed: false, reason: "Le crédit ponctuel a déjà été utilisé.", extraAllowed: false, ctaMode: "repurchase_one_shot" };
+    }
+
+    return { allowed: false, reason: "Aucun droit actif pour créer un dossier.", extraAllowed: false, ctaMode: "none" };
+  }
+
+  function updatePlanSubtitle() {
+    const permission = getCreatePermission();
+    planSubtitle.textContent = permission.reason;
+
+    createLimitNotice.style.display = "none";
+    extraDossierBox.style.display = "none";
+    repurchaseOneShotBox.style.display = "none";
+    upgradeMonthlyBox.style.display = "none";
+
+    openCreateDossier.disabled = true;
+    openCreateDossier.textContent = "Ajouter un dossier";
+
+    const showMonthlyUpgrade = userProfile && !userProfile.isTestAccount && userProfile.plan !== "monthly_89";
+    if (showMonthlyUpgrade) {
+      upgradeMonthlyBox.style.display = "block";
+    }
+
+    if (permission.allowed) {
+      openCreateDossier.disabled = false;
+      return;
+    }
+
+    if (permission.ctaMode === "extra") {
+      openCreateDossier.textContent = "Quota atteint";
+      extraDossierBox.style.display = "block";
+      return;
+    }
+
+    if (permission.ctaMode === "repurchase_one_shot") {
       createLimitNotice.textContent = permission.reason;
       createLimitNotice.style.display = "block";
+      repurchaseOneShotBox.style.display = "block";
+      return;
     }
 
-    async function loadDossiers(uid) {
-      try {
-        const dossiersRef = collection(db, "users", uid, "requests");
-        const q = query(dossiersRef, orderBy("createdAt", "asc"));
-        const snap = await getDocs(q);
+    createLimitNotice.textContent = permission.reason;
+    createLimitNotice.style.display = "block";
+  }
 
-        dossiers = snap.docs.map((docSnap) => {
-          const data = docSnap.data();
-          return {
-            id: docSnap.id,
-            ...data,
-            statusLabel: data.statusLabel || "Dossier créé"
-          };
-        });
+  async function loadDossiers(uid) {
+    try {
+      const dossiersRef = collection(db, "users", uid, "requests");
+      const q = query(dossiersRef, orderBy("createdAt", "asc"));
+      const snap = await getDocs(q);
 
-        dossierCounter = dossiers.length;
-        renderDossiers();
-        updatePlanSubtitle();
+      dossiers = snap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          statusLabel: data.statusLabel || "Dossier créé"
+        };
+      });
 
-        if (!dossiers.length) {
-          resetSummary();
-          return;
-        }
-
-        const selectedStillExists = currentDossier && dossiers.find((d) => d.id === currentDossier.id);
-        updateSummary(selectedStillExists || dossiers[0]);
-        renderDossiers();
-      } catch (err) {
-        console.error("Erreur loadDossiers:", err);
-        dossierList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
-        resetSummary();
-      }
-    }
-
-    function renderDossiers() {
-      dossierList.innerHTML = "";
+      dossierCounter = dossiers.length;
+      renderDossiers();
+      updatePlanSubtitle();
 
       if (!dossiers.length) {
-        dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé.</div>`;
+        resetSummary();
         return;
       }
 
-      dossiers.forEach((dossier) => {
-        const card = document.createElement("div");
-        card.className = "dossier-card" + (currentDossier && currentDossier.id === dossier.id ? " active" : "");
+      const selectedStillExists = currentDossier && dossiers.find((d) => d.id === currentDossier.id);
+      updateSummary(selectedStillExists || dossiers[0]);
+      renderDossiers();
+    } catch (err) {
+      console.error("Erreur loadDossiers:", err);
+      dossierList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
+      resetSummary();
+    }
+  }
 
-        let badgeClass = "warning";
-        let badgeText = dossier.statusLabel || "En cours";
+  function renderDossiers() {
+    dossierList.innerHTML = "";
 
-        if (dossier.injunctionPublished === true || dossier.currentStep === "injunction_published") {
-          badgeClass = "included";
-          badgeText = "Injonction publiée";
-        }
-
-        if ((dossier.postOrderChoice || "") === "client_bailiff") {
-          badgeClass = "warning";
-          badgeText = "Transmission autonome";
-        }
-
-        const canEdit = isDossierClosable(dossier);
-
-        card.innerHTML = `
-          <div>
-            <strong>${escapeHtml(dossier.ref || "Sans référence")}</strong>
-            <span>${escapeHtml(dossier.debiteurName || "Débiteur non renseigné")}</span>
-            <span>${escapeHtml(formatCurrency(dossier.amountTTC || 0))}</span>
-          </div>
-
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-            <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
-            ${canEdit ? `<button class="btn btn-secondary" type="button" data-edit-dossier="${escapeHtml(dossier.id)}">Modifier le dossier</button>` : ``}
-          </div>
-        `;
-
-        card.addEventListener("click", () => {
-          updateSummary(dossier);
-          renderDossiers();
-        });
-
-        dossierList.appendChild(card);
-      });
-
-      dossierList.querySelectorAll("[data-edit-dossier]").forEach((button) => {
-        button.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const dossierId = button.dataset.editDossier;
-          const dossier = dossiers.find((d) => d.id === dossierId);
-          if (!dossier) return;
-          prepareCreateForm(dossier);
-          openModal(createDossierModal);
-        });
-      });
+    if (!dossiers.length) {
+      dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé.</div>`;
+      return;
     }
 
-    function prepareCreateForm(dossier = null) {
-      if (dossier) {
-        editingDossierId = dossier.id;
-        createDossierTitle.textContent = "Modifier le dossier";
-        dossierLabelInput.value = dossier.label || "";
-        dossierRefInput.value = dossier.ref || "";
-        debiteurTypeInput.value = dossier.debiteurType || "professionnel";
-        amountTTCInput.value = dossier.amountTTC || "";
-        debiteurNameInput.value = dossier.debiteurName || "";
-        invoiceRefInput.value = dossier.invoiceRef || "";
-        dueDateInput.value = dossier.dueDate || "";
-        dossierSummaryInput.value = dossier.dossierSummary || "";
-        return;
+    dossiers.forEach((dossier) => {
+      const card = document.createElement("div");
+      card.className = "dossier-card" + (currentDossier && currentDossier.id === dossier.id ? " active" : "");
+
+      let badgeClass = "warning";
+      let badgeText = dossier.statusLabel || "En cours";
+
+      if (dossier.clientActionRequired === true) {
+        badgeClass = "danger";
+        badgeText = "Action requise";
+      } else if (dossier.injunctionPublished === true || dossier.currentStep === "injunction_published") {
+        badgeClass = "included";
+        badgeText = "Injonction publiée";
+      } else if ((dossier.postOrderChoice || "") === "client_bailiff") {
+        badgeClass = "warning";
+        badgeText = "Transmission autonome";
       }
 
-      editingDossierId = null;
-      createDossierTitle.textContent = "Ajouter un dossier";
-      dossierLabelInput.value = `Dossier ${dossierCounter + 1}`;
-      dossierRefInput.value = generateDossierRef();
-      debiteurTypeInput.value = "professionnel";
-      amountTTCInput.value = "";
-      debiteurNameInput.value = "";
-      invoiceRefInput.value = "";
-      dueDateInput.value = "";
-      dossierSummaryInput.value = "";
+      const canEdit = isDossierClosable(dossier);
+
+      card.innerHTML = `
+        <div>
+          <strong>${escapeHtml(dossier.ref || "Sans référence")}</strong>
+          <span>${escapeHtml(dossier.debiteurName || "Débiteur non renseigné")}</span>
+          <span>${escapeHtml(formatCurrency(dossier.amountTTC || 0))}</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
+          ${canEdit ? `<button class="btn btn-secondary" type="button" data-edit-dossier="${escapeHtml(dossier.id)}">Modifier le dossier</button>` : ``}
+        </div>
+      `;
+
+      card.addEventListener("click", () => {
+        updateSummary(dossier);
+        renderDossiers();
+      });
+
+      dossierList.appendChild(card);
+    });
+
+    dossierList.querySelectorAll("[data-edit-dossier]").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dossierId = button.dataset.editDossier;
+        const dossier = dossiers.find((d) => d.id === dossierId);
+        if (!dossier) return;
+        prepareCreateForm(dossier);
+        openModal(createDossierModal);
+      });
+    });
+  }
+
+  function prepareCreateForm(dossier = null) {
+    if (dossier) {
+      editingDossierId = dossier.id;
+      createDossierTitle.textContent = "Modifier le dossier";
+      dossierLabelInput.value = dossier.label || "";
+      dossierRefInput.value = dossier.ref || "";
+      debiteurTypeInput.value = dossier.debiteurType || "professionnel";
+      amountTTCInput.value = dossier.amountTTC || "";
+      debiteurNameInput.value = dossier.debiteurName || "";
+      invoiceRefInput.value = dossier.invoiceRef || "";
+      dueDateInput.value = dossier.dueDate || "";
+      dossierSummaryInput.value = dossier.dossierSummary || "";
+      return;
     }
 
-    async function createOrUpdateDossier(e) {
-      e.preventDefault();
+    editingDossierId = null;
+    createDossierTitle.textContent = "Ajouter un dossier";
+    dossierLabelInput.value = `Dossier ${dossierCounter + 1}`;
+    dossierRefInput.value = generateDossierRef();
+    debiteurTypeInput.value = "professionnel";
+    amountTTCInput.value = "";
+    debiteurNameInput.value = "";
+    invoiceRefInput.value = "";
+    dueDateInput.value = "";
+    dossierSummaryInput.value = "";
+  }
 
-      if (!currentUser) {
-        alert("Utilisateur non connecté.");
-        return;
-      }
+  async function createOrUpdateDossier(e) {
+    e.preventDefault();
 
-      const ref = dossierRefInput.value.trim();
-      const label = dossierLabelInput.value.trim();
-      const debiteurType = debiteurTypeInput.value.trim();
-      const amountTTC = Number(amountTTCInput.value || 0);
-      const debiteurName = debiteurNameInput.value.trim();
-      const invoiceRef = invoiceRefInput.value.trim();
-      const dueDate = dueDateInput.value || "";
-      const dossierSummary = dossierSummaryInput.value.trim();
+    if (!currentUser) {
+      alert("Utilisateur non connecté.");
+      return;
+    }
 
-      if (!ref || !label || !debiteurType || !debiteurName || !amountTTC) {
-        alert("Complète les champs obligatoires.");
-        return;
-      }
+    const ref = dossierRefInput.value.trim();
+    const label = dossierLabelInput.value.trim();
+    const debiteurType = debiteurTypeInput.value.trim();
+    const amountTTC = Number(amountTTCInput.value || 0);
+    const debiteurName = debiteurNameInput.value.trim();
+    const invoiceRef = invoiceRefInput.value.trim();
+    const dueDate = dueDateInput.value || "";
+    const dossierSummary = dossierSummaryInput.value.trim();
 
-      try {
-        if (editingDossierId) {
-          const requestRef = doc(db, "users", currentUser.uid, "requests", editingDossierId);
+    if (!ref || !label || !debiteurType || !debiteurName || !amountTTC) {
+      alert("Complète les champs obligatoires.");
+      return;
+    }
 
-          await updateDoc(requestRef, {
-            label,
-            debiteurType,
-            amountTTC,
-            debiteurName,
-            invoiceRef,
-            dueDate,
-            dossierSummary,
-            updatedAt: serverTimestamp()
-          });
+    try {
+      if (editingDossierId) {
+        const requestRef = doc(db, "users", currentUser.uid, "requests", editingDossierId);
 
-          closeModal(createDossierModal);
-          createDossierForm.reset();
-          editingDossierId = null;
-
-          await loadDossiers(currentUser.uid);
-          return;
-        }
-
-        const permission = getCreatePermission();
-        if (!permission.allowed) {
-          alert(permission.reason);
-          return;
-        }
-
-        const chosenEntitlement = getBestEntitlementForNewCase();
-        if (!chosenEntitlement) {
-          alert("Aucun droit disponible.");
-          return;
-        }
-
-        const entitlementRef = doc(db, "users", currentUser.uid, "entitlements", chosenEntitlement.id);
-        const requestsColRef = collection(db, "users", currentUser.uid, "requests");
-        const newRequestRef = doc(requestsColRef);
-
-        await runTransaction(db, async (transaction) => {
-          const entitlementSnap = await transaction.get(entitlementRef);
-          if (!entitlementSnap.exists()) {
-            throw new Error("Droit introuvable.");
-          }
-
-          const entitlementData = entitlementSnap.data();
-          const granted = Number(entitlementData.grantedCaseCount || 0);
-          const used = Number(entitlementData.usedCaseCount || 0);
-
-          if (entitlementData.status !== "active" || used >= granted) {
-            throw new Error("Aucun crédit disponible.");
-          }
-
-          if (entitlementData.validUntil?.toDate) {
-            const validUntil = entitlementData.validUntil.toDate();
-            if (validUntil.getTime() < Date.now()) {
-              throw new Error("Ce droit a expiré.");
-            }
-          }
-
-          transaction.set(newRequestRef, {
-            ref,
-            label,
-            debiteurType,
-            amountTTC,
-            debiteurName,
-            invoiceRef,
-            dueDate,
-            dossierSummary,
-            status: "new",
-            statusLabel: "Dossier créé",
-            currentStep: "new",
-            injunctionPublished: false,
-            entitlementId: chosenEntitlement.id,
-            offerType: entitlementData.type || chosenEntitlement.type || "unknown",
-            clientUid: currentUser.uid,
-            lifecycleStatus: "open",
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-
-          transaction.update(entitlementRef, {
-            usedCaseCount: used + 1,
-            updatedAt: serverTimestamp()
-          });
+        await updateDoc(requestRef, {
+          label,
+          debiteurType,
+          amountTTC,
+          debiteurName,
+          invoiceRef,
+          dueDate,
+          dossierSummary,
+          updatedAt: serverTimestamp()
         });
 
         closeModal(createDossierModal);
         createDossierForm.reset();
+        editingDossierId = null;
 
-        await loadEntitlements(currentUser.uid);
         await loadDossiers(currentUser.uid);
-      } catch (err) {
-        console.error("Erreur createOrUpdateDossier:", err);
-        alert(err?.message || "Impossible d’enregistrer le dossier.");
-      }
-    }
-
-    function startCheckoutLink(url) {
-      if (!currentUser) {
-        window.location.href = "connexion.html";
         return;
       }
 
-      if (!url) {
-        alert("Lien Stripe manquant.");
+      const permission = getCreatePermission();
+      if (!permission.allowed) {
+        alert(permission.reason);
         return;
       }
 
-      window.location.href = url;
-    }
-
-    function handleExtraDossierPayment() {
-      startCheckoutLink(STRIPE_LINKS.extra_case_19);
-    }
-
-    function handleOneShotRepurchase() {
-      startCheckoutLink(STRIPE_LINKS.one_shot_49);
-    }
-
-    function handleMonthlySubscription() {
-      startCheckoutLink(STRIPE_LINKS.monthly_89);
-    }
-
-    function getAssistedStripeLink(amount) {
-      if (amount < 128) return STRIPE_LINKS.assisted_85;
-      if (amount <= 1280) return STRIPE_LINKS.assisted_140;
-      return STRIPE_LINKS.assisted_247;
-    }
-
-    function getAssistedUrgentStripeLink(amount) {
-      if (amount < 128) return STRIPE_LINKS.assisted_175;
-      if (amount <= 1280) return STRIPE_LINKS.assisted_230;
-      return STRIPE_LINKS.assisted_337;
-    }
-
-    function handleAssistedPayment() {
-      if (!currentDossier || !isInjunctionPublished(currentDossier)) {
-        alert("Le paiement assisté n’est disponible qu’après publication de l’injonction.");
+      const chosenEntitlement = getBestEntitlementForNewCase();
+      if (!chosenEntitlement) {
+        alert("Aucun droit disponible.");
         return;
       }
 
-      const amount = Number(currentDossier.amountTTC || 0);
-      const stripeLink = getAssistedStripeLink(amount);
-      startCheckoutLink(stripeLink);
-    }
+      const entitlementRef = doc(db, "users", currentUser.uid, "entitlements", chosenEntitlement.id);
+      const requestsColRef = collection(db, "users", currentUser.uid, "requests");
+      const newRequestRef = doc(requestsColRef);
 
-    async function loadFilesForDossier(dossierId) {
-      if (!currentUser || !dossierId) {
-        uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
-        refreshUploadStatuses();
-        return;
-      }
+      await runTransaction(db, async (transaction) => {
+        const entitlementSnap = await transaction.get(entitlementRef);
+        if (!entitlementSnap.exists()) {
+          throw new Error("Droit introuvable.");
+        }
 
-      try {
-        const filesRef = collection(db, "users", currentUser.uid, "requests", dossierId, "files");
-        const snap = await getDocs(filesRef);
+        const entitlementData = entitlementSnap.data();
+        const granted = Number(entitlementData.grantedCaseCount || 0);
+        const used = Number(entitlementData.usedCaseCount || 0);
 
-        uploadedFiles = {
-          quote: [],
-          invoice: [],
-          recovery: [],
-          supporting: []
-        };
+        if (entitlementData.status !== "active" || used >= granted) {
+          throw new Error("Aucun crédit disponible.");
+        }
 
-        snap.docs.forEach((docSnap) => {
-          const data = docSnap.data();
-          const docType = data.docType || "supporting";
-          if (!uploadedFiles[docType]) uploadedFiles[docType] = [];
-          uploadedFiles[docType].push({
-            id: docSnap.id,
-            ...data
-          });
+        if (entitlementData.validUntil?.toDate) {
+          const validUntil = entitlementData.validUntil.toDate();
+          if (validUntil.getTime() < Date.now()) {
+            throw new Error("Ce droit a expiré.");
+          }
+        }
+
+        transaction.set(newRequestRef, {
+          ref,
+          label,
+          debiteurType,
+          amountTTC,
+          debiteurName,
+          invoiceRef,
+          dueDate,
+          dossierSummary,
+          status: "new",
+          statusLabel: "Dossier créé",
+          currentStep: "new",
+          injunctionPublished: false,
+          entitlementId: chosenEntitlement.id,
+          offerType: entitlementData.type || chosenEntitlement.type || "unknown",
+          clientUid: currentUser.uid,
+          lifecycleStatus: "open",
+          paymentStatus: "paid",
+          clientHasNewFiles: false,
+          clientActionRequired: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
         });
 
-        refreshUploadStatuses();
-      } catch (err) {
-        console.error("Erreur loadFilesForDossier:", err);
-        uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
-        refreshUploadStatuses();
-      }
-    }
-
-    function refreshUploadStatuses() {
-      Object.keys(DOC_TYPE_LABELS).forEach((docType) => {
-        const statusEl = document.getElementById(`status-${docType}`);
-        if (!statusEl) return;
-
-        if (!currentDossier) {
-          statusEl.textContent = "Sélectionne d’abord un dossier.";
-          statusEl.className = "file-status";
-          return;
-        }
-
-        const selectedCount = selectedFilesByType[docType]?.length || 0;
-        const sentCount = uploadedFiles[docType]?.length || 0;
-
-        if (selectedCount > 0) {
-          statusEl.textContent = `${selectedCount} fichier(s) sélectionné(s) — ${sentCount} déjà envoyé(s).`;
-          statusEl.className = "file-status";
-          return;
-        }
-
-        if (sentCount > 0) {
-          statusEl.textContent = `${sentCount} fichier(s) envoyé(s).`;
-          statusEl.className = "file-status ok";
-          return;
-        }
-
-        statusEl.textContent = "Aucun fichier envoyé.";
-        statusEl.className = "file-status";
+        transaction.update(entitlementRef, {
+          usedCaseCount: used + 1,
+          updatedAt: serverTimestamp()
+        });
       });
+
+      closeModal(createDossierModal);
+      createDossierForm.reset();
+
+      await loadEntitlements(currentUser.uid);
+      await loadDossiers(currentUser.uid);
+    } catch (err) {
+      console.error("Erreur createOrUpdateDossier:", err);
+      alert(err?.message || "Impossible d’enregistrer le dossier.");
+    }
+  }
+
+  function startCheckoutLink(url) {
+    if (!currentUser) {
+      window.location.href = "connexion.html";
+      return;
     }
 
-    function handleFileSelection(event) {
-      const docType = event.target.dataset.docTypeInput;
-      selectedFilesByType[docType] = Array.from(event.target.files || []);
+    if (!url) {
+      alert("Lien Stripe manquant.");
+      return;
+    }
+
+    window.location.href = url;
+  }
+
+  function handleExtraDossierPayment() {
+    startCheckoutLink(STRIPE_LINKS.extra_case_19);
+  }
+
+  function handleOneShotRepurchase() {
+    startCheckoutLink(STRIPE_LINKS.one_shot_49);
+  }
+
+  function handleMonthlySubscription() {
+    startCheckoutLink(STRIPE_LINKS.monthly_89);
+  }
+
+  function getAssistedStripeLink(amount) {
+    if (amount < 128) return STRIPE_LINKS.assisted_85;
+    if (amount <= 1280) return STRIPE_LINKS.assisted_140;
+    return STRIPE_LINKS.assisted_247;
+  }
+
+  function handleAssistedPayment() {
+    if (!currentDossier || !isInjunctionPublished(currentDossier)) {
+      alert("Le paiement assisté n’est disponible qu’après publication de l’injonction.");
+      return;
+    }
+
+    const amount = Number(currentDossier.amountTTC || 0);
+    const stripeLink = getAssistedStripeLink(amount);
+    startCheckoutLink(stripeLink);
+  }
+
+  async function loadFilesForDossier(dossierId) {
+    if (!currentUser || !dossierId) {
+      uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
+      refreshUploadStatuses();
+      return;
+    }
+
+    try {
+      const filesRef = collection(db, "users", currentUser.uid, "requests", dossierId, "files");
+      const snap = await getDocs(filesRef);
+
+      uploadedFiles = {
+        quote: [],
+        invoice: [],
+        recovery: [],
+        supporting: []
+      };
+
+      snap.docs.forEach((docSnap) => {
+        const data = docSnap.data();
+        const docType = data.docType || "supporting";
+        if (!uploadedFiles[docType]) uploadedFiles[docType] = [];
+        uploadedFiles[docType].push({
+          id: docSnap.id,
+          ...data
+        });
+      });
+
+      refreshUploadStatuses();
+    } catch (err) {
+      console.error("Erreur loadFilesForDossier:", err);
+      uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
       refreshUploadStatuses();
     }
-
-   async function handleFileSend(docType) {
-  if (!currentUser) {
-    alert("Utilisateur non connecté.");
-    return;
   }
 
-  if (!currentDossier) {
-    alert("Sélectionne d’abord un dossier.");
-    return;
-  }
-
-  const files = selectedFilesByType[docType] || [];
-  if (!files.length) {
-    alert("Sélectionne au moins un fichier.");
-    return;
-  }
-
-  const sendBtn = document.querySelector(`[data-upload-send="${docType}"]`);
-  const viewBtn = document.querySelector(`[data-upload-view="${docType}"]`);
-  const deleteBtn = document.querySelector(`[data-upload-delete="${docType}"]`);
-  const statusEl = document.getElementById(`status-${docType}`);
-
-  const originalSendText = sendBtn ? sendBtn.textContent : "Envoyer";
-
-  try {
-    if (sendBtn) {
-      sendBtn.disabled = true;
-      sendBtn.textContent = "Envoi...";
-    }
-    if (viewBtn) viewBtn.disabled = true;
-    if (deleteBtn) deleteBtn.disabled = true;
-    if (statusEl) {
-      statusEl.textContent = "Envoi en cours...";
-      statusEl.className = "file-status";
-    }
-
-    for (const file of files) {
-      const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
-      const fullPath = `users/${currentUser.uid}/requests/${currentDossier.id}/${docType}/${safeName}`;
-      const fileRef = storageRef(storage, fullPath);
-
-      await uploadBytes(fileRef, file);
-      const downloadURL = await getDownloadURL(fileRef);
-
-      await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "files"), {
-        docType,
-        name: file.name,
-        path: fullPath,
-        url: downloadURL,
-        size: file.size,
-        contentType: file.type || "",
-        createdAt: serverTimestamp()
-      });
-    }
-
-    selectedFilesByType[docType] = [];
-    const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
-    if (input) input.value = "";
-
-    await loadFilesForDossier(currentDossier.id);
-    alert("Fichier(s) envoyé(s).");
-  } catch (err) {
-    console.error("Erreur handleFileSend:", err);
-    if (statusEl) {
-      statusEl.textContent = "Erreur pendant l’envoi.";
-      statusEl.className = "file-status";
-    }
-    alert("Impossible d’envoyer les fichiers.");
-  } finally {
-    if (sendBtn) {
-      sendBtn.disabled = false;
-      sendBtn.textContent = originalSendText;
-    }
-    if (viewBtn) viewBtn.disabled = false;
-    if (deleteBtn) deleteBtn.disabled = false;
-  }
-}
-
-    async function deleteFileEntry(file) {
-      if (!currentUser || !currentDossier || !file?.id) return;
-
-      if (file.path) {
-        const fileRef = storageRef(storage, file.path);
-        await deleteObject(fileRef).catch(() => {});
-      }
-
-      const fileDocRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id, "files", file.id);
-      await deleteDoc(fileDocRef);
-    }
-
-    async function handleDeleteFilesByType(docType) {
-      if (!currentUser) {
-        alert("Utilisateur non connecté.");
-        return;
-      }
+  function refreshUploadStatuses() {
+    Object.keys(DOC_TYPE_LABELS).forEach((docType) => {
+      const statusEl = document.getElementById(`status-${docType}`);
+      if (!statusEl) return;
 
       if (!currentDossier) {
-        alert("Sélectionne d’abord un dossier.");
+        statusEl.textContent = "Sélectionne d’abord un dossier.";
+        statusEl.className = "file-status";
         return;
       }
 
-      const files = uploadedFiles[docType] || [];
-      const selected = selectedFilesByType[docType] || [];
+      const selectedCount = selectedFilesByType[docType]?.length || 0;
+      const sentCount = uploadedFiles[docType]?.length || 0;
 
-      if (!files.length && !selected.length) {
-        alert("Aucun fichier à supprimer.");
+      if (selectedCount > 0) {
+        statusEl.textContent = `${selectedCount} fichier(s) sélectionné(s) — ${sentCount} déjà envoyé(s).`;
+        statusEl.className = "file-status";
         return;
       }
 
-      const ok = confirm(`Supprimer les fichiers de la catégorie "${DOC_TYPE_LABELS[docType]}" ?`);
-      if (!ok) return;
-
-      try {
-        for (const file of files) {
-          await deleteFileEntry(file);
-        }
-
-        selectedFilesByType[docType] = [];
-        const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
-        if (input) input.value = "";
-
-        await loadFilesForDossier(currentDossier.id);
-        alert("Fichier(s) supprimé(s).");
-      } catch (err) {
-        console.error("Erreur handleDeleteFilesByType:", err);
-        alert("Impossible de supprimer les fichiers.");
+      if (sentCount > 0) {
+        statusEl.textContent = `${sentCount} fichier(s) envoyé(s).`;
+        statusEl.className = "file-status ok";
+        return;
       }
+
+      statusEl.textContent = "Aucun fichier envoyé.";
+      statusEl.className = "file-status";
+    });
+  }
+
+  function handleFileSelection(event) {
+    const docType = event.target.dataset.docTypeInput;
+    selectedFilesByType[docType] = Array.from(event.target.files || []);
+    refreshUploadStatuses();
+  }
+
+  async function handleFileSend(docType) {
+    if (!currentUser) {
+      alert("Utilisateur non connecté.");
+      return;
     }
 
-    function openFilesModalForType(docType) {
-      if (!currentDossier) {
-        alert("Sélectionne d’abord un dossier.");
-        return;
+    if (!currentDossier) {
+      alert("Sélectionne d’abord un dossier.");
+      return;
+    }
+
+    const files = selectedFilesByType[docType] || [];
+    if (!files.length) {
+      alert("Sélectionne au moins un fichier.");
+      return;
+    }
+
+    const sendBtn = document.querySelector(`[data-upload-send="${docType}"]`);
+    const viewBtn = document.querySelector(`[data-upload-view="${docType}"]`);
+    const deleteBtn = document.querySelector(`[data-upload-delete="${docType}"]`);
+    const statusEl = document.getElementById(`status-${docType}`);
+
+    const originalSendText = sendBtn ? sendBtn.textContent : "Envoyer";
+
+    try {
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = "Envoi...";
+      }
+      if (viewBtn) viewBtn.disabled = true;
+      if (deleteBtn) deleteBtn.disabled = true;
+      if (statusEl) {
+        statusEl.textContent = "Envoi en cours...";
+        statusEl.className = "file-status";
       }
 
-      const files = uploadedFiles[docType] || [];
-      filesModalSubtitle.textContent = `${DOC_TYPE_LABELS[docType]} — ${currentDossier.ref || "Dossier"}`;
-      fileListContainer.innerHTML = "";
+      for (const file of files) {
+        const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
+        const fullPath = `users/${currentUser.uid}/requests/${currentDossier.id}/${docType}/${safeName}`;
+        const fileRef = storageRef(storage, fullPath);
 
-      if (!files.length) {
-        fileListContainer.innerHTML = `<div class="empty-state">Aucun fichier trouvé.</div>`;
-        openModal(filesModal);
-        return;
-      }
+        await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(fileRef);
 
-      files.forEach((file) => {
-        const item = document.createElement("div");
-        item.className = "file-item";
-        item.innerHTML = `
-          <div>
-            <strong>${escapeHtml(file.name || "Fichier")}</strong>
-            <span>${escapeHtml(formatDate(file.createdAt?.toDate ? file.createdAt.toDate() : file.createdAt))}</span>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a class="btn btn-secondary" href="${escapeHtml(file.url || "#")}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
-            <button class="btn btn-danger" type="button" data-delete-file="${escapeHtml(file.id)}">Supprimer</button>
-          </div>
-        `;
-        fileListContainer.appendChild(item);
-      });
-
-      fileListContainer.querySelectorAll("[data-delete-file]").forEach((button) => {
-        button.addEventListener("click", async () => {
-          const fileId = button.dataset.deleteFile;
-          const file = (uploadedFiles[docType] || []).find((f) => f.id === fileId);
-          if (!file) return;
-
-          const ok = confirm(`Supprimer "${file.name || "ce fichier"}" ?`);
-          if (!ok) return;
-
-          try {
-            await deleteFileEntry(file);
-            await loadFilesForDossier(currentDossier.id);
-            openFilesModalForType(docType);
-          } catch (err) {
-            console.error("Erreur suppression fichier modal:", err);
-            alert("Impossible de supprimer ce fichier.");
-          }
+        await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "files"), {
+          docType,
+          name: file.name,
+          path: fullPath,
+          url: downloadURL,
+          size: file.size,
+          contentType: file.type || "",
+          createdAt: serverTimestamp()
         });
+      }
+
+      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
+      await updateDoc(requestRef, {
+        clientHasNewFiles: true,
+        clientLastUploadAt: serverTimestamp(),
+        clientFilesUpdatedAt: serverTimestamp(),
+        clientStatus: "Pièces reçues",
+        internalStatus: "À qualifier",
+        updatedAt: serverTimestamp()
       });
 
-      openModal(filesModal);
+      selectedFilesByType[docType] = [];
+      const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
+      if (input) input.value = "";
+
+      await loadFilesForDossier(currentDossier.id);
+      await loadDossiers(currentUser.uid);
+      alert("Fichier(s) envoyé(s).");
+    } catch (err) {
+      console.error("Erreur handleFileSend:", err);
+      if (statusEl) {
+        statusEl.textContent = "Erreur pendant l’envoi.";
+        statusEl.className = "file-status";
+      }
+      alert("Impossible d’envoyer les fichiers.");
+    } finally {
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = originalSendText;
+      }
+      if (viewBtn) viewBtn.disabled = false;
+      if (deleteBtn) deleteBtn.disabled = false;
+    }
+  }
+
+  async function deleteFileEntry(file) {
+    if (!currentUser || !currentDossier || !file?.id) return;
+
+    if (file.path) {
+      const fileRef = storageRef(storage, file.path);
+      await deleteObject(fileRef).catch(() => {});
     }
 
-    async function loadTimelineForDossier(dossierId) {
-      if (!currentUser || !dossierId) {
+    const fileDocRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id, "files", file.id);
+    await deleteDoc(fileDocRef);
+  }
+
+  async function handleDeleteFilesByType(docType) {
+    if (!currentUser) {
+      alert("Utilisateur non connecté.");
+      return;
+    }
+
+    if (!currentDossier) {
+      alert("Sélectionne d’abord un dossier.");
+      return;
+    }
+
+    const files = uploadedFiles[docType] || [];
+    const selected = selectedFilesByType[docType] || [];
+
+    if (!files.length && !selected.length) {
+      alert("Aucun fichier à supprimer.");
+      return;
+    }
+
+    const ok = confirm(`Supprimer les fichiers de la catégorie "${DOC_TYPE_LABELS[docType]}" ?`);
+    if (!ok) return;
+
+    try {
+      for (const file of files) {
+        await deleteFileEntry(file);
+      }
+
+      selectedFilesByType[docType] = [];
+      const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
+      if (input) input.value = "";
+
+      await loadFilesForDossier(currentDossier.id);
+      alert("Fichier(s) supprimé(s).");
+    } catch (err) {
+      console.error("Erreur handleDeleteFilesByType:", err);
+      alert("Impossible de supprimer les fichiers.");
+    }
+  }
+
+  function openFilesModalForType(docType) {
+    if (!currentDossier) {
+      alert("Sélectionne d’abord un dossier.");
+      return;
+    }
+
+    const files = uploadedFiles[docType] || [];
+    filesModalSubtitle.textContent = `${DOC_TYPE_LABELS[docType]} — ${currentDossier.ref || "Dossier"}`;
+    fileListContainer.innerHTML = "";
+
+    if (!files.length) {
+      fileListContainer.innerHTML = `<div class="empty-state">Aucun fichier trouvé.</div>`;
+      openModal(filesModal);
+      return;
+    }
+
+    files.forEach((file) => {
+      const item = document.createElement("div");
+      item.className = "file-item";
+      item.innerHTML = `
+        <div>
+          <strong>${escapeHtml(file.name || "Fichier")}</strong>
+          <span>${escapeHtml(formatDate(file.createdAt?.toDate ? file.createdAt.toDate() : file.createdAt))}</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a class="btn btn-secondary" href="${escapeHtml(file.url || "#")}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+          <button class="btn btn-danger" type="button" data-delete-file="${escapeHtml(file.id)}">Supprimer</button>
+        </div>
+      `;
+      fileListContainer.appendChild(item);
+    });
+
+    fileListContainer.querySelectorAll("[data-delete-file]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const fileId = button.dataset.deleteFile;
+        const file = (uploadedFiles[docType] || []).find((f) => f.id === fileId);
+        if (!file) return;
+
+        const ok = confirm(`Supprimer "${file.name || "ce fichier"}" ?`);
+        if (!ok) return;
+
+        try {
+          await deleteFileEntry(file);
+          await loadFilesForDossier(currentDossier.id);
+          openFilesModalForType(docType);
+        } catch (err) {
+          console.error("Erreur suppression fichier modal:", err);
+          alert("Impossible de supprimer ce fichier.");
+        }
+      });
+    });
+
+    openModal(filesModal);
+  }
+
+  async function loadTimelineForDossier(dossierId) {
+    if (!currentUser || !dossierId) {
+      timelineEventsCache = [];
+      renderTimeline([]);
+      updateNextActionBox(currentDossier, []);
+      setChoiceSectionState(false);
+      return;
+    }
+
+    try {
+      const eventsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events");
+      const q = query(eventsRef, orderBy("createdAt", "asc"));
+      const snap = await getDocs(q);
+
+      if (!snap.docs.length) {
         timelineEventsCache = [];
         renderTimeline([]);
+        updateNextActionBox(currentDossier, []);
         setChoiceSectionState(false);
         return;
       }
 
-      try {
-        const eventsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events");
-        const q = query(eventsRef, orderBy("createdAt", "asc"));
-        const snap = await getDocs(q);
-
-        if (!snap.docs.length) {
-          timelineEventsCache = [];
-          renderTimeline([]);
-          setChoiceSectionState(false);
-          return;
-        }
-
-        const events = snap.docs.map((docSnap) => {
+      const events = await Promise.all(
+        snap.docs.map(async (docSnap) => {
           const data = docSnap.data();
           const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+
+          let proofCount = 0;
+          try {
+            const proofsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events", docSnap.id, "proofs");
+            const proofsSnap = await getDocs(proofsRef);
+            proofCount = proofsSnap.size;
+          } catch {
+            proofCount = 0;
+          }
 
           return {
             id: docSnap.id,
             ...data,
             title: data.title || data.label || "Étape publiée",
             description: data.description || data.note || "Publication enregistrée.",
-            dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible"
+            dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible",
+            createdAtDate: createdAt,
+            proofCount
           };
-        });
+        })
+      );
 
-        timelineEventsCache = events;
-        renderTimeline(events);
-        setChoiceSectionState(isInjunctionPublished(currentDossier));
-      } catch (err) {
-        console.error("Erreur loadTimelineForDossier:", err);
-        timelineEventsCache = [];
-        renderTimeline([]);
-        setChoiceSectionState(false);
-      }
+      timelineEventsCache = events.filter(isPublishedEvent);
+      renderTimeline(timelineEventsCache);
+      updateNextActionBox(currentDossier, timelineEventsCache);
+      setChoiceSectionState(isInjunctionPublished(currentDossier));
+    } catch (err) {
+      console.error("Erreur loadTimelineForDossier:", err);
+      timelineEventsCache = [];
+      renderTimeline([]);
+      updateNextActionBox(currentDossier, []);
+      setChoiceSectionState(false);
+    }
+  }
+
+  function renderTimeline(events = []) {
+    timelineList.innerHTML = "";
+
+    if (!events.length) {
+      timelineList.innerHTML = `<div class="empty-state">Aucune publication pour le moment.</div>`;
+      return;
     }
 
-    function renderTimeline(events = []) {
-      timelineList.innerHTML = "";
+    events.forEach((event) => {
+      const item = document.createElement("div");
+      item.className = "timeline-item";
 
-      if (!events.length) {
-        timelineList.innerHTML = `<div class="empty-state">Aucune publication pour le moment.</div>`;
-        return;
-      }
-
-      events.forEach((event) => {
-        const item = document.createElement("div");
-        item.className = "timeline-item";
-
-        const statusKey = normaliseEventStatus(event.status, event.currentStep);
-        const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié";
-        const instructions = buildInstructions(event);
-        const documentUrl = buildEventDocUrl(event);
-        const documentLabel = buildEventDocLabel(event);
-
-        item.innerHTML = `
-          <div class="timeline-main">
-            <span class="timeline-meta">${escapeHtml(event.dateLabel || "Date non disponible")}</span>
-            <strong>${escapeHtml(event.title || "Étape")}</strong>
-            <span>${escapeHtml(statusLabel)}</span>
-
-            <div class="note-box soft" style="margin-top:10px;">
-              <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
-              ${escapeHtml(instructions)}
-            </div>
-
-            <div class="note-box soft" style="margin-top:10px;">
-              <strong style="display:block;margin-bottom:6px;color:#fff;">Document</strong>
-              ${
-                documentUrl
-                  ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
-                  : `<span>${escapeHtml(documentLabel)} non disponible.</span>`
-              }
-            </div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:8px;min-width:180px;">
-            <span class="badge neutral">${escapeHtml(statusLabel)}</span>
-            <button class="btn btn-secondary" type="button" data-event-open="${escapeHtml(event.id)}">Ouvrir l’étape</button>
-          </div>
-        `;
-
-        timelineList.appendChild(item);
-      });
-
-      timelineList.querySelectorAll("[data-event-open]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const eventId = button.dataset.eventOpen;
-          const event = timelineEventsCache.find((item) => item.id === eventId);
-          if (event) openEventModal(event);
-        });
-      });
-    }
-
-    function openEventModal(event) {
-      const statusKey = normaliseEventStatus(event.status, event.currentStep);
+      const statusKey = eventNeedsClientAction(event) ? "client_action_required" : normaliseEventStatus(event.status, event.currentStep);
       const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié";
       const instructions = buildInstructions(event);
       const documentUrl = buildEventDocUrl(event);
       const documentLabel = buildEventDocLabel(event);
+      const requiredProofs = getRequiredProofs(event);
 
-      eventModalSubtitle.textContent = `${currentDossier?.ref || "Dossier"} — ${event.dateLabel || "Date non disponible"}`;
-      eventModalContent.innerHTML = `
-        <div class="note-box soft">
-          <strong style="display:block;margin-bottom:6px;color:#fff;">Titre</strong>
-          ${escapeHtml(event.title || "Étape")}
-        </div>
+      item.innerHTML = `
+        <div class="timeline-main">
+          <span class="timeline-meta">${escapeHtml(event.dateLabel || "Date non disponible")}</span>
+          <strong>${escapeHtml(event.title || "Étape")}</strong>
+          <span>${escapeHtml(statusLabel)}</span>
 
-        <div class="note-box soft">
-          <strong style="display:block;margin-bottom:6px;color:#fff;">Statut</strong>
-          ${escapeHtml(statusLabel)}
-        </div>
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
+            ${escapeHtml(instructions)}
+          </div>
 
-        <div class="note-box soft">
-          <strong style="display:block;margin-bottom:6px;color:#fff;">Document</strong>
+          <div class="note-box soft" style="margin-top:10px;">
+            <strong style="display:block;margin-bottom:6px;color:#fff;">Document</strong>
+            ${
+              documentUrl
+                ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
+                : `<span>${escapeHtml(documentLabel)}${documentLabel === "Document" ? " non disponible." : ""}</span>`
+            }
+          </div>
+
           ${
-            documentUrl
-              ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
-              : `<span>${escapeHtml(documentLabel)} non disponible.</span>`
+            requiredProofs.length
+              ? `<div class="note-box warning" style="margin-top:10px;">
+                  <strong style="display:block;margin-bottom:6px;color:#fff;">Action requise</strong>
+                  Déposez ensuite : ${escapeHtml(requiredProofs.join(", "))}.
+                </div>`
+              : ""
           }
         </div>
 
-        <div class="note-box soft">
-          <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
-          ${escapeHtml(instructions)}
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:180px;">
+          <span class="badge ${requiredProofs.length ? "danger" : "neutral"}">${escapeHtml(statusLabel)}</span>
+          <button class="btn btn-secondary" type="button" data-event-open="${escapeHtml(event.id)}">Ouvrir l’étape</button>
         </div>
       `;
 
-      openModal(eventModal);
-    }
-
-    async function initUserDashboard(user) {
-      currentUser = user;
-      userEmail.textContent = user.email || "Compte connecté";
-
-      await ensureUserProfile(user);
-      await loadEntitlements(user.uid);
-      updateTopStatus();
-      updatePlanSubtitle();
-      await loadDossiers(user.uid);
-      readPaymentParams();
-    }
-
-    fileInputs.forEach((input) => {
-      input.addEventListener("change", handleFileSelection);
+      timelineList.appendChild(item);
     });
 
-    sendButtons.forEach((button) => {
+    timelineList.querySelectorAll("[data-event-open]").forEach((button) => {
       button.addEventListener("click", () => {
-        handleFileSend(button.dataset.uploadSend);
+        const eventId = button.dataset.eventOpen;
+        const event = timelineEventsCache.find((item) => item.id === eventId);
+        if (event) openEventModal(event);
       });
     });
+  }
 
-    viewButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        openFilesModalForType(button.dataset.uploadView);
-      });
-    });
+  function openEventModal(event) {
+    const statusKey = eventNeedsClientAction(event) ? "client_action_required" : normaliseEventStatus(event.status, event.currentStep);
+    const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié";
+    const instructions = buildInstructions(event);
+    const documentUrl = buildEventDocUrl(event);
+    const documentLabel = buildEventDocLabel(event);
+    const requiredProofs = getRequiredProofs(event);
 
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        handleDeleteFilesByType(button.dataset.uploadDelete);
-      });
-    });
+    eventModalSubtitle.textContent = `${currentDossier?.ref || "Dossier"} — ${event.dateLabel || "Date non disponible"}`;
+    eventModalContent.innerHTML = `
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Titre</strong>
+        ${escapeHtml(event.title || "Étape")}
+      </div>
 
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", async () => {
-        try {
-          await signOut(auth);
-          window.location.href = "connexion.html";
-        } catch (err) {
-          console.error("Erreur signOut:", err);
-          alert("Impossible de se déconnecter.");
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Statut</strong>
+        ${escapeHtml(statusLabel)}
+      </div>
+
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Document</strong>
+        ${
+          documentUrl
+            ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
+            : `<span>${escapeHtml(documentLabel)}${documentLabel === "Document" ? " non disponible." : ""}</span>`
         }
-      });
-    }
+      </div>
 
-    if (buyExtraDossierBtn) {
-      buyExtraDossierBtn.addEventListener("click", handleExtraDossierPayment);
-    }
+      <div class="note-box soft">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
+        ${escapeHtml(instructions)}
+      </div>
 
-    if (buyOneShotBtn) {
-      buyOneShotBtn.addEventListener("click", handleOneShotRepurchase);
-    }
+      <div class="note-box ${requiredProofs.length ? "warning" : "soft"}">
+        <strong style="display:block;margin-bottom:6px;color:#fff;">Ce que vous devez faire</strong>
+        ${
+          requiredProofs.length
+            ? `Après votre action, déposez : ${escapeHtml(requiredProofs.join(", "))}.`
+            : "Aucune action complémentaire n’est demandée pour cette étape."
+        }
+      </div>
+    `;
 
-    if (buyMonthlyBtn) {
-      buyMonthlyBtn.addEventListener("click", handleMonthlySubscription);
-    }
+    openModal(eventModal);
+  }
 
-    if (openCreateDossier) {
-      openCreateDossier.addEventListener("click", () => {
-        const permission = getCreatePermission();
+  async function initUserDashboard(user) {
+    currentUser = user;
+    userEmail.textContent = user.email || "Compte connecté";
 
-        if (!permission.allowed) {
-          if (permission.ctaMode === "extra") {
-            extraDossierBox.style.display = "block";
-            return;
-          }
+    await ensureUserProfile(user);
+    await loadEntitlements(user.uid);
+    updateTopStatus();
+    updatePlanSubtitle();
+    await loadDossiers(user.uid);
+    readPaymentParams();
+  }
 
-          if (permission.ctaMode === "repurchase_one_shot") {
-            repurchaseOneShotBox.style.display = "block";
-            return;
-          }
+  fileInputs.forEach((input) => {
+    input.addEventListener("change", handleFileSelection);
+  });
 
-          alert(permission.reason);
+  sendButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      handleFileSend(button.dataset.uploadSend);
+    });
+  });
+
+  viewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      openFilesModalForType(button.dataset.uploadView);
+    });
+  });
+
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      handleDeleteFilesByType(button.dataset.uploadDelete);
+    });
+  });
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "connexion.html";
+      } catch (err) {
+        console.error("Erreur signOut:", err);
+        alert("Impossible de se déconnecter.");
+      }
+    });
+  }
+
+  if (buyExtraDossierBtn) {
+    buyExtraDossierBtn.addEventListener("click", handleExtraDossierPayment);
+  }
+
+  if (buyOneShotBtn) {
+    buyOneShotBtn.addEventListener("click", handleOneShotRepurchase);
+  }
+
+  if (buyMonthlyBtn) {
+    buyMonthlyBtn.addEventListener("click", handleMonthlySubscription);
+  }
+
+  if (openCreateDossier) {
+    openCreateDossier.addEventListener("click", () => {
+      const permission = getCreatePermission();
+
+      if (!permission.allowed) {
+        if (permission.ctaMode === "extra") {
+          extraDossierBox.style.display = "block";
           return;
         }
 
-        prepareCreateForm();
-        openModal(createDossierModal);
-      });
-    }
+        if (permission.ctaMode === "repurchase_one_shot") {
+          repurchaseOneShotBox.style.display = "block";
+          return;
+        }
 
-    if (createDossierForm) {
-      createDossierForm.addEventListener("submit", createOrUpdateDossier);
-    }
-
-    if (closeCreateDossier) {
-      closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
-    }
-
-    if (cancelCreateDossier) {
-      cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
-    }
-
-    if (closeFilesModal) {
-      closeFilesModal.addEventListener("click", () => closeModal(filesModal));
-    }
-
-    if (closeEventModal) {
-      closeEventModal.addEventListener("click", () => closeModal(eventModal));
-    }
-
-    if (validateAutonome) {
-      validateAutonome.addEventListener("click", handleAutonomousChoice);
-    }
-
-    if (payAssisted) {
-      payAssisted.addEventListener("click", handleAssistedPayment);
-    }
-
-    async function handleAutonomousChoice() {
-      if (!currentUser || !currentDossier || !isInjunctionPublished(currentDossier)) {
-        alert("L’injonction n’est pas encore publiée.");
+        alert(permission.reason);
         return;
       }
 
-      try {
-        const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
-        await updateDoc(requestRef, {
-          postOrderChoice: "client_bailiff",
-          updatedAt: serverTimestamp()
-        });
+      prepareCreateForm();
+      openModal(createDossierModal);
+    });
+  }
 
-        alert("Choix enregistré.");
-        await loadDossiers(currentUser.uid);
-      } catch (err) {
-        console.error("Erreur handleAutonomousChoice:", err);
-        alert("Impossible d’enregistrer le choix.");
-      }
+  if (createDossierForm) {
+    createDossierForm.addEventListener("submit", createOrUpdateDossier);
+  }
+
+  if (closeCreateDossier) {
+    closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+  }
+
+  if (cancelCreateDossier) {
+    cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+  }
+
+  if (closeFilesModal) {
+    closeFilesModal.addEventListener("click", () => closeModal(filesModal));
+  }
+
+  if (closeEventModal) {
+    closeEventModal.addEventListener("click", () => closeModal(eventModal));
+  }
+
+  if (validateAutonome) {
+    validateAutonome.addEventListener("click", handleAutonomousChoice);
+  }
+
+  if (payAssisted) {
+    payAssisted.addEventListener("click", handleAssistedPayment);
+  }
+
+  async function handleAutonomousChoice() {
+    if (!currentUser || !currentDossier || !isInjunctionPublished(currentDossier)) {
+      alert("L’injonction n’est pas encore publiée.");
+      return;
     }
 
-    [createDossierModal, filesModal, eventModal].forEach((modal) => {
-      if (!modal) return;
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) closeModal(modal);
+    try {
+      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
+      await updateDoc(requestRef, {
+        postOrderChoice: "client_bailiff",
+        updatedAt: serverTimestamp()
       });
-    });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeModal(createDossierModal);
-        closeModal(filesModal);
-        closeModal(eventModal);
-      }
-    });
+      alert("Choix enregistré.");
+      await loadDossiers(currentUser.uid);
+    } catch (err) {
+      console.error("Erreur handleAutonomousChoice:", err);
+      alert("Impossible d’enregistrer le choix.");
+    }
+  }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "connexion.html";
-        return;
-      }
-
-      try {
-        await initUserDashboard(user);
-      } catch (err) {
-        console.error("Erreur initUserDashboard:", err);
-        alert("Erreur de chargement du tableau de bord.");
-      }
+  [createDossierModal, filesModal, eventModal].forEach((modal) => {
+    if (!modal) return;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal(modal);
     });
-  </script>
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal(createDossierModal);
+      closeModal(filesModal);
+      closeModal(eventModal);
+    }
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "connexion.html";
+      return;
+    }
+
+    try {
+      await initUserDashboard(user);
+    } catch (err) {
+      console.error("Erreur initUserDashboard:", err);
+      alert("Erreur de chargement du tableau de bord.");
+    }
+  });
+</script>
 </body>
 </html>
