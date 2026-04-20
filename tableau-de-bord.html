@@ -668,12 +668,6 @@
       font-size:.92rem;
     }
 
-    .choice-card a{
-      color:#fff4ea;
-      text-decoration:underline;
-      text-underline-offset:3px;
-    }
-
     .price-box{
       padding:16px;
       border-radius:18px;
@@ -1069,12 +1063,30 @@
 
             <div class="panel-head">
               <div>
-                <h2 class="panel-title">Pièces</h2>
+                <h2 class="panel-title">Pièces du dossier</h2>
                 <div class="panel-sub">Déposez ici vos pièces dossier. Vous pouvez ensuite les envoyer, les voir ou les supprimer.</div>
               </div>
             </div>
 
             <div class="upload-grid">
+
+              <div class="upload-card" data-doc-type="quote">
+                <div>
+                  <strong>Devis / bon de commande</strong>
+                  <span>Ajoutez le document à l’origine de la créance.</span>
+                  <span class="file-status" id="status-quote">Aucun fichier envoyé.</span>
+                </div>
+
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="quote" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="quote">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="quote">Voir</button>
+                  <button class="btn btn-danger" type="button" data-upload-delete="quote">Supprimer</button>
+                </div>
+              </div>
 
               <div class="upload-card" data-doc-type="invoice">
                 <div>
@@ -1094,9 +1106,27 @@
                 </div>
               </div>
 
+              <div class="upload-card" data-doc-type="recovery">
+                <div>
+                  <strong>Relances déjà faites</strong>
+                  <span>Ajoutez les relances ou mises en demeure déjà envoyées de votre côté.</span>
+                  <span class="file-status" id="status-recovery">Aucun fichier envoyé.</span>
+                </div>
+
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="recovery" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="recovery">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="recovery">Voir</button>
+                  <button class="btn btn-danger" type="button" data-upload-delete="recovery">Supprimer</button>
+                </div>
+              </div>
+
               <div class="upload-card" data-doc-type="supporting">
                 <div>
-                  <strong>Justificatifs et échanges</strong>
+                  <strong>Autres justificatifs</strong>
                   <span>Déposez mails, preuves et documents utiles au dossier.</span>
                   <span class="file-status" id="status-supporting">Aucun fichier envoyé.</span>
                 </div>
@@ -1324,7 +1354,19 @@
       appId: "1:295300543556:web:3facac2d0c612e3456b811"
     };
 
-    const CHECKOUT_URL = "https://createcheckoutsession-pqz4ycvjmq-od.a.run.app";
+    const STRIPE_LINKS = {
+      one_shot_49: "https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01",
+      monthly_89: "https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02",
+      extra_case_19: "https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03",
+
+      assisted_85: "https://buy.stripe.com/test_5kQfZgej00ZReZR0yz7Vm04",
+      assisted_140: "https://buy.stripe.com/test_bJe9AS2AicIzeZR5ST7Vm05",
+      assisted_247: "https://buy.stripe.com/test_eVqdR8ej037Z191dll7Vm06",
+
+      assisted_175: "https://buy.stripe.com/test_4gMeVcej037Z7xp5ST7Vm07",
+      assisted_230: "https://buy.stripe.com/test_8x2eVcfn4dMD04Xdll7Vm08",
+      assisted_337: "https://buy.stripe.com/test_14A4gy3Em37Z04Xa997Vm09"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -1401,7 +1443,9 @@
     let userProfile = null;
     let entitlements = [];
     let uploadedFiles = {
+      quote: [],
       invoice: [],
+      recovery: [],
       supporting: []
     };
     let timelineEventsCache = [];
@@ -1409,13 +1453,17 @@
     let dossierCounter = 0;
 
     let selectedFilesByType = {
+      quote: [],
       invoice: [],
+      recovery: [],
       supporting: []
     };
 
     const DOC_TYPE_LABELS = {
+      quote: "Devis / bon de commande",
       invoice: "Facture impayée",
-      supporting: "Justificatifs et échanges"
+      recovery: "Relances déjà faites",
+      supporting: "Autres justificatifs"
     };
 
     const EVENT_STATUS_LABELS = {
@@ -1465,7 +1513,7 @@
     function readPaymentParams() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "success") {
-        showFlash("Paiement reçu. L’accès apparaît après synchronisation.");
+        showFlash("Paiement reçu. Vérifiez maintenant vos accès et votre dossier.");
       }
     }
 
@@ -2044,81 +2092,58 @@
       }
     }
 
-    async function startCheckout(offerType) {
+    function startCheckoutLink(url) {
       if (!currentUser) {
         window.location.href = "connexion.html";
         return;
       }
 
-      try {
-        const response = await fetch(CHECKOUT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            offerType
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.url) {
-          throw new Error(data.error || "Erreur Stripe");
-        }
-
-        window.location.href = data.url;
-      } catch (error) {
-        console.error("Erreur checkout:", error);
-        alert("Impossible de lancer le paiement.");
-      }
-    }
-
-    async function handleExtraDossierPayment() {
-      await startCheckout("extra_case_19");
-    }
-
-    async function handleOneShotRepurchase() {
-      await startCheckout("one_shot_49");
-    }
-
-    async function handleMonthlySubscription() {
-      await startCheckout("monthly_89");
-    }
-
-    async function handleAutonomousChoice() {
-      if (!currentUser || !currentDossier || !isInjunctionPublished(currentDossier)) {
-        alert("L’injonction n’est pas encore publiée.");
+      if (!url) {
+        alert("Lien Stripe manquant.");
         return;
       }
 
-      try {
-        const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
-        await updateDoc(requestRef, {
-          postOrderChoice: "client_bailiff",
-          updatedAt: serverTimestamp()
-        });
-
-        alert("Choix enregistré.");
-        await loadDossiers(currentUser.uid);
-      } catch (err) {
-        console.error("Erreur handleAutonomousChoice:", err);
-        alert("Impossible d’enregistrer le choix.");
-      }
+      window.location.href = url;
     }
 
-    async function handleAssistedPayment() {
+    function handleExtraDossierPayment() {
+      startCheckoutLink(STRIPE_LINKS.extra_case_19);
+    }
+
+    function handleOneShotRepurchase() {
+      startCheckoutLink(STRIPE_LINKS.one_shot_49);
+    }
+
+    function handleMonthlySubscription() {
+      startCheckoutLink(STRIPE_LINKS.monthly_89);
+    }
+
+    function getAssistedStripeLink(amount) {
+      if (amount < 128) return STRIPE_LINKS.assisted_85;
+      if (amount <= 1280) return STRIPE_LINKS.assisted_140;
+      return STRIPE_LINKS.assisted_247;
+    }
+
+    function getAssistedUrgentStripeLink(amount) {
+      if (amount < 128) return STRIPE_LINKS.assisted_175;
+      if (amount <= 1280) return STRIPE_LINKS.assisted_230;
+      return STRIPE_LINKS.assisted_337;
+    }
+
+    function handleAssistedPayment() {
       if (!currentDossier || !isInjunctionPublished(currentDossier)) {
         alert("Le paiement assisté n’est disponible qu’après publication de l’injonction.");
         return;
       }
 
-      await startCheckout("assisted_payment");
+      const amount = Number(currentDossier.amountTTC || 0);
+      const stripeLink = getAssistedStripeLink(amount);
+      startCheckoutLink(stripeLink);
     }
 
     async function loadFilesForDossier(dossierId) {
       if (!currentUser || !dossierId) {
-        uploadedFiles = { invoice: [], supporting: [] };
+        uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
         refreshUploadStatuses();
         return;
       }
@@ -2128,7 +2153,9 @@
         const snap = await getDocs(filesRef);
 
         uploadedFiles = {
+          quote: [],
           invoice: [],
+          recovery: [],
           supporting: []
         };
 
@@ -2145,7 +2172,7 @@
         refreshUploadStatuses();
       } catch (err) {
         console.error("Erreur loadFilesForDossier:", err);
-        uploadedFiles = { invoice: [], supporting: [] };
+        uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
         refreshUploadStatuses();
       }
     }
@@ -2587,6 +2614,27 @@
 
     if (payAssisted) {
       payAssisted.addEventListener("click", handleAssistedPayment);
+    }
+
+    async function handleAutonomousChoice() {
+      if (!currentUser || !currentDossier || !isInjunctionPublished(currentDossier)) {
+        alert("L’injonction n’est pas encore publiée.");
+        return;
+      }
+
+      try {
+        const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
+        await updateDoc(requestRef, {
+          postOrderChoice: "client_bailiff",
+          updatedAt: serverTimestamp()
+        });
+
+        alert("Choix enregistré.");
+        await loadDossiers(currentUser.uid);
+      } catch (err) {
+        console.error("Erreur handleAutonomousChoice:", err);
+        alert("Impossible d’enregistrer le choix.");
+      }
     }
 
     [createDossierModal, filesModal, eventModal].forEach((modal) => {
