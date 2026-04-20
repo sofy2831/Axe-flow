@@ -1003,7 +1003,13 @@
     internalStatusSelect.value = currentRequest.internalStatus || "À qualifier";
     clientStatusSelect.value = currentRequest.clientStatus || "Demande reçue";
     prioritySelect.value = currentRequest.priority || "Normale";
-    injunctionChoiceSelect.value = currentRequest.postOrderChoice || "Non défini";
+    if (currentRequest.postOrderChoice === "client_bailiff" || currentRequest.postOrderChoice === "Client") {
+  injunctionChoiceSelect.value = "Client";
+} else if (currentRequest.postOrderChoice === "Axe Flow") {
+  injunctionChoiceSelect.value = "Axe Flow";
+} else {
+  injunctionChoiceSelect.value = "Non défini";
+}
   }
 
   async function loadFiles() {
