@@ -1362,22 +1362,40 @@ prepareR3Btn?.addEventListener("click", async () => {
     });
 
     [
-      debtorName,
-      debtorType,
-      debtorAddress,
-      invoiceRef,
-      dueDate,
-      internalSummary,
-      internalStatusSelect,
-      clientStatusSelect,
-      prioritySelect,
-      injunctionChoiceSelect
-    ].forEach((el) => {
-      el?.addEventListener("change", async () => {
-        await saveMainFields();
-        await loadRequest();
-      });
-    });
+  debtorName,
+  debtorType,
+  debtorAddress,
+  invoiceRef,
+  dueDate,
+  internalSummary,
+  clientStatusSelect,
+  prioritySelect,
+  injunctionChoiceSelect
+].forEach((el) => {
+  el?.addEventListener("change", async () => {
+    await saveMainFields();
+    await loadRequest();
+  });
+});
+
+internalStatusSelect?.addEventListener("change", async () => {
+  const nextInternal = internalStatusSelect.value;
+
+  const extraData = {
+    currentStep: getStepFromInternalStatus(nextInternal)
+  };
+
+  if (nextInternal !== "Attente client") {
+    extraData.clientActionRequired = false;
+  }
+
+  if (nextInternal !== "Clôturé" && nextInternal !== "Archivé") {
+    extraData.lifecycleStatus = "open";
+  }
+
+  await saveMainFields(extraData);
+  await loadRequest();
+});
   }
 
   async function bootstrap() {
