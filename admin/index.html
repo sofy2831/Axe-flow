@@ -863,17 +863,23 @@
   }
 
   function computeNextAction(item) {
-    const internal = getInternalStatus(item);
+  const internal = getInternalStatus(item);
+  const clientStatus = getClientStatus(item);
 
-    if (internal === "À qualifier") return "Lire les pièces et poser le statut initial";
-    if (internal === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
-    if (internal === "Attente client") return "Contrôler le retour ou relancer";
-    if (internal === "Prêt relance") return "Préparer ou publier la relance";
-    if (internal === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
-    if (internal === "Prêt injonction") return "Préparer l’étape injonction";
-    if (internal === "Clôturé") return "Aucune";
-    return "Ouvrir et analyser";
+  if (item.clientHasNewFiles === true || clientStatus === "Pièces reçues") {
+    return "Vérifier les pièces reçues et qualifier le dossier";
   }
+
+  if (internal === "À qualifier") return "Lire les pièces et poser le statut initial";
+  if (internal === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
+  if (internal === "Attente client") return "Contrôler le retour ou relancer";
+  if (internal === "Prêt relance") return "Préparer ou publier la relance";
+  if (internal === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
+  if (internal === "Prêt injonction") return "Préparer l’étape injonction";
+  if (internal === "Clôturé") return "Aucune";
+
+  return "Ouvrir et analyser";
+}
 
   function computeKPIs(items) {
     const newCount = items.filter(i => getInternalStatus(i) === "À qualifier").length;
