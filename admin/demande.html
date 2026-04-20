@@ -1169,34 +1169,49 @@ function getStepFromInternalStatus(internalStatus) {
     await loadMessages();
   }
 
-  async function closeRequest(mode = "closed") {
-    const reason = closureReason.value;
-    const comment = closureComment.value.trim();
+ async function closeRequest(mode = "closed") {
+  const reason = closureReason.value;
+  const comment = closureComment.value.trim();
 
-    if (mode === "closed" && !reason) {
-      alert("Choisis un motif de clôture.");
-      return;
-    }
-
-    await updateDoc(buildRequestPath(), {
-      lifecycleStatus: mode,
-      internalStatus: mode === "closed" ? "Clôturé" : "Archivé",
-      clientStatus: mode === "closed" ? "Dossier clôturé" : (currentRequest?.clientStatus || "Traitement en cours"),
-      closureReason: reason || "",
-      closureComment: comment || "",
-      closedAt: mode === "closed" ? serverTimestamp() : null,
-      archivedAt: mode === "archived" ? serverTimestamp() : null,
-      updatedAt: serverTimestamp()
-    });
-
-    if (comment) {
-      await addMessage("admin", `Clôture dossier : ${comment}`, "closure_note");
-    }
-
-    await loadRequest();
-    await loadMessages();
+  if (mode === "closed" && !reason) {
+    alert("Choisis un motif de clôture.");
+    return;
   }
 
+  const payload = {
+    lifecycleStatus: mode,
+    internalStatus: mode === "closed" ? "Clôturé" : "Archivé",
+    clientStatus: mode === "closed" ? "Dossier clôturé" : (currentRequest?.clientStatus || "Traitement en cours"),
+    closureReason: reason || "",
+    closureComment: comment || "",
+    updatedAt: serverTimestamp(),
+    clientHasNewFiles: false,
+    clientActionRequired: false
+  };
+
+  if (mode === "closed") {
+    payload.closedAt = serverTimestamp();
+    payload.archivedAt = null;
+    payload.status = "closed";
+    payload.statusLabel = "Dossier clôturé";
+    payload.currentStep = "closed";
+  } else {
+    payload.closedAt = null;
+    payload.archivedAt = serverTimestamp();
+    payload.status = "archived";
+    payload.statusLabel = "Dossier archivé";
+    payload.currentStep = "archived";
+  }
+
+  await updateDoc(buildRequestPath(), payload);
+
+  if (comment) {
+    await addMessage("admin", `Clôture dossier : ${comment}`, "closure_note");
+  }
+
+  await loadRequest();
+  await loadMessages();
+}
   function wireQuickActions() {
     qualifyBtn?.addEventListener("click", async () => {
   internalStatusSelect.value = "À qualifier";
