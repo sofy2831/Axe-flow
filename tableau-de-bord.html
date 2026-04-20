@@ -2482,6 +2482,13 @@
       const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
       if (input) input.value = "";
 
+      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
+await updateDoc(requestRef, {
+  clientHasNewFiles: false,
+  clientStatus: "Demande reçue",
+  updatedAt: serverTimestamp()
+});
+      
       await loadFilesForDossier(currentDossier.id);
       alert("Fichier(s) supprimé(s).");
     } catch (err) {
