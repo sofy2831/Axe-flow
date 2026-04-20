@@ -994,8 +994,8 @@
         <tr>
           <td>
             <div class="client">
-              <strong>${escapeHtml(item.creditorName || item.clientName || "Client")}</strong>
-              <span>${escapeHtml(item.creditorEmail || item.clientEmail || "—")}</span>
+              <strong>${escapeHtml(item.creditorName || item.clientName || item.clientEmail || item.clientUid || "Client")}</strong>
+<span>${escapeHtml(item.creditorEmail || item.clientEmail || "—")}</span>
             </div>
           </td>
           <td>${escapeHtml(item.ref || item.id)}</td>
