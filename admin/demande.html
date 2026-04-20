@@ -1112,10 +1112,42 @@
     });
   }
 
-  async function saveMainFields() {
-    if (!currentRequest) return;
+ async function saveMainFields(extraData = {}) {
+  if (!currentRequest) return;
 
-    await updateDoc(buildRequestPath(), {
+  const nextInternalStatus = internalStatusSelect.value;
+  const nextClientStatus = clientStatusSelect.value;
+  const nextPriority = prioritySelect.value;
+  const nextPostOrderChoice = injunctionChoiceSelect.value;
+
+  const payload = {
+    debiteurName: debtorName.value.trim(),
+    debiteurType: debtorType.value,
+    debiteurAddress: debtorAddress.value.trim(),
+    invoiceRef: invoiceRef.value.trim(),
+    dueDate: dueDate.value.trim(),
+    internalSummary: internalSummary.value.trim(),
+    internalStatus: nextInternalStatus,
+    clientStatus: nextClientStatus,
+    priority: nextPriority,
+    postOrderChoice: nextPostOrderChoice,
+    updatedAt: serverTimestamp(),
+    ...extraData
+  };
+
+  await updateDoc(buildRequestPath(), payload);
+}
+  function getStepFromInternalStatus(internalStatus) {
+  if (internalStatus === "À qualifier") return "new";
+  if (internalStatus === "Pièces manquantes") return "missing_pieces";
+  if (internalStatus === "Prêt relance") return "relance_ready";
+  if (internalStatus === "Attente client") return "waiting_client";
+  if (internalStatus === "Prêt mise en demeure") return "formal_notice_ready";
+  if (internalStatus === "Prêt injonction") return "injunction_ready";
+  if (internalStatus === "Clôturé") return "closed";
+  if (internalStatus === "Archivé") return "archived";
+  return "in_progress";
+}
       debiteurName: debtorName.value.trim(),
       debiteurType: debtorType.value,
       debiteurAddress: debtorAddress.value.trim(),
