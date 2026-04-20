@@ -1690,68 +1690,87 @@
     calculatedPrice.textContent = formatCurrency(calculatePrice(Number(currentDossier?.amountTTC || 0)));
   }
 
-  function updateNextActionBox(dossier, events = []) {
-    if (!nextActionBox || !nextActionTitle || !nextActionText) return;
+ function updateNextActionBox(dossier, events = []) {
+  if (!nextActionBox || !nextActionTitle || !nextActionText) return;
 
-    if (!dossier) {
-      nextActionTitle.textContent = "Ce que vous devez faire maintenant";
-      nextActionText.textContent = "Sélectionnez un dossier pour voir la prochaine action.";
-      nextActionBox.className = "note-box warning";
-      return;
-    }
-
-    if (isInjunctionPublished(dossier) && !dossier.postOrderChoice) {
-      nextActionTitle.textContent = "Choix attendu";
-      nextActionText.textContent = "L’injonction a été publiée. Choisissez maintenant entre transmission autonome et transmission assistée.";
-      nextActionBox.className = "note-box warning";
-      return;
-    }
-
-    const actionableEvent = [...events]
-      .filter((event) => isPublishedEvent(event) && eventNeedsClientAction(event))
-      .sort((a, b) => {
-        const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
-        const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
-        return bt - at;
-      })[0];
-
-    if (actionableEvent) {
-      const proofs = getRequiredProofs(actionableEvent);
-      nextActionTitle.textContent = "Action requise";
-      nextActionText.textContent =
-        proofs.length
-          ? `${actionableEvent.title || "Étape publiée"} — vous devez agir puis déposer : ${proofs.join(", ")}.`
-          : `${actionableEvent.title || "Étape publiée"} — une action est attendue de votre part.`;
-      nextActionBox.className = "note-box warning";
-      return;
-    }
-
-    if (!events.length) {
-      nextActionTitle.textContent = "Aucune action immédiate";
-      nextActionText.textContent = "Aucune publication Axe Flow n’a encore été envoyée sur ce dossier.";
-      nextActionBox.className = "note-box soft";
-      return;
-    }
-
-    const latestPublished = [...events]
-      .filter(isPublishedEvent)
-      .sort((a, b) => {
-        const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
-        const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
-        return bt - at;
-      })[0];
-
-    if (latestPublished) {
-      nextActionTitle.textContent = "Dernière mise à jour";
-      nextActionText.textContent = `${latestPublished.title || "Étape publiée"} — aucune action immédiate n’est demandée pour le moment.`;
-      nextActionBox.className = "note-box success";
-      return;
-    }
-
-    nextActionTitle.textContent = "Aucune action immédiate";
-    nextActionText.textContent = "Votre dossier est en cours de traitement.";
-    nextActionBox.className = "note-box soft";
+  if (!dossier) {
+    nextActionTitle.textContent = "Ce que vous devez faire maintenant";
+    nextActionText.textContent = "Sélectionnez un dossier pour voir la prochaine action.";
+    nextActionBox.className = "note-box warning";
+    return;
   }
+
+  // 1. Cas le plus important : le client a envoyé ses pièces, Axe Flow doit reprendre
+  if (
+    dossier.clientHasNewFiles === true &&
+    (!events.length || dossier.clientStatus === "Pièces reçues" || dossier.internalStatus === "À qualifier")
+  ) {
+    nextActionTitle.textContent = "Pièces bien reçues";
+    nextActionText.textContent =
+      "Vos pièces ont bien été reçues. Vous pouvez quitter votre espace. Axe Flow reviendra vers vous rapidement après vérification du dossier. Vous serez averti par email dès qu’une nouvelle étape sera disponible.";
+    nextActionBox.className = "note-box success";
+    return;
+  }
+
+  // 2. Cas injonction publiée sans choix encore fait
+  if (isInjunctionPublished(dossier) && !dossier.postOrderChoice) {
+    nextActionTitle.textContent = "Choix attendu";
+    nextActionText.textContent =
+      "L’injonction a été publiée. Choisissez maintenant entre transmission autonome et transmission assistée.";
+    nextActionBox.className = "note-box warning";
+    return;
+  }
+
+  // 3. Dernière publication avec action requise
+  const actionableEvent = [...events]
+    .filter((event) => isPublishedEvent(event) && eventNeedsClientAction(event))
+    .sort((a, b) => {
+      const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
+      const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
+      return bt - at;
+    })[0];
+
+  if (actionableEvent) {
+    const proofs = getRequiredProofs(actionableEvent);
+    nextActionTitle.textContent = "Action requise";
+    nextActionText.textContent =
+      proofs.length
+        ? `${actionableEvent.title || "Étape publiée"} — vous devez agir puis déposer : ${proofs.join(", ")}.`
+        : `${actionableEvent.title || "Étape publiée"} — une action est attendue de votre part.`;
+    nextActionBox.className = "note-box warning";
+    return;
+  }
+
+  // 4. Aucun event encore publié
+  if (!events.length) {
+    nextActionTitle.textContent = "Aucune action immédiate";
+    nextActionText.textContent =
+      "Votre dossier est enregistré. Axe Flow n’a pas encore publié d’étape sur cet espace.";
+    nextActionBox.className = "note-box soft";
+    return;
+  }
+
+  // 5. Dernière mise à jour sans action demandée
+  const latestPublished = [...events]
+    .filter(isPublishedEvent)
+    .sort((a, b) => {
+      const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
+      const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
+      return bt - at;
+    })[0];
+
+  if (latestPublished) {
+    nextActionTitle.textContent = "Dernière mise à jour";
+    nextActionText.textContent =
+      `${latestPublished.title || "Étape publiée"} — aucune action immédiate n’est demandée pour le moment.`;
+    nextActionBox.className = "note-box success";
+    return;
+  }
+
+  nextActionTitle.textContent = "Aucune action immédiate";
+  nextActionText.textContent = "Votre dossier est en cours de traitement.";
+  nextActionBox.className = "note-box soft";
+}
 
   function resetSummary() {
     currentDossier = null;
