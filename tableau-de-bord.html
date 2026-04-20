@@ -2214,53 +2214,83 @@
       refreshUploadStatuses();
     }
 
-    async function handleFileSend(docType) {
-      if (!currentUser) {
-        alert("Utilisateur non connecté.");
-        return;
-      }
-      if (!currentDossier) {
-        alert("Sélectionne d’abord un dossier.");
-        return;
-      }
+   async function handleFileSend(docType) {
+  if (!currentUser) {
+    alert("Utilisateur non connecté.");
+    return;
+  }
 
-      const files = selectedFilesByType[docType] || [];
-      if (!files.length) {
-        alert("Sélectionne au moins un fichier.");
-        return;
-      }
+  if (!currentDossier) {
+    alert("Sélectionne d’abord un dossier.");
+    return;
+  }
 
-      try {
-        for (const file of files) {
-          const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
-          const fullPath = `users/${currentUser.uid}/requests/${currentDossier.id}/${docType}/${safeName}`;
-          const fileRef = storageRef(storage, fullPath);
+  const files = selectedFilesByType[docType] || [];
+  if (!files.length) {
+    alert("Sélectionne au moins un fichier.");
+    return;
+  }
 
-          await uploadBytes(fileRef, file);
-          const downloadURL = await getDownloadURL(fileRef);
+  const sendBtn = document.querySelector(`[data-upload-send="${docType}"]`);
+  const viewBtn = document.querySelector(`[data-upload-view="${docType}"]`);
+  const deleteBtn = document.querySelector(`[data-upload-delete="${docType}"]`);
+  const statusEl = document.getElementById(`status-${docType}`);
 
-          await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "files"), {
-            docType,
-            name: file.name,
-            path: fullPath,
-            url: downloadURL,
-            size: file.size,
-            contentType: file.type || "",
-            createdAt: serverTimestamp()
-          });
-        }
+  const originalSendText = sendBtn ? sendBtn.textContent : "Envoyer";
 
-        selectedFilesByType[docType] = [];
-        const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
-        if (input) input.value = "";
-
-        await loadFilesForDossier(currentDossier.id);
-        alert("Fichier(s) envoyé(s).");
-      } catch (err) {
-        console.error("Erreur handleFileSend:", err);
-        alert("Impossible d’envoyer les fichiers.");
-      }
+  try {
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Envoi...";
     }
+    if (viewBtn) viewBtn.disabled = true;
+    if (deleteBtn) deleteBtn.disabled = true;
+    if (statusEl) {
+      statusEl.textContent = "Envoi en cours...";
+      statusEl.className = "file-status";
+    }
+
+    for (const file of files) {
+      const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
+      const fullPath = `users/${currentUser.uid}/requests/${currentDossier.id}/${docType}/${safeName}`;
+      const fileRef = storageRef(storage, fullPath);
+
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+
+      await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "files"), {
+        docType,
+        name: file.name,
+        path: fullPath,
+        url: downloadURL,
+        size: file.size,
+        contentType: file.type || "",
+        createdAt: serverTimestamp()
+      });
+    }
+
+    selectedFilesByType[docType] = [];
+    const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
+    if (input) input.value = "";
+
+    await loadFilesForDossier(currentDossier.id);
+    alert("Fichier(s) envoyé(s).");
+  } catch (err) {
+    console.error("Erreur handleFileSend:", err);
+    if (statusEl) {
+      statusEl.textContent = "Erreur pendant l’envoi.";
+      statusEl.className = "file-status";
+    }
+    alert("Impossible d’envoyer les fichiers.");
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = originalSendText;
+    }
+    if (viewBtn) viewBtn.disabled = false;
+    if (deleteBtn) deleteBtn.disabled = false;
+  }
+}
 
     async function deleteFileEntry(file) {
       if (!currentUser || !currentDossier || !file?.id) return;
