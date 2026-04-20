@@ -963,20 +963,41 @@
     return doc(db, "users", currentClientUid, "requests", currentRequestId);
   }
 
+  function normalizePostOrderChoiceFromSelect(value) {
+    if (value === "Client") return "client_bailiff";
+    if (value === "Axe Flow") return "axe_flow";
+    return "";
+  }
+
+  function hydratePostOrderChoiceForSelect(value) {
+    if (value === "client_bailiff" || value === "Client") return "Client";
+    if (value === "axe_flow" || value === "Axe Flow") return "Axe Flow";
+    return "Non défini";
+  }
+
+  function getClientIdentity(req) {
+    return {
+      name: req.creditorName || req.clientName || req.clientUid || "",
+      email: req.creditorEmail || req.clientEmail || ""
+    };
+  }
+
   async function loadRequest() {
     const snap = await getDoc(buildRequestPath());
     if (!snap.exists()) {
       alert("Dossier introuvable.");
-      return;
+      return false;
     }
     currentRequest = { id: snap.id, ...snap.data() };
     renderRequest();
+    return true;
   }
 
   function renderRequest() {
     if (!currentRequest) return;
 
     const paymentMeta = getPaymentLabel(currentRequest);
+    const clientIdentity = getClientIdentity(currentRequest);
 
     heroTitle.textContent = `Dossier ${currentRequest.ref || currentRequest.id}`;
     heroDescription.textContent =
@@ -989,8 +1010,8 @@
 
     requestRef.value = currentRequest.ref || "";
     requestOffer.value = currentRequest.offerType || currentRequest.plan || "";
-    creditorName.value = currentRequest.creditorName || currentRequest.clientName || "";
-    creditorEmail.value = currentRequest.creditorEmail || currentRequest.clientEmail || "";
+    creditorName.value = clientIdentity.name;
+    creditorEmail.value = clientIdentity.email;
     invoiceAmount.value = formatAmount(currentRequest.amountTTC || currentRequest.invoiceAmount || 0);
     receivedAt.value = formatDate(currentRequest.createdAt);
     debtorName.value = currentRequest.debiteurName || "";
@@ -1003,13 +1024,7 @@
     internalStatusSelect.value = currentRequest.internalStatus || "À qualifier";
     clientStatusSelect.value = currentRequest.clientStatus || "Demande reçue";
     prioritySelect.value = currentRequest.priority || "Normale";
-    if (currentRequest.postOrderChoice === "client_bailiff" || currentRequest.postOrderChoice === "Client") {
-  injunctionChoiceSelect.value = "Client";
-} else if (currentRequest.postOrderChoice === "Axe Flow") {
-  injunctionChoiceSelect.value = "Axe Flow";
-} else {
-  injunctionChoiceSelect.value = "Non défini";
-}
+    injunctionChoiceSelect.value = hydratePostOrderChoiceForSelect(currentRequest.postOrderChoice);
   }
 
   async function loadFiles() {
@@ -1118,48 +1133,49 @@
     });
   }
 
-async function saveMainFields(extraData = {}) {
-  if (!currentRequest) return;
+  async function saveMainFields(extraData = {}) {
+    if (!currentRequest) return;
 
-  const nextInternalStatus = internalStatusSelect.value;
-  const nextClientStatus = clientStatusSelect.value;
-  const nextPriority = prioritySelect.value;
-  const nextPostOrderChoice = injunctionChoiceSelect.value;
+    const nextInternalStatus = internalStatusSelect.value;
+    const nextClientStatus = clientStatusSelect.value;
+    const nextPriority = prioritySelect.value;
+    const nextPostOrderChoice = normalizePostOrderChoiceFromSelect(injunctionChoiceSelect.value);
 
-  const payload = {
-    debiteurName: debtorName.value.trim(),
-    debiteurType: debtorType.value,
-    debiteurAddress: debtorAddress.value.trim(),
-    invoiceRef: invoiceRef.value.trim(),
-    dueDate: dueDate.value.trim(),
-    internalSummary: internalSummary.value.trim(),
-    internalStatus: nextInternalStatus,
-    clientStatus: nextClientStatus,
-    priority: nextPriority,
-    postOrderChoice: nextPostOrderChoice,
-    updatedAt: serverTimestamp(),
-    ...extraData
-  };
+    const payload = {
+      debiteurName: debtorName.value.trim(),
+      debiteurType: debtorType.value,
+      debiteurAddress: debtorAddress.value.trim(),
+      invoiceRef: invoiceRef.value.trim(),
+      dueDate: dueDate.value.trim(),
+      internalSummary: internalSummary.value.trim(),
+      internalStatus: nextInternalStatus,
+      clientStatus: nextClientStatus,
+      priority: nextPriority,
+      postOrderChoice: nextPostOrderChoice,
+      updatedAt: serverTimestamp(),
+      ...extraData
+    };
 
-  await updateDoc(buildRequestPath(), payload);
-}
+    await updateDoc(buildRequestPath(), payload);
+  }
 
-function getStepFromInternalStatus(internalStatus) {
-  if (internalStatus === "À qualifier") return "new";
-  if (internalStatus === "Pièces manquantes") return "missing_pieces";
-  if (internalStatus === "Prêt relance") return "relance_ready";
-  if (internalStatus === "Attente client") return "waiting_client";
-  if (internalStatus === "Prêt mise en demeure") return "formal_notice_ready";
-  if (internalStatus === "Prêt injonction") return "injunction_ready";
-  if (internalStatus === "Clôturé") return "closed";
-  if (internalStatus === "Archivé") return "archived";
-  return "in_progress";
-}
- 
+  function getStepFromInternalStatus(internalStatus) {
+    if (internalStatus === "À qualifier") return "new";
+    if (internalStatus === "Pièces manquantes") return "missing_pieces";
+    if (internalStatus === "Prêt relance") return "relance_ready";
+    if (internalStatus === "Attente client") return "waiting_client";
+    if (internalStatus === "Prêt mise en demeure") return "formal_notice_ready";
+    if (internalStatus === "Prêt injonction") return "injunction_ready";
+    if (internalStatus === "Clôturé") return "closed";
+    if (internalStatus === "Archivé") return "archived";
+    return "in_progress";
+  }
+
   async function addMessage(authorType, body, kind = "message") {
-    if (!body.trim()) {
+    const cleanBody = (body || "").trim();
+    if (!cleanBody) {
       alert("Message vide.");
-      return;
+      return false;
     }
 
     await addDoc(
@@ -1167,174 +1183,176 @@ function getStepFromInternalStatus(internalStatus) {
       {
         authorType,
         kind,
-        body: body.trim(),
+        body: cleanBody,
         createdAt: serverTimestamp()
       }
     );
 
     await loadMessages();
+    return true;
   }
 
- async function closeRequest(mode = "closed") {
-  const reason = closureReason.value;
-  const comment = closureComment.value.trim();
+  async function closeRequest(mode = "closed") {
+    const reason = closureReason.value;
+    const comment = closureComment.value.trim();
 
-  if (mode === "closed" && !reason) {
-    alert("Choisis un motif de clôture.");
-    return;
+    if (mode === "closed" && !reason) {
+      alert("Choisis un motif de clôture.");
+      return;
+    }
+
+    const payload = {
+      lifecycleStatus: mode,
+      internalStatus: mode === "closed" ? "Clôturé" : "Archivé",
+      clientStatus: mode === "closed" ? "Dossier clôturé" : (currentRequest?.clientStatus || "Traitement en cours"),
+      closureReason: reason || "",
+      closureComment: comment || "",
+      updatedAt: serverTimestamp(),
+      clientHasNewFiles: false,
+      clientActionRequired: false
+    };
+
+    if (mode === "closed") {
+      payload.closedAt = serverTimestamp();
+      payload.archivedAt = null;
+      payload.status = "closed";
+      payload.statusLabel = "Dossier clôturé";
+      payload.currentStep = "closed";
+    } else {
+      payload.closedAt = null;
+      payload.archivedAt = serverTimestamp();
+      payload.status = "archived";
+      payload.statusLabel = "Dossier archivé";
+      payload.currentStep = "archived";
+    }
+
+    await updateDoc(buildRequestPath(), payload);
+
+    if (comment) {
+      await addMessage("admin", `Clôture dossier : ${comment}`, "closure_note");
+    }
+
+    await loadRequest();
+    await loadMessages();
   }
 
-  const payload = {
-    lifecycleStatus: mode,
-    internalStatus: mode === "closed" ? "Clôturé" : "Archivé",
-    clientStatus: mode === "closed" ? "Dossier clôturé" : (currentRequest?.clientStatus || "Traitement en cours"),
-    closureReason: reason || "",
-    closureComment: comment || "",
-    updatedAt: serverTimestamp(),
-    clientHasNewFiles: false,
-    clientActionRequired: false
-  };
-
-  if (mode === "closed") {
-    payload.closedAt = serverTimestamp();
-    payload.archivedAt = null;
-    payload.status = "closed";
-    payload.statusLabel = "Dossier clôturé";
-    payload.currentStep = "closed";
-  } else {
-    payload.closedAt = null;
-    payload.archivedAt = serverTimestamp();
-    payload.status = "archived";
-    payload.statusLabel = "Dossier archivé";
-    payload.currentStep = "archived";
-  }
-
-  await updateDoc(buildRequestPath(), payload);
-
-  if (comment) {
-    await addMessage("admin", `Clôture dossier : ${comment}`, "closure_note");
-  }
-
-  await loadRequest();
-  await loadMessages();
-}
   function wireQuickActions() {
     qualifyBtn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "À qualifier";
-  clientStatusSelect.value = "Analyse en cours";
+      internalStatusSelect.value = "À qualifier";
+      clientStatusSelect.value = "Analyse en cours";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "new",
-    status: "new",
-    statusLabel: "Dossier créé"
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "new",
+        status: "new",
+        statusLabel: "Dossier créé"
+      });
 
-  await loadRequest();
-  alert("Dossier passé en qualification.");
-});
+      await loadRequest();
+      alert("Dossier passé en qualification.");
+    });
 
- prepareR1Btn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt relance";
-  clientStatusSelect.value = "Traitement en cours";
+    prepareR1Btn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt relance";
+      clientStatusSelect.value = "Traitement en cours";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "relance_ready",
-    status: "in_progress",
-    statusLabel: "Relance en préparation"
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "relance_ready",
+        status: "in_progress",
+        statusLabel: "Relance en préparation"
+      });
 
-  await loadRequest();
-  alert("Relance 1 préparée. Passe ensuite par Gérer la publication.");
-});
+      await loadRequest();
+      alert("Relance 1 préparée. Passe ensuite par Gérer la publication.");
+    });
 
-prepareR2Btn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt relance";
-  clientStatusSelect.value = "Traitement en cours";
+    prepareR2Btn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt relance";
+      clientStatusSelect.value = "Traitement en cours";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "relance_ready",
-    status: "in_progress",
-    statusLabel: "Relance en préparation"
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "relance_ready",
+        status: "in_progress",
+        statusLabel: "Relance en préparation"
+      });
 
-  await loadRequest();
-  alert("Relance 2 préparée. Passe ensuite par Gérer la publication.");
-});
+      await loadRequest();
+      alert("Relance 2 préparée. Passe ensuite par Gérer la publication.");
+    });
 
-prepareR3Btn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt relance";
-  clientStatusSelect.value = "Traitement en cours";
+    prepareR3Btn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt relance";
+      clientStatusSelect.value = "Traitement en cours";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "relance_ready",
-    status: "in_progress",
-    statusLabel: "Relance en préparation"
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "relance_ready",
+        status: "in_progress",
+        statusLabel: "Relance en préparation"
+      });
 
-  await loadRequest();
-  alert("Relance 3 préparée. Passe ensuite par Gérer la publication.");
-});
+      await loadRequest();
+      alert("Relance 3 préparée. Passe ensuite par Gérer la publication.");
+    });
 
-   prepareFormalNoticeBtn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt mise en demeure";
-  clientStatusSelect.value = "Traitement en cours";
+    prepareFormalNoticeBtn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt mise en demeure";
+      clientStatusSelect.value = "Traitement en cours";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "formal_notice_ready",
-    status: "in_progress",
-    statusLabel: "Mise en demeure en préparation"
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "formal_notice_ready",
+        status: "in_progress",
+        statusLabel: "Mise en demeure en préparation"
+      });
 
-  await loadRequest();
-  alert("Mise en demeure préparée. Passe ensuite par Gérer la publication.");
-});
+      await loadRequest();
+      alert("Mise en demeure préparée. Passe ensuite par Gérer la publication.");
+    });
 
     prepareInjunctionBtn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt injonction";
-  clientStatusSelect.value = "Traitement en cours";
+      internalStatusSelect.value = "Prêt injonction";
+      clientStatusSelect.value = "Traitement en cours";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "injunction_ready",
-    status: "in_progress",
-    statusLabel: "Injonction en préparation",
-    injunctionPublished: false
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "injunction_ready",
+        status: "in_progress",
+        statusLabel: "Injonction en préparation",
+        injunctionPublished: false
+      });
 
-  await loadRequest();
-  alert("Injonction préparée. Passe ensuite par Gérer la publication.");
-});
+      await loadRequest();
+      alert("Injonction préparée. Passe ensuite par Gérer la publication.");
+    });
 
     requestMissingPieceBtn?.addEventListener("click", async () => {
-  const msg = prompt("Pièce à demander au client :");
-  if (!msg) return;
+      const msg = prompt("Pièce à demander au client :");
+      if (!msg) return;
 
-  await addMessage("admin", `Pièce complémentaire demandée : ${msg}`, "missing_piece");
-  clientStatusSelect.value = "Pièce demandée";
-  internalStatusSelect.value = "Attente client";
+      await addMessage("admin", `Pièce complémentaire demandée : ${msg}`, "missing_piece");
+      clientStatusSelect.value = "Pièce demandée";
+      internalStatusSelect.value = "Attente client";
 
-  await saveMainFields({
-    clientHasNewFiles: false,
-    clientActionRequired: true,
-    currentStep: "waiting_client",
-    status: "waiting_client",
-    statusLabel: "Pièce demandée"
-  });
+      await saveMainFields({
+        clientHasNewFiles: false,
+        clientActionRequired: true,
+        currentStep: "waiting_client",
+        status: "waiting_client",
+        statusLabel: "Pièce demandée"
+      });
 
-  await loadRequest();
-  alert("Demande de pièce enregistrée.");
-});
+      await loadRequest();
+      alert("Demande de pièce enregistrée.");
+    });
 
     saveInternalNoteQuickBtn?.addEventListener("click", async () => {
       const note = prompt("Note interne :");
       if (!note) return;
-      await addMessage("admin", note, "internal_note");
-      alert("Note interne enregistrée.");
+      const ok = await addMessage("admin", note, "internal_note");
+      if (ok) alert("Note interne enregistrée.");
     });
 
     archiveQuickBtn?.addEventListener("click", async () => {
@@ -1349,13 +1367,15 @@ prepareR3Btn?.addEventListener("click", async () => {
     }
 
     sendClientMessageBtn?.addEventListener("click", async () => {
-      await addMessage("admin", clientMessage.value, "client_message");
+      const ok = await addMessage("admin", clientMessage.value, "client_message");
+      if (!ok) return;
       clientMessage.value = "";
       alert("Message enregistré.");
     });
 
     saveInternalNoteBtn?.addEventListener("click", async () => {
-      await addMessage("admin", clientMessage.value, "internal_note");
+      const ok = await addMessage("admin", clientMessage.value, "internal_note");
+      if (!ok) return;
       clientMessage.value = "";
       alert("Note interne enregistrée.");
     });
@@ -1371,40 +1391,40 @@ prepareR3Btn?.addEventListener("click", async () => {
     });
 
     [
-  debtorName,
-  debtorType,
-  debtorAddress,
-  invoiceRef,
-  dueDate,
-  internalSummary,
-  clientStatusSelect,
-  prioritySelect,
-  injunctionChoiceSelect
-].forEach((el) => {
-  el?.addEventListener("change", async () => {
-    await saveMainFields();
-    await loadRequest();
-  });
-});
+      debtorName,
+      debtorType,
+      debtorAddress,
+      invoiceRef,
+      dueDate,
+      internalSummary,
+      clientStatusSelect,
+      prioritySelect,
+      injunctionChoiceSelect
+    ].forEach((el) => {
+      el?.addEventListener("change", async () => {
+        await saveMainFields();
+        await loadRequest();
+      });
+    });
 
-internalStatusSelect?.addEventListener("change", async () => {
-  const nextInternal = internalStatusSelect.value;
+    internalStatusSelect?.addEventListener("change", async () => {
+      const nextInternal = internalStatusSelect.value;
 
-  const extraData = {
-    currentStep: getStepFromInternalStatus(nextInternal)
-  };
+      const extraData = {
+        currentStep: getStepFromInternalStatus(nextInternal)
+      };
 
-  if (nextInternal !== "Attente client") {
-    extraData.clientActionRequired = false;
-  }
+      if (nextInternal !== "Attente client") {
+        extraData.clientActionRequired = false;
+      }
 
-  if (nextInternal !== "Clôturé" && nextInternal !== "Archivé") {
-    extraData.lifecycleStatus = "open";
-  }
+      if (nextInternal !== "Clôturé" && nextInternal !== "Archivé") {
+        extraData.lifecycleStatus = "open";
+      }
 
-  await saveMainFields(extraData);
-  await loadRequest();
-});
+      await saveMainFields(extraData);
+      await loadRequest();
+    });
   }
 
   async function bootstrap() {
@@ -1413,7 +1433,9 @@ internalStatusSelect?.addEventListener("change", async () => {
       return;
     }
 
-    await loadRequest();
+    const exists = await loadRequest();
+    if (!exists) return;
+
     await loadFiles();
     await loadEvents();
     await loadMessages();
