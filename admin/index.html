@@ -772,7 +772,7 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore,
-    collectionGroup,
+    collection,
     getDocs,
     query,
     orderBy,
@@ -821,13 +821,6 @@
     });
   }
 
-  function extractUidFromPath(path = "") {
-    const parts = path.split("/");
-    const usersIndex = parts.indexOf("users");
-    if (usersIndex >= 0 && parts[usersIndex + 1]) return parts[usersIndex + 1];
-    return "";
-  }
-
   function getInternalStatus(item) {
     return item.internalStatus || "À qualifier";
   }
@@ -856,6 +849,7 @@
 
     if (type === "client") {
       if (v.includes("clôt")) return "done";
+      if (v.includes("pièce")) return "waiting";
       return "client";
     }
 
@@ -863,23 +857,22 @@
   }
 
   function computeNextAction(item) {
-  const internal = getInternalStatus(item);
-  const clientStatus = getClientStatus(item);
+    const internal = getInternalStatus(item);
+    const clientStatus = getClientStatus(item);
 
-  if (item.clientHasNewFiles === true || clientStatus === "Pièces reçues") {
-    return "Vérifier les pièces reçues et qualifier le dossier";
+    if (item.clientHasNewFiles === true || clientStatus === "Pièces reçues") {
+      return "Vérifier les pièces reçues et qualifier le dossier";
+    }
+
+    if (internal === "À qualifier") return "Lire les pièces et poser le statut initial";
+    if (internal === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
+    if (internal === "Attente client") return "Contrôler le retour ou relancer";
+    if (internal === "Prêt relance") return "Préparer ou publier la relance";
+    if (internal === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
+    if (internal === "Prêt injonction") return "Préparer l’étape injonction";
+    if (internal === "Clôturé") return "Aucune";
+    return "Ouvrir et analyser";
   }
-
-  if (internal === "À qualifier") return "Lire les pièces et poser le statut initial";
-  if (internal === "Pièces manquantes") return "Demander / vérifier les pièces manquantes";
-  if (internal === "Attente client") return "Contrôler le retour ou relancer";
-  if (internal === "Prêt relance") return "Préparer ou publier la relance";
-  if (internal === "Prêt mise en demeure") return "Finaliser et publier la mise en demeure";
-  if (internal === "Prêt injonction") return "Préparer l’étape injonction";
-  if (internal === "Clôturé") return "Aucune";
-
-  return "Ouvrir et analyser";
-}
 
   function computeKPIs(items) {
     const newCount = items.filter(i => getInternalStatus(i) === "À qualifier").length;
@@ -902,74 +895,75 @@
   }
 
   function renderAlerts(items) {
-  const urgentItems = items
-    .filter(i => {
-      const priority = getPriority(i).toLowerCase();
-      const internal = getInternalStatus(i).toLowerCase();
-      const clientStatus = getClientStatus(i).toLowerCase();
+    const urgentItems = items
+      .filter(i => {
+        const priority = getPriority(i).toLowerCase();
+        const internal = getInternalStatus(i).toLowerCase();
+        const clientStatus = getClientStatus(i).toLowerCase();
 
-      return (
-        i.clientHasNewFiles === true ||
-        clientStatus.includes("pièces reçues") ||
-        priority.includes("urgent") ||
-        priority.includes("haute") ||
-        priority.includes("prioritaire") ||
-        internal.includes("qualifier") ||
-        internal.includes("attente")
-      );
-    })
-    .slice(0, 6);
+        return (
+          i.clientHasNewFiles === true ||
+          clientStatus.includes("pièces reçues") ||
+          priority.includes("urgent") ||
+          priority.includes("haute") ||
+          priority.includes("prioritaire") ||
+          internal.includes("qualifier") ||
+          internal.includes("attente")
+        );
+      })
+      .slice(0, 6);
 
-  urgentBadge.textContent = `${urgentItems.length} urgence${urgentItems.length > 1 ? "s" : ""}`;
+    urgentBadge.textContent = `${urgentItems.length} urgence${urgentItems.length > 1 ? "s" : ""}`;
 
-  if (!urgentItems.length) {
-    alertList.innerHTML = `<div class="empty-state">Aucune alerte prioritaire.</div>`;
-    return;
-  }
-
-  alertList.innerHTML = "";
-
-  urgentItems.forEach((item, index) => {
-    let dotClass = "info";
-    let title = "Dossier prioritaire";
-
-    if (item.clientHasNewFiles === true || getClientStatus(item) === "Pièces reçues") {
-      dotClass = "danger";
-      title = "Nouvelles pièces reçues";
-    } else if (getInternalStatus(item) === "À qualifier") {
-      dotClass = "warning";
-      title = "Dossier à qualifier";
-    } else if (getInternalStatus(item) === "Attente client") {
-      dotClass = "warning";
-      title = "Retour client attendu";
-    } else if (index === 0) {
-      dotClass = "danger";
+    if (!urgentItems.length) {
+      alertList.innerHTML = `<div class="empty-state">Aucune alerte prioritaire.</div>`;
+      return;
     }
 
-    const detailUrl = getDetailUrl(item);
-    const clientName =
-      item.creditorName ||
-      item.clientName ||
-      item.clientEmail ||
-      item.clientUid ||
-      "Client";
+    alertList.innerHTML = "";
 
-    const summary = `${item.ref || item.id} — ${clientName} — ${computeNextAction(item)}.`;
+    urgentItems.forEach((item, index) => {
+      let dotClass = "info";
+      let title = "Dossier prioritaire";
 
-    alertList.insertAdjacentHTML("beforeend", `
-      <div class="alert-item">
-        <div class="alert-left">
-          <div class="alert-dot ${dotClass}"></div>
-          <div class="alert-content">
-            <strong>${escapeHtml(title)}</strong>
-            <span>${escapeHtml(summary)}</span>
+      if (item.clientHasNewFiles === true || getClientStatus(item) === "Pièces reçues") {
+        dotClass = "danger";
+        title = "Nouvelles pièces reçues";
+      } else if (getInternalStatus(item) === "À qualifier") {
+        dotClass = "warning";
+        title = "Dossier à qualifier";
+      } else if (getInternalStatus(item) === "Attente client") {
+        dotClass = "warning";
+        title = "Retour client attendu";
+      } else if (index === 0) {
+        dotClass = "danger";
+      }
+
+      const detailUrl = getDetailUrl(item);
+      const clientName =
+        item.creditorName ||
+        item.clientName ||
+        item.clientEmail ||
+        item.email ||
+        item.clientUid ||
+        "Client";
+
+      const summary = `${item.ref || item.id} — ${clientName} — ${computeNextAction(item)}.`;
+
+      alertList.insertAdjacentHTML("beforeend", `
+        <div class="alert-item">
+          <div class="alert-left">
+            <div class="alert-dot ${dotClass}"></div>
+            <div class="alert-content">
+              <strong>${escapeHtml(title)}</strong>
+              <span>${escapeHtml(summary)}</span>
+            </div>
           </div>
+          <a href="${detailUrl}" class="mini-btn">Ouvrir</a>
         </div>
-        <a href="${detailUrl}" class="mini-btn">Ouvrir</a>
-      </div>
-    `);
-  });
-}
+      `);
+    });
+  }
 
   function renderActiveTable(items) {
     const activeItems = items.slice(0, 6);
@@ -994,8 +988,8 @@
         <tr>
           <td>
             <div class="client">
-              <strong>${escapeHtml(item.creditorName || item.clientName || item.clientEmail || item.clientUid || "Client")}</strong>
-<span>${escapeHtml(item.creditorEmail || item.clientEmail || "—")}</span>
+              <strong>${escapeHtml(item.creditorName || item.clientName || item.clientEmail || item.email || item.clientUid || "Client")}</strong>
+              <span>${escapeHtml(item.creditorEmail || item.clientEmail || item.email || "—")}</span>
             </div>
           </td>
           <td>${escapeHtml(item.ref || item.id)}</td>
@@ -1009,20 +1003,37 @@
   }
 
   async function loadRequests() {
-    const q = query(collectionGroup(db, "requests"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
+    const usersSnap = await getDocs(collection(db, "users"));
+    const requests = [];
 
-    allRequests = snap.docs.map((docSnap) => {
-      const data = docSnap.data();
-      const uid = extractUidFromPath(docSnap.ref.path);
+    for (const userDoc of usersSnap.docs) {
+      const userData = userDoc.data();
+      const uid = userDoc.id;
 
-      return {
-        id: docSnap.id,
-        uid,
-        ...data,
-        creditorName: data.creditorName || data.clientName || "",
-        creditorEmail: data.creditorEmail || data.clientEmail || ""
-      };
+      const requestsRef = collection(db, "users", uid, "requests");
+      const requestsSnap = await getDocs(query(requestsRef, orderBy("createdAt", "desc")));
+
+      requestsSnap.forEach((requestDoc) => {
+        const data = requestDoc.data();
+
+        requests.push({
+          id: requestDoc.id,
+          uid,
+          ...data,
+          email: userData.email || "",
+          clientEmail: data.clientEmail || userData.email || "",
+          creditorEmail: data.creditorEmail || userData.email || "",
+          clientName: data.clientName || "",
+          creditorName: data.creditorName || "",
+          clientUid: data.clientUid || uid
+        });
+      });
+    }
+
+    allRequests = requests.sort((a, b) => {
+      const at = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bt = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      return bt - at;
     });
 
     const activeItems = allRequests.filter((item) => {
