@@ -573,224 +573,214 @@
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      addDoc,
-      collection,
-      updateDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-      authDomain: "axe-flow.firebaseapp.com",
-      projectId: "axe-flow",
-      storageBucket: "axe-flow.firebasestorage.app",
-      messagingSenderId: "295300543556",
-      appId: "1:295300543556:web:3facac2d0c612e3456b811"
-    };
+const firebaseConfig = {
+  apiKey: "XXX",
+  authDomain: "axe-flow.firebaseapp.com",
+  projectId: "axe-flow"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    const params = new URLSearchParams(window.location.search);
-    const uid = params.get("uid");
-    const requestId = params.get("id");
+const params = new URLSearchParams(window.location.search);
+const uid = params.get("uid");
+const requestId = params.get("id");
 
-    const heroTitle = document.getElementById("heroTitle");
-    const heroText = document.getElementById("heroText");
-    const backToRequestBtn = document.getElementById("backToRequestBtn");
+const publicationType = document.getElementById("publicationType");
+const publicationTitle = document.getElementById("publicationTitle");
+const publicationMessage = document.getElementById("publicationMessage");
+const publicationProofs = document.getElementById("publicationProofs");
+const publicationDocument = document.getElementById("publicationDocument");
+const draftStatus = document.getElementById("draftStatus");
 
-    const contextRef = document.getElementById("contextRef");
-    const contextClient = document.getElementById("contextClient");
-    const contextEmail = document.getElementById("contextEmail");
+const publishBtn = document.getElementById("publishBtn");
+const saveDraftBtn = document.getElementById("saveDraftBtn");
+const clearBtn = document.getElementById("clearBtn");
 
-    const publicationType = document.getElementById("publicationType");
-    const publicationTitle = document.getElementById("publicationTitle");
-    const publicationMessage = document.getElementById("publicationMessage");
-    const publicationProofs = document.getElementById("publicationProofs");
-    const publicationDocument = document.getElementById("publicationDocument");
-    const draftStatus = document.getElementById("draftStatus");
+function requestPath() {
+  return doc(db, "users", uid, "requests", requestId);
+}
 
-    const publishBtn = document.getElementById("publishBtn");
-    const saveDraftBtn = document.getElementById("saveDraftBtn");
-    const clearBtn = document.getElementById("clearBtn");
+function setDraftLabel(mode = "draft") {
+  draftStatus.className = "status " + (mode === "published" ? "published" : "draft");
+  draftStatus.textContent = mode === "published" ? "Publié" : "Brouillon";
+}
 
-    let currentRequest = null;
+/**
+ * 🔥 MAPPING MÉTIER CENTRAL
+ */
+function getUpdateFromType(type) {
+  switch (type) {
+    case "Relance 1":
+    case "Relance 2":
+    case "Relance 3":
+      return {
+        currentStep: "relance_sent",
+        status: "in_progress",
+        statusLabel: "Relance envoyée",
+        clientActionRequired: true,
+        clientHasNewFiles: false
+      };
 
-    function requestPath() {
-      return doc(db, "users", uid, "requests", requestId);
+    case "Mise en demeure":
+      return {
+        currentStep: "formal_notice_sent",
+        status: "in_progress",
+        statusLabel: "Mise en demeure envoyée",
+        clientActionRequired: true,
+        clientHasNewFiles: false
+      };
+
+    case "Injonction":
+      return {
+        currentStep: "injunction_sent",
+        status: "in_progress",
+        statusLabel: "Injonction déposée",
+        clientActionRequired: false,
+        clientHasNewFiles: false,
+        injunctionPublished: true
+      };
+
+    case "Demande de pièce":
+      return {
+        currentStep: "waiting_client",
+        status: "waiting_client",
+        statusLabel: "Pièce demandée",
+        clientActionRequired: true,
+        clientHasNewFiles: false
+      };
+
+    case "Clôture dossier":
+      return {
+        currentStep: "closed",
+        status: "closed",
+        statusLabel: "Dossier clôturé",
+        clientActionRequired: false,
+        clientHasNewFiles: false,
+        lifecycleStatus: "closed",
+        closedAt: serverTimestamp()
+      };
+
+    default:
+      return {
+        status: "in_progress",
+        statusLabel: "Mise à jour dossier"
+      };
+  }
+}
+
+async function savePublication(mode = "draft") {
+  const type = publicationType.value;
+  const title = publicationTitle.value.trim();
+  const message = publicationMessage.value.trim();
+  const proofs = publicationProofs.value.trim();
+  const documentName = publicationDocument.value.trim();
+
+  if (!title || !message) {
+    alert("Titre et message obligatoires.");
+    return;
+  }
+
+  // 1. EVENT
+  await addDoc(
+    collection(db, "users", uid, "requests", requestId, "events"),
+    {
+      title,
+      type,
+      description: message,
+      requiredProofs: proofs
+        ? proofs.split(",").map(x => x.trim()).filter(Boolean)
+        : [],
+      documentName: documentName || null,
+      status: mode === "published" ? "published" : "draft",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     }
+  );
 
-    function setDraftLabel(mode = "draft") {
-      draftStatus.className = "status " + (mode === "published" ? "published" : "draft");
-      draftStatus.textContent = mode === "published" ? "Publié" : "Brouillon";
-    }
+  // 2. UPDATE DOSSIER SI PUBLICATION
+  if (mode === "published") {
+    const updateData = getUpdateFromType(type);
 
-    function fillQuickTemplate(typeValue) {
-      const type = typeValue || "";
-
-      if (type === "Relance 1") {
-        publicationTitle.value = "Relance 1 préparée";
-        publicationMessage.value = "Votre relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace client.";
-        publicationProofs.value = "preuve d’envoi mail, capture écran";
-      } else if (type === "Relance 2") {
-        publicationTitle.value = "Relance 2 préparée";
-        publicationMessage.value = "Votre relance 2 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
-        publicationProofs.value = "preuve d’envoi relance 2";
-      } else if (type === "Relance 3") {
-        publicationTitle.value = "Relance 3 préparée";
-        publicationMessage.value = "Votre relance 3 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
-        publicationProofs.value = "preuve d’envoi relance 3";
-      } else if (type === "Mise en demeure") {
-        publicationTitle.value = "Mise en demeure préparée";
-        publicationMessage.value = "La mise en demeure a été préparée. Merci de procéder à l’envoi puis de déposer le justificatif dans votre espace.";
-        publicationProofs.value = "preuve LRAR, accusé, justificatif d’envoi";
-      } else if (type === "Injonction") {
-        publicationTitle.value = "Injonction en préparation";
-        publicationMessage.value = "Le dossier d’injonction est en préparation. La suite vous sera publiée dès validation.";
-        publicationProofs.value = "";
-      } else if (type === "Demande de pièce") {
-        publicationTitle.value = "Pièce complémentaire demandée";
-        publicationMessage.value = "Une pièce complémentaire est nécessaire pour poursuivre le traitement du dossier.";
-        publicationProofs.value = "document demandé";
-      } else if (type === "Information client") {
-        publicationTitle.value = "Information dossier";
-        publicationMessage.value = "Une mise à jour de votre dossier est disponible dans votre espace client.";
-        publicationProofs.value = "";
-      } else if (type === "Clôture dossier") {
-        publicationTitle.value = "Dossier clôturé";
-        publicationMessage.value = "Votre dossier a été clôturé. Vous pouvez consulter le récapitulatif dans votre espace client.";
-        publicationProofs.value = "";
-      }
-    }
-
-    async function loadRequest() {
-      const snap = await getDoc(requestPath());
-
-      if (!snap.exists()) {
-        alert("Dossier introuvable.");
-        return;
-      }
-
-      currentRequest = { id: snap.id, ...snap.data() };
-
-      const ref = currentRequest.ref || currentRequest.id;
-      const clientName = currentRequest.creditorName || currentRequest.clientName || "Client";
-      const clientEmail = currentRequest.creditorEmail || currentRequest.clientEmail || "—";
-
-      heroTitle.textContent = `Publication ${ref}`;
-      heroText.textContent = `Tu publies ici une étape rattachée au dossier ${ref}.`;
-      contextRef.textContent = `Référence : ${ref}`;
-      contextClient.textContent = `Client : ${clientName}`;
-      contextEmail.textContent = `Email : ${clientEmail}`;
-      backToRequestBtn.href = `demande.html?uid=${encodeURIComponent(uid)}&id=${encodeURIComponent(requestId)}`;
-    }
-
-    async function savePublication(mode = "draft") {
-      const type = publicationType.value;
-      const title = publicationTitle.value.trim();
-      const message = publicationMessage.value.trim();
-      const proofs = publicationProofs.value.trim();
-      const documentName = publicationDocument.value.trim();
-
-      if (!title || !message) {
-        alert("Titre et message obligatoires.");
-        return;
-      }
-
-      await addDoc(
-        collection(db, "users", uid, "requests", requestId, "events"),
-        {
-          title,
-          type,
-          description: message,
-          requiredProofs: proofs ? proofs.split(",").map(x => x.trim()).filter(Boolean) : [],
-          documentName,
-          status: mode === "published" ? "Publié" : "Brouillon",
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }
-      );
-
-      if (mode === "published") {
-        await updateDoc(requestPath(), {
-          clientStatus: "Traitement en cours",
-          updatedAt: serverTimestamp()
-        });
-      }
-
-      setDraftLabel(mode);
-
-      if (mode === "published") {
-        alert("Publication enregistrée côté client.");
-      } else {
-        alert("Brouillon enregistré.");
-      }
-    }
-
-    function clearForm() {
-      publicationTitle.value = "";
-      publicationMessage.value = "";
-      publicationProofs.value = "";
-      publicationDocument.value = "";
-      setDraftLabel("draft");
-    }
-
-    publicationType.addEventListener("change", () => {
-      fillQuickTemplate(publicationType.value);
-      setDraftLabel("draft");
+    await updateDoc(requestPath(), {
+      ...updateData,
+      clientStatus: "Traitement en cours",
+      updatedAt: serverTimestamp()
     });
+  }
 
-    publishBtn.addEventListener("click", async () => {
-      await savePublication("published");
-    });
+  setDraftLabel(mode);
 
-    saveDraftBtn.addEventListener("click", async () => {
-      await savePublication("draft");
-    });
+  alert(mode === "published"
+    ? "Publication envoyée côté client"
+    : "Brouillon enregistré"
+  );
+}
 
-    clearBtn.addEventListener("click", () => {
-      clearForm();
-    });
+function clearForm() {
+  publicationTitle.value = "";
+  publicationMessage.value = "";
+  publicationProofs.value = "";
+  publicationDocument.value = "";
+  setDraftLabel("draft");
+}
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "connexion.html";
-        return;
-      }
+/**
+ * EVENTS UI
+ */
+publicationType.addEventListener("change", () => {
+  setDraftLabel("draft");
+});
 
-      try {
-        const userSnap = await getDoc(doc(db, "users", user.uid));
-        const profile = userSnap.exists() ? userSnap.data() : null;
+publishBtn.addEventListener("click", async () => {
+  await savePublication("published");
+});
 
-        if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
-          alert("Accès admin refusé.");
-          window.location.href = "../index.html";
-          return;
-        }
+saveDraftBtn.addEventListener("click", async () => {
+  await savePublication("draft");
+});
 
-        if (!uid || !requestId) {
-          alert("URL invalide. Il faut ?uid=...&id=...");
-          window.location.href = "demandes.html";
-          return;
-        }
+clearBtn.addEventListener("click", clearForm);
 
-        await loadRequest();
-        fillQuickTemplate(publicationType.value);
-      } catch (err) {
-        console.error("Erreur chargement publication admin:", err);
-        alert("Erreur de chargement de la page publication.");
-      }
-    });
-  </script>
+/**
+ * AUTH
+ */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "connexion.html";
+    return;
+  }
+
+  try {
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+    const profile = userSnap.data();
+
+    if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
+      alert("Accès refusé");
+      return;
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur chargement");
+  }
+});
+</script>
 </body>
 </html>
