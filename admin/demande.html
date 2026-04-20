@@ -1211,59 +1211,115 @@
 
   function wireQuickActions() {
     qualifyBtn?.addEventListener("click", async () => {
-      internalStatusSelect.value = "À qualifier";
-      clientStatusSelect.value = "Analyse en cours";
-      await saveMainFields();
-      await loadRequest();
-      alert("Dossier passé en qualification.");
-    });
+  internalStatusSelect.value = "À qualifier";
+  clientStatusSelect.value = "Analyse en cours";
 
-    prepareR1Btn?.addEventListener("click", async () => {
-      internalStatusSelect.value = "Prêt relance";
-      await saveMainFields();
-      await loadRequest();
-      alert("Relance 1 préparée. Passe ensuite par Gérer la publication.");
-    });
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "new",
+    status: "new",
+    statusLabel: "Dossier créé"
+  });
 
-    prepareR2Btn?.addEventListener("click", async () => {
-      internalStatusSelect.value = "Prêt relance";
-      await saveMainFields();
-      await loadRequest();
-      alert("Relance 2 préparée. Passe ensuite par Gérer la publication.");
-    });
+  await loadRequest();
+  alert("Dossier passé en qualification.");
+});
 
-    prepareR3Btn?.addEventListener("click", async () => {
-      internalStatusSelect.value = "Prêt relance";
-      await saveMainFields();
-      await loadRequest();
-      alert("Relance 3 préparée. Passe ensuite par Gérer la publication.");
-    });
+ prepareR1Btn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt relance";
+  clientStatusSelect.value = "Traitement en cours";
 
-    prepareFormalNoticeBtn?.addEventListener("click", async () => {
-      internalStatusSelect.value = "Prêt mise en demeure";
-      await saveMainFields();
-      await loadRequest();
-      alert("Mise en demeure préparée. Passe ensuite par Gérer la publication.");
-    });
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "relance_ready",
+    status: "in_progress",
+    statusLabel: "Relance en préparation"
+  });
+
+  await loadRequest();
+  alert("Relance 1 préparée. Passe ensuite par Gérer la publication.");
+});
+
+prepareR2Btn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt relance";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "relance_ready",
+    status: "in_progress",
+    statusLabel: "Relance en préparation"
+  });
+
+  await loadRequest();
+  alert("Relance 2 préparée. Passe ensuite par Gérer la publication.");
+});
+
+prepareR3Btn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt relance";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "relance_ready",
+    status: "in_progress",
+    statusLabel: "Relance en préparation"
+  });
+
+  await loadRequest();
+  alert("Relance 3 préparée. Passe ensuite par Gérer la publication.");
+});
+
+   prepareFormalNoticeBtn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt mise en demeure";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "formal_notice_ready",
+    status: "in_progress",
+    statusLabel: "Mise en demeure en préparation"
+  });
+
+  await loadRequest();
+  alert("Mise en demeure préparée. Passe ensuite par Gérer la publication.");
+});
 
     prepareInjunctionBtn?.addEventListener("click", async () => {
-      internalStatusSelect.value = "Prêt injonction";
-      await saveMainFields();
-      await loadRequest();
-      alert("Injonction préparée. Passe ensuite par Gérer la publication.");
-    });
+  internalStatusSelect.value = "Prêt injonction";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "injunction_ready",
+    status: "in_progress",
+    statusLabel: "Injonction en préparation",
+    injunctionPublished: false
+  });
+
+  await loadRequest();
+  alert("Injonction préparée. Passe ensuite par Gérer la publication.");
+});
 
     requestMissingPieceBtn?.addEventListener("click", async () => {
-      const msg = prompt("Pièce à demander au client :");
-      if (!msg) return;
+  const msg = prompt("Pièce à demander au client :");
+  if (!msg) return;
 
-      await addMessage("admin", `Pièce complémentaire demandée : ${msg}`, "missing_piece");
-      clientStatusSelect.value = "Pièce demandée";
-      internalStatusSelect.value = "Attente client";
-      await saveMainFields();
-      await loadRequest();
-      alert("Demande de pièce enregistrée.");
-    });
+  await addMessage("admin", `Pièce complémentaire demandée : ${msg}`, "missing_piece");
+  clientStatusSelect.value = "Pièce demandée";
+  internalStatusSelect.value = "Attente client";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    clientActionRequired: true,
+    currentStep: "waiting_client",
+    status: "waiting_client",
+    statusLabel: "Pièce demandée"
+  });
+
+  await loadRequest();
+  alert("Demande de pièce enregistrée.");
+});
 
     saveInternalNoteQuickBtn?.addEventListener("click", async () => {
       const note = prompt("Note interne :");
