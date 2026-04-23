@@ -884,6 +884,10 @@ function redirectToPublication() {
     `publications.html?uid=${encodeURIComponent(currentClientUid)}&id=${encodeURIComponent(currentRequestId)}`;
 }
 
+  function goToPublicationPage() {
+  window.location.href = `publications.html?uid=${encodeURIComponent(currentClientUid)}&id=${encodeURIComponent(currentRequestId)}`;
+}
+  
 function wireQuickActions() {
 
   qualifyBtn.addEventListener("click", async () => {
@@ -898,56 +902,77 @@ function wireQuickActions() {
     await loadRequest();
   });
 
-  prepareR1Btn.addEventListener("click", async () => {
-    await saveMainFields({
-      internalStatus: "Prêt relance",
-      clientStatus: "Traitement en cours",
-      currentStep: "relance_ready"
-    });
+prepareR1Btn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt relance";
+  clientStatusSelect.value = "Traitement en cours";
 
-    redirectToPublication();
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "relance_ready",
+    status: "in_progress",
+    statusLabel: "Relance en préparation"
   });
 
-  prepareR2Btn.addEventListener("click", async () => {
-    await saveMainFields({
-      internalStatus: "Prêt relance",
-      clientStatus: "Traitement en cours",
-      currentStep: "relance_ready"
-    });
+  goToPublicationPage();
+});
 
-    redirectToPublication();
+  prepareR2Btn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt relance";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "relance_ready",
+    status: "in_progress",
+    statusLabel: "Relance en préparation"
   });
 
-  prepareR3Btn.addEventListener("click", async () => {
-    await saveMainFields({
-      internalStatus: "Prêt relance",
-      clientStatus: "Traitement en cours",
-      currentStep: "relance_ready"
-    });
+  goToPublicationPage();
+});
 
-    redirectToPublication();
+  prepareR3Btn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt relance";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "relance_ready",
+    status: "in_progress",
+    statusLabel: "Relance en préparation"
   });
 
-  prepareFormalNoticeBtn.addEventListener("click", async () => {
-    await saveMainFields({
-      internalStatus: "Prêt mise en demeure",
-      clientStatus: "Traitement en cours",
-      currentStep: "formal_notice_ready"
-    });
+  goToPublicationPage();
+});
 
-    redirectToPublication();
+ prepareFormalNoticeBtn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt mise en demeure";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "formal_notice_ready",
+    status: "in_progress",
+    statusLabel: "Mise en demeure en préparation"
   });
 
-  prepareInjunctionBtn.addEventListener("click", async () => {
-    await saveMainFields({
-      internalStatus: "Prêt injonction",
-      clientStatus: "Traitement en cours",
-      currentStep: "injunction_ready"
-    });
+  goToPublicationPage();
+});
 
-    redirectToPublication();
+ 
+prepareInjunctionBtn?.addEventListener("click", async () => {
+  internalStatusSelect.value = "Prêt injonction";
+  clientStatusSelect.value = "Traitement en cours";
+
+  await saveMainFields({
+    clientHasNewFiles: false,
+    currentStep: "injunction_ready",
+    status: "in_progress",
+    statusLabel: "Injonction en préparation",
+    injunctionPublished: false
   });
 
+  goToPublicationPage();
+});
 }
 
 /* =========================
