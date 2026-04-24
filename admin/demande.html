@@ -795,71 +795,347 @@
 </main>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  collection,
-  getDocs,
-  addDoc,
-  serverTimestamp,
-  query,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    updateDoc,
+    collection,
+    getDocs,
+    addDoc,
+    serverTimestamp,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "axe-flow.firebaseapp.com",
-  projectId: "axe-flow",
-  storageBucket: "axe-flow.firebasestorage.app",
-  messagingSenderId: "295300543556",
-  appId: "1:295300543556:web:3facac2d0c612e3456b811"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "295300543556",
+    appId: "1:295300543556:web:3facac2d0c612e3456b811"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-let currentRequest = null;
-let currentRequestId = new URLSearchParams(window.location.search).get("id");
-let currentClientUid = new URLSearchParams(window.location.search).get("uid");
+  let currentRequest = null;
+  let currentRequestId = null;
+  let currentClientUid = null;
 
-/* =========================
-   RENDER
-========================= */
+  const qs = new URLSearchParams(window.location.search);
+  currentRequestId = qs.get("id");
+  currentClientUid = qs.get("uid");
 
-function renderRequest() {
-  if (!currentRequest) return;
+  const heroTitle = document.getElementById("heroTitle");
+  const heroDescription = document.getElementById("heroDescription");
+  const pillClientStatus = document.getElementById("pillClientStatus");
+  const pillInternalStatus = document.getElementById("pillInternalStatus");
+  const pillPriority = document.getElementById("pillPriority");
+  const pillPaymentStatus = document.getElementById("pillPaymentStatus");
 
-  creditorEmail.value =
-    currentRequest.creditorEmail ||
-    currentRequest.clientEmail ||
-    "";
+  const requestRef = document.getElementById("requestRef");
+  const requestOffer = document.getElementById("requestOffer");
+  const creditorName = document.getElementById("creditorName");
+  const creditorEmail = document.getElementById("creditorEmail");
+  const invoiceAmount = document.getElementById("invoiceAmount");
+  const receivedAt = document.getElementById("receivedAt");
+  const debtorName = document.getElementById("debtorName");
+  const debtorType = document.getElementById("debtorType");
+  const debtorAddress = document.getElementById("debtorAddress");
+  const invoiceRef = document.getElementById("invoiceRef");
+  const dueDate = document.getElementById("dueDate");
+  const internalSummary = document.getElementById("internalSummary");
 
-  internalStatusSelect.value =
-    currentRequest.internalStatus?.trim() || "À qualifier";
+  const internalStatusSelect = document.getElementById("internalStatusSelect");
+  const clientStatusSelect = document.getElementById("clientStatusSelect");
+  const prioritySelect = document.getElementById("prioritySelect");
+  const injunctionChoiceSelect = document.getElementById("injunctionChoiceSelect");
 
-  clientStatusSelect.value =
-    currentRequest.clientStatus?.trim() || "Demande reçue";
+  const initialFilesList = document.getElementById("initialFilesList");
+  const eventsTimeline = document.getElementById("eventsTimeline");
+  const proofsList = document.getElementById("proofsList");
+  const messagesList = document.getElementById("messagesList");
 
-  prioritySelect.value =
-    currentRequest.priority?.trim() || "Normale";
-}
+  const qualifyBtn = document.getElementById("qualifyBtn");
+  const prepareR1Btn = document.getElementById("prepareR1Btn");
+  const prepareR2Btn = document.getElementById("prepareR2Btn");
+  const prepareR3Btn = document.getElementById("prepareR3Btn");
+  const prepareFormalNoticeBtn = document.getElementById("prepareFormalNoticeBtn");
+  const prepareInjunctionBtn = document.getElementById("prepareInjunctionBtn");
+  const openPublicationBtn = document.getElementById("openPublicationBtn");
+  const requestMissingPieceBtn = document.getElementById("requestMissingPieceBtn");
+  const saveInternalNoteQuickBtn = document.getElementById("saveInternalNoteQuickBtn");
+  const archiveQuickBtn = document.getElementById("archiveQuickBtn");
 
-/* =========================
-   SAVE
-========================= */
+  const clientMessage = document.getElementById("clientMessage");
+  const sendClientMessageBtn = document.getElementById("sendClientMessageBtn");
+  const saveInternalNoteBtn = document.getElementById("saveInternalNoteBtn");
 
-async function saveMainFields(extraData = {}) {
-  await updateDoc(
-    doc(db, "users", currentClientUid, "requests", currentRequestId),
-    {
+  const closureReason = document.getElementById("closureReason");
+  const closureComment = document.getElementById("closureComment");
+  const closeRequestBtn = document.getElementById("closeRequestBtn");
+  const archiveRequestBtn = document.getElementById("archiveRequestBtn");
+
+  function formatDate(dateValue) {
+    if (!dateValue) return "—";
+    const date =
+      dateValue?.toDate ? dateValue.toDate() :
+      dateValue instanceof Date ? dateValue :
+      new Date(dateValue);
+    if (isNaN(date.getTime())) return "—";
+    return date.toLocaleDateString("fr-FR");
+  }
+
+  function formatDateTime(dateValue) {
+    if (!dateValue) return "—";
+    const date =
+      dateValue?.toDate ? dateValue.toDate() :
+      dateValue instanceof Date ? dateValue :
+      new Date(dateValue);
+    if (isNaN(date.getTime())) return "—";
+    return `${date.toLocaleDateString("fr-FR")} à ${date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })}`;
+  }
+
+  function formatAmount(value) {
+    const n = Number(value || 0);
+    return n.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "EUR"
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function setPill(el, text, mode = "info") {
+    if (!el) return;
+    el.textContent = text || "—";
+    el.className = `pill ${mode}`;
+  }
+
+  function getPaymentLabel(data) {
+    if (data?.paymentStatus === "paid") return ["Paiement validé", "success"];
+    if (data?.paymentStatus === "pending") return ["Paiement en attente", "warning"];
+    return ["Paiement non défini", "danger"];
+  }
+
+  function getPriorityMode(priority) {
+    const p = (priority || "").toLowerCase();
+    if (p === "haute" || p === "urgent" || p === "prioritaire") return "danger";
+    if (p === "normale") return "warning";
+    if (p === "basse") return "info";
+    return "info";
+  }
+
+  function getInternalMode(status) {
+    const s = (status || "").toLowerCase();
+    if (s.includes("clôt") || s.includes("archiv")) return "success";
+    if (s.includes("attente") || s.includes("qualifier")) return "warning";
+    return "info";
+  }
+
+  function getClientMode(status) {
+    const s = (status || "").toLowerCase();
+    if (s.includes("clôt")) return "success";
+    if (s.includes("pièce")) return "warning";
+    return "info";
+  }
+
+  function buildRequestPath() {
+    return doc(db, "users", currentClientUid, "requests", currentRequestId);
+  }
+
+  function normalizePostOrderChoiceFromSelect(value) {
+    if (value === "Client") return "client_bailiff";
+    if (value === "Axe Flow") return "axe_flow";
+    return "";
+  }
+
+  function hydratePostOrderChoiceForSelect(value) {
+    if (value === "client_bailiff" || value === "Client") return "Client";
+    if (value === "axe_flow" || value === "Axe Flow") return "Axe Flow";
+    return "Non défini";
+  }
+
+  function getClientIdentity(req) {
+    return {
+      name: req.creditorName || req.clientName || req.clientUid || "",
+      email: req.creditorEmail || req.clientEmail || ""
+    };
+  }
+
+  async function loadRequest() {
+    const snap = await getDoc(buildRequestPath());
+    if (!snap.exists()) {
+      alert("Dossier introuvable.");
+      return false;
+    }
+
+    currentRequest = { id: snap.id, ...snap.data() };
+    renderRequest();
+    return true;
+  }
+
+  function renderRequest() {
+    if (!currentRequest) return;
+
+    const paymentMeta = getPaymentLabel(currentRequest);
+    const clientIdentity = getClientIdentity(currentRequest);
+
+    heroTitle.textContent = `Dossier ${currentRequest.ref || currentRequest.id}`;
+    heroDescription.textContent =
+      "Cette fiche sert à lire les pièces, qualifier le dossier, préparer les étapes et suivre ce qui est publié côté client.";
+
+    setPill(pillClientStatus, currentRequest.clientStatus || "Demande reçue", getClientMode(currentRequest.clientStatus));
+    setPill(pillInternalStatus, currentRequest.internalStatus || "À qualifier", getInternalMode(currentRequest.internalStatus));
+    setPill(pillPriority, currentRequest.priority || "Normale", getPriorityMode(currentRequest.priority));
+    setPill(pillPaymentStatus, paymentMeta[0], paymentMeta[1]);
+
+    requestRef.value = currentRequest.ref || "";
+    requestOffer.value = currentRequest.offerType || currentRequest.plan || "";
+    creditorName.value = clientIdentity.name;
+    creditorEmail.value = clientIdentity.email;
+    invoiceAmount.value = formatAmount(currentRequest.amountTTC || currentRequest.invoiceAmount || 0);
+    receivedAt.value = formatDate(currentRequest.createdAt);
+    debtorName.value = currentRequest.debiteurName || "";
+    debtorType.value = currentRequest.debiteurType || "professionnel";
+    debtorAddress.value = currentRequest.debiteurAddress || "";
+    invoiceRef.value = currentRequest.invoiceRef || "";
+    dueDate.value = currentRequest.dueDate || "";
+    internalSummary.value = currentRequest.internalSummary || currentRequest.dossierSummary || "";
+
+    internalStatusSelect.value = currentRequest.internalStatus || "À qualifier";
+    clientStatusSelect.value = currentRequest.clientStatus || "Demande reçue";
+    prioritySelect.value = currentRequest.priority || "Normale";
+    injunctionChoiceSelect.value = hydratePostOrderChoiceForSelect(currentRequest.postOrderChoice);
+  }
+
+  async function loadFiles() {
+    initialFilesList.innerHTML = "";
+
+    const filesRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "files");
+    const snap = await getDocs(query(filesRef, orderBy("createdAt", "asc")));
+
+    if (snap.empty) {
+      initialFilesList.innerHTML = `<div class="empty-state">Aucune pièce reçue.</div>`;
+      return;
+    }
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      initialFilesList.insertAdjacentHTML("beforeend", `
+        <div class="doc">
+          <div class="doc-left">
+            <strong>${escapeHtml(data.name || "Fichier")}</strong>
+            <span>${escapeHtml(data.docType || "document")} — reçu le ${escapeHtml(formatDate(data.createdAt))}</span>
+          </div>
+          <a href="${escapeHtml(data.url || "#")}" class="mini-btn" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+        </div>
+      `);
+    });
+  }
+
+  async function loadEvents() {
+    eventsTimeline.innerHTML = "";
+    proofsList.innerHTML = "";
+
+    const eventsRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "events");
+    const snap = await getDocs(query(eventsRef, orderBy("createdAt", "asc")));
+
+    if (snap.empty) {
+      eventsTimeline.innerHTML = `<div class="empty-state">Aucune étape pour le moment.</div>`;
+      proofsList.innerHTML = `<div class="empty-state">Aucun justificatif déposé.</div>`;
+      return;
+    }
+
+    let proofCount = 0;
+
+    for (const eventDoc of snap.docs) {
+      const data = eventDoc.data();
+
+      eventsTimeline.insertAdjacentHTML("beforeend", `
+        <div class="step">
+          <div class="step-top">
+            <div>
+              <div class="step-title">${escapeHtml(data.title || "Étape publiée")}</div>
+              <small>${escapeHtml(formatDateTime(data.createdAt))}</small>
+            </div>
+            <span class="pill info">${escapeHtml(data.status || "Publié")}</span>
+          </div>
+          <p>${escapeHtml(data.description || data.message || "Aucune description.")}</p>
+          <div class="step-actions">
+            ${data.documentUrl ? `<a href="${escapeHtml(data.documentUrl)}" target="_blank" rel="noopener noreferrer" class="mini-btn secondary">Voir document</a>` : ""}
+          </div>
+        </div>
+      `);
+
+      const proofsRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "events", eventDoc.id, "proofs");
+      const proofsSnap = await getDocs(query(proofsRef, orderBy("uploadedAt", "asc")));
+
+      proofsSnap.forEach((proofDoc) => {
+        const proof = proofDoc.data();
+        proofCount += 1;
+
+        proofsList.insertAdjacentHTML("beforeend", `
+          <div class="doc">
+            <div class="doc-left">
+              <strong>${escapeHtml(proof.name || "Justificatif")}</strong>
+              <span>${escapeHtml(data.title || "Étape")} — déposé le ${escapeHtml(formatDate(proof.uploadedAt))}</span>
+            </div>
+            <a href="${escapeHtml(proof.url || "#")}" class="mini-btn" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+          </div>
+        `);
+      });
+    }
+
+    if (proofCount === 0) {
+      proofsList.innerHTML = `<div class="empty-state">Aucun justificatif déposé.</div>`;
+    }
+  }
+
+  async function loadMessages() {
+    messagesList.innerHTML = "";
+
+    const messagesRef = collection(db, "users", currentClientUid, "requests", currentRequestId, "messages");
+    const snap = await getDocs(query(messagesRef, orderBy("createdAt", "asc")));
+
+    if (snap.empty) {
+      messagesList.innerHTML = `<div class="empty-state">Aucun échange ni note interne.</div>`;
+      return;
+    }
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      messagesList.insertAdjacentHTML("beforeend", `
+        <div class="message">
+          <small>${escapeHtml(data.authorType || "system")} — ${escapeHtml(formatDateTime(data.createdAt))}</small>
+          ${escapeHtml(data.body || "")}
+        </div>
+      `);
+    });
+  }
+
+  async function saveMainFields(extraData = {}) {
+    if (!currentRequest) return;
+
+    const payload = {
       debiteurName: debtorName.value.trim(),
       debiteurType: debtorType.value,
       debiteurAddress: debtorAddress.value.trim(),
@@ -869,148 +1145,320 @@ async function saveMainFields(extraData = {}) {
       internalStatus: internalStatusSelect.value,
       clientStatus: clientStatusSelect.value,
       priority: prioritySelect.value,
+      postOrderChoice: normalizePostOrderChoiceFromSelect(injunctionChoiceSelect.value),
       updatedAt: serverTimestamp(),
       ...extraData
+    };
+
+    await updateDoc(buildRequestPath(), payload);
+  }
+
+  function getStepFromInternalStatus(internalStatus) {
+    if (internalStatus === "À qualifier") return "new";
+    if (internalStatus === "Pièces manquantes") return "missing_pieces";
+    if (internalStatus === "Prêt relance") return "relance_ready";
+    if (internalStatus === "Attente client") return "waiting_client";
+    if (internalStatus === "Prêt mise en demeure") return "formal_notice_ready";
+    if (internalStatus === "Prêt injonction") return "injunction_ready";
+    if (internalStatus === "Clôturé") return "closed";
+    if (internalStatus === "Archivé") return "archived";
+    return "in_progress";
+  }
+
+  async function addMessage(authorType, body, kind = "message") {
+    const cleanBody = (body || "").trim();
+    if (!cleanBody) {
+      alert("Message vide.");
+      return false;
     }
-  );
-}
 
-/* =========================
-   ACTIONS MÉTIER
-========================= */
+    await addDoc(
+      collection(db, "users", currentClientUid, "requests", currentRequestId, "messages"),
+      {
+        authorType,
+        kind,
+        body: cleanBody,
+        createdAt: serverTimestamp()
+      }
+    );
 
-function redirectToPublication() {
-  window.location.href =
-    `publications.html?uid=${encodeURIComponent(currentClientUid)}&id=${encodeURIComponent(currentRequestId)}`;
-}
+    await loadMessages();
+    return true;
+  }
 
   function goToPublicationPage() {
-  window.location.href = `publications.html?uid=${encodeURIComponent(currentClientUid)}&id=${encodeURIComponent(currentRequestId)}`;
-}
-  
-function wireQuickActions() {
+    window.location.href = `publications.html?uid=${encodeURIComponent(currentClientUid)}&id=${encodeURIComponent(currentRequestId)}`;
+  }
 
-  qualifyBtn.addEventListener("click", async () => {
-    internalStatusSelect.value = "À qualifier";
-    clientStatusSelect.value = "Analyse en cours";
+  async function closeRequest(mode = "closed") {
+    const reason = closureReason.value;
+    const comment = closureComment.value.trim();
 
-    await saveMainFields({
-      currentStep: "new",
-      status: "new"
-    });
+    if (mode === "closed" && !reason) {
+      alert("Choisis un motif de clôture.");
+      return;
+    }
+
+    const payload = {
+      lifecycleStatus: mode,
+      internalStatus: mode === "closed" ? "Clôturé" : "Archivé",
+      clientStatus: mode === "closed" ? "Dossier clôturé" : (currentRequest?.clientStatus || "Traitement en cours"),
+      closureReason: reason || "",
+      closureComment: comment || "",
+      updatedAt: serverTimestamp(),
+      clientHasNewFiles: false,
+      clientActionRequired: false
+    };
+
+    if (mode === "closed") {
+      payload.closedAt = serverTimestamp();
+      payload.archivedAt = null;
+      payload.status = "closed";
+      payload.statusLabel = "Dossier clôturé";
+      payload.currentStep = "closed";
+    } else {
+      payload.closedAt = null;
+      payload.archivedAt = serverTimestamp();
+      payload.status = "archived";
+      payload.statusLabel = "Dossier archivé";
+      payload.currentStep = "archived";
+    }
+
+    await updateDoc(buildRequestPath(), payload);
+
+    if (comment) {
+      await addMessage("admin", `Clôture dossier : ${comment}`, "closure_note");
+    }
 
     await loadRequest();
-  });
-
-prepareR1Btn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt relance";
-  clientStatusSelect.value = "Traitement en cours";
-
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "relance_ready",
-    status: "in_progress",
-    statusLabel: "Relance en préparation"
-  });
-
-  goToPublicationPage();
-});
-
-  prepareR2Btn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt relance";
-  clientStatusSelect.value = "Traitement en cours";
-
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "relance_ready",
-    status: "in_progress",
-    statusLabel: "Relance en préparation"
-  });
-
-  goToPublicationPage();
-});
-
-  prepareR3Btn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt relance";
-  clientStatusSelect.value = "Traitement en cours";
-
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "relance_ready",
-    status: "in_progress",
-    statusLabel: "Relance en préparation"
-  });
-
-  goToPublicationPage();
-});
-
- prepareFormalNoticeBtn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt mise en demeure";
-  clientStatusSelect.value = "Traitement en cours";
-
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "formal_notice_ready",
-    status: "in_progress",
-    statusLabel: "Mise en demeure en préparation"
-  });
-
-  goToPublicationPage();
-});
-
- 
-prepareInjunctionBtn?.addEventListener("click", async () => {
-  internalStatusSelect.value = "Prêt injonction";
-  clientStatusSelect.value = "Traitement en cours";
-
-  await saveMainFields({
-    clientHasNewFiles: false,
-    currentStep: "injunction_ready",
-    status: "in_progress",
-    statusLabel: "Injonction en préparation",
-    injunctionPublished: false
-  });
-
-  goToPublicationPage();
-});
-}
-
-/* =========================
-   LOAD
-========================= */
-
-async function loadRequest() {
-  const snap = await getDoc(
-    doc(db, "users", currentClientUid, "requests", currentRequestId)
-  );
-
-  if (!snap.exists()) return;
-
-  currentRequest = snap.data();
-  renderRequest();
-}
-
-/* =========================
-   INIT
-========================= */
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "connexion.html";
-    return;
+    await loadMessages();
   }
 
-  const profileSnap = await getDoc(doc(db, "users", user.uid));
-  const profile = profileSnap.data();
+  function wireQuickActions() {
+    qualifyBtn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "À qualifier";
+      clientStatusSelect.value = "Analyse en cours";
 
-  if (!profile || profile.role !== "admin") {
-    window.location.href = "../index.html";
-    return;
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "new",
+        status: "new",
+        statusLabel: "Dossier créé"
+      });
+
+      await loadRequest();
+      alert("Dossier qualifié.");
+    });
+
+    prepareR1Btn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt relance";
+      clientStatusSelect.value = "Traitement en cours";
+
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "relance_ready",
+        status: "in_progress",
+        statusLabel: "Relance 1 en préparation"
+      });
+
+      goToPublicationPage();
+    });
+
+    prepareR2Btn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt relance";
+      clientStatusSelect.value = "Traitement en cours";
+
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "relance_ready",
+        status: "in_progress",
+        statusLabel: "Relance 2 en préparation"
+      });
+
+      goToPublicationPage();
+    });
+
+    prepareR3Btn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt relance";
+      clientStatusSelect.value = "Traitement en cours";
+
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "relance_ready",
+        status: "in_progress",
+        statusLabel: "Relance 3 en préparation"
+      });
+
+      goToPublicationPage();
+    });
+
+    prepareFormalNoticeBtn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt mise en demeure";
+      clientStatusSelect.value = "Traitement en cours";
+
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "formal_notice_ready",
+        status: "in_progress",
+        statusLabel: "Mise en demeure en préparation"
+      });
+
+      goToPublicationPage();
+    });
+
+    prepareInjunctionBtn?.addEventListener("click", async () => {
+      internalStatusSelect.value = "Prêt injonction";
+      clientStatusSelect.value = "Traitement en cours";
+
+      await saveMainFields({
+        clientHasNewFiles: false,
+        currentStep: "injunction_ready",
+        status: "in_progress",
+        statusLabel: "Injonction en préparation",
+        injunctionPublished: false
+      });
+
+      goToPublicationPage();
+    });
+
+    requestMissingPieceBtn?.addEventListener("click", async () => {
+      const msg = prompt("Pièce à demander au client :");
+      if (!msg) return;
+
+      await addMessage("admin", `Pièce complémentaire demandée : ${msg}`, "missing_piece");
+      clientStatusSelect.value = "Pièce demandée";
+      internalStatusSelect.value = "Attente client";
+
+      await saveMainFields({
+        clientHasNewFiles: false,
+        clientActionRequired: true,
+        currentStep: "waiting_client",
+        status: "waiting_client",
+        statusLabel: "Pièce demandée"
+      });
+
+      await loadRequest();
+      alert("Demande de pièce enregistrée.");
+    });
+
+    saveInternalNoteQuickBtn?.addEventListener("click", async () => {
+      const note = prompt("Note interne :");
+      if (!note) return;
+      const ok = await addMessage("admin", note, "internal_note");
+      if (ok) alert("Note interne enregistrée.");
+    });
+
+    archiveQuickBtn?.addEventListener("click", async () => {
+      await closeRequest("archived");
+      alert("Dossier archivé.");
+    });
   }
 
-  await loadRequest();
-  wireQuickActions();
-});
+  function wireMainButtons() {
+    openPublicationBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      goToPublicationPage();
+    });
+
+    sendClientMessageBtn?.addEventListener("click", async () => {
+      const ok = await addMessage("admin", clientMessage.value, "client_message");
+      if (!ok) return;
+      clientMessage.value = "";
+      alert("Message enregistré.");
+    });
+
+    saveInternalNoteBtn?.addEventListener("click", async () => {
+      const ok = await addMessage("admin", clientMessage.value, "internal_note");
+      if (!ok) return;
+      clientMessage.value = "";
+      alert("Note interne enregistrée.");
+    });
+
+    closeRequestBtn?.addEventListener("click", async () => {
+      await closeRequest("closed");
+      alert("Dossier clôturé.");
+    });
+
+    archiveRequestBtn?.addEventListener("click", async () => {
+      await closeRequest("archived");
+      alert("Dossier archivé.");
+    });
+
+    [
+      debtorName,
+      debtorType,
+      debtorAddress,
+      invoiceRef,
+      dueDate,
+      internalSummary,
+      clientStatusSelect,
+      prioritySelect,
+      injunctionChoiceSelect
+    ].forEach((el) => {
+      el?.addEventListener("change", async () => {
+        await saveMainFields();
+        await loadRequest();
+      });
+    });
+
+    internalStatusSelect?.addEventListener("change", async () => {
+      const nextInternal = internalStatusSelect.value;
+
+      const extraData = {
+        currentStep: getStepFromInternalStatus(nextInternal)
+      };
+
+      if (nextInternal !== "Attente client") {
+        extraData.clientActionRequired = false;
+      }
+
+      if (nextInternal !== "Clôturé" && nextInternal !== "Archivé") {
+        extraData.lifecycleStatus = "open";
+      }
+
+      await saveMainFields(extraData);
+      await loadRequest();
+    });
+  }
+
+  async function bootstrap() {
+    if (!currentClientUid || !currentRequestId) {
+      alert("URL invalide. Il faut ?uid=...&id=...");
+      return;
+    }
+
+    const exists = await loadRequest();
+    if (!exists) return;
+
+    await loadFiles();
+    await loadEvents();
+    await loadMessages();
+    wireQuickActions();
+    wireMainButtons();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "connexion.html";
+      return;
+    }
+
+    try {
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      const profile = userSnap.exists() ? userSnap.data() : null;
+
+      if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
+        alert("Accès admin refusé.");
+        window.location.href = "../index.html";
+        return;
+      }
+
+      await bootstrap();
+    } catch (err) {
+      console.error("Erreur bootstrap admin:", err);
+      alert("Erreur de chargement du dossier admin.");
+    }
+  });
 </script>
 
 </body>
