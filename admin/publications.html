@@ -574,24 +574,18 @@
 
   <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  addDoc,
-  collection,
-  updateDoc,
-  serverTimestamp
+  getFirestore, doc, getDoc, addDoc, collection, updateDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "XXX",
+  apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
   authDomain: "axe-flow.firebaseapp.com",
-  projectId: "axe-flow"
+  projectId: "axe-flow",
+  storageBucket: "axe-flow.firebasestorage.app",
+  messagingSenderId: "295300543556",
+  appId: "1:295300543556:web:3facac2d0c612e3456b811"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -601,6 +595,13 @@ const db = getFirestore(app);
 const params = new URLSearchParams(window.location.search);
 const uid = params.get("uid");
 const requestId = params.get("id");
+
+const heroTitle = document.getElementById("heroTitle");
+const heroText = document.getElementById("heroText");
+const backToRequestBtn = document.getElementById("backToRequestBtn");
+const contextRef = document.getElementById("contextRef");
+const contextClient = document.getElementById("contextClient");
+const contextEmail = document.getElementById("contextEmail");
 
 const publicationType = document.getElementById("publicationType");
 const publicationTitle = document.getElementById("publicationTitle");
@@ -613,6 +614,8 @@ const publishBtn = document.getElementById("publishBtn");
 const saveDraftBtn = document.getElementById("saveDraftBtn");
 const clearBtn = document.getElementById("clearBtn");
 
+let currentRequest = null;
+
 function requestPath() {
   return doc(db, "users", uid, "requests", requestId);
 }
@@ -622,67 +625,151 @@ function setDraftLabel(mode = "draft") {
   draftStatus.textContent = mode === "published" ? "Publié" : "Brouillon";
 }
 
-/**
- * 🔥 MAPPING MÉTIER CENTRAL
- */
-function getUpdateFromType(type) {
-  switch (type) {
-    case "Relance 1":
-    case "Relance 2":
-    case "Relance 3":
-      return {
-        currentStep: "relance_sent",
-        status: "in_progress",
-        statusLabel: "Relance envoyée",
-        clientActionRequired: true,
-        clientHasNewFiles: false
-      };
-
-    case "Mise en demeure":
-      return {
-        currentStep: "formal_notice_sent",
-        status: "in_progress",
-        statusLabel: "Mise en demeure envoyée",
-        clientActionRequired: true,
-        clientHasNewFiles: false
-      };
-
-    case "Injonction":
-      return {
-        currentStep: "injunction_sent",
-        status: "in_progress",
-        statusLabel: "Injonction déposée",
-        clientActionRequired: false,
-        clientHasNewFiles: false,
-        injunctionPublished: true
-      };
-
-    case "Demande de pièce":
-      return {
-        currentStep: "waiting_client",
-        status: "waiting_client",
-        statusLabel: "Pièce demandée",
-        clientActionRequired: true,
-        clientHasNewFiles: false
-      };
-
-    case "Clôture dossier":
-      return {
-        currentStep: "closed",
-        status: "closed",
-        statusLabel: "Dossier clôturé",
-        clientActionRequired: false,
-        clientHasNewFiles: false,
-        lifecycleStatus: "closed",
-        closedAt: serverTimestamp()
-      };
-
-    default:
-      return {
-        status: "in_progress",
-        statusLabel: "Mise à jour dossier"
-      };
+function fillQuickTemplate(type) {
+  if (type === "Relance 1") {
+    publicationTitle.value = "Relance 1 préparée";
+    publicationMessage.value = "Votre relance 1 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve dans votre espace client.";
+    publicationProofs.value = "preuve d’envoi mail, capture écran";
   }
+
+  if (type === "Relance 2") {
+    publicationTitle.value = "Relance 2 préparée";
+    publicationMessage.value = "Votre relance 2 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
+    publicationProofs.value = "preuve d’envoi relance 2";
+  }
+
+  if (type === "Relance 3") {
+    publicationTitle.value = "Relance 3 préparée";
+    publicationMessage.value = "Votre relance 3 a été préparée. Merci d’effectuer l’envoi puis de déposer la preuve correspondante.";
+    publicationProofs.value = "preuve d’envoi relance 3";
+  }
+
+  if (type === "Mise en demeure") {
+    publicationTitle.value = "Mise en demeure préparée";
+    publicationMessage.value = "La mise en demeure a été préparée. Merci de procéder à l’envoi puis de déposer le justificatif dans votre espace.";
+    publicationProofs.value = "preuve LRAR, accusé, justificatif d’envoi";
+  }
+
+  if (type === "Injonction") {
+    publicationTitle.value = "Injonction publiée";
+    publicationMessage.value = "Le dossier d’injonction est disponible dans votre espace. Vous pouvez maintenant choisir la suite à donner.";
+    publicationProofs.value = "";
+  }
+
+  if (type === "Demande de pièce") {
+    publicationTitle.value = "Pièce complémentaire demandée";
+    publicationMessage.value = "Une pièce complémentaire est nécessaire pour poursuivre le traitement du dossier.";
+    publicationProofs.value = "document demandé";
+  }
+
+  if (type === "Information client") {
+    publicationTitle.value = "Information dossier";
+    publicationMessage.value = "Une mise à jour de votre dossier est disponible dans votre espace client.";
+    publicationProofs.value = "";
+  }
+
+  if (type === "Clôture dossier") {
+    publicationTitle.value = "Dossier clôturé";
+    publicationMessage.value = "Votre dossier a été clôturé. Vous pouvez consulter le récapitulatif dans votre espace client.";
+    publicationProofs.value = "";
+  }
+}
+
+function getUpdateFromType(type) {
+  if (["Relance 1", "Relance 2", "Relance 3"].includes(type)) {
+    return {
+      currentStep: "relance_sent",
+      status: "in_progress",
+      statusLabel: "Relance publiée",
+      clientStatus: "Traitement en cours",
+      clientActionRequired: true,
+      clientHasNewFiles: false
+    };
+  }
+
+  if (type === "Mise en demeure") {
+    return {
+      currentStep: "formal_notice_sent",
+      status: "in_progress",
+      statusLabel: "Mise en demeure publiée",
+      clientStatus: "Traitement en cours",
+      clientActionRequired: true,
+      clientHasNewFiles: false
+    };
+  }
+
+  if (type === "Injonction") {
+    return {
+      currentStep: "injunction_published",
+      status: "in_progress",
+      statusLabel: "Injonction publiée",
+      clientStatus: "Injonction publiée",
+      clientActionRequired: false,
+      clientHasNewFiles: false,
+      injunctionPublished: true
+    };
+  }
+
+  if (type === "Demande de pièce") {
+    return {
+      currentStep: "waiting_client",
+      status: "waiting_client",
+      statusLabel: "Pièce demandée",
+      clientStatus: "Pièce demandée",
+      clientActionRequired: true,
+      clientHasNewFiles: false
+    };
+  }
+
+  if (type === "Clôture dossier") {
+    return {
+      currentStep: "closed",
+      status: "closed",
+      statusLabel: "Dossier clôturé",
+      clientStatus: "Dossier clôturé",
+      lifecycleStatus: "closed",
+      clientActionRequired: false,
+      clientHasNewFiles: false,
+      closedAt: serverTimestamp()
+    };
+  }
+
+  return {
+    status: "in_progress",
+    statusLabel: "Mise à jour dossier",
+    clientStatus: "Traitement en cours",
+    clientHasNewFiles: false
+  };
+}
+
+async function loadRequest() {
+  if (!uid || !requestId) {
+    alert("URL invalide. Il manque uid ou id.");
+    window.location.href = "demandes.html";
+    return;
+  }
+
+  const snap = await getDoc(requestPath());
+
+  if (!snap.exists()) {
+    alert("Dossier introuvable.");
+    window.location.href = "demandes.html";
+    return;
+  }
+
+  currentRequest = { id: snap.id, ...snap.data() };
+
+  const ref = currentRequest.ref || currentRequest.id;
+  const clientName = currentRequest.creditorName || currentRequest.clientName || currentRequest.clientUid || "Client";
+  const clientEmail = currentRequest.creditorEmail || currentRequest.clientEmail || "—";
+
+  heroTitle.textContent = `Publication ${ref}`;
+  heroText.textContent = `Tu publies ici une étape rattachée au dossier ${ref}.`;
+  contextRef.textContent = `Référence : ${ref}`;
+  contextClient.textContent = `Client : ${clientName}`;
+  contextEmail.textContent = `Email : ${clientEmail}`;
+
+  backToRequestBtn.href = `demande.html?uid=${encodeURIComponent(uid)}&id=${encodeURIComponent(requestId)}`;
 }
 
 async function savePublication(mode = "draft") {
@@ -697,40 +784,27 @@ async function savePublication(mode = "draft") {
     return;
   }
 
-  // 1. EVENT
-  await addDoc(
-    collection(db, "users", uid, "requests", requestId, "events"),
-    {
-      title,
-      type,
-      description: message,
-      requiredProofs: proofs
-        ? proofs.split(",").map(x => x.trim()).filter(Boolean)
-        : [],
-      documentName: documentName || null,
-      status: mode === "published" ? "published" : "draft",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }
-  );
+  await addDoc(collection(db, "users", uid, "requests", requestId, "events"), {
+    title,
+    type,
+    description: message,
+    requiredProofs: proofs ? proofs.split(",").map(x => x.trim()).filter(Boolean) : [],
+    documentName: documentName || "",
+    status: mode === "published" ? "published" : "draft",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
 
-  // 2. UPDATE DOSSIER SI PUBLICATION
   if (mode === "published") {
-    const updateData = getUpdateFromType(type);
-
     await updateDoc(requestPath(), {
-      ...updateData,
-      clientStatus: "Traitement en cours",
-      updatedAt: serverTimestamp()
+      ...getUpdateFromType(type),
+      updatedAt: serverTimestamp(),
+      lastPublishedEventAt: serverTimestamp()
     });
   }
 
   setDraftLabel(mode);
-
-  alert(mode === "published"
-    ? "Publication envoyée côté client"
-    : "Brouillon enregistré"
-  );
+  alert(mode === "published" ? "Publication envoyée côté client." : "Brouillon enregistré.");
 }
 
 function clearForm() {
@@ -741,26 +815,15 @@ function clearForm() {
   setDraftLabel("draft");
 }
 
-/**
- * EVENTS UI
- */
 publicationType.addEventListener("change", () => {
+  fillQuickTemplate(publicationType.value);
   setDraftLabel("draft");
 });
 
-publishBtn.addEventListener("click", async () => {
-  await savePublication("published");
-});
-
-saveDraftBtn.addEventListener("click", async () => {
-  await savePublication("draft");
-});
-
+publishBtn.addEventListener("click", () => savePublication("published"));
+saveDraftBtn.addEventListener("click", () => savePublication("draft"));
 clearBtn.addEventListener("click", clearForm);
 
-/**
- * AUTH
- */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "connexion.html";
@@ -769,16 +832,19 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     const userSnap = await getDoc(doc(db, "users", user.uid));
-    const profile = userSnap.data();
+    const profile = userSnap.exists() ? userSnap.data() : null;
 
     if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
-      alert("Accès refusé");
+      alert("Accès admin refusé.");
+      window.location.href = "../index.html";
       return;
     }
 
+    await loadRequest();
+    fillQuickTemplate(publicationType.value);
   } catch (err) {
-    console.error(err);
-    alert("Erreur chargement");
+    console.error("Erreur publications.html :", err);
+    alert("Erreur de chargement publication.");
   }
 });
 </script>
