@@ -1,59 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axe Flow</title>
 
-<title>Axe Flow — Tableau de bord</title>
-<meta name="robots" content="noindex,nofollow" />
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-body{
-  margin:0;
-  font-family:Inter;
-  background:#071e2b;
-  color:#fff;
-}
-
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
-}
-
-.panel{
-  background:#0f3e56;
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:20px;
-}
-
-h1{margin:0 0 20px;}
-
-.btn{
-  padding:10px 14px;
-  border-radius:999px;
-  border:none;
-  cursor:pointer;
-  font-weight:700;
-}
-
+body{margin:0;font-family:Inter;background:#071e2b;color:#fff;}
+.container{max-width:900px;margin:auto;padding:20px;}
+.logo{width:60px;border-radius:12px;}
+.panel{background:#0f3e56;border-radius:20px;padding:20px;margin-bottom:20px;}
+.btn{padding:10px 14px;border-radius:999px;border:none;font-weight:700;cursor:pointer;}
 .btn-primary{background:#ff7f1f;color:#fff;}
 .btn-secondary{background:#ffffff20;color:#fff;}
-.btn-success{background:#3dd08f;color:#fff;}
-
-.step{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:14px;
-  background:#ffffff10;
-}
-
+.step{background:#ffffff10;padding:12px;border-radius:12px;margin-bottom:10px;}
 .locked{opacity:.4}
 .done{background:#3dd08f30}
 </style>
@@ -62,436 +24,128 @@ h1{margin:0 0 20px;}
 <body>
 <div class="container">
 
+<img src="images/axe-flow-cover.png" class="logo">
+
 <h1>Axe Flow</h1>
 
 <div class="panel">
-<h2>Dossier</h2>
+<h2>Créer un dossier</h2>
 
-<input id="amount" placeholder="Montant €" />
-<input id="debiteur" placeholder="Nom débiteur" />
-
-<br><br>
+<input id="debiteur" placeholder="Nom débiteur"><br><br>
+<input id="amount" placeholder="Montant €"><br><br>
 
 <label class="btn btn-secondary">
-Uploader facture
+Facture impayée
 <input type="file" id="invoiceFile" hidden>
 </label>
 
 <p id="invoiceStatus">Aucune facture</p>
-</div>
-<div class="panel">
-  <h2>Parcours automatique</h2>
-  <p>
-    Les documents sont générés automatiquement. Vous téléchargez, vous envoyez, puis vous déposez la preuve.
-  </p>
 
-  <div id="stepsList"></div>
+<br>
+<button class="btn btn-primary" onclick="createDossier()">Créer dossier</button>
 </div>
 
 <div class="panel">
-  <h2>Preuves d’envoi</h2>
-  <p>Déposez ici les preuves liées aux étapes envoyées.</p>
-
-  <input type="file" id="proofFile" />
-  <br><br>
-  <button class="btn btn-primary" id="uploadProofBtn">Déposer la preuve</button>
-
-  <p id="proofStatus">Aucune preuve déposée.</p>
+<h2>Étapes automatiques</h2>
+<div id="steps"></div>
 </div>
 
-<div class="panel" id="injunctionPanel" style="display:none;">
-  <h2>Suite injonction</h2>
-  <p>
-    Les relances et la mise en demeure sont terminées. Vous pouvez maintenant préparer l’injonction.
-  </p>
+<div class="panel">
+<h2>Déposer preuve</h2>
 
-  <button class="btn btn-secondary" id="generateInjunctionBtn">
-    Télécharger le dossier d’injonction
-  </button>
+<input type="file" id="proofFile"><br><br>
+<button class="btn btn-primary" onclick="uploadProof()">Déposer</button>
 
-  <br><br>
-
-  <button class="btn btn-primary" id="payAssistedBtn">
-    Demander l’assistance Axe Flow
-  </button>
+<p id="proofStatus"></p>
 </div>
+
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc,
-  addDoc, serverTimestamp, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getStorage, ref as storageRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-  authDomain: "axe-flow.firebaseapp.com",
-  projectId: "axe-flow",
-  storageBucket: "axe-flow.firebasestorage.app",
-  messagingSenderId: "295300543556",
-  appId: "1:295300543556:web:3facac2d0c612e3456b811"
-};
+const app = initializeApp({
+apiKey:"AIzaSyCPbY...",
+authDomain:"axe-flow.firebaseapp.com",
+projectId:"axe-flow"
+});
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
-let currentUser = null;
-let currentDossier = null;
-let currentDossierId = null;
+let dossier = null;
 
-const AUTO_STEPS = [
-  { key:"relance_1", label:"Relance 1", delay:3, proof:"preuve d’envoi relance 1" },
-  { key:"relance_2", label:"Relance 2", delay:7, proof:"preuve d’envoi relance 2" },
-  { key:"relance_3", label:"Relance 3", delay:12, proof:"preuve d’envoi relance 3" },
-  { key:"mise_en_demeure", label:"Mise en demeure", delay:20, proof:"preuve LRAR ou justificatif d’envoi" },
-  { key:"injonction", label:"Proposition injonction", delay:30, proof:null }
+const steps = [
+"Relance 1",
+"Relance 2",
+"Relance 3",
+"Mise en demeure",
+"Injonction"
 ];
 
-function todayIso() {
-  return new Date().toISOString().slice(0,10);
-}
+function render(){
+const el = document.getElementById("steps");
+el.innerHTML="";
 
-function addDays(date, days) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
-function isStepAvailable(dossier, step) {
-  const start = dossier.createdAt?.toDate ? dossier.createdAt.toDate() : new Date();
-  return new Date() >= addDays(start, step.delay);
-}
-
-function buildDocText(step, dossier) {
-  const date = new Date().toLocaleDateString("fr-FR");
-
-  return `
-Axe Flow
-
-${date}
-
-Objet : ${step.label} - facture impayée ${dossier.invoiceRef || ""}
-
-Débiteur :
-${dossier.debiteurName || ""}
-${dossier.debiteurAddress || ""}
-${dossier.debiteurZip || ""} ${dossier.debiteurCity || ""}
-
-Madame, Monsieur,
-
-Sauf erreur ou omission de notre part, la facture référencée ${dossier.invoiceRef || "non renseignée"}, d’un montant de ${dossier.amountTTC || 0} € TTC, arrivée à échéance le ${dossier.dueDate || "date non renseignée"}, demeure impayée à ce jour.
-
-Nous vous invitons à procéder au règlement dans les meilleurs délais.
-
-À défaut de régularisation, le dossier pourra être transmis à l’étape suivante de recouvrement.
-
-Cordialement,
-
-Axe Flow
+steps.forEach((s,i)=>{
+el.innerHTML+=`
+<div class="step">
+${s}
+<br><br>
+<button onclick="generate(${i})" class="btn btn-primary">Télécharger</button>
+</div>
 `;
-}
-
-function downloadWord(step, dossier) {
-  const content = buildDocText(step, dossier);
-  const blob = new Blob([content], {
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${step.key}_${dossier.ref || "dossier"}.docx`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function markStepDownloaded(step) {
-  const stepRef = doc(db, "users", currentUser.uid, "requests", currentDossierId, "autoSteps", step.key);
-  await setDoc(stepRef, {
-    key: step.key,
-    label: step.label,
-    status: "downloaded",
-    downloadedAt: serverTimestamp(),
-    proofRequired: step.proof || "",
-    updatedAt: serverTimestamp()
-  }, { merge:true });
-
-  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossierId), {
-    currentStep: step.key,
-    statusLabel: `${step.label} téléchargée`,
-    updatedAt: serverTimestamp()
-  });
-
-  await loadDossier(currentDossierId);
-}
-
-async function uploadProof() {
-  const input = document.getElementById("proofFile");
-  const file = input.files?.[0];
-
-  if (!currentDossier || !file) {
-    alert("Sélectionne une preuve.");
-    return;
-  }
-
-  const currentStepKey = currentDossier.currentStep;
-  if (!currentStepKey) {
-    alert("Télécharge d’abord une étape.");
-    return;
-  }
-
-  const path = `users/${currentUser.uid}/requests/${currentDossierId}/proofs/${Date.now()}_${file.name}`;
-  const ref = storageRef(storage, path);
-
-  await uploadBytes(ref, file);
-  const url = await getDownloadURL(ref);
-
-  await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossierId, "proofs"), {
-    stepKey: currentStepKey,
-    name: file.name,
-    path,
-    url,
-    createdAt: serverTimestamp()
-  });
-
-  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossierId), {
-    lastClientProofAt: serverTimestamp(),
-    proofsCompletionStatus: "proof_uploaded",
-    statusLabel: "Preuve déposée",
-    updatedAt: serverTimestamp()
-  });
-
-  document.getElementById("proofStatus").textContent = "Preuve déposée.";
-  input.value = "";
-  await loadDossier(currentDossierId);
-}
-  async function loadDossier(dossierId) {
-  currentDossierId = dossierId;
-
-  const snap = await getDoc(doc(db, "users", currentUser.uid, "requests", dossierId));
-  if (!snap.exists()) return;
-
-  currentDossier = { id: snap.id, ...snap.data() };
-
-  summaryRef.textContent = currentDossier.ref || "—";
-  amountTTCDisplay.textContent = formatCurrency(currentDossier.amountTTC || 0);
-  summaryDebiteur.textContent = currentDossier.debiteurName || "—";
-  summaryType.textContent = currentDossier.debiteurType || "—";
-  summaryInvoice.textContent = currentDossier.invoiceRef || "—";
-  summaryStatus.textContent = currentDossier.statusLabel || "Dossier créé";
-
-  renderAutomaticSteps();
-}
-
-function renderAutomaticSteps() {
-  timelineList.innerHTML = "";
-
-  if (!currentDossier) {
-    timelineList.innerHTML = `<div class="empty-state">Sélectionne un dossier.</div>`;
-    return;
-  }
-
-  AUTO_STEPS.forEach((step) => {
-    const available = isStepAvailable(currentDossier, step);
-    const disabled = available ? "" : "disabled";
-
-    timelineList.insertAdjacentHTML("beforeend", `
-      <div class="timeline-item">
-        <div class="timeline-main">
-          <span class="timeline-meta">J+${step.delay}</span>
-          <strong>${escapeHtml(step.label)}</strong>
-          <span>${available ? "Disponible" : "Disponible automatiquement plus tard"}</span>
-
-          <div class="note-box soft" style="margin-top:10px;">
-            Document Word généré automatiquement avec les informations du dossier.
-          </div>
-
-          ${step.proof ? `
-            <div class="note-box warning" style="margin-top:10px;">
-              Preuve attendue : ${escapeHtml(step.proof)}
-            </div>
-          ` : `
-            <div class="note-box success" style="margin-top:10px;">
-              Étape injonction : proposition de suite assistée Axe Flow.
-            </div>
-          `}
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:8px;min-width:180px;">
-          <button class="btn btn-primary" type="button" data-download-step="${step.key}" ${disabled}>
-            Télécharger
-          </button>
-        </div>
-      </div>
-    `);
-  });
-
-  document.querySelectorAll("[data-download-step]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const step = AUTO_STEPS.find(s => s.key === btn.dataset.downloadStep);
-      if (!step) return;
-
-      downloadWord(step, currentDossier);
-      await markStepDownloaded(step);
-    });
-  });
-}
-
-async function loadDossiers(uid) {
-  const snap = await getDocs(query(
-    collection(db, "users", uid, "requests"),
-    orderBy("createdAt", "asc")
-  ));
-
-  dossiers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  dossierCounter = dossiers.length;
-
-  dossierList.innerHTML = "";
-
-  if (!dossiers.length) {
-    dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé.</div>`;
-    resetSummary();
-    return;
-  }
-
-  dossiers.forEach((dossier) => {
-    dossierList.insertAdjacentHTML("beforeend", `
-      <div class="dossier-card ${currentDossierId === dossier.id ? "active" : ""}" data-dossier-id="${escapeHtml(dossier.id)}">
-        <div>
-          <strong>${escapeHtml(dossier.ref || "Sans référence")}</strong>
-          <span>${escapeHtml(dossier.debiteurName || "Débiteur non renseigné")}</span>
-          <span>${escapeHtml(formatCurrency(dossier.amountTTC || 0))}</span>
-        </div>
-        <span class="badge warning">${escapeHtml(dossier.statusLabel || "En cours")}</span>
-      </div>
-    `);
-  });
-
-  document.querySelectorAll("[data-dossier-id]").forEach((card) => {
-    card.addEventListener("click", async () => {
-      await loadDossier(card.dataset.dossierId);
-      await loadDossiers(uid);
-    });
-  });
-
-  if (!currentDossierId) {
-    await loadDossier(dossiers[0].id);
-  }
-}
-
-async function createDossier(e) {
-  e.preventDefault();
-
-  const ref = dossierRefInput.value.trim();
-  const amountTTC = Number(amountTTCInput.value || 0);
-
-  if (!debiteurNameInput.value.trim() || !amountTTC) {
-    alert("Nom du débiteur et montant obligatoires.");
-    return;
-  }
-
-  await addDoc(collection(db, "users", currentUser.uid, "requests"), {
-    ref,
-    label: dossierLabelInput.value.trim(),
-    debiteurType: debiteurTypeInput.value,
-    amountTTC,
-    debiteurName: debiteurNameInput.value.trim(),
-    invoiceRef: invoiceRefInput.value.trim(),
-    dueDate: dueDateInput.value,
-    dossierSummary: dossierSummaryInput.value.trim(),
-
-    status: "new",
-    statusLabel: "Dossier créé",
-    currentStep: "new",
-    lifecycleStatus: "open",
-    paymentStatus: "paid",
-    clientUid: currentUser.uid,
-    offerType: "one_shot_49",
-
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-
-  closeModal(createDossierModal);
-  createDossierForm.reset();
-  await loadDossiers(currentUser.uid);
-}
-
-async function initUserDashboard(user) {
-  currentUser = user;
-  userEmail.textContent = user.email || "Compte connecté";
-
-  const userRef = doc(db, "users", user.uid);
-  const userSnap = await getDoc(userRef);
-
-  if (!userSnap.exists()) {
-    await setDoc(userRef, {
-      uid: user.uid,
-      email: user.email || "",
-      role: "client",
-      plan: "one_shot_49",
-      subscriptionStatus: "active",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-  }
-
-  userStatusPill.textContent = "Activé";
-  userStatusPill.className = "status-pill success";
-  userPlanPill.textContent = "Option 49 €";
-  userPlanPill.className = "status-pill neutral";
-
-  planSubtitle.textContent = "Relances automatiques + mise en demeure + proposition injonction.";
-
-  await loadDossiers(user.uid);
-}
-
-function resetSummary() {
-  summaryRef.textContent = "—";
-  amountTTCDisplay.textContent = "—";
-  summaryDebiteur.textContent = "—";
-  summaryType.textContent = "—";
-  summaryInvoice.textContent = "—";
-  summaryStatus.textContent = "—";
-  timelineList.innerHTML = `<div class="empty-state">Aucune étape.</div>`;
-}
-
-openCreateDossier.addEventListener("click", () => {
-  dossierCounter += 1;
-  dossierLabelInput.value = `Dossier ${dossierCounter}`;
-  dossierRefInput.value = `AF-${new Date().getFullYear()}-${String(dossierCounter).padStart(3, "0")}`;
-  openModal(createDossierModal);
 });
+}
 
-createDossierForm.addEventListener("submit", createDossier);
-closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
-cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+window.createDossier = async ()=>{
+const debiteur = document.getElementById("debiteur").value;
+const amount = document.getElementById("amount").value;
 
-document.getElementById("uploadProofBtn")?.addEventListener("click", uploadProof);
+if(!debiteur || !amount){
+alert("Remplis les champs");
+return;
+}
 
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "connexion.html";
-});
+dossier = {
+debiteur,
+amount,
+createdAt: Date.now()
+};
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "connexion.html";
-    return;
-  }
+await setDoc(doc(db,"test","dossier"), dossier);
 
-  try {
-    await initUserDashboard(user);
-  } catch (err) {
-    console.error("Erreur tableau de bord :", err);
-    alert("Erreur de chargement du tableau de bord.");
-  }
-});
+render();
+};
+
+window.generate = (i)=>{
+const text = `
+Relance ${i+1}
+
+Client : ${dossier.debiteur}
+Montant : ${dossier.amount} €
+
+Merci de régler votre facture.
+`;
+
+const blob = new Blob([text], {type:"application/msword"});
+const url = URL.createObjectURL(blob);
+
+const a = document.createElement("a");
+a.href = url;
+a.download = "relance.doc";
+a.click();
+};
+
+window.uploadProof = ()=>{
+const f = document.getElementById("proofFile").files[0];
+if(!f){
+alert("Ajoute un fichier");
+return;
+}
+document.getElementById("proofStatus").innerText = "Preuve déposée";
+};
+
 </script>
 </body>
 </html>
