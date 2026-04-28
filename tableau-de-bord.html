@@ -1,2891 +1,497 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Axe Flow — Tableau de bord client</title>
-  <meta name="description" content="Tableau de bord client Axe Flow : création du dossier, dépôt des pièces, suivi des étapes publiées, actions client et dépôt des justificatifs." />
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="theme-color" content="#0b3145" />
-
-  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <style>
-    :root{
-      --bg:#071e2b;
-      --bg-2:#0b3145;
-      --bg-3:#0f3e56;
-      --panel:rgba(255,255,255,0.06);
-      --panel-2:rgba(255,255,255,0.04);
-      --line:rgba(255,255,255,0.09);
-      --line-strong:rgba(255,255,255,0.14);
-      --text:#f4f7fb;
-      --muted:rgba(244,247,251,0.76);
-      --soft:rgba(244,247,251,0.58);
-      --accent:#ff7f1f;
-      --accent-2:#ff9b4a;
-      --success:#3dd08f;
-      --warning:#ffb347;
-      --danger:#ff6b6b;
-      --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:18px;
-      --radius-sm:14px;
-      --max:1320px;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-
-    body{
-      margin:0;
-      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
-        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
-        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
-      line-height:1.5;
-    }
-
-    a{color:inherit;text-decoration:none}
-    img{max-width:100%;display:block}
-    button,input,select,textarea{font:inherit}
-
-    .container{
-      width:min(var(--max), calc(100% - 32px));
-      margin:0 auto;
-    }
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter:blur(14px);
-      background:rgba(6,20,29,0.66);
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-
-    .topbar-inner{
-      min-height:78px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-
-    .brand-logo{
-      width:54px;
-      height:54px;
-      border-radius:16px;
-      object-fit:cover;
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:var(--shadow);
-      background:rgba(255,255,255,0.04);
-      flex:0 0 auto;
-    }
-
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-    }
-
-    .brand-title{
-      font-size:1rem;
-      font-weight:800;
-      letter-spacing:.02em;
-    }
-
-    .brand-sub{
-      color:var(--soft);
-      font-size:.86rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .top-actions{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .user-chip{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-height:42px;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-      font-size:.9rem;
-      font-weight:600;
-      max-width:100%;
-      flex-wrap:wrap;
-    }
-
-    .user-email{
-      max-width:220px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .status-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:30px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .status-pill.success{
-      background:rgba(61,208,143,0.14);
-      border:1px solid rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .status-pill.warning{
-      background:rgba(255,179,71,0.14);
-      border:1px solid rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .status-pill.danger{
-      background:rgba(255,107,107,0.14);
-      border:1px solid rgba(255,107,107,0.20);
-      color:#ffdede;
-    }
-
-    .status-pill.neutral{
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-    }
-
-    .page{
-      padding:28px 0 44px;
-    }
-
-    .hero{
-      margin-bottom:18px;
-      padding:28px;
-      border-radius:30px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-    }
-
-    .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:var(--muted);
-      font-size:.88rem;
-      font-weight:600;
-      margin-bottom:14px;
-    }
-
-    .eyebrow-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--accent);
-      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
-    }
-
-    h1{
-      margin:0 0 10px;
-      font-size:clamp(2rem, 4vw, 3rem);
-      line-height:1.04;
-      letter-spacing:-0.04em;
-    }
-
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      max-width:none;
-      width:100%;
-      font-size:1rem;
-    }
-
-    .hero-note{
-      margin-top:16px;
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      color:var(--muted);
-      font-size:.93rem;
-    }
-
-    .hero-note strong{
-      color:#fff;
-    }
-
-    .flash-banner{
-      margin-bottom:18px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(61,208,143,0.22);
-      background:rgba(61,208,143,0.12);
-      color:#d9ffee;
-      font-size:.92rem;
-      display:none;
-    }
-
-    .flash-banner.show{
-      display:block;
-    }
-
-    .dashboard-grid{
-      display:grid;
-      grid-template-columns:repeat(12, minmax(0,1fr));
-      gap:18px;
-      align-items:start;
-      grid-template-areas:
-        "dossiers dossiers dossiers dossiers summary summary summary summary summary summary summary summary"
-        "upload upload upload upload upload upload timeline timeline timeline timeline timeline timeline"
-        "choice choice choice choice choice choice choice choice choice choice choice choice";
-    }
-
-    .panel{
-      border-radius:28px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      min-width:0;
-    }
-
-    .panel-dossiers{grid-area:dossiers}
-    .panel-summary{grid-area:summary}
-    .panel-upload{grid-area:upload}
-    .panel-timeline{grid-area:timeline}
-    .panel-choice{grid-area:choice}
-
-    .panel-inner{
-      padding:22px;
-    }
-
-    .panel-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .panel-title{
-      margin:0 0 6px;
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
-    }
-
-    .panel-sub{
-      color:var(--soft);
-      font-size:.9rem;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      min-height:44px;
-      padding:0 16px;
-      border-radius:999px;
-      border:1px solid transparent;
-      font-weight:700;
-      font-size:.92rem;
-      transition:.2s ease;
-      cursor:pointer;
-      white-space:nowrap;
-      text-align:center;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg, var(--accent), var(--accent-2));
-      color:#fff;
-      box-shadow:0 18px 40px rgba(255,127,31,0.22);
-    }
-
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary{
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      border-color:rgba(255,255,255,0.12);
-    }
-
-    .btn-secondary:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
-    }
-
-    .btn-danger{
-      background:rgba(255,107,107,0.12);
-      color:#ffdede;
-      border-color:rgba(255,107,107,0.24);
-    }
-
-    .btn-danger:hover{
-      background:rgba(255,107,107,0.18);
-      transform:translateY(-1px);
-    }
-
-    .btn[disabled],
-    .btn.is-disabled{
-      opacity:.5;
-      cursor:not-allowed;
-      pointer-events:none;
-      box-shadow:none;
-      transform:none;
-      filter:none;
-    }
-
-    .note-box{
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.10);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff4ea;
-      font-size:.92rem;
-    }
-
-    .note-box.soft{
-      background:rgba(255,255,255,0.04);
-      border-color:rgba(255,255,255,0.08);
-      color:var(--muted);
-    }
-
-    .note-box.success{
-      background:rgba(61,208,143,0.12);
-      border-color:rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .note-box.warning{
-      background:rgba(255,179,71,0.12);
-      border-color:rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .dossier-list{
-      display:grid;
-      gap:12px;
-      margin-top:14px;
-    }
-
-    .dossier-card{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    .dossier-card:hover{
-      background:rgba(255,255,255,0.06);
-      transform:translateY(-1px);
-    }
-
-    .dossier-card.active{
-      border-color:rgba(255,127,31,0.24);
-      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
-    }
-
-    .dossier-card strong{
-      display:block;
-      color:#fff;
-      font-size:.95rem;
-      margin-bottom:4px;
-    }
-
-    .dossier-card span{
-      display:block;
-      color:var(--muted);
-      font-size:.88rem;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:30px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .badge.included{
-      background:rgba(61,208,143,0.14);
-      border:1px solid rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .badge.warning{
-      background:rgba(255,179,71,0.14);
-      border:1px solid rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .badge.danger{
-      background:rgba(255,107,107,0.14);
-      border:1px solid rgba(255,107,107,0.20);
-      color:#ffdede;
-    }
-
-    .badge.neutral{
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-    }
-
-    .empty-state{
-      padding:18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.03);
-      border:1px dashed rgba(255,255,255,0.12);
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:14px;
-      margin-bottom:0;
-    }
-
-    .summary-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      min-width:0;
-    }
-
-    .summary-label{
-      color:var(--soft);
-      font-size:.84rem;
-      margin-bottom:8px;
-    }
-
-    .summary-value{
-      font-size:1.08rem;
-      line-height:1.25;
-      font-weight:800;
-      letter-spacing:-0.03em;
-      color:#fff;
-      word-break:break-word;
-    }
-
-    .upload-grid{
-      display:grid;
-      gap:12px;
-    }
-
-    .upload-card{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-    }
-
-    .upload-card strong{
-      display:block;
-      color:#fff;
-      font-size:.95rem;
-      margin-bottom:4px;
-    }
-
-    .upload-card span{
-      display:block;
-      color:var(--muted);
-      font-size:.88rem;
-      max-width:54ch;
-    }
-
-    .upload-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      flex:0 0 auto;
-      align-items:center;
-      justify-content:flex-end;
-    }
-
-    .upload-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:40px;
-      padding:0 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.12);
-      color:#fff;
-      font-size:.86rem;
-      font-weight:800;
-      white-space:nowrap;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    .upload-btn:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
-    }
-
-    .upload-btn input{
-      display:none;
-    }
-
-    .file-status{
-      margin-top:8px;
-      font-size:.82rem !important;
-      color:var(--soft) !important;
-    }
-
-    .file-status.ok{
-      color:#d9ffee !important;
-    }
-
-    .timeline{
-      display:grid;
-      gap:12px;
-    }
-
-    .timeline-item{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:flex-start;
-    }
-
-    .timeline-main{
-      flex:1 1 auto;
-      min-width:0;
-    }
-
-    .timeline-main strong{
-      display:block;
-      font-size:1rem;
-      color:#fff;
-      margin-bottom:6px;
-    }
-
-    .timeline-main span{
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .timeline-meta{
-      display:inline-flex;
-      align-items:center;
-      min-height:28px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem !important;
-      font-weight:800;
-      color:#fff !important;
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      margin-bottom:10px;
-    }
-
-    .choice-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .choice-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-    }
-
-    .choice-card.highlight{
-      border-color:rgba(255,127,31,0.24);
-      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
-    }
-
-    .choice-card h3{
-      margin:0 0 8px;
-      font-size:1rem;
-      letter-spacing:-0.02em;
-    }
-
-    .choice-card p{
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .price-box{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.12);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff;
-      margin-bottom:12px;
-    }
-
-    .price-box strong{
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
-    }
-
-    .footer-note{
-      margin-top:18px;
-      color:var(--soft);
-      font-size:.88rem;
-      text-align:center;
-    }
-
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(2,10,15,0.72);
-      backdrop-filter:blur(4px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      z-index:100;
-    }
-
-    .modal-backdrop.open{
-      display:flex;
-    }
-
-    .modal{
-      width:min(980px, 100%);
-      max-height:90vh;
-      overflow:auto;
-      border-radius:28px;
-      background:linear-gradient(180deg, #103448, #0a2535);
-      border:1px solid rgba(255,255,255,0.10);
-      box-shadow:var(--shadow);
-    }
-
-    .modal.small{
-      width:min(860px, 100%);
-    }
-
-    .modal-inner{
-      padding:22px;
-    }
-
-    .modal-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .modal h2{
-      margin:0 0 6px;
-      font-size:1.3rem;
-      letter-spacing:-0.02em;
-    }
-
-    .close-btn{
-      border:none;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-      min-width:40px;
-      min-height:40px;
-      border-radius:999px;
-      cursor:pointer;
-      font-size:1.05rem;
-    }
-
-    .close-btn:hover{
-      background:rgba(255,255,255,0.14);
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin:14px 0 18px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .field.full{
-      grid-column:1 / -1;
-    }
-
-    .field label{
-      color:var(--soft);
-      font-size:.88rem;
-      font-weight:600;
-    }
-
-    .field input,
-    .field select,
-    .field textarea{
-      min-height:46px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.12);
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      outline:none;
-    }
-
-    .field textarea{
-      min-height:110px;
-      padding:12px 14px;
-      resize:vertical;
-    }
-
-    .field input::placeholder,
-    .field textarea::placeholder{
-      color:rgba(244,247,251,0.42);
-    }
-
-    .field input[readonly]{
-      opacity:.9;
-    }
-
-    .file-list{
-      display:grid;
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .file-item{
-      padding:14px;
-      border-radius:16px;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-    }
-
-    .file-item strong{
-      display:block;
-      font-size:.92rem;
-      margin-bottom:4px;
-      color:#fff;
-    }
-
-    .file-item span{
-      color:var(--muted);
-      font-size:.84rem;
-    }
-
-    @media (max-width: 1200px){
-      .dashboard-grid{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-        grid-template-areas:
-          "dossiers summary"
-          "upload upload"
-          "timeline timeline"
-          "choice choice";
-      }
-    }
-
-    @media (max-width: 860px){
-      .dashboard-grid{
-        grid-template-columns:1fr;
-        grid-template-areas:
-          "dossiers"
-          "summary"
-          "upload"
-          "timeline"
-          "choice";
-      }
-
-      .topbar-inner{
-        min-height:unset;
-        padding:14px 0;
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .top-actions{
-        width:100%;
-        justify-content:flex-start;
-      }
-
-      .upload-card,
-      .file-item,
-      .timeline-item{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .summary-grid,
-      .choice-grid,
-      .form-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media (max-width: 560px){
-      .container{
-        width:min(var(--max), calc(100% - 20px));
-      }
-
-      .btn{
-        width:100%;
-      }
-
-      .panel-inner,
-      .hero,
-      .modal-inner{
-        padding:18px;
-      }
-
-      .upload-actions{
-        width:100%;
-      }
-
-      .upload-actions .btn,
-      .upload-actions .upload-btn{
-        width:100%;
-      }
-
-      .user-chip{
-        max-width:100%;
-        width:100%;
-      }
-
-      .user-email{
-        max-width:100%;
-      }
-
-      .file-item > div:last-child{
-        width:100%;
-      }
-
-      .file-item > div:last-child .btn{
-        width:100%;
-      }
-    }
-  </style>
-</head>
-<body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a href="index.html" class="brand">
-        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
-        <div class="brand-text">
-          <span class="brand-title">Axe Flow</span>
-          <span class="brand-sub">Tableau de bord client</span>
-        </div>
-      </a>
-
-      <div class="top-actions">
-        <div class="user-chip" id="userChip">
-          <span class="user-email" id="userEmail">Chargement...</span>
-          <span class="status-pill neutral" id="userStatusPill">Statut</span>
-          <span class="status-pill neutral" id="userPlanPill">Offre</span>
-        </div>
-        <button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="page">
-    <div class="container">
-
-      <div class="flash-banner" id="flashBanner"></div>
-
-      <section class="hero">
-        <div class="eyebrow">
-          <span class="eyebrow-dot"></span>
-          Gestion complète de vos impayés
-        </div>
-
-        <h1>Tableau de bord</h1>
-
-        <p>
-          Centralisez vos dossiers, déposez vos pièces, suivez les actions menées et pilotez votre recouvrement.
-        </p>
-
-        <div class="hero-note">
-          <strong>Important :</strong> Axe Flow prépare les documents. L’envoi reste à votre charge sauf mandat spécifique.
-        </div>
-      </section>
-
-      <section class="dashboard-grid">
-
-        <div class="panel panel-dossiers">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Vos dossiers</h2>
-                <div class="panel-sub" id="planSubtitle"></div>
-              </div>
-
-              <button class="btn btn-primary" id="openCreateDossier" type="button">
-                Ajouter un dossier
-              </button>
-            </div>
-
-            <div class="note-box warning" id="createLimitNotice" style="display:none;"></div>
-
-            <div id="extraDossierBox" style="display:none;margin-top:12px;">
-              <div class="note-box">
-                Vous avez atteint votre limite. Débloquez un dossier supplémentaire.
-              </div>
-              <button class="btn btn-primary" id="buyExtraDossierBtn" type="button" style="margin-top:10px;">
-                Débloquer un dossier - 19 €
-              </button>
-            </div>
-
-            <div id="repurchaseOneShotBox" style="display:none;margin-top:12px;">
-              <div class="note-box">
-                Crédit utilisé. Nouveau dossier disponible.
-              </div>
-              <button class="btn btn-primary" id="buyOneShotBtn" type="button" style="margin-top:10px;">
-                Nouveau dossier - 49 €
-              </button>
-            </div>
-
-            <div id="upgradeMonthlyBox" style="display:none;margin-top:12px;">
-              <div class="note-box soft">
-                Passez à l’offre Pro avec 3 dossiers inclus.
-              </div>
-              <button class="btn btn-secondary" id="buyMonthlyBtn" type="button" style="margin-top:10px;">
-                Abonnement 89 € / mois
-              </button>
-            </div>
-
-            <div class="dossier-list" id="dossierList"></div>
-
-          </div>
-        </div>
-
-        <div class="panel panel-summary">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <h2 class="panel-title">Synthèse</h2>
-            </div>
-
-            <div class="summary-grid">
-              <div class="summary-card">
-                <div class="summary-label">Référence</div>
-                <div class="summary-value" id="summaryRef">—</div>
-              </div>
-
-              <div class="note-box warning" id="nextActionBox" style="margin-top:16px;">
-  <strong id="nextActionTitle" style="display:block;margin-bottom:6px;color:#fff;">
-    Ce que vous devez faire maintenant
-  </strong>
-  <div id="nextActionText">Sélectionnez un dossier pour voir la prochaine action.</div>
-</div>
-              
-              <div class="summary-card">
-                <div class="summary-label">Montant</div>
-                <div class="summary-value" id="amountTTCDisplay">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Débiteur</div>
-                <div class="summary-value" id="summaryDebiteur">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Type</div>
-                <div class="summary-value" id="summaryType">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Échéance / facture</div>
-                <div class="summary-value" id="summaryInvoice">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Statut</div>
-                <div class="summary-value" id="summaryStatus">—</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="panel panel-upload">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Pièces du dossier</h2>
-                <div class="panel-sub">Déposez ici vos pièces dossier. Vous pouvez ensuite les envoyer, les voir ou les supprimer.</div>
-              </div>
-            </div>
-
-            <div class="upload-grid">
-
-              <div class="upload-card" data-doc-type="quote">
-                <div>
-                  <strong>Devis / bon de commande</strong>
-                  <span>Ajoutez le document à l’origine de la créance.</span>
-                  <span class="file-status" id="status-quote">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="quote" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="quote">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="quote">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="quote">Supprimer</button>
-                </div>
-              </div>
-
-              <div class="upload-card" data-doc-type="invoice">
-                <div>
-                  <strong>Facture impayée</strong>
-                  <span>Déposez la facture concernée par le dossier.</span>
-                  <span class="file-status" id="status-invoice">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="invoice" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="invoice">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="invoice">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="invoice">Supprimer</button>
-                </div>
-              </div>
-
-              <div class="upload-card" data-doc-type="recovery">
-                <div>
-                  <strong>Relances déjà faites</strong>
-                  <span>Ajoutez les relances ou mises en demeure déjà envoyées de votre côté.</span>
-                  <span class="file-status" id="status-recovery">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="recovery" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="recovery">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="recovery">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="recovery">Supprimer</button>
-                </div>
-              </div>
-
-              <div class="upload-card" data-doc-type="supporting">
-                <div>
-                  <strong>Autres justificatifs</strong>
-                  <span>Déposez mails, preuves et documents utiles au dossier.</span>
-                  <span class="file-status" id="status-supporting">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="supporting" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="supporting">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="supporting">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="supporting">Supprimer</button>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
-        <div class="panel panel-timeline">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Suivi des étapes</h2>
-                <div class="panel-sub">Chaque publication Axe Flow apparaît ici avec son document et ses consignes.</div>
-              </div>
-            </div>
-
-            <div class="timeline" id="timelineList">
-              <div class="empty-state">Aucune publication pour le moment.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-choice">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Suite après injonction</h2>
-                <div class="panel-sub">Ce bloc s’affiche uniquement quand l’injonction a été publiée.</div>
-              </div>
-            </div>
-
-            <div class="note-box" id="choiceNotice">
-              Disponible après publication de l’injonction.
-            </div>
-
-            <div class="choice-grid" style="margin-top:12px;">
-
-              <div class="choice-card">
-                <h3>Transmission autonome</h3>
-                <p>Vous gérez ensuite la transmission et choisissez vous-même le commissaire de justice compétent.</p>
-                <button class="btn btn-secondary" id="validateAutonome" type="button">
-                  Choisir cette option
-                </button>
-              </div>
-
-              <div class="choice-card highlight">
-                <h3>Transmission assistée par Axe Flow</h3>
-                <p>Axe Flow prend la suite sur la transmission selon le montant du dossier.</p>
-
-                <div class="price-box">
-                  <strong id="calculatedPrice">—</strong>
-                </div>
-
-                <button class="btn btn-primary" id="payAssisted" type="button">
-                  Payer
-                </button>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
-      </section>
-
-      <div class="footer-note">
-        Axe Flow - tableau de bord client
-      </div>
-
-    </div>
-  </main>
-
-  <div class="modal-backdrop" id="createDossierModal">
-    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="createDossierTitle">
-      <div class="modal-inner">
-        <div class="modal-head">
-          <div>
-            <h2 id="createDossierTitle">Ajouter un dossier</h2>
-            <div class="panel-sub">Référence générée automatiquement.</div>
-          </div>
-          <button class="close-btn" type="button" id="closeCreateDossier">×</button>
-        </div>
-
-        <form id="createDossierForm">
-          <div class="form-grid">
-            <div class="field">
-              <label for="dossierLabel">Intitulé interne</label>
-              <input type="text" id="dossierLabel" placeholder="Ex. Impayé Martin avril 2026" required />
-            </div>
-
-            <div class="field">
-              <label for="dossierRef">Référence dossier</label>
-              <input type="text" id="dossierRef" readonly />
-            </div>
-
-            <div class="field">
-              <label for="debiteurType">Type de débiteur</label>
-              <select id="debiteurType" required>
-                <option value="professionnel">Professionnel</option>
-                <option value="particulier">Particulier</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="amountTTCInput">Montant TTC (€)</label>
-              <input type="number" id="amountTTCInput" min="0" step="0.01" placeholder="1200" required />
-            </div>
-
-            <div class="field full">
-              <label for="debiteurName">Nom du débiteur</label>
-              <input type="text" id="debiteurName" placeholder="Ex. SARL Martin" required />
-            </div>
-
-            <div class="field">
-              <label for="invoiceRefInput">Référence facture</label>
-              <input type="text" id="invoiceRefInput" placeholder="FAC-2026-001" />
-            </div>
-
-            <div class="field">
-              <label for="dueDateInput">Date d’échéance</label>
-              <input type="date" id="dueDateInput" />
-            </div>
-
-            <div class="field full">
-              <label for="dossierSummaryInput">Résumé</label>
-              <textarea id="dossierSummaryInput" placeholder="Résumé du dossier"></textarea>
-            </div>
-          </div>
-
-          <div style="display:flex;flex-wrap:wrap;gap:10px;">
-            <button class="btn btn-primary" type="submit" id="saveDossierBtn">Enregistrer</button>
-            <button class="btn btn-secondary" type="button" id="cancelCreateDossier">Annuler</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="filesModal">
-    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="filesModalTitle">
-      <div class="modal-inner">
-        <div class="modal-head">
-          <div>
-            <h2 id="filesModalTitle">Fichiers</h2>
-            <div class="panel-sub" id="filesModalSubtitle">Aucun dossier sélectionné.</div>
-          </div>
-          <button class="close-btn" type="button" id="closeFilesModal">×</button>
-        </div>
-
-        <div class="file-list" id="fileListContainer">
-          <div class="empty-state">Aucun fichier.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="eventModal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
-      <div class="modal-inner">
-        <div class="modal-head">
-          <div>
-            <h2 id="eventModalTitle">Détail de l’étape</h2>
-            <div class="panel-sub" id="eventModalSubtitle">Aucune étape sélectionnée.</div>
-          </div>
-          <button class="close-btn" type="button" id="closeEventModal">×</button>
-        </div>
-
-        <div class="file-list" id="eventModalContent">
-          <div class="empty-state">Aucune donnée.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getAuth,
-    onAuthStateChanged,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    query,
-    orderBy,
-    getDocs,
-    addDoc,
-    serverTimestamp,
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc,
-    runTransaction,
-    deleteDoc
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import {
-    getStorage,
-    ref as storageRef,
-    uploadBytes,
-    getDownloadURL,
-    deleteObject
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-    authDomain: "axe-flow.firebaseapp.com",
-    projectId: "axe-flow",
-    storageBucket: "axe-flow.firebasestorage.app",
-    messagingSenderId: "295300543556",
-    appId: "1:295300543556:web:3facac2d0c612e3456b811"
-  };
-
-  const STRIPE_LINKS = {
-    one_shot_49: "https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01",
-    monthly_89: "https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02",
-    extra_case_19: "https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03",
-
-    assisted_85: "https://buy.stripe.com/test_5kQfZgej00ZReZR0yz7Vm04",
-    assisted_140: "https://buy.stripe.com/test_bJe9AS2AicIzeZR5ST7Vm05",
-    assisted_247: "https://buy.stripe.com/test_eVqdR8ej037Z191dll7Vm06",
-
-    assisted_175: "https://buy.stripe.com/test_4gMeVcej037Z7xp5ST7Vm07",
-    assisted_230: "https://buy.stripe.com/test_8x2eVcfn4dMD04Xdll7Vm08",
-    assisted_337: "https://buy.stripe.com/test_14A4gy3Em37Z04Xa997Vm09"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-
-  const userEmail = document.getElementById("userEmail");
-  const userStatusPill = document.getElementById("userStatusPill");
-  const userPlanPill = document.getElementById("userPlanPill");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const flashBanner = document.getElementById("flashBanner");
-
-  const planSubtitle = document.getElementById("planSubtitle");
-  const createLimitNotice = document.getElementById("createLimitNotice");
-  const extraDossierBox = document.getElementById("extraDossierBox");
-  const repurchaseOneShotBox = document.getElementById("repurchaseOneShotBox");
-  const upgradeMonthlyBox = document.getElementById("upgradeMonthlyBox");
-
-  const buyExtraDossierBtn = document.getElementById("buyExtraDossierBtn");
-  const buyOneShotBtn = document.getElementById("buyOneShotBtn");
-  const buyMonthlyBtn = document.getElementById("buyMonthlyBtn");
-
-  const openCreateDossier = document.getElementById("openCreateDossier");
-  const dossierList = document.getElementById("dossierList");
-
-  const summaryRef = document.getElementById("summaryRef");
-  const amountTTCDisplay = document.getElementById("amountTTCDisplay");
-  const summaryDebiteur = document.getElementById("summaryDebiteur");
-  const summaryType = document.getElementById("summaryType");
-  const summaryInvoice = document.getElementById("summaryInvoice");
-  const summaryStatus = document.getElementById("summaryStatus");
-
-  const nextActionBox = document.getElementById("nextActionBox");
-  const nextActionTitle = document.getElementById("nextActionTitle");
-  const nextActionText = document.getElementById("nextActionText");
-
-  const timelineList = document.getElementById("timelineList");
-
-  const calculatedPrice = document.getElementById("calculatedPrice");
-  const validateAutonome = document.getElementById("validateAutonome");
-  const payAssisted = document.getElementById("payAssisted");
-  const choiceNotice = document.getElementById("choiceNotice");
-  const panelChoice = document.querySelector(".panel-choice");
-
-  const fileInputs = document.querySelectorAll("[data-doc-type-input]");
-  const sendButtons = document.querySelectorAll("[data-upload-send]");
-  const viewButtons = document.querySelectorAll("[data-upload-view]");
-  const deleteButtons = document.querySelectorAll("[data-upload-delete]");
-
-  const createDossierModal = document.getElementById("createDossierModal");
-  const createDossierForm = document.getElementById("createDossierForm");
-  const closeCreateDossier = document.getElementById("closeCreateDossier");
-  const cancelCreateDossier = document.getElementById("cancelCreateDossier");
-
-  const dossierLabelInput = document.getElementById("dossierLabel");
-  const dossierRefInput = document.getElementById("dossierRef");
-  const debiteurTypeInput = document.getElementById("debiteurType");
-  const amountTTCInput = document.getElementById("amountTTCInput");
-  const debiteurNameInput = document.getElementById("debiteurName");
-  const invoiceRefInput = document.getElementById("invoiceRefInput");
-  const dueDateInput = document.getElementById("dueDateInput");
-  const dossierSummaryInput = document.getElementById("dossierSummaryInput");
-  const createDossierTitle = document.getElementById("createDossierTitle");
-
-  const filesModal = document.getElementById("filesModal");
-  const closeFilesModal = document.getElementById("closeFilesModal");
-  const filesModalSubtitle = document.getElementById("filesModalSubtitle");
-  const fileListContainer = document.getElementById("fileListContainer");
-
-  const eventModal = document.getElementById("eventModal");
-  const closeEventModal = document.getElementById("closeEventModal");
-  const eventModalSubtitle = document.getElementById("eventModalSubtitle");
-  const eventModalContent = document.getElementById("eventModalContent");
-
-  let currentUser = null;
-  let currentDossier = null;
-  let dossiers = [];
-  let userProfile = null;
-  let entitlements = [];
-  let uploadedFiles = {
-    quote: [],
-    invoice: [],
-    recovery: [],
-    supporting: []
-  };
-  let timelineEventsCache = [];
-  let editingDossierId = null;
-  let dossierCounter = 0;
-
-  let selectedFilesByType = {
-    quote: [],
-    invoice: [],
-    recovery: [],
-    supporting: []
-  };
-
-  const DOC_TYPE_LABELS = {
-    quote: "Devis / bon de commande",
-    invoice: "Facture impayée",
-    recovery: "Relances déjà faites",
-    supporting: "Autres justificatifs"
-  };
-
-  const EVENT_STATUS_LABELS = {
-    draft: "Brouillon",
-    to_publish: "À publier",
-    published: "Publié",
-    client_action_required: "Action requise",
-    proofs_submitted: "Preuves déposées",
-    reviewed: "Vérifié",
-    closed: "Clôturé"
-  };
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function formatDate(value) {
-    if (!value) return "Non renseignée";
-    try {
-      const date = value instanceof Date ? value : new Date(value);
-      if (isNaN(date.getTime())) return String(value);
-      return date.toLocaleDateString("fr-FR");
-    } catch {
-      return String(value);
-    }
-  }
-
-  function formatDateTime(value) {
-    if (!value) return "Non renseignée";
-    try {
-      const date = value instanceof Date ? value : new Date(value);
-      if (isNaN(date.getTime())) return String(value);
-      return `${date.toLocaleDateString("fr-FR")} à ${date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
-    } catch {
-      return String(value);
-    }
-  }
-
-  function formatCurrency(value) {
-    const amount = Number(value || 0);
-    return amount.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "EUR"
-    });
-  }
-
-  function showFlash(message) {
-    if (!message) return;
-    flashBanner.textContent = message;
-    flashBanner.classList.add("show");
-  }
-
-  function readPaymentParams() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("payment") === "success") {
-      showFlash("Paiement reçu. Vérifiez maintenant vos accès et votre dossier.");
-    }
-  }
-
-  function openModal(modal) {
-    if (modal) modal.classList.add("open");
-  }
-
-  function closeModal(modal) {
-    if (modal) modal.classList.remove("open");
-  }
-
-  function getCurrentYear() {
-    return new Date().getFullYear();
-  }
-
-  function getNextDossierNumber() {
-    return String(dossierCounter + 1).padStart(3, "0");
-  }
-
-  function generateDossierRef() {
-    return `AF-${getCurrentYear()}-${getNextDossierNumber()}`;
-  }
-
-  function calculatePrice(amount) {
-    if (amount < 128) return 85;
-    if (amount <= 1280) return 140;
-    return 247;
-  }
-
-  function getStatusMeta(status) {
-    if (status === "active") return { label: "Activé", className: "success" };
-    if (status === "inactive" || status === "cancelled") return { label: "Inactif", className: "danger" };
-    return { label: "À vérifier", className: "warning" };
-  }
-
-  function getPlanMeta(plan) {
-    if (plan === "one_shot_49") return { label: "Option 49 €", className: "neutral" };
-    if (plan === "monthly_89") return { label: "Option 89 €/mois", className: "neutral" };
-    if (userProfile?.isTestAccount) return { label: "Compte test", className: "neutral" };
-    return { label: "Offre inconnue", className: "warning" };
-  }
-
-  function updateTopStatus() {
-    const statusMeta = getStatusMeta(userProfile?.subscriptionStatus);
-    const planMeta = getPlanMeta(userProfile?.plan);
-
-    userStatusPill.textContent = statusMeta.label;
-    userStatusPill.className = `status-pill ${statusMeta.className}`;
-
-    userPlanPill.textContent = planMeta.label;
-    userPlanPill.className = `status-pill ${planMeta.className}`;
-  }
-
-  function isDossierClosable(dossier) {
-    return (dossier?.lifecycleStatus || "open") !== "closed";
-  }
-
-  function normaliseEventStatus(rawStatus, rawCurrentStep) {
-    const status = String(rawStatus || "").toLowerCase();
-
-    if (status === "draft" || status === "brouillon") return "draft";
-    if (status === "published" || status === "publié") return "published";
-    if (status === "client_action_required") return "client_action_required";
-    if (status === "proofs_submitted") return "proofs_submitted";
-    if (status === "reviewed") return "reviewed";
-    if (status === "closed") return "closed";
-
-    if (rawCurrentStep === "published") return "published";
-    if (rawCurrentStep === "client_action_required") return "client_action_required";
-    if (rawCurrentStep === "proofs_submitted") return "proofs_submitted";
-    if (rawCurrentStep === "reviewed") return "reviewed";
-    if (rawCurrentStep === "closed") return "closed";
-
-    return "published";
-  }
-
-  function buildInstructions(event) {
-    if (event.instructions) return String(event.instructions);
-    if (event.clientInstructions) return String(event.clientInstructions);
-    if (event.description) return String(event.description);
-    return "Aucune consigne particulière.";
-  }
-
-  function buildEventDocLabel(event) {
-    return event.documentLabel || event.documentName || event.fileLabel || "Document";
-  }
-
-  function buildEventDocUrl(event) {
-    return event.documentUrl || event.fileUrl || event.url || "";
-  }
-
-  function getRequiredProofs(event) {
-    if (Array.isArray(event.requiredProofs)) {
-      return event.requiredProofs.filter(Boolean).map((x) => String(x));
-    }
-    if (typeof event.requiredProofs === "string" && event.requiredProofs.trim()) {
-      return event.requiredProofs.split(",").map((x) => x.trim()).filter(Boolean);
-    }
-    return [];
-  }
-
-  function isPublishedEvent(event) {
-    const s = String(event?.status || "").toLowerCase();
-    return s === "published" || s === "publié" || (!s && !String(event?.title || "").toLowerCase().includes("brouillon"));
-  }
-
-  function eventNeedsClientAction(event) {
-    const proofs = getRequiredProofs(event);
-    return proofs.length > 0;
-  }
-
-  function isInjunctionEvent(event) {
-    const haystack = [
-      event.type,
-      event.stepType,
-      event.currentStep,
-      event.title,
-      event.label
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes("injonction") || haystack.includes("injunction");
-  }
-
-  function isInjunctionPublished(dossier) {
-    if (!dossier) return false;
-
-    if (dossier.currentStep === "injunction_published" || dossier.injunctionPublished === true) {
-      return true;
-    }
-
-    return timelineEventsCache.some((event) => isPublishedEvent(event) && isInjunctionEvent(event));
-  }
-
-  function setChoiceSectionState(enabled) {
-    if (panelChoice) {
-      panelChoice.style.display = enabled ? "" : "none";
-    }
-
-    validateAutonome.disabled = !enabled;
-    payAssisted.disabled = !enabled;
-
-    if (!enabled) {
-      choiceNotice.textContent = "Disponible après publication de l’injonction.";
-      calculatedPrice.textContent = "—";
-      return;
-    }
-
-    choiceNotice.textContent = "L’injonction est publiée. Vous pouvez choisir la suite.";
-    calculatedPrice.textContent = formatCurrency(calculatePrice(Number(currentDossier?.amountTTC || 0)));
-  }
-
- function updateNextActionBox(dossier, events = []) {
-  if (!nextActionBox || !nextActionTitle || !nextActionText) return;
-
-  if (!dossier) {
-    nextActionTitle.textContent = "Ce que vous devez faire maintenant";
-    nextActionText.textContent = "Sélectionnez un dossier pour voir la prochaine action.";
-    nextActionBox.className = "note-box warning";
-    return;
-  }
-
-  // 1. Cas le plus important : le client a envoyé ses pièces, Axe Flow doit reprendre
-  if (
-    dossier.clientHasNewFiles === true &&
-    (!events.length || dossier.clientStatus === "Pièces reçues" || dossier.internalStatus === "À qualifier")
-  ) {
-    nextActionTitle.textContent = "Pièces bien reçues";
-    nextActionText.textContent =
-      "Vos pièces ont bien été reçues. Vous pouvez quitter votre espace. Axe Flow reviendra vers vous rapidement après vérification du dossier. Vous serez averti par email dès qu’une nouvelle étape sera disponible.";
-    nextActionBox.className = "note-box success";
-    return;
-  }
-
-  // 2. Cas injonction publiée sans choix encore fait
-  if (isInjunctionPublished(dossier) && !dossier.postOrderChoice) {
-    nextActionTitle.textContent = "Choix attendu";
-    nextActionText.textContent =
-      "L’injonction a été publiée. Choisissez maintenant entre transmission autonome et transmission assistée.";
-    nextActionBox.className = "note-box warning";
-    return;
-  }
-
-  // 3. Dernière publication avec action requise
-  const actionableEvent = [...events]
-    .filter((event) => isPublishedEvent(event) && eventNeedsClientAction(event))
-    .sort((a, b) => {
-      const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
-      const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
-      return bt - at;
-    })[0];
-
-  if (actionableEvent) {
-    const proofs = getRequiredProofs(actionableEvent);
-    nextActionTitle.textContent = "Action requise";
-    nextActionText.textContent =
-      proofs.length
-        ? `${actionableEvent.title || "Étape publiée"} — vous devez agir puis déposer : ${proofs.join(", ")}.`
-        : `${actionableEvent.title || "Étape publiée"} — une action est attendue de votre part.`;
-    nextActionBox.className = "note-box warning";
-    return;
-  }
-
-  // 4. Aucun event encore publié
-  if (!events.length) {
-    nextActionTitle.textContent = "Aucune action immédiate";
-    nextActionText.textContent =
-      "Votre dossier est enregistré. Axe Flow n’a pas encore publié d’étape sur cet espace.";
-    nextActionBox.className = "note-box soft";
-    return;
-  }
-
-  // 5. Dernière mise à jour sans action demandée
-  const latestPublished = [...events]
-    .filter(isPublishedEvent)
-    .sort((a, b) => {
-      const at = a.createdAtDate ? a.createdAtDate.getTime() : 0;
-      const bt = b.createdAtDate ? b.createdAtDate.getTime() : 0;
-      return bt - at;
-    })[0];
-
-  if (latestPublished) {
-    nextActionTitle.textContent = "Dernière mise à jour";
-    nextActionText.textContent =
-      `${latestPublished.title || "Étape publiée"} — aucune action immédiate n’est demandée pour le moment.`;
-    nextActionBox.className = "note-box success";
-    return;
-  }
-
-  nextActionTitle.textContent = "Aucune action immédiate";
-  nextActionText.textContent = "Votre dossier est en cours de traitement.";
-  nextActionBox.className = "note-box soft";
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Axe Flow — Tableau de bord</title>
+<meta name="robots" content="noindex,nofollow" />
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+
+<style>
+body{
+  margin:0;
+  font-family:Inter;
+  background:#071e2b;
+  color:#fff;
 }
 
-  function resetSummary() {
-    currentDossier = null;
-    timelineEventsCache = [];
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
 
-    summaryRef.textContent = "—";
-    amountTTCDisplay.textContent = "—";
-    summaryDebiteur.textContent = "—";
-    summaryType.textContent = "—";
-    summaryInvoice.textContent = "—";
-    summaryStatus.textContent = "—";
+.panel{
+  background:#0f3e56;
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+}
 
-    timelineList.innerHTML = `<div class="empty-state">Aucune publication pour le moment.</div>`;
-    updateNextActionBox(null, []);
-    setChoiceSectionState(false);
-    refreshUploadStatuses();
+h1{margin:0 0 20px;}
+
+.btn{
+  padding:10px 14px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.btn-primary{background:#ff7f1f;color:#fff;}
+.btn-secondary{background:#ffffff20;color:#fff;}
+.btn-success{background:#3dd08f;color:#fff;}
+
+.step{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:14px;
+  background:#ffffff10;
+}
+
+.locked{opacity:.4}
+.done{background:#3dd08f30}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Axe Flow</h1>
+
+<div class="panel">
+<h2>Dossier</h2>
+
+<input id="amount" placeholder="Montant €" />
+<input id="debiteur" placeholder="Nom débiteur" />
+
+<br><br>
+
+<label class="btn btn-secondary">
+Uploader facture
+<input type="file" id="invoiceFile" hidden>
+</label>
+
+<p id="invoiceStatus">Aucune facture</p>
+</div>
+<div class="panel">
+  <h2>Parcours automatique</h2>
+  <p>
+    Les documents sont générés automatiquement. Vous téléchargez, vous envoyez, puis vous déposez la preuve.
+  </p>
+
+  <div id="stepsList"></div>
+</div>
+
+<div class="panel">
+  <h2>Preuves d’envoi</h2>
+  <p>Déposez ici les preuves liées aux étapes envoyées.</p>
+
+  <input type="file" id="proofFile" />
+  <br><br>
+  <button class="btn btn-primary" id="uploadProofBtn">Déposer la preuve</button>
+
+  <p id="proofStatus">Aucune preuve déposée.</p>
+</div>
+
+<div class="panel" id="injunctionPanel" style="display:none;">
+  <h2>Suite injonction</h2>
+  <p>
+    Les relances et la mise en demeure sont terminées. Vous pouvez maintenant préparer l’injonction.
+  </p>
+
+  <button class="btn btn-secondary" id="generateInjunctionBtn">
+    Télécharger le dossier d’injonction
+  </button>
+
+  <br><br>
+
+  <button class="btn btn-primary" id="payAssistedBtn">
+    Demander l’assistance Axe Flow
+  </button>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc,
+  addDoc, serverTimestamp, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+  authDomain: "axe-flow.firebaseapp.com",
+  projectId: "axe-flow",
+  storageBucket: "axe-flow.firebasestorage.app",
+  messagingSenderId: "295300543556",
+  appId: "1:295300543556:web:3facac2d0c612e3456b811"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+let currentUser = null;
+let currentDossier = null;
+let currentDossierId = null;
+
+const AUTO_STEPS = [
+  { key:"relance_1", label:"Relance 1", delay:3, proof:"preuve d’envoi relance 1" },
+  { key:"relance_2", label:"Relance 2", delay:7, proof:"preuve d’envoi relance 2" },
+  { key:"relance_3", label:"Relance 3", delay:12, proof:"preuve d’envoi relance 3" },
+  { key:"mise_en_demeure", label:"Mise en demeure", delay:20, proof:"preuve LRAR ou justificatif d’envoi" },
+  { key:"injonction", label:"Proposition injonction", delay:30, proof:null }
+];
+
+function todayIso() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function isStepAvailable(dossier, step) {
+  const start = dossier.createdAt?.toDate ? dossier.createdAt.toDate() : new Date();
+  return new Date() >= addDays(start, step.delay);
+}
+
+function buildDocText(step, dossier) {
+  const date = new Date().toLocaleDateString("fr-FR");
+
+  return `
+Axe Flow
+
+${date}
+
+Objet : ${step.label} - facture impayée ${dossier.invoiceRef || ""}
+
+Débiteur :
+${dossier.debiteurName || ""}
+${dossier.debiteurAddress || ""}
+${dossier.debiteurZip || ""} ${dossier.debiteurCity || ""}
+
+Madame, Monsieur,
+
+Sauf erreur ou omission de notre part, la facture référencée ${dossier.invoiceRef || "non renseignée"}, d’un montant de ${dossier.amountTTC || 0} € TTC, arrivée à échéance le ${dossier.dueDate || "date non renseignée"}, demeure impayée à ce jour.
+
+Nous vous invitons à procéder au règlement dans les meilleurs délais.
+
+À défaut de régularisation, le dossier pourra être transmis à l’étape suivante de recouvrement.
+
+Cordialement,
+
+Axe Flow
+`;
+}
+
+function downloadWord(step, dossier) {
+  const content = buildDocText(step, dossier);
+  const blob = new Blob([content], {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${step.key}_${dossier.ref || "dossier"}.docx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function markStepDownloaded(step) {
+  const stepRef = doc(db, "users", currentUser.uid, "requests", currentDossierId, "autoSteps", step.key);
+  await setDoc(stepRef, {
+    key: step.key,
+    label: step.label,
+    status: "downloaded",
+    downloadedAt: serverTimestamp(),
+    proofRequired: step.proof || "",
+    updatedAt: serverTimestamp()
+  }, { merge:true });
+
+  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossierId), {
+    currentStep: step.key,
+    statusLabel: `${step.label} téléchargée`,
+    updatedAt: serverTimestamp()
+  });
+
+  await loadDossier(currentDossierId);
+}
+
+async function uploadProof() {
+  const input = document.getElementById("proofFile");
+  const file = input.files?.[0];
+
+  if (!currentDossier || !file) {
+    alert("Sélectionne une preuve.");
+    return;
   }
 
-  function updateSummary(dossier) {
-    currentDossier = dossier;
-
-    summaryRef.textContent = dossier.ref || "—";
-    amountTTCDisplay.textContent = formatCurrency(dossier.amountTTC || 0);
-    summaryDebiteur.textContent = dossier.debiteurName || "—";
-    summaryType.textContent = dossier.debiteurType || "—";
-    summaryInvoice.textContent = dossier.invoiceRef
-      ? `${dossier.invoiceRef}${dossier.dueDate ? " — " + formatDate(dossier.dueDate) : ""}`
-      : (dossier.dueDate ? formatDate(dossier.dueDate) : "—");
-    summaryStatus.textContent = dossier.statusLabel || dossier.status || "Dossier créé";
-
-    loadFilesForDossier(dossier.id);
-    loadTimelineForDossier(dossier.id);
+  const currentStepKey = currentDossier.currentStep;
+  if (!currentStepKey) {
+    alert("Télécharge d’abord une étape.");
+    return;
   }
 
-  async function ensureUserProfile(user) {
-    const userRef = doc(db, "users", user.uid);
-    const snap = await getDoc(userRef);
+  const path = `users/${currentUser.uid}/requests/${currentDossierId}/proofs/${Date.now()}_${file.name}`;
+  const ref = storageRef(storage, path);
 
-    if (snap.exists()) {
-      userProfile = snap.data();
-      return;
-    }
+  await uploadBytes(ref, file);
+  const url = await getDownloadURL(ref);
 
-    const defaultProfile = {
-      uid: user.uid,
-      email: user.email || "",
-      role: "client",
-      plan: "unknown",
-      subscriptionStatus: "unknown",
-      monthlyQuota: 0,
-      monthlyUsed: 0,
-      isTestAccount: false,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
+  await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossierId, "proofs"), {
+    stepKey: currentStepKey,
+    name: file.name,
+    path,
+    url,
+    createdAt: serverTimestamp()
+  });
 
-    await setDoc(userRef, defaultProfile);
-    userProfile = {
-      ...defaultProfile,
-      createdAt: null,
-      updatedAt: null
-    };
+  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossierId), {
+    lastClientProofAt: serverTimestamp(),
+    proofsCompletionStatus: "proof_uploaded",
+    statusLabel: "Preuve déposée",
+    updatedAt: serverTimestamp()
+  });
+
+  document.getElementById("proofStatus").textContent = "Preuve déposée.";
+  input.value = "";
+  await loadDossier(currentDossierId);
+}
+  async function loadDossier(dossierId) {
+  currentDossierId = dossierId;
+
+  const snap = await getDoc(doc(db, "users", currentUser.uid, "requests", dossierId));
+  if (!snap.exists()) return;
+
+  currentDossier = { id: snap.id, ...snap.data() };
+
+  summaryRef.textContent = currentDossier.ref || "—";
+  amountTTCDisplay.textContent = formatCurrency(currentDossier.amountTTC || 0);
+  summaryDebiteur.textContent = currentDossier.debiteurName || "—";
+  summaryType.textContent = currentDossier.debiteurType || "—";
+  summaryInvoice.textContent = currentDossier.invoiceRef || "—";
+  summaryStatus.textContent = currentDossier.statusLabel || "Dossier créé";
+
+  renderAutomaticSteps();
+}
+
+function renderAutomaticSteps() {
+  timelineList.innerHTML = "";
+
+  if (!currentDossier) {
+    timelineList.innerHTML = `<div class="empty-state">Sélectionne un dossier.</div>`;
+    return;
   }
 
-  function isEntitlementUsable(entitlement) {
-    if (!entitlement) return false;
-    if (entitlement.status !== "active") return false;
+  AUTO_STEPS.forEach((step) => {
+    const available = isStepAvailable(currentDossier, step);
+    const disabled = available ? "" : "disabled";
 
-    const granted = Number(entitlement.grantedCaseCount || 0);
-    const used = Number(entitlement.usedCaseCount || 0);
-    if (used >= granted) return false;
+    timelineList.insertAdjacentHTML("beforeend", `
+      <div class="timeline-item">
+        <div class="timeline-main">
+          <span class="timeline-meta">J+${step.delay}</span>
+          <strong>${escapeHtml(step.label)}</strong>
+          <span>${available ? "Disponible" : "Disponible automatiquement plus tard"}</span>
 
-    if (entitlement.validUntil?.toDate) {
-      const validUntil = entitlement.validUntil.toDate();
-      if (validUntil.getTime() < Date.now()) return false;
-    }
+          <div class="note-box soft" style="margin-top:10px;">
+            Document Word généré automatiquement avec les informations du dossier.
+          </div>
 
-    return true;
+          ${step.proof ? `
+            <div class="note-box warning" style="margin-top:10px;">
+              Preuve attendue : ${escapeHtml(step.proof)}
+            </div>
+          ` : `
+            <div class="note-box success" style="margin-top:10px;">
+              Étape injonction : proposition de suite assistée Axe Flow.
+            </div>
+          `}
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:180px;">
+          <button class="btn btn-primary" type="button" data-download-step="${step.key}" ${disabled}>
+            Télécharger
+          </button>
+        </div>
+      </div>
+    `);
+  });
+
+  document.querySelectorAll("[data-download-step]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const step = AUTO_STEPS.find(s => s.key === btn.dataset.downloadStep);
+      if (!step) return;
+
+      downloadWord(step, currentDossier);
+      await markStepDownloaded(step);
+    });
+  });
+}
+
+async function loadDossiers(uid) {
+  const snap = await getDocs(query(
+    collection(db, "users", uid, "requests"),
+    orderBy("createdAt", "asc")
+  ));
+
+  dossiers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  dossierCounter = dossiers.length;
+
+  dossierList.innerHTML = "";
+
+  if (!dossiers.length) {
+    dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé.</div>`;
+    resetSummary();
+    return;
   }
 
-  function getAvailableEntitlements() {
-    return entitlements.filter(isEntitlementUsable);
-  }
-
-  function getRemainingCredits() {
-    return getAvailableEntitlements().reduce((sum, entitlement) => {
-      const granted = Number(entitlement.grantedCaseCount || 0);
-      const used = Number(entitlement.usedCaseCount || 0);
-      return sum + Math.max(0, granted - used);
-    }, 0);
-  }
-
-  function getMonthlyActiveEntitlements() {
-    return getAvailableEntitlements().filter((item) => item.type === "monthly_89");
-  }
-
-  function getOneShotAvailableEntitlements() {
-    return getAvailableEntitlements().filter((item) => item.type === "one_shot_49");
-  }
-
-  function getExtraAvailableEntitlements() {
-    return getAvailableEntitlements().filter((item) => item.type === "extra_case_19");
-  }
-
-  function getBestEntitlementForNewCase() {
-    const available = getAvailableEntitlements();
-    if (!available.length) return null;
-
-    const priority = {
-      monthly_89: 1,
-      extra_case_19: 2,
-      one_shot_49: 3
-    };
-
-    return [...available].sort((a, b) => {
-      const pa = priority[a.type] || 99;
-      const pb = priority[b.type] || 99;
-      if (pa !== pb) return pa - pb;
-
-      const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-      const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-      return aTime - bTime;
-    })[0];
-  }
-
-  async function loadEntitlements(uid) {
-    try {
-      const entitlementsRef = collection(db, "users", uid, "entitlements");
-      const q = query(entitlementsRef, orderBy("createdAt", "asc"));
-      const snap = await getDocs(q);
-
-      entitlements = snap.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data()
-      }));
-    } catch (err) {
-      console.error("Erreur loadEntitlements:", err);
-      entitlements = [];
-    }
-  }
-
-  function getCreatePermission() {
-    if (!userProfile) {
-      return { allowed: false, reason: "Chargement du compte.", extraAllowed: false, ctaMode: "none" };
-    }
-
-    if (userProfile.isTestAccount) {
-      return { allowed: true, reason: "Compte test actif.", extraAllowed: false, ctaMode: "create" };
-    }
-
-    const status = userProfile.subscriptionStatus || "unknown";
-    const plan = userProfile.plan || "unknown";
-    const remainingCredits = getRemainingCredits();
-    const hasMonthly = getMonthlyActiveEntitlements().length > 0;
-    const hasOneShot = getOneShotAvailableEntitlements().length > 0;
-    const hasExtra = getExtraAvailableEntitlements().length > 0;
-
-    if (remainingCredits > 0) {
-      if (hasMonthly) return { allowed: true, reason: `Offre Pro active — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-      if (hasExtra) return { allowed: true, reason: `Crédit supplémentaire actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-      if (hasOneShot) return { allowed: true, reason: `Crédit ponctuel actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-      return { allowed: true, reason: `Crédit actif — ${remainingCredits} dossier(s) disponible(s).`, extraAllowed: false, ctaMode: "create" };
-    }
-
-    if (status !== "active") {
-      return { allowed: false, reason: "Compte non activé ou paiement non synchronisé.", extraAllowed: false, ctaMode: "none" };
-    }
-
-    if (plan === "monthly_89") {
-      return { allowed: false, reason: "Offre Pro active — vos 3 crédits sont utilisés.", extraAllowed: true, ctaMode: "extra" };
-    }
-
-    if (plan === "one_shot_49") {
-      return { allowed: false, reason: "Le crédit ponctuel a déjà été utilisé.", extraAllowed: false, ctaMode: "repurchase_one_shot" };
-    }
-
-    return { allowed: false, reason: "Aucun droit actif pour créer un dossier.", extraAllowed: false, ctaMode: "none" };
-  }
-
-  function updatePlanSubtitle() {
-    const permission = getCreatePermission();
-    planSubtitle.textContent = permission.reason;
-
-    createLimitNotice.style.display = "none";
-    extraDossierBox.style.display = "none";
-    repurchaseOneShotBox.style.display = "none";
-    upgradeMonthlyBox.style.display = "none";
-
-    openCreateDossier.disabled = true;
-    openCreateDossier.textContent = "Ajouter un dossier";
-
-    const showMonthlyUpgrade = userProfile && !userProfile.isTestAccount && userProfile.plan !== "monthly_89";
-    if (showMonthlyUpgrade) {
-      upgradeMonthlyBox.style.display = "block";
-    }
-
-    if (permission.allowed) {
-      openCreateDossier.disabled = false;
-      return;
-    }
-
-    if (permission.ctaMode === "extra") {
-      openCreateDossier.textContent = "Quota atteint";
-      extraDossierBox.style.display = "block";
-      return;
-    }
-
-    if (permission.ctaMode === "repurchase_one_shot") {
-      createLimitNotice.textContent = permission.reason;
-      createLimitNotice.style.display = "block";
-      repurchaseOneShotBox.style.display = "block";
-      return;
-    }
-
-    createLimitNotice.textContent = permission.reason;
-    createLimitNotice.style.display = "block";
-  }
-
-  async function loadDossiers(uid) {
-    try {
-      const dossiersRef = collection(db, "users", uid, "requests");
-      const q = query(dossiersRef, orderBy("createdAt", "asc"));
-      const snap = await getDocs(q);
-
-      dossiers = snap.docs.map((docSnap) => {
-        const data = docSnap.data();
-        return {
-          id: docSnap.id,
-          ...data,
-          statusLabel: data.statusLabel || "Dossier créé"
-        };
-      });
-
-      dossierCounter = dossiers.length;
-      renderDossiers();
-      updatePlanSubtitle();
-
-      if (!dossiers.length) {
-        resetSummary();
-        return;
-      }
-
-      const selectedStillExists = currentDossier && dossiers.find((d) => d.id === currentDossier.id);
-      updateSummary(selectedStillExists || dossiers[0]);
-      renderDossiers();
-    } catch (err) {
-      console.error("Erreur loadDossiers:", err);
-      dossierList.innerHTML = `<div class="empty-state">Erreur de chargement.</div>`;
-      resetSummary();
-    }
-  }
-
-  function renderDossiers() {
-    dossierList.innerHTML = "";
-
-    if (!dossiers.length) {
-      dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé.</div>`;
-      return;
-    }
-
-    dossiers.forEach((dossier) => {
-      const card = document.createElement("div");
-      card.className = "dossier-card" + (currentDossier && currentDossier.id === dossier.id ? " active" : "");
-
-      let badgeClass = "warning";
-      let badgeText = dossier.statusLabel || "En cours";
-
-      if (dossier.clientActionRequired === true) {
-        badgeClass = "danger";
-        badgeText = "Action requise";
-      } else if (dossier.injunctionPublished === true || dossier.currentStep === "injunction_published") {
-        badgeClass = "included";
-        badgeText = "Injonction publiée";
-      } else if ((dossier.postOrderChoice || "") === "client_bailiff") {
-        badgeClass = "warning";
-        badgeText = "Transmission autonome";
-      }
-
-      const canEdit = isDossierClosable(dossier);
-
-      card.innerHTML = `
+  dossiers.forEach((dossier) => {
+    dossierList.insertAdjacentHTML("beforeend", `
+      <div class="dossier-card ${currentDossierId === dossier.id ? "active" : ""}" data-dossier-id="${escapeHtml(dossier.id)}">
         <div>
           <strong>${escapeHtml(dossier.ref || "Sans référence")}</strong>
           <span>${escapeHtml(dossier.debiteurName || "Débiteur non renseigné")}</span>
           <span>${escapeHtml(formatCurrency(dossier.amountTTC || 0))}</span>
         </div>
+        <span class="badge warning">${escapeHtml(dossier.statusLabel || "En cours")}</span>
+      </div>
+    `);
+  });
 
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-          <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
-          ${canEdit ? `<button class="btn btn-secondary" type="button" data-edit-dossier="${escapeHtml(dossier.id)}">Modifier le dossier</button>` : ``}
-        </div>
-      `;
-
-      card.addEventListener("click", () => {
-        updateSummary(dossier);
-        renderDossiers();
-      });
-
-      dossierList.appendChild(card);
+  document.querySelectorAll("[data-dossier-id]").forEach((card) => {
+    card.addEventListener("click", async () => {
+      await loadDossier(card.dataset.dossierId);
+      await loadDossiers(uid);
     });
+  });
 
-    dossierList.querySelectorAll("[data-edit-dossier]").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const dossierId = button.dataset.editDossier;
-        const dossier = dossiers.find((d) => d.id === dossierId);
-        if (!dossier) return;
-        prepareCreateForm(dossier);
-        openModal(createDossierModal);
-      });
-    });
+  if (!currentDossierId) {
+    await loadDossier(dossiers[0].id);
+  }
+}
+
+async function createDossier(e) {
+  e.preventDefault();
+
+  const ref = dossierRefInput.value.trim();
+  const amountTTC = Number(amountTTCInput.value || 0);
+
+  if (!debiteurNameInput.value.trim() || !amountTTC) {
+    alert("Nom du débiteur et montant obligatoires.");
+    return;
   }
 
-  function prepareCreateForm(dossier = null) {
-    if (dossier) {
-      editingDossierId = dossier.id;
-      createDossierTitle.textContent = "Modifier le dossier";
-      dossierLabelInput.value = dossier.label || "";
-      dossierRefInput.value = dossier.ref || "";
-      debiteurTypeInput.value = dossier.debiteurType || "professionnel";
-      amountTTCInput.value = dossier.amountTTC || "";
-      debiteurNameInput.value = dossier.debiteurName || "";
-      invoiceRefInput.value = dossier.invoiceRef || "";
-      dueDateInput.value = dossier.dueDate || "";
-      dossierSummaryInput.value = dossier.dossierSummary || "";
-      return;
-    }
+  await addDoc(collection(db, "users", currentUser.uid, "requests"), {
+    ref,
+    label: dossierLabelInput.value.trim(),
+    debiteurType: debiteurTypeInput.value,
+    amountTTC,
+    debiteurName: debiteurNameInput.value.trim(),
+    invoiceRef: invoiceRefInput.value.trim(),
+    dueDate: dueDateInput.value,
+    dossierSummary: dossierSummaryInput.value.trim(),
 
-    editingDossierId = null;
-    createDossierTitle.textContent = "Ajouter un dossier";
-    dossierLabelInput.value = `Dossier ${dossierCounter + 1}`;
-    dossierRefInput.value = generateDossierRef();
-    debiteurTypeInput.value = "professionnel";
-    amountTTCInput.value = "";
-    debiteurNameInput.value = "";
-    invoiceRefInput.value = "";
-    dueDateInput.value = "";
-    dossierSummaryInput.value = "";
-  }
+    status: "new",
+    statusLabel: "Dossier créé",
+    currentStep: "new",
+    lifecycleStatus: "open",
+    paymentStatus: "paid",
+    clientUid: currentUser.uid,
+    offerType: "one_shot_49",
 
-  async function createOrUpdateDossier(e) {
-    e.preventDefault();
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
 
-    if (!currentUser) {
-      alert("Utilisateur non connecté.");
-      return;
-    }
+  closeModal(createDossierModal);
+  createDossierForm.reset();
+  await loadDossiers(currentUser.uid);
+}
 
-    const ref = dossierRefInput.value.trim();
-    const label = dossierLabelInput.value.trim();
-    const debiteurType = debiteurTypeInput.value.trim();
-    const amountTTC = Number(amountTTCInput.value || 0);
-    const debiteurName = debiteurNameInput.value.trim();
-    const invoiceRef = invoiceRefInput.value.trim();
-    const dueDate = dueDateInput.value || "";
-    const dossierSummary = dossierSummaryInput.value.trim();
+async function initUserDashboard(user) {
+  currentUser = user;
+  userEmail.textContent = user.email || "Compte connecté";
 
-    if (!ref || !label || !debiteurType || !debiteurName || !amountTTC) {
-      alert("Complète les champs obligatoires.");
-      return;
-    }
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
 
-    try {
-      if (editingDossierId) {
-        const requestRef = doc(db, "users", currentUser.uid, "requests", editingDossierId);
-
-        await updateDoc(requestRef, {
-          label,
-          debiteurType,
-          amountTTC,
-          debiteurName,
-          invoiceRef,
-          dueDate,
-          dossierSummary,
-          updatedAt: serverTimestamp()
-        });
-
-        closeModal(createDossierModal);
-        createDossierForm.reset();
-        editingDossierId = null;
-
-        await loadDossiers(currentUser.uid);
-        return;
-      }
-
-      const permission = getCreatePermission();
-      if (!permission.allowed) {
-        alert(permission.reason);
-        return;
-      }
-
-      const chosenEntitlement = getBestEntitlementForNewCase();
-      if (!chosenEntitlement) {
-        alert("Aucun droit disponible.");
-        return;
-      }
-
-      const entitlementRef = doc(db, "users", currentUser.uid, "entitlements", chosenEntitlement.id);
-      const requestsColRef = collection(db, "users", currentUser.uid, "requests");
-      const newRequestRef = doc(requestsColRef);
-
-      await runTransaction(db, async (transaction) => {
-        const entitlementSnap = await transaction.get(entitlementRef);
-        if (!entitlementSnap.exists()) {
-          throw new Error("Droit introuvable.");
-        }
-
-        const entitlementData = entitlementSnap.data();
-        const granted = Number(entitlementData.grantedCaseCount || 0);
-        const used = Number(entitlementData.usedCaseCount || 0);
-
-        if (entitlementData.status !== "active" || used >= granted) {
-          throw new Error("Aucun crédit disponible.");
-        }
-
-        if (entitlementData.validUntil?.toDate) {
-          const validUntil = entitlementData.validUntil.toDate();
-          if (validUntil.getTime() < Date.now()) {
-            throw new Error("Ce droit a expiré.");
-          }
-        }
-
-        transaction.set(newRequestRef, {
-          ref,
-          label,
-          debiteurType,
-          amountTTC,
-          debiteurName,
-          invoiceRef,
-          dueDate,
-          dossierSummary,
-          status: "new",
-          statusLabel: "Dossier créé",
-          currentStep: "new",
-          injunctionPublished: false,
-          entitlementId: chosenEntitlement.id,
-          offerType: entitlementData.type || chosenEntitlement.type || "unknown",
-          clientUid: currentUser.uid,
-          lifecycleStatus: "open",
-          paymentStatus: "paid",
-          clientHasNewFiles: false,
-          clientActionRequired: false,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        transaction.update(entitlementRef, {
-          usedCaseCount: used + 1,
-          updatedAt: serverTimestamp()
-        });
-      });
-
-      closeModal(createDossierModal);
-      createDossierForm.reset();
-
-      await loadEntitlements(currentUser.uid);
-      await loadDossiers(currentUser.uid);
-    } catch (err) {
-      console.error("Erreur createOrUpdateDossier:", err);
-      alert(err?.message || "Impossible d’enregistrer le dossier.");
-    }
-  }
-
-  function startCheckoutLink(url) {
-    if (!currentUser) {
-      window.location.href = "connexion.html";
-      return;
-    }
-
-    if (!url) {
-      alert("Lien Stripe manquant.");
-      return;
-    }
-
-    window.location.href = url;
-  }
-
-  function handleExtraDossierPayment() {
-    startCheckoutLink(STRIPE_LINKS.extra_case_19);
-  }
-
-  function handleOneShotRepurchase() {
-    startCheckoutLink(STRIPE_LINKS.one_shot_49);
-  }
-
-  function handleMonthlySubscription() {
-    startCheckoutLink(STRIPE_LINKS.monthly_89);
-  }
-
-  function getAssistedStripeLink(amount) {
-    if (amount < 128) return STRIPE_LINKS.assisted_85;
-    if (amount <= 1280) return STRIPE_LINKS.assisted_140;
-    return STRIPE_LINKS.assisted_247;
-  }
-
-  function handleAssistedPayment() {
-    if (!currentDossier || !isInjunctionPublished(currentDossier)) {
-      alert("Le paiement assisté n’est disponible qu’après publication de l’injonction.");
-      return;
-    }
-
-    const amount = Number(currentDossier.amountTTC || 0);
-    const stripeLink = getAssistedStripeLink(amount);
-    startCheckoutLink(stripeLink);
-  }
-
-  async function loadFilesForDossier(dossierId) {
-    if (!currentUser || !dossierId) {
-      uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
-      refreshUploadStatuses();
-      return;
-    }
-
-    try {
-      const filesRef = collection(db, "users", currentUser.uid, "requests", dossierId, "files");
-      const snap = await getDocs(filesRef);
-
-      uploadedFiles = {
-        quote: [],
-        invoice: [],
-        recovery: [],
-        supporting: []
-      };
-
-      snap.docs.forEach((docSnap) => {
-        const data = docSnap.data();
-        const docType = data.docType || "supporting";
-        if (!uploadedFiles[docType]) uploadedFiles[docType] = [];
-        uploadedFiles[docType].push({
-          id: docSnap.id,
-          ...data
-        });
-      });
-
-      refreshUploadStatuses();
-    } catch (err) {
-      console.error("Erreur loadFilesForDossier:", err);
-      uploadedFiles = { quote: [], invoice: [], recovery: [], supporting: [] };
-      refreshUploadStatuses();
-    }
-  }
-
-  function refreshUploadStatuses() {
-    Object.keys(DOC_TYPE_LABELS).forEach((docType) => {
-      const statusEl = document.getElementById(`status-${docType}`);
-      if (!statusEl) return;
-
-      if (!currentDossier) {
-        statusEl.textContent = "Sélectionne d’abord un dossier.";
-        statusEl.className = "file-status";
-        return;
-      }
-
-      const selectedCount = selectedFilesByType[docType]?.length || 0;
-      const sentCount = uploadedFiles[docType]?.length || 0;
-
-      if (selectedCount > 0) {
-        statusEl.textContent = `${selectedCount} fichier(s) sélectionné(s) — ${sentCount} déjà envoyé(s).`;
-        statusEl.className = "file-status";
-        return;
-      }
-
-      if (sentCount > 0) {
-        statusEl.textContent = `${sentCount} fichier(s) envoyé(s).`;
-        statusEl.className = "file-status ok";
-        return;
-      }
-
-      statusEl.textContent = "Aucun fichier envoyé.";
-      statusEl.className = "file-status";
+  if (!userSnap.exists()) {
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email || "",
+      role: "client",
+      plan: "one_shot_49",
+      subscriptionStatus: "active",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
   }
 
-  function handleFileSelection(event) {
-    const docType = event.target.dataset.docTypeInput;
-    selectedFilesByType[docType] = Array.from(event.target.files || []);
-    refreshUploadStatuses();
-  }
+  userStatusPill.textContent = "Activé";
+  userStatusPill.className = "status-pill success";
+  userPlanPill.textContent = "Option 49 €";
+  userPlanPill.className = "status-pill neutral";
 
-  async function handleFileSend(docType) {
-    if (!currentUser) {
-      alert("Utilisateur non connecté.");
-      return;
-    }
+  planSubtitle.textContent = "Relances automatiques + mise en demeure + proposition injonction.";
 
-    if (!currentDossier) {
-      alert("Sélectionne d’abord un dossier.");
-      return;
-    }
+  await loadDossiers(user.uid);
+}
 
-    const files = selectedFilesByType[docType] || [];
-    if (!files.length) {
-      alert("Sélectionne au moins un fichier.");
-      return;
-    }
+function resetSummary() {
+  summaryRef.textContent = "—";
+  amountTTCDisplay.textContent = "—";
+  summaryDebiteur.textContent = "—";
+  summaryType.textContent = "—";
+  summaryInvoice.textContent = "—";
+  summaryStatus.textContent = "—";
+  timelineList.innerHTML = `<div class="empty-state">Aucune étape.</div>`;
+}
 
-    const sendBtn = document.querySelector(`[data-upload-send="${docType}"]`);
-    const viewBtn = document.querySelector(`[data-upload-view="${docType}"]`);
-    const deleteBtn = document.querySelector(`[data-upload-delete="${docType}"]`);
-    const statusEl = document.getElementById(`status-${docType}`);
-
-    const originalSendText = sendBtn ? sendBtn.textContent : "Envoyer";
-
-    try {
-      if (sendBtn) {
-        sendBtn.disabled = true;
-        sendBtn.textContent = "Envoi...";
-      }
-      if (viewBtn) viewBtn.disabled = true;
-      if (deleteBtn) deleteBtn.disabled = true;
-      if (statusEl) {
-        statusEl.textContent = "Envoi en cours...";
-        statusEl.className = "file-status";
-      }
-
-      for (const file of files) {
-        const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
-        const fullPath = `users/${currentUser.uid}/requests/${currentDossier.id}/${docType}/${safeName}`;
-        const fileRef = storageRef(storage, fullPath);
-
-        await uploadBytes(fileRef, file);
-        const downloadURL = await getDownloadURL(fileRef);
-
-        await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "files"), {
-          docType,
-          name: file.name,
-          path: fullPath,
-          url: downloadURL,
-          size: file.size,
-          contentType: file.type || "",
-          createdAt: serverTimestamp()
-        });
-      }
-
-      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
-      await updateDoc(requestRef, {
-        clientHasNewFiles: true,
-        clientLastUploadAt: serverTimestamp(),
-        clientFilesUpdatedAt: serverTimestamp(),
-        clientStatus: "Pièces reçues",
-        internalStatus: "À qualifier",
-        updatedAt: serverTimestamp()
-      });
-
-      selectedFilesByType[docType] = [];
-      const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
-      if (input) input.value = "";
-
-      await loadFilesForDossier(currentDossier.id);
-      await loadDossiers(currentUser.uid);
-      alert("Fichier(s) envoyé(s).");
-    } catch (err) {
-      console.error("Erreur handleFileSend:", err);
-      if (statusEl) {
-        statusEl.textContent = "Erreur pendant l’envoi.";
-        statusEl.className = "file-status";
-      }
-      alert("Impossible d’envoyer les fichiers.");
-    } finally {
-      if (sendBtn) {
-        sendBtn.disabled = false;
-        sendBtn.textContent = originalSendText;
-      }
-      if (viewBtn) viewBtn.disabled = false;
-      if (deleteBtn) deleteBtn.disabled = false;
-    }
-  }
-
-  async function deleteFileEntry(file) {
-    if (!currentUser || !currentDossier || !file?.id) return;
-
-    if (file.path) {
-      const fileRef = storageRef(storage, file.path);
-      await deleteObject(fileRef).catch(() => {});
-    }
-
-    const fileDocRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id, "files", file.id);
-    await deleteDoc(fileDocRef);
-  }
-
-  async function handleDeleteFilesByType(docType) {
-    if (!currentUser) {
-      alert("Utilisateur non connecté.");
-      return;
-    }
-
-    if (!currentDossier) {
-      alert("Sélectionne d’abord un dossier.");
-      return;
-    }
-
-    const files = uploadedFiles[docType] || [];
-    const selected = selectedFilesByType[docType] || [];
-
-    if (!files.length && !selected.length) {
-      alert("Aucun fichier à supprimer.");
-      return;
-    }
-
-    const ok = confirm(`Supprimer les fichiers de la catégorie "${DOC_TYPE_LABELS[docType]}" ?`);
-    if (!ok) return;
-
-    try {
-      for (const file of files) {
-        await deleteFileEntry(file);
-      }
-
-      selectedFilesByType[docType] = [];
-      const input = document.querySelector(`[data-doc-type-input="${docType}"]`);
-      if (input) input.value = "";
-
-      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
-await updateDoc(requestRef, {
-  clientHasNewFiles: false,
-  clientStatus: "Demande reçue",
-  updatedAt: serverTimestamp()
+openCreateDossier.addEventListener("click", () => {
+  dossierCounter += 1;
+  dossierLabelInput.value = `Dossier ${dossierCounter}`;
+  dossierRefInput.value = `AF-${new Date().getFullYear()}-${String(dossierCounter).padStart(3, "0")}`;
+  openModal(createDossierModal);
 });
-      
-      await loadFilesForDossier(currentDossier.id);
-      alert("Fichier(s) supprimé(s).");
-    } catch (err) {
-      console.error("Erreur handleDeleteFilesByType:", err);
-      alert("Impossible de supprimer les fichiers.");
-    }
+
+createDossierForm.addEventListener("submit", createDossier);
+closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
+
+document.getElementById("uploadProofBtn")?.addEventListener("click", uploadProof);
+
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "connexion.html";
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "connexion.html";
+    return;
   }
 
-  function openFilesModalForType(docType) {
-    if (!currentDossier) {
-      alert("Sélectionne d’abord un dossier.");
-      return;
-    }
-
-    const files = uploadedFiles[docType] || [];
-    filesModalSubtitle.textContent = `${DOC_TYPE_LABELS[docType]} — ${currentDossier.ref || "Dossier"}`;
-    fileListContainer.innerHTML = "";
-
-    if (!files.length) {
-      fileListContainer.innerHTML = `<div class="empty-state">Aucun fichier trouvé.</div>`;
-      openModal(filesModal);
-      return;
-    }
-
-    files.forEach((file) => {
-      const item = document.createElement("div");
-      item.className = "file-item";
-      item.innerHTML = `
-        <div>
-          <strong>${escapeHtml(file.name || "Fichier")}</strong>
-          <span>${escapeHtml(formatDate(file.createdAt?.toDate ? file.createdAt.toDate() : file.createdAt))}</span>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <a class="btn btn-secondary" href="${escapeHtml(file.url || "#")}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
-          <button class="btn btn-danger" type="button" data-delete-file="${escapeHtml(file.id)}">Supprimer</button>
-        </div>
-      `;
-      fileListContainer.appendChild(item);
-    });
-
-    fileListContainer.querySelectorAll("[data-delete-file]").forEach((button) => {
-      button.addEventListener("click", async () => {
-        const fileId = button.dataset.deleteFile;
-        const file = (uploadedFiles[docType] || []).find((f) => f.id === fileId);
-        if (!file) return;
-
-        const ok = confirm(`Supprimer "${file.name || "ce fichier"}" ?`);
-        if (!ok) return;
-
-        try {
-          await deleteFileEntry(file);
-          await loadFilesForDossier(currentDossier.id);
-          openFilesModalForType(docType);
-        } catch (err) {
-          console.error("Erreur suppression fichier modal:", err);
-          alert("Impossible de supprimer ce fichier.");
-        }
-      });
-    });
-
-    openModal(filesModal);
+  try {
+    await initUserDashboard(user);
+  } catch (err) {
+    console.error("Erreur tableau de bord :", err);
+    alert("Erreur de chargement du tableau de bord.");
   }
-
-  async function loadTimelineForDossier(dossierId) {
-    if (!currentUser || !dossierId) {
-      timelineEventsCache = [];
-      renderTimeline([]);
-      updateNextActionBox(currentDossier, []);
-      setChoiceSectionState(false);
-      return;
-    }
-
-    try {
-      const eventsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events");
-      const q = query(eventsRef, orderBy("createdAt", "asc"));
-      const snap = await getDocs(q);
-
-      if (!snap.docs.length) {
-        timelineEventsCache = [];
-        renderTimeline([]);
-        updateNextActionBox(currentDossier, []);
-        setChoiceSectionState(false);
-        return;
-      }
-
-      const events = await Promise.all(
-        snap.docs.map(async (docSnap) => {
-          const data = docSnap.data();
-          const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
-
-          let proofCount = 0;
-          try {
-            const proofsRef = collection(db, "users", currentUser.uid, "requests", dossierId, "events", docSnap.id, "proofs");
-            const proofsSnap = await getDocs(proofsRef);
-            proofCount = proofsSnap.size;
-          } catch {
-            proofCount = 0;
-          }
-
-          return {
-            id: docSnap.id,
-            ...data,
-            title: data.title || data.label || "Étape publiée",
-            description: data.description || data.note || "Publication enregistrée.",
-            dateLabel: createdAt ? createdAt.toLocaleDateString("fr-FR") : "Date non disponible",
-            createdAtDate: createdAt,
-            proofCount
-          };
-        })
-      );
-
-      timelineEventsCache = events.filter(isPublishedEvent);
-      renderTimeline(timelineEventsCache);
-      updateNextActionBox(currentDossier, timelineEventsCache);
-      setChoiceSectionState(isInjunctionPublished(currentDossier));
-    } catch (err) {
-      console.error("Erreur loadTimelineForDossier:", err);
-      timelineEventsCache = [];
-      renderTimeline([]);
-      updateNextActionBox(currentDossier, []);
-      setChoiceSectionState(false);
-    }
-  }
-
-  function renderTimeline(events = []) {
-    timelineList.innerHTML = "";
-
-    if (!events.length) {
-      timelineList.innerHTML = `<div class="empty-state">Aucune publication pour le moment.</div>`;
-      return;
-    }
-
-    events.forEach((event) => {
-      const item = document.createElement("div");
-      item.className = "timeline-item";
-
-      const statusKey = eventNeedsClientAction(event) ? "client_action_required" : normaliseEventStatus(event.status, event.currentStep);
-      const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié";
-      const instructions = buildInstructions(event);
-      const documentUrl = buildEventDocUrl(event);
-      const documentLabel = buildEventDocLabel(event);
-      const requiredProofs = getRequiredProofs(event);
-
-      item.innerHTML = `
-        <div class="timeline-main">
-          <span class="timeline-meta">${escapeHtml(event.dateLabel || "Date non disponible")}</span>
-          <strong>${escapeHtml(event.title || "Étape")}</strong>
-          <span>${escapeHtml(statusLabel)}</span>
-
-          <div class="note-box soft" style="margin-top:10px;">
-            <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
-            ${escapeHtml(instructions)}
-          </div>
-
-          <div class="note-box soft" style="margin-top:10px;">
-            <strong style="display:block;margin-bottom:6px;color:#fff;">Document</strong>
-            ${
-              documentUrl
-                ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
-                : `<span>${escapeHtml(documentLabel)}${documentLabel === "Document" ? " non disponible." : ""}</span>`
-            }
-          </div>
-
-          ${
-            requiredProofs.length
-              ? `<div class="note-box warning" style="margin-top:10px;">
-                  <strong style="display:block;margin-bottom:6px;color:#fff;">Action requise</strong>
-                  Déposez ensuite : ${escapeHtml(requiredProofs.join(", "))}.
-                </div>`
-              : ""
-          }
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:8px;min-width:180px;">
-          <span class="badge ${requiredProofs.length ? "danger" : "neutral"}">${escapeHtml(statusLabel)}</span>
-          <button class="btn btn-secondary" type="button" data-event-open="${escapeHtml(event.id)}">Ouvrir l’étape</button>
-        </div>
-      `;
-
-      timelineList.appendChild(item);
-    });
-
-    timelineList.querySelectorAll("[data-event-open]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const eventId = button.dataset.eventOpen;
-        const event = timelineEventsCache.find((item) => item.id === eventId);
-        if (event) openEventModal(event);
-      });
-    });
-  }
-
-  function openEventModal(event) {
-    const statusKey = eventNeedsClientAction(event) ? "client_action_required" : normaliseEventStatus(event.status, event.currentStep);
-    const statusLabel = EVENT_STATUS_LABELS[statusKey] || "Publié";
-    const instructions = buildInstructions(event);
-    const documentUrl = buildEventDocUrl(event);
-    const documentLabel = buildEventDocLabel(event);
-    const requiredProofs = getRequiredProofs(event);
-
-    eventModalSubtitle.textContent = `${currentDossier?.ref || "Dossier"} — ${event.dateLabel || "Date non disponible"}`;
-    eventModalContent.innerHTML = `
-      <div class="note-box soft">
-        <strong style="display:block;margin-bottom:6px;color:#fff;">Titre</strong>
-        ${escapeHtml(event.title || "Étape")}
-      </div>
-
-      <div class="note-box soft">
-        <strong style="display:block;margin-bottom:6px;color:#fff;">Statut</strong>
-        ${escapeHtml(statusLabel)}
-      </div>
-
-      <div class="note-box soft">
-        <strong style="display:block;margin-bottom:6px;color:#fff;">Document</strong>
-        ${
-          documentUrl
-            ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff4ea;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(documentLabel)}</a>`
-            : `<span>${escapeHtml(documentLabel)}${documentLabel === "Document" ? " non disponible." : ""}</span>`
-        }
-      </div>
-
-      <div class="note-box soft">
-        <strong style="display:block;margin-bottom:6px;color:#fff;">Consignes</strong>
-        ${escapeHtml(instructions)}
-      </div>
-
-      <div class="note-box ${requiredProofs.length ? "warning" : "soft"}">
-        <strong style="display:block;margin-bottom:6px;color:#fff;">Ce que vous devez faire</strong>
-        ${
-          requiredProofs.length
-            ? `Après votre action, déposez : ${escapeHtml(requiredProofs.join(", "))}.`
-            : "Aucune action complémentaire n’est demandée pour cette étape."
-        }
-      </div>
-    `;
-
-    openModal(eventModal);
-  }
-
-  async function initUserDashboard(user) {
-    currentUser = user;
-    userEmail.textContent = user.email || "Compte connecté";
-
-    await ensureUserProfile(user);
-    await loadEntitlements(user.uid);
-    updateTopStatus();
-    updatePlanSubtitle();
-    await loadDossiers(user.uid);
-    readPaymentParams();
-  }
-
-  fileInputs.forEach((input) => {
-    input.addEventListener("change", handleFileSelection);
-  });
-
-  sendButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      handleFileSend(button.dataset.uploadSend);
-    });
-  });
-
-  viewButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      openFilesModalForType(button.dataset.uploadView);
-    });
-  });
-
-  deleteButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      handleDeleteFilesByType(button.dataset.uploadDelete);
-    });
-  });
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        window.location.href = "connexion.html";
-      } catch (err) {
-        console.error("Erreur signOut:", err);
-        alert("Impossible de se déconnecter.");
-      }
-    });
-  }
-
-  if (buyExtraDossierBtn) {
-    buyExtraDossierBtn.addEventListener("click", handleExtraDossierPayment);
-  }
-
-  if (buyOneShotBtn) {
-    buyOneShotBtn.addEventListener("click", handleOneShotRepurchase);
-  }
-
-  if (buyMonthlyBtn) {
-    buyMonthlyBtn.addEventListener("click", handleMonthlySubscription);
-  }
-
-  if (openCreateDossier) {
-    openCreateDossier.addEventListener("click", () => {
-      const permission = getCreatePermission();
-
-      if (!permission.allowed) {
-        if (permission.ctaMode === "extra") {
-          extraDossierBox.style.display = "block";
-          return;
-        }
-
-        if (permission.ctaMode === "repurchase_one_shot") {
-          repurchaseOneShotBox.style.display = "block";
-          return;
-        }
-
-        alert(permission.reason);
-        return;
-      }
-
-      prepareCreateForm();
-      openModal(createDossierModal);
-    });
-  }
-
-  if (createDossierForm) {
-    createDossierForm.addEventListener("submit", createOrUpdateDossier);
-  }
-
-  if (closeCreateDossier) {
-    closeCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
-  }
-
-  if (cancelCreateDossier) {
-    cancelCreateDossier.addEventListener("click", () => closeModal(createDossierModal));
-  }
-
-  if (closeFilesModal) {
-    closeFilesModal.addEventListener("click", () => closeModal(filesModal));
-  }
-
-  if (closeEventModal) {
-    closeEventModal.addEventListener("click", () => closeModal(eventModal));
-  }
-
-  if (validateAutonome) {
-    validateAutonome.addEventListener("click", handleAutonomousChoice);
-  }
-
-  if (payAssisted) {
-    payAssisted.addEventListener("click", handleAssistedPayment);
-  }
-
-  async function handleAutonomousChoice() {
-    if (!currentUser || !currentDossier || !isInjunctionPublished(currentDossier)) {
-      alert("L’injonction n’est pas encore publiée.");
-      return;
-    }
-
-    try {
-      const requestRef = doc(db, "users", currentUser.uid, "requests", currentDossier.id);
-      await updateDoc(requestRef, {
-        postOrderChoice: "client_bailiff",
-        updatedAt: serverTimestamp()
-      });
-
-      alert("Choix enregistré.");
-      await loadDossiers(currentUser.uid);
-    } catch (err) {
-      console.error("Erreur handleAutonomousChoice:", err);
-      alert("Impossible d’enregistrer le choix.");
-    }
-  }
-
-  [createDossierModal, filesModal, eventModal].forEach((modal) => {
-    if (!modal) return;
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal(modal);
-    });
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeModal(createDossierModal);
-      closeModal(filesModal);
-      closeModal(eventModal);
-    }
-  });
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "connexion.html";
-      return;
-    }
-
-    try {
-      await initUserDashboard(user);
-    } catch (err) {
-      console.error("Erreur initUserDashboard:", err);
-      alert("Erreur de chargement du tableau de bord.");
-    }
-  });
+});
 </script>
 </body>
 </html>
