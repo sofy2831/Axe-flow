@@ -1028,10 +1028,11 @@ function renderSummary(){
   summaryDebtor.textContent = debtorName(currentDossier);
   nextAction.textContent = getNextActionLabel(currentDossier);
 
-  creditorNameView.textContent = creditorName(currentDossier);
-  creditorAddressView.textContent = creditorAddress(currentDossier) || "Adresse à compléter";
-  creditorCityView.textContent = [creditorZip(currentDossier), creditorCity(currentDossier)].filter(Boolean).join(" ") || "Code postal / ville à compléter";
-  creditorEmailView.textContent = creditorEmail(currentDossier) || "Email à compléter";
+  creditorNameEdit.value = creditorName(currentDossier);
+creditorEmailEdit.value = creditorEmail(currentDossier);
+creditorAddressEdit.value = creditorAddress(currentDossier);
+creditorZipEdit.value = creditorZip(currentDossier);
+creditorCityEdit.value = creditorCity(currentDossier);
 
   debtorNameView.textContent = debtorName(currentDossier);
   debtorAddressView.textContent = debtorAddress(currentDossier) || "Adresse à compléter";
