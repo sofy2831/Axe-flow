@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow — Tableau de bord client</title>
-  <meta name="description" content="Tableau de bord client Axe Flow : création du dossier, dépôt des pièces, suivi des étapes publiées, action injonction et dépôt des justificatifs." />
+  <meta name="description" content="Tableau de bord client Axe Flow : dossiers impayés, relances automatiques, mise en demeure, injonction de payer et suivi des étapes." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -262,7 +262,7 @@
       align-items:start;
       grid-template-areas:
         "dossiers dossiers dossiers dossiers summary summary summary summary summary summary summary summary"
-        "upload upload upload upload upload upload timeline timeline timeline timeline timeline timeline"
+        "actions actions actions actions actions actions timeline timeline timeline timeline timeline timeline"
         "injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction";
     }
 
@@ -277,7 +277,7 @@
 
     .panel-dossiers{grid-area:dossiers}
     .panel-summary{grid-area:summary}
-    .panel-upload{grid-area:upload}
+    .panel-actions{grid-area:actions}
     .panel-timeline{grid-area:timeline}
     .panel-injunction{grid-area:injunction}
 
@@ -510,76 +510,51 @@
       word-break:break-word;
     }
 
-    .upload-grid{
+    .actions-grid{
       display:grid;
+      grid-template-columns:repeat(5, minmax(0,1fr));
       gap:12px;
     }
 
-    .upload-card{
+    .action-card{
       padding:16px;
-      border-radius:18px;
+      border-radius:20px;
       background:rgba(255,255,255,0.04);
       border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
+      min-width:0;
     }
 
-    .upload-card strong{
-      display:block;
-      color:#fff;
-      font-size:.95rem;
-      margin-bottom:4px;
+    .action-card.done{
+      border-color:rgba(61,208,143,0.22);
+      background:rgba(61,208,143,0.08);
     }
 
-    .upload-card span{
-      display:block;
+    .action-card.current{
+      border-color:rgba(255,127,31,0.26);
+      background:rgba(255,127,31,0.10);
+    }
+
+    .action-card.locked{
+      opacity:.55;
+    }
+
+    .action-card h3{
+      margin:0 0 8px;
+      font-size:.98rem;
+      letter-spacing:-0.02em;
+    }
+
+    .action-card p{
+      margin:0 0 12px;
       color:var(--muted);
-      font-size:.88rem;
-      max-width:54ch;
-    }
-
-    .upload-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      flex:0 0 auto;
-      align-items:center;
-      justify-content:flex-end;
-    }
-
-    .upload-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:40px;
-      padding:0 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.12);
-      color:#fff;
       font-size:.86rem;
-      font-weight:800;
-      white-space:nowrap;
-      cursor:pointer;
-      transition:.2s ease;
     }
 
-    .upload-btn:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
+    .action-card .btn{
+      width:100%;
+      min-height:40px;
+      font-size:.84rem;
     }
-
-    .upload-btn input{display:none}
-
-    .file-status{
-      margin-top:8px;
-      font-size:.82rem !important;
-      color:var(--soft) !important;
-    }
-
-    .file-status.ok{color:#d9ffee !important}
 
     .timeline{
       display:grid;
@@ -797,33 +772,24 @@
 
     .field input[readonly]{opacity:.9}
 
-    .file-list{
-      display:grid;
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .file-item{
-      padding:14px;
-      border-radius:16px;
+    .text-preview{
+      white-space:pre-wrap;
+      padding:16px;
+      border-radius:18px;
       background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-    }
-
-    .file-item strong{
-      display:block;
-      font-size:.92rem;
-      margin-bottom:4px;
+      border:1px solid rgba(255,255,255,0.10);
       color:#fff;
+      font-size:.92rem;
+      line-height:1.55;
+      margin-top:14px;
     }
 
-    .file-item span{
-      color:var(--muted);
-      font-size:.84rem;
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
     }
 
     @media (max-width: 1200px){
@@ -831,9 +797,13 @@
         grid-template-columns:repeat(2, minmax(0,1fr));
         grid-template-areas:
           "dossiers summary"
-          "upload upload"
+          "actions actions"
           "timeline timeline"
           "injunction injunction";
+      }
+
+      .actions-grid{
+        grid-template-columns:repeat(3, minmax(0,1fr));
       }
     }
 
@@ -843,7 +813,7 @@
         grid-template-areas:
           "dossiers"
           "summary"
-          "upload"
+          "actions"
           "timeline"
           "injunction";
       }
@@ -860,8 +830,6 @@
         justify-content:flex-start;
       }
 
-      .upload-card,
-      .file-item,
       .timeline-item{
         flex-direction:column;
         align-items:flex-start;
@@ -869,7 +837,8 @@
 
       .summary-grid,
       .form-grid,
-      .injunction-grid{
+      .injunction-grid,
+      .actions-grid{
         grid-template-columns:1fr;
       }
     }
@@ -887,15 +856,6 @@
         padding:18px;
       }
 
-      .upload-actions{
-        width:100%;
-      }
-
-      .upload-actions .btn,
-      .upload-actions .upload-btn{
-        width:100%;
-      }
-
       .user-chip{
         max-width:100%;
         width:100%;
@@ -905,390 +865,200 @@
         max-width:100%;
       }
 
-      .file-item > div:last-child{
-        width:100%;
-      }
-
-      .file-item > div:last-child .btn{
-        width:100%;
+      .modal-actions{
+        justify-content:stretch;
       }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a href="index.html" class="brand">
-        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
-        <div class="brand-text">
-          <span class="brand-title">Axe Flow</span>
-          <span class="brand-sub">Tableau de bord client</span>
-        </div>
-      </a>
 
-      <div class="top-actions">
-        <div class="user-chip" id="userChip">
-          <span class="user-email" id="userEmail">Chargement...</span>
-          <span class="status-pill neutral" id="userStatusPill">Statut</span>
-          <span class="status-pill neutral" id="userPlanPill">Offre</span>
-        </div>
-        <button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="index.html" class="brand">
+      <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+      <div class="brand-text">
+        <span class="brand-title">Axe Flow</span>
+        <span class="brand-sub">Tableau de bord client</span>
       </div>
-    </div>
-  </header>
+    </a>
 
-  <main class="page">
-    <div class="container">
-
-      <div class="flash-banner" id="flashBanner"></div>
-
-      <section class="hero">
-        <div class="eyebrow">
-          <span class="eyebrow-dot"></span>
-          Gestion complète de vos impayés
-        </div>
-
-        <h1>Tableau de bord</h1>
-
-        <p>
-          Centralisez vos dossiers, déposez vos pièces, suivez les actions menées et pilotez votre recouvrement.
-        </p>
-
-        <div class="hero-note">
-          <strong>Important :</strong> Axe Flow prépare les documents. L’injonction est ensuite gérée depuis votre espace selon le montant de la créance.
-        </div>
-      </section>
-
-      <section class="dashboard-grid">
-
-        <div class="panel panel-dossiers">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Vos dossiers</h2>
-                <div class="panel-sub" id="planSubtitle"></div>
-              </div>
-
-              <button class="btn btn-primary" id="openCreateDossier" type="button">
-                Ajouter un dossier
-              </button>
-            </div>
-
-            <div class="note-box warning" id="createLimitNotice" style="display:none;"></div>
-
-            <div id="extraDossierBox" style="display:none;margin-top:12px;">
-              <div class="note-box">
-                Vous avez atteint votre limite. Débloquez un dossier supplémentaire.
-              </div>
-              <button class="btn btn-primary" id="buyExtraDossierBtn" type="button" style="margin-top:10px;">
-                Débloquer un dossier - 19 €
-              </button>
-            </div>
-
-            <div id="repurchaseOneShotBox" style="display:none;margin-top:12px;">
-              <div class="note-box">
-                Crédit utilisé. Vous pouvez ouvrir un nouveau dossier ponctuel.
-              </div>
-              <button class="btn btn-primary" id="buyOneShotBtn" type="button" style="margin-top:10px;">
-                Nouveau dossier - 49 €
-              </button>
-            </div>
-
-            <div id="upgradeMonthlyBox" style="display:none;margin-top:12px;">
-              <div class="note-box soft">
-                Passez à l’offre Pro : 3 dossiers inclus puis 19 € par dossier supplémentaire.
-              </div>
-              <button class="btn btn-secondary" id="buyMonthlyBtn" type="button" style="margin-top:10px;">
-                Abonnement 89 € / mois
-              </button>
-            </div>
-
-            <div class="dossier-list" id="dossierList"></div>
-
-          </div>
-        </div>
-
-        <div class="panel panel-summary">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <h2 class="panel-title">Synthèse</h2>
-            </div>
-
-            <div class="summary-grid">
-              <div class="summary-card">
-                <div class="summary-label">Référence</div>
-                <div class="summary-value" id="summaryRef">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Montant</div>
-                <div class="summary-value" id="amountTTCDisplay">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Débiteur</div>
-                <div class="summary-value" id="summaryDebiteur">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Type</div>
-                <div class="summary-value" id="summaryType">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Facture</div>
-                <div class="summary-value" id="summaryInvoice">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Échéance</div>
-                <div class="summary-value" id="summaryDueDate">—</div>
-              </div>
-
-              <div class="summary-card wide">
-                <div class="summary-label">Statut</div>
-                <div class="summary-value" id="summaryStatus">—</div>
-              </div>
-
-              <div class="summary-card wide">
-                <div class="note-box warning" id="nextActionBox">
-                  <strong id="nextActionTitle" style="display:block;margin-bottom:6px;color:#fff;">
-                    Ce que vous devez faire maintenant
-                  </strong>
-                  <div id="nextActionText">Sélectionnez un dossier pour voir la prochaine action.</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="panel panel-upload">
-          <div class="panel-inner">
-
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Pièces du dossier</h2>
-                <div class="panel-sub">Déposez ici vos pièces dossier. Vous pouvez ensuite les envoyer, les voir ou les supprimer.</div>
-              </div>
-            </div>
-
-            <div class="upload-grid">
-
-              <div class="upload-card" data-doc-type="quote">
-                <div>
-                  <strong>Devis / bon de commande</strong>
-                  <span>Ajoutez le document à l’origine de la créance.</span>
-                  <span class="file-status" id="status-quote">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="quote" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="quote">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="quote">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="quote">Supprimer</button>
-                </div>
-              </div>
-
-              <div class="upload-card" data-doc-type="invoice">
-                <div>
-                  <strong>Facture impayée</strong>
-                  <span>Déposez la facture concernée par le dossier.</span>
-                  <span class="file-status" id="status-invoice">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="invoice" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="invoice">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="invoice">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="invoice">Supprimer</button>
-                </div>
-              </div>
-
-              <div class="upload-card" data-doc-type="recovery">
-                <div>
-                  <strong>Relances déjà faites</strong>
-                  <span>Ajoutez les relances ou mises en demeure déjà envoyées de votre côté.</span>
-                  <span class="file-status" id="status-recovery">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="recovery" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="recovery">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="recovery">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="recovery">Supprimer</button>
-                </div>
-              </div>
-
-              <div class="upload-card" data-doc-type="supporting">
-                <div>
-                  <strong>Autres justificatifs</strong>
-                  <span>Déposez mails, preuves et documents utiles au dossier.</span>
-                  <span class="file-status" id="status-supporting">Aucun fichier envoyé.</span>
-                </div>
-
-                <div class="upload-actions">
-                  <label class="upload-btn">
-                    Télécharger
-                    <input type="file" data-doc-type-input="supporting" multiple />
-                  </label>
-                  <button class="btn btn-secondary" type="button" data-upload-send="supporting">Envoyer</button>
-                  <button class="btn btn-secondary" type="button" data-upload-view="supporting">Voir</button>
-                  <button class="btn btn-danger" type="button" data-upload-delete="supporting">Supprimer</button>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
-        <div class="panel panel-timeline">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Suivi des étapes</h2>
-                <div class="panel-sub">Chaque publication Axe Flow apparaît ici avec son document et ses consignes.</div>
-              </div>
-            </div>
-
-            <div class="timeline" id="timelineList">
-              <div class="empty-state">Aucune publication pour le moment.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-injunction" id="injunctionPanel">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Injonction de payer</h2>
-                <div class="panel-sub">L’étape contentieuse est préparée et pilotée par Axe Flow.</div>
-              </div>
-            </div>
-
-            <div class="note-box" id="injunctionNotice">
-              Disponible après mise en demeure publiée par Axe Flow.
-            </div>
-
-            <div class="injunction-grid" style="margin-top:12px;">
-              <div class="injunction-card highlight">
-                <h3>Dossier d’injonction Axe Flow</h3>
-                <p>
-                  Axe Flow prépare le dossier d’injonction selon les éléments du dossier et le montant de la créance.
-                </p>
-
-                <div class="price-box">
-                  <strong id="calculatedPrice">—</strong>
-                </div>
-
-                <label class="checkbox-row">
-                  <input type="checkbox" id="expressOption" />
-                  <span>Traitement prioritaire sous 24h : supplément de 90 €.</span>
-                </label>
-
-                <div class="note-box success" style="margin-bottom:12px;">
-                  Les frais sont en principe mis à la charge du débiteur. Vous pourrez en demander le remboursement dans le dossier.
-                </div>
-
-                <button class="btn btn-primary" id="payInjunction" type="button">
-                  Lancer l’injonction
-                </button>
-              </div>
-
-              <div class="injunction-card">
-                <h3>Barème indicatif</h3>
-                <p>Le montant est calculé automatiquement selon la facture sélectionnée.</p>
-
-                <div class="note-box soft">
-                  <strong style="display:block;color:#fff;margin-bottom:6px;">Créance &lt; 128 €</strong>
-                  85 € — ou 175 € en 24h.
-                </div>
-
-                <div class="note-box soft" style="margin-top:10px;">
-                  <strong style="display:block;color:#fff;margin-bottom:6px;">Créance de 128 € à 1 280 €</strong>
-                  140 € — ou 230 € en 24h.
-                </div>
-
-                <div class="note-box soft" style="margin-top:10px;">
-                  <strong style="display:block;color:#fff;margin-bottom:6px;">Créance &gt; 1 280 €</strong>
-                  247 € — ou 337 € en 24h.
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </section>
-
-      <div class="footer-note">
-        Axe Flow - tableau de bord client
+    <div class="top-actions">
+      <div class="user-chip">
+        <span class="user-email" id="userEmail">—</span>
+        <span class="status-pill success" id="statusBadge">Actif</span>
+        <span class="status-pill neutral" id="planBadge">Offre —</span>
       </div>
-
-    </div>
-  </main>
-    <div class="modal-backdrop" id="createDossierModal">
-    <div class="modal small">
-      <div class="modal-inner">
-        <div class="modal-head">
-          <h2>Ajouter / Modifier un dossier</h2>
-          <button class="close-btn" id="closeCreateDossier">×</button>
-        </div>
-
-        <form id="createDossierForm">
-          <div class="form-grid">
-            <div class="field">
-              <label>Référence</label>
-              <input type="text" id="dossierRef" readonly />
-            </div>
-
-            <div class="field">
-              <label>Nom débiteur</label>
-              <input type="text" id="debiteurName" required />
-            </div>
-
-            <div class="field">
-              <label>Montant TTC (€)</label>
-              <input type="number" id="amountTTCInput" required />
-            </div>
-
-            <div class="field">
-              <label>Type</label>
-              <select id="debiteurType">
-                <option value="particulier">Particulier</option>
-                <option value="professionnel">Professionnel</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Référence facture</label>
-              <input type="text" id="invoiceRefInput" />
-            </div>
-
-            <div class="field">
-              <label>Date d’échéance</label>
-              <input type="date" id="dueDateInput" />
-            </div>
-          </div>
-
-          <button class="btn btn-primary" type="submit">Enregistrer</button>
-        </form>
-      </div>
+      <button class="btn btn-secondary" id="logoutBtn">Déconnexion</button>
     </div>
   </div>
+</header>
 
+<main class="page">
+  <div class="container">
+
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Recouvrement automatisé
+      </div>
+
+      <h1>Tableau de bord</h1>
+
+      <p>
+        Suivez vos impayés et déclenchez chaque étape automatiquement :
+        relance, mise en demeure, injonction.
+      </p>
+    </section>
+
+    <section class="dashboard-grid">
+
+      <!-- DOSSIERS -->
+      <div class="panel panel-dossiers">
+        <div class="panel-inner">
+
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Vos dossiers</h2>
+            </div>
+
+            <button class="btn btn-primary" id="addDossierBtn">
+              Ajouter un dossier
+            </button>
+          </div>
+
+          <div class="dossier-list" id="dossierList"></div>
+
+        </div>
+      </div>
+
+      <!-- SYNTHÈSE -->
+      <div class="panel panel-summary">
+        <div class="panel-inner">
+
+          <h2 class="panel-title">Synthèse</h2>
+
+          <div class="summary-grid">
+
+            <div class="summary-card">
+              <div class="summary-label">Référence</div>
+              <div class="summary-value" id="summaryRef">—</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Montant</div>
+              <div class="summary-value" id="summaryAmount">—</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Débiteur</div>
+              <div class="summary-value" id="summaryDebtor">—</div>
+            </div>
+
+            <div class="summary-card wide">
+              <div class="summary-label">Prochaine action</div>
+              <div class="summary-value" id="nextAction">—</div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ACTIONS AUTOMATISÉES -->
+      <div class="panel panel-actions">
+        <div class="panel-inner">
+
+          <h2 class="panel-title">Actions</h2>
+
+          <div class="actions-grid">
+
+            <div class="action-card" data-step="1">
+              <h3>Relance 1</h3>
+              <p>Relance simple</p>
+              <button class="btn btn-primary" data-action="relance1">Voir</button>
+            </div>
+
+            <div class="action-card" data-step="2">
+              <h3>Relance 2</h3>
+              <p>Relance ferme</p>
+              <button class="btn btn-primary" data-action="relance2">Voir</button>
+            </div>
+
+            <div class="action-card" data-step="3">
+              <h3>Relance 3</h3>
+              <p>Dernier rappel</p>
+              <button class="btn btn-primary" data-action="relance3">Voir</button>
+            </div>
+
+            <div class="action-card" data-step="4">
+              <h3>Mise en demeure</h3>
+              <p>Avant contentieux</p>
+              <button class="btn btn-danger" data-action="med">Voir</button>
+            </div>
+
+            <div class="action-card" data-step="5">
+              <h3>Injonction</h3>
+              <p>Procédure tribunal</p>
+              <button class="btn btn-secondary" disabled>Disponible après MED</button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="panel panel-timeline">
+        <div class="panel-inner">
+
+          <h2 class="panel-title">Historique</h2>
+
+          <div class="timeline" id="timeline">
+            <div class="empty-state">Aucune action</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- INJONCTION -->
+      <div class="panel panel-injunction">
+        <div class="panel-inner">
+
+          <h2 class="panel-title">Injonction de payer</h2>
+
+          <div class="note-box">
+            Disponible après mise en demeure.
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<!-- MODAL TEXTE -->
+<div class="modal-backdrop" id="modalText">
+  <div class="modal">
+    <div class="modal-inner">
+
+      <div class="modal-head">
+        <h2 id="modalTitle">Document</h2>
+        <button class="close-btn" id="closeModal">×</button>
+      </div>
+
+      <div class="text-preview" id="textContent"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="copyBtn">Copier</button>
+        <a class="btn btn-primary" id="mailBtn" target="_blank">Envoyer par mail</a>
+      </div>
+
+    </div>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -1314,142 +1084,498 @@ const firebaseConfig = {
   messagingSenderId: "295300543556",
   appId: "1:295300543556:web:3facac2d0c612e3456b811"
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
+let dossiers = [];
 let currentDossier = null;
+let currentText = "";
+
+const userEmail = document.getElementById("userEmail");
+const statusBadge = document.getElementById("statusBadge");
+const planBadge = document.getElementById("planBadge");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const dossierList = document.getElementById("dossierList");
+const addDossierBtn = document.getElementById("addDossierBtn");
+
 const summaryRef = document.getElementById("summaryRef");
-const summaryDebiteur = document.getElementById("summaryDebiteur");
-const summaryType = document.getElementById("summaryType");
-const amountTTCDisplay = document.getElementById("amountTTCDisplay");
-const summaryInvoice = document.getElementById("summaryInvoice");
-const summaryDueDate = document.getElementById("summaryDueDate");
-const summaryStatus = document.getElementById("summaryStatus");
+const summaryAmount = document.getElementById("summaryAmount");
+const summaryDebtor = document.getElementById("summaryDebtor");
+const nextAction = document.getElementById("nextAction");
 
-const calculatedPrice = document.getElementById("calculatedPrice");
-const expressOption = document.getElementById("expressOption");
+const timeline = document.getElementById("timeline");
 
-function formatCurrency(val){
-  return Number(val || 0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+const modalText = document.getElementById("modalText");
+const modalTitle = document.getElementById("modalTitle");
+const textContent = document.getElementById("textContent");
+const closeModal = document.getElementById("closeModal");
+const copyBtn = document.getElementById("copyBtn");
+const mailBtn = document.getElementById("mailBtn");
+
+function esc(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
-function calculateInjunctionPrice(amount, express=false){
-  let base = 0;
-
-  if(amount < 128) base = 85;
-  else if(amount <= 1280) base = 140;
-  else base = 247;
-
-  return express ? base + 90 : base;
+function formatCurrency(v){
+  return Number(v || 0).toLocaleString("fr-FR", {
+    style:"currency",
+    currency:"EUR"
+  });
 }
 
-function updatePrice(){
-  if(!currentDossier){
-    calculatedPrice.textContent = "—";
-    return;
+function todayFR(){
+  return new Date().toLocaleDateString("fr-FR");
+}
+
+function generateRef(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const r = Math.floor(1000 + Math.random() * 9000);
+  return `AF-${y}${m}-${r}`;
+}
+
+function getPlanLabel(userData = {}){
+  const plan = userData.planType || userData.plan || "one_shot_49";
+
+  if(plan === "subscription_89") return "Plan : Pro 89 €";
+  if(plan === "extra_19") return "Plan : extra 19 €";
+  return "Plan : dossier 49 €";
+}
+
+function getStatusLabel(userData = {}){
+  const status = userData.accountStatus || "active";
+
+  if(status === "unpaid") return "Paiement requis";
+  if(status === "paused") return "Suspendu";
+  return "Actif";
+}
+
+function getStep(d){
+  return Number(d.step || 0);
+}
+
+function getNextActionLabel(d){
+  const step = getStep(d);
+
+  if(step <= 0) return "Relance 1 à générer";
+  if(step === 1) return "Relance 2 à générer";
+  if(step === 2) return "Relance 3 à générer";
+  if(step === 3) return "Mise en demeure à générer";
+  if(step === 4) return "Injonction de payer disponible";
+  return "Dossier avancé";
+}
+
+function buildRelanceText(level, d){
+  const debtor = d.debiteurName || "Madame, Monsieur";
+  const ref = d.ref || "—";
+  const amount = formatCurrency(d.amountTTC);
+  const invoice = d.invoiceRef || "—";
+  const dueDate = d.dueDate || "—";
+
+  if(level === 1){
+    return `Objet : Relance de paiement — Facture ${invoice}
+
+${debtor},
+
+Sauf erreur de notre part, la facture ${invoice}, rattachée au dossier ${ref}, reste impayée à ce jour.
+
+Montant restant dû : ${amount}
+Date d’échéance : ${dueDate}
+
+Nous vous remercions de procéder au règlement dans les meilleurs délais ou de nous indiquer toute difficulté éventuelle.
+
+Si le paiement a déjà été effectué, merci de ne pas tenir compte de cette relance.
+
+Cordialement,`;
   }
-  const price = calculateInjunctionPrice(currentDossier.amountTTC, expressOption.checked);
-  calculatedPrice.textContent = formatCurrency(price);
+
+  if(level === 2){
+    return `Objet : Deuxième relance — Facture ${invoice}
+
+${debtor},
+
+Malgré une première relance, la facture ${invoice}, rattachée au dossier ${ref}, demeure impayée.
+
+Montant restant dû : ${amount}
+Date d’échéance : ${dueDate}
+
+Nous vous remercions de régulariser la situation sous 7 jours.
+
+À défaut de règlement ou de réponse, une dernière relance sera adressée avant mise en demeure.
+
+Cordialement,`;
+  }
+
+  return `Objet : Dernière relance avant mise en demeure — Facture ${invoice}
+
+${debtor},
+
+À ce jour, la facture ${invoice}, rattachée au dossier ${ref}, demeure impayée malgré nos précédentes relances.
+
+Montant restant dû : ${amount}
+Date d’échéance : ${dueDate}
+
+Nous vous mettons en mesure de régulariser la situation sous 7 jours.
+
+À défaut de paiement ou de réponse, une mise en demeure de payer sera établie.
+
+Cordialement,`;
 }
 
-expressOption.addEventListener("change", updatePrice);
+function buildMiseEnDemeureText(d){
+  const debtor = d.debiteurName || "Madame, Monsieur";
+  const ref = d.ref || "—";
+  const amount = formatCurrency(d.amountTTC);
+  const invoice = d.invoiceRef || "—";
+  const dueDate = d.dueDate || "—";
 
-async function loadDossiers(uid){
-  const snap = await getDocs(collection(db,"users",uid,"requests"));
+  return `Objet : Mise en demeure de payer — Facture ${invoice}
+
+${debtor},
+
+Par la présente, nous vous mettons en demeure de régler la somme de ${amount}, correspondant à la facture ${invoice}, rattachée au dossier ${ref}.
+
+Date d’échéance initiale : ${dueDate}
+
+À défaut de paiement intégral sous 8 jours à compter de la réception de la présente, une procédure de recouvrement pourra être engagée, notamment par voie d’injonction de payer.
+
+La présente vaut mise en demeure formelle.
+
+Cordialement,`;
+}
+
+function openTextModal(title, body, email = ""){
+  currentText = body;
+  modalTitle.textContent = title;
+  textContent.textContent = body;
+
+  const subject = title;
+  mailBtn.href = `mailto:${encodeURIComponent(email || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  modalText.classList.add("open");
+}
+
+function closeTextModal(){
+  modalText.classList.remove("open");
+  currentText = "";
+}
+
+async function markStep(action){
+  if(!currentUser || !currentDossier) return;
+
+  let step = 0;
+  let label = "";
+
+  if(action === "relance1"){
+    step = 1;
+    label = "Relance 1 générée";
+  }
+
+  if(action === "relance2"){
+    step = 2;
+    label = "Relance 2 générée";
+  }
+
+  if(action === "relance3"){
+    step = 3;
+    label = "Relance 3 générée";
+  }
+
+  if(action === "med"){
+    step = 4;
+    label = "Mise en demeure générée";
+  }
+
+  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossier.id), {
+    step,
+    statusLabel: label,
+    updatedAt: serverTimestamp()
+  });
+
+  await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"), {
+    title: label,
+    description: `Document généré le ${todayFR()}`,
+    createdAt: serverTimestamp()
+  });
+
+  await loadDossiers(currentUser.uid);
+}
+
+function renderDossiers(){
   dossierList.innerHTML = "";
 
-  snap.forEach(docSnap=>{
-    const d = {id:docSnap.id, ...docSnap.data()};
+  if(!dossiers.length){
+    dossierList.innerHTML = `<div class="empty-state">Aucun dossier pour le moment.</div>`;
+    return;
+  }
+
+  dossiers.forEach(d => {
+    const active = currentDossier && currentDossier.id === d.id;
 
     const el = document.createElement("div");
-    el.className = "dossier-card";
+    el.className = `dossier-card ${active ? "active" : ""}`;
 
     el.innerHTML = `
       <div>
-        <strong>${d.ref || "-"}</strong>
-        <span>${d.debiteurName || "-"}</span>
+        <strong>${esc(d.ref || "Dossier")}</strong>
+        <span>${esc(d.debiteurName || "Débiteur non renseigné")}</span>
         <span>${formatCurrency(d.amountTTC)}</span>
       </div>
-      <span class="badge neutral">${d.statusLabel || "En cours"}</span>
+      <span class="badge neutral">${esc(d.statusLabel || "Créé")}</span>
     `;
 
-    el.onclick = ()=>{
+    el.addEventListener("click", () => {
       currentDossier = d;
-      renderSummary();
-      updatePrice();
-    };
+      renderAll();
+    });
 
     dossierList.appendChild(el);
   });
 }
 
 function renderSummary(){
-  if(!currentDossier) return;
-
-  summaryRef.textContent = currentDossier.ref;
-  summaryDebiteur.textContent = currentDossier.debiteurName;
-  summaryType.textContent = currentDossier.debiteurType;
-  amountTTCDisplay.textContent = formatCurrency(currentDossier.amountTTC);
-  summaryInvoice.textContent = currentDossier.invoiceRef || "-";
-  summaryDueDate.textContent = currentDossier.dueDate || "-";
-  summaryStatus.textContent = currentDossier.statusLabel || "Dossier créé";
-}
-
-document.getElementById("payInjunction").onclick = ()=>{
   if(!currentDossier){
-    alert("Sélectionne un dossier");
+    summaryRef.textContent = "—";
+    summaryAmount.textContent = "—";
+    summaryDebtor.textContent = "—";
+    nextAction.textContent = "Sélectionnez un dossier.";
     return;
   }
 
-  const price = calculateInjunctionPrice(currentDossier.amountTTC, expressOption.checked);
+  summaryRef.textContent = currentDossier.ref || "—";
+  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC);
+  summaryDebtor.textContent = currentDossier.debiteurName || "—";
+  nextAction.textContent = getNextActionLabel(currentDossier);
+}
 
-  alert("Paiement injonction : " + formatCurrency(price));
-  // brancher Stripe ici
-};
+function renderActions(){
+  document.querySelectorAll(".action-card").forEach(card => {
+    const step = Number(card.dataset.step);
+    const currentStep = currentDossier ? getStep(currentDossier) : 0;
 
-document.getElementById("createDossierForm").onsubmit = async (e)=>{
-  e.preventDefault();
+    card.classList.remove("done", "current", "locked");
 
-  if(!currentUser) return;
+    if(!currentDossier){
+      card.classList.add("locked");
+      return;
+    }
 
-  const ref = document.getElementById("dossierRef").value;
-  const debiteurName = document.getElementById("debiteurName").value;
-  const amount = Number(document.getElementById("amountTTCInput").value);
-  const type = document.getElementById("debiteurType").value;
-  const invoice = document.getElementById("invoiceRefInput").value;
-  const due = document.getElementById("dueDateInput").value;
+    if(step <= currentStep){
+      card.classList.add("done");
+    } else if(step === currentStep + 1){
+      card.classList.add("current");
+    } else {
+      card.classList.add("locked");
+    }
 
-  await addDoc(collection(db,"users",currentUser.uid,"requests"),{
-    ref,
-    debiteurName,
-    amountTTC: amount,
-    debiteurType: type,
-    invoiceRef: invoice,
-    dueDate: due,
-    statusLabel:"Dossier créé",
-    createdAt: serverTimestamp()
+    const btn = card.querySelector("button");
+    if(!btn) return;
+
+    if(step > currentStep + 1){
+      btn.disabled = true;
+    } else if(step === 5 && currentStep < 4){
+      btn.disabled = true;
+    } else {
+      btn.disabled = false;
+    }
+  });
+}
+
+async function renderTimeline(){
+  timeline.innerHTML = "";
+
+  if(!currentUser || !currentDossier){
+    timeline.innerHTML = `<div class="empty-state">Sélectionnez un dossier.</div>`;
+    return;
+  }
+
+  const snap = await getDocs(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"));
+
+  const events = [];
+  snap.forEach(s => events.push({ id:s.id, ...s.data() }));
+
+  if(!events.length){
+    timeline.innerHTML = `<div class="empty-state">Aucune action enregistrée.</div>`;
+    return;
+  }
+
+  events.forEach(ev => {
+    const item = document.createElement("div");
+    item.className = "timeline-item";
+
+    item.innerHTML = `
+      <div class="timeline-main">
+        <span class="timeline-meta">${esc(todayFR())}</span>
+        <strong>${esc(ev.title || "Action")}</strong>
+        <span>${esc(ev.description || "")}</span>
+      </div>
+    `;
+
+    timeline.appendChild(item);
+  });
+}
+
+function renderAddButton(){
+  const planText = planBadge.textContent || "";
+
+  if(planText.includes("Pro")){
+    if(dossiers.length < 3){
+      addDossierBtn.textContent = "Ajouter un dossier inclus";
+    } else {
+      addDossierBtn.textContent = "Ajouter un dossier — 19 €";
+    }
+  } else {
+    if(dossiers.length === 0){
+      addDossierBtn.textContent = "Ajouter mon dossier";
+    } else {
+      addDossierBtn.textContent = "Nouveau dossier — 49 €";
+    }
+  }
+}
+
+async function renderAll(){
+  renderDossiers();
+  renderSummary();
+  renderActions();
+  renderAddButton();
+  await renderTimeline();
+}
+
+async function loadDossiers(uid){
+  const snap = await getDocs(collection(db, "users", uid, "requests"));
+
+  dossiers = [];
+  snap.forEach(s => {
+    dossiers.push({ id:s.id, ...s.data() });
   });
 
-  loadDossiers(currentUser.uid);
-};
+  dossiers.sort((a,b) => {
+    const ar = String(a.ref || "");
+    const br = String(b.ref || "");
+    return br.localeCompare(ar);
+  });
 
-let authChecked = false;
+  if(!currentDossier && dossiers.length){
+    currentDossier = dossiers[0];
+  } else if(currentDossier){
+    currentDossier = dossiers.find(d => d.id === currentDossier.id) || dossiers[0] || null;
+  }
 
-onAuthStateChanged(auth, async (user)=>{
-  if (authChecked) return;
-  authChecked = true;
+  await renderAll();
+}
 
+addDossierBtn.addEventListener("click", async () => {
+  if(!currentUser) return;
+
+  const debiteurName = prompt("Nom du débiteur ?");
+  if(!debiteurName) return;
+
+  const amountRaw = prompt("Montant TTC de la créance ?");
+  const amount = Number(String(amountRaw || "").replace(",", "."));
+  if(!Number.isFinite(amount) || amount <= 0){
+    alert("Montant invalide.");
+    return;
+  }
+
+  const invoiceRef = prompt("Référence facture ?") || "";
+  const dueDate = prompt("Date d’échéance ? Exemple : 2026-05-30") || "";
+
+  await addDoc(collection(db, "users", currentUser.uid, "requests"), {
+    ref: generateRef(),
+    debiteurName,
+    amountTTC: amount,
+    invoiceRef,
+    dueDate,
+    step: 0,
+    statusLabel: "Dossier créé",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+
+  await loadDossiers(currentUser.uid);
+});
+
+document.querySelectorAll("[data-action]").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    if(!currentDossier){
+      alert("Sélectionnez un dossier.");
+      return;
+    }
+
+    const action = btn.dataset.action;
+    let title = "";
+    let body = "";
+
+    if(action === "relance1"){
+      title = "Relance 1";
+      body = buildRelanceText(1, currentDossier);
+    }
+
+    if(action === "relance2"){
+      title = "Relance 2";
+      body = buildRelanceText(2, currentDossier);
+    }
+
+    if(action === "relance3"){
+      title = "Relance 3";
+      body = buildRelanceText(3, currentDossier);
+    }
+
+    if(action === "med"){
+      title = "Mise en demeure";
+      body = buildMiseEnDemeureText(currentDossier);
+    }
+
+    openTextModal(title, body, currentDossier.debiteurEmail || "");
+
+    await markStep(action);
+  });
+});
+
+closeModal.addEventListener("click", closeTextModal);
+
+modalText.addEventListener("click", e => {
+  if(e.target === modalText) closeTextModal();
+});
+
+copyBtn.addEventListener("click", async () => {
+  if(!currentText) return;
+  await navigator.clipboard.writeText(currentText);
+  copyBtn.textContent = "Copié";
+  setTimeout(() => copyBtn.textContent = "Copier", 1200);
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  location.href = "connexion.html";
+});
+
+onAuthStateChanged(auth, async user => {
   if(!user){
     location.href = "connexion.html";
     return;
   }
 
   currentUser = user;
-  loadDossiers(user.uid);
+  userEmail.textContent = user.email || "Client Axe Flow";
+
+  statusBadge.textContent = "Actif";
+  statusBadge.className = "status-pill success";
+
+  planBadge.textContent = "Plan : dossier 49 €";
+  planBadge.className = "status-pill neutral";
+
+  await loadDossiers(user.uid);
 });
 </script>
 
