@@ -923,16 +923,15 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
       }
     });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
+   onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
 
-      try {
-        await ensureUserProfile(user);
-        window.location.href = "tableau-de-bord.html";
-      } catch (error) {
-        console.error("Erreur chargement profil utilisateur:", error);
-      }
-    });
+  try {
+    await ensureUserProfile(user);
+  } catch (error) {
+    console.error("Erreur chargement profil utilisateur:", error);
+  }
+});
   </script>
 </body>
 </html>
