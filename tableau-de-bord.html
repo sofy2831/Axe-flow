@@ -239,14 +239,14 @@
 
           <div class="identity-grid">
             <div class="identity-card">
-              <h3>Créancier / Vous</h3>
+              <h3>Vous / Créancier</h3>
               <div class="identity-line"><strong id="creditorNameView">—</strong></div>
               <div class="identity-line" id="creditorAddressView">—</div>
               <div class="identity-line" id="creditorCityView">—</div>
               <div class="identity-line" id="creditorEmailView">—</div>
             </div>
             <div class="identity-card">
-              <h3>Client débiteur</h3>
+              <h3>Votre client / Débiteur</h3>
               <div class="identity-line"><strong id="debtorNameView">—</strong></div>
               <div class="identity-line" id="debtorAddressView">—</div>
               <div class="identity-line" id="debtorCityView">—</div>
@@ -351,9 +351,9 @@
 
           <div class="field"><label>Créancier — nom / société</label><input type="text" id="creditorNameInput" /></div>
           <div class="field"><label>Créancier — email</label><input type="email" id="creditorEmailInput" /></div>
-          <div class="field full"><label>Créancier — adresse</label><input type="text" id="creditorAddressInput" /></div>
-          <div class="field"><label>Créancier — code postal</label><input type="text" id="creditorZipInput" /></div>
-          <div class="field"><label>Créancier — ville</label><input type="text" id="creditorCityInput" /></div>
+          <div class="field full"><label>Créancier — adresse</label><input type="text" id="creditorAddressInput" required /></div>
+          <div class="field"><label>Créancier — code postal</label><input type="text" id="creditorZipInput" required /></div>
+          <div class="field"><label>Créancier — ville</label><input type="text" id="creditorCityInput" required /></div>
 
           <div class="field"><label>Débiteur — nom / société</label><input type="text" id="debtorNameInput" required /></div>
           <div class="field"><label>Débiteur — email</label><input type="email" id="debtorEmailInput" /></div>
@@ -390,6 +390,7 @@
         <button class="btn btn-secondary" id="shareBtn" type="button" style="display:none;">Partager</button>
         <a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a>
         <button class="btn btn-warning" id="letterBtn" type="button">Courrier</button>
+        <button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button>
         <button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button>
       </div>
     </div>
@@ -497,6 +498,7 @@ const copyBtn = $("copyBtn");
 const shareBtn = $("shareBtn");
 const mailBtn = $("mailBtn");
 const letterBtn = $("letterBtn");
+const printPdfBtn = $("printPdfBtn");
 const markSentBtn = $("markSentBtn");
 
 const injunctionModal = $("injunctionModal");
@@ -730,6 +732,104 @@ Fait le ${todayFR()}
 
 ${body}`;
 }
+function escapeHtml(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function bodyWithoutSubject(body){
+  return String(body || "").replace(/^Objet\\s*:\\s*(.+?)\\n\\n/i, "").trim();
+}
+function extractSubject(body, fallback="Courrier"){
+  const m = String(body || "").match(/^Objet\\s*:\\s*(.+?)\\n/i);
+  return m ? m[1].trim() : fallback;
+}
+function professionalLetterHtml(body, d=currentDossier){
+  const subject = extractSubject(body, actionTitle(currentAction));
+  const cleanBody = bodyWithoutSubject(body);
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(subject)}</title>
+<style>
+  @page{ size:A4; margin:18mm; }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#111;
+    font-size:12.5pt;
+    line-height:1.5;
+  }
+  .page{ width:100%; min-height:100%; }
+  .top{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:30mm;
+    margin-bottom:22mm;
+  }
+  .sender,
+  .recipient{ white-space:pre-line; }
+  .recipient{ padding-top:28mm; }
+  .date{
+    text-align:right;
+    margin-bottom:16mm;
+  }
+  .subject{
+    font-weight:700;
+    margin-bottom:14mm;
+  }
+  .body{ white-space:pre-line; }
+  .print-note{
+    margin-top:20mm;
+    padding-top:6mm;
+    border-top:1px solid #ddd;
+    font-size:9pt;
+    color:#666;
+  }
+  @media print{ .print-note{ display:none; } }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="top">
+      <div class="sender">${escapeHtml(creditorBlock(d))}</div>
+      <div class="recipient">À l’attention de :
+${escapeHtml(debtorBlock(d))}</div>
+    </section>
+
+    <div class="date">Fait le ${escapeHtml(todayFR())}</div>
+    <div class="subject">Objet : ${escapeHtml(subject)}</div>
+    <section class="body">${escapeHtml(cleanBody)}</section>
+
+    <div class="print-note">
+      Conseil : utilisez “Imprimer” puis “Enregistrer au format PDF” pour obtenir le courrier en PDF.
+    </div>
+  </main>
+</body>
+</html>`;
+}
+function openProfessionalLetter(body, d=currentDossier, autoPrint=false){
+  const w = window.open("", "_blank");
+  if(!w){
+    alert("La fenêtre d’impression a été bloquée par le navigateur.");
+    return;
+  }
+  w.document.open();
+  w.document.write(professionalLetterHtml(body, d));
+  w.document.close();
+  if(autoPrint){
+    setTimeout(() => {
+      w.focus();
+      w.print();
+    }, 400);
+  }
+}
 function pieceList(d=currentDossier){
   return [
     `Pièce 1 — Facture impayée ${invoiceNumber(d)}`,
@@ -810,8 +910,8 @@ function openTextModal(action){
   currentText = buildText(action, currentDossier);
   modalTitle.textContent = actionTitle(action);
   modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
-  modalCreditorBox.textContent = "Créancier / Vous :\n" + creditorBlock(currentDossier);
-  modalDebtorBox.textContent = "Client débiteur :\n" + debtorBlock(currentDossier);
+  modalCreditorBox.textContent = "Vous / Créancier :\n" + creditorBlock(currentDossier);
+  modalDebtorBox.textContent = "Votre client / Débiteur :\n" + debtorBlock(currentDossier);
   textContent.textContent = currentText;
   mailBtn.href = makeMailto(debtorEmail(currentDossier), actionTitle(action) + " – Facture " + invoiceNumber(currentDossier), currentText);
   shareBtn.style.display = navigator.share ? "" : "none";
@@ -1083,11 +1183,14 @@ shareBtn.addEventListener("click", async () => {
 });
 letterBtn.addEventListener("click", () => {
   if(!currentText) return;
-  const letter = letterVersion(currentText, currentDossier);
-  const w = window.open("", "_blank");
-  w.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.5;padding:32px;">${esc(letter)}</pre>`);
-  w.document.close();
+  openProfessionalLetter(currentText, currentDossier, false);
 });
+
+printPdfBtn.addEventListener("click", () => {
+  if(!currentText) return;
+  openProfessionalLetter(currentText, currentDossier, true);
+});
+
 markSentBtn.addEventListener("click", async () => {
   if(!currentAction) return;
   await markStep(currentAction);
