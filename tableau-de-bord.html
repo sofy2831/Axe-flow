@@ -18,11 +18,8 @@
     :root{
       --bg:#071e2b;
       --bg-2:#0b3145;
-      --bg-3:#0f3e56;
       --panel:rgba(255,255,255,0.06);
-      --panel-2:rgba(255,255,255,0.04);
       --line:rgba(255,255,255,0.09);
-      --line-strong:rgba(255,255,255,0.14);
       --text:#f4f7fb;
       --muted:rgba(244,247,251,0.76);
       --soft:rgba(244,247,251,0.58);
@@ -37,7 +34,6 @@
 
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-
     body{
       margin:0;
       font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -48,213 +44,36 @@
         linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
       line-height:1.5;
     }
-
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
     button,input,select,textarea{font:inherit}
-
-    .container{
-      width:min(var(--max), calc(100% - 32px));
-      margin:0 auto;
-    }
-
+    .container{width:min(var(--max), calc(100% - 32px));margin:0 auto}
     .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
+      position:sticky;top:0;z-index:50;
       backdrop-filter:blur(14px);
       background:rgba(6,20,29,0.66);
       border-bottom:1px solid rgba(255,255,255,0.08);
     }
-
-    .topbar-inner{
-      min-height:78px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-
-    .brand-logo{
-      width:54px;
-      height:54px;
-      border-radius:16px;
-      object-fit:cover;
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:var(--shadow);
-      background:rgba(255,255,255,0.04);
-      flex:0 0 auto;
-    }
-
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-    }
-
-    .brand-title{
-      font-size:1rem;
-      font-weight:800;
-      letter-spacing:.02em;
-    }
-
-    .brand-sub{
-      color:var(--soft);
-      font-size:.86rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .top-actions{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .user-chip{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-height:42px;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-      font-size:.9rem;
-      font-weight:600;
-      max-width:100%;
-      flex-wrap:wrap;
-    }
-
-    .user-email{
-      max-width:220px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .status-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:30px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .status-pill.success{
-      background:rgba(61,208,143,0.14);
-      border:1px solid rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .status-pill.warning{
-      background:rgba(255,179,71,0.14);
-      border:1px solid rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .status-pill.danger{
-      background:rgba(255,107,107,0.14);
-      border:1px solid rgba(255,107,107,0.20);
-      color:#ffdede;
-    }
-
-    .status-pill.neutral{
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-    }
-
-    .page{
-      padding:28px 0 44px;
-    }
-
-    .hero{
-      margin-bottom:18px;
-      padding:28px;
-      border-radius:30px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-    }
-
-    .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:var(--muted);
-      font-size:.88rem;
-      font-weight:600;
-      margin-bottom:14px;
-    }
-
-    .eyebrow-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--accent);
-      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
-    }
-
-    h1{
-      margin:0 0 10px;
-      font-size:clamp(2rem, 4vw, 3rem);
-      line-height:1.04;
-      letter-spacing:-0.04em;
-    }
-
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      max-width:none;
-      width:100%;
-      font-size:1rem;
-    }
-
-    .hero-note{
-      margin-top:16px;
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      color:var(--muted);
-      font-size:.93rem;
-    }
-
-    .hero-note strong{color:#fff}
-
-    .flash-banner{
-      margin-bottom:18px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(61,208,143,0.22);
-      background:rgba(61,208,143,0.12);
-      color:#d9ffee;
-      font-size:.92rem;
-      display:none;
-    }
-
-    .flash-banner.show{display:block}
-
+    .topbar-inner{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-logo{width:54px;height:54px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,0.12);box-shadow:var(--shadow);background:rgba(255,255,255,0.04);flex:0 0 auto}
+    .brand-text{display:flex;flex-direction:column;min-width:0}
+    .brand-title{font-size:1rem;font-weight:800;letter-spacing:.02em}
+    .brand-sub{color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .user-chip{display:flex;align-items:center;gap:10px;min-height:42px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:#fff;font-size:.9rem;font-weight:600;max-width:100%;flex-wrap:wrap}
+    .user-email{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .status-pill{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 10px;border-radius:999px;font-size:.78rem;font-weight:800;white-space:nowrap}
+    .status-pill.success{background:rgba(61,208,143,0.14);border:1px solid rgba(61,208,143,0.22);color:#d9ffee}
+    .status-pill.warning{background:rgba(255,179,71,0.14);border:1px solid rgba(255,179,71,0.20);color:#ffe7c2}
+    .status-pill.danger{background:rgba(255,107,107,0.14);border:1px solid rgba(255,107,107,0.20);color:#ffdede}
+    .status-pill.neutral{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);color:#fff}
+    .page{padding:28px 0 44px}
+    .hero{margin-bottom:18px;padding:28px;border-radius:30px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow)}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:var(--muted);font-size:.88rem;font-weight:600;margin-bottom:14px}
+    .eyebrow-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px rgba(255,127,31,0.12)}
+    h1{margin:0 0 10px;font-size:clamp(2rem, 4vw, 3rem);line-height:1.04;letter-spacing:-0.04em}
+    .hero p{margin:0;color:var(--muted);width:100%;font-size:1rem}
     .dashboard-grid{
       display:grid;
       grid-template-columns:repeat(12, minmax(0,1fr));
@@ -265,614 +84,107 @@
         "actions actions actions actions actions actions timeline timeline timeline timeline timeline timeline"
         "injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction";
     }
-
-    .panel{
-      border-radius:28px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      min-width:0;
-    }
-
-    .panel-dossiers{grid-area:dossiers}
-    .panel-summary{grid-area:summary}
-    .panel-actions{grid-area:actions}
-    .panel-timeline{grid-area:timeline}
-    .panel-injunction{grid-area:injunction}
-
+    .panel{border-radius:28px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow);overflow:hidden;min-width:0}
+    .panel-dossiers{grid-area:dossiers}.panel-summary{grid-area:summary}.panel-actions{grid-area:actions}.panel-timeline{grid-area:timeline}.panel-injunction{grid-area:injunction}
     .panel-inner{padding:22px}
-
-    .panel-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .panel-title{
-      margin:0 0 6px;
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
-    }
-
-    .panel-sub{
-      color:var(--soft);
-      font-size:.9rem;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      min-height:44px;
-      padding:0 16px;
-      border-radius:999px;
-      border:1px solid transparent;
-      font-weight:700;
-      font-size:.92rem;
-      transition:.2s ease;
-      cursor:pointer;
-      white-space:nowrap;
-      text-align:center;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg, var(--accent), var(--accent-2));
-      color:#fff;
-      box-shadow:0 18px 40px rgba(255,127,31,0.22);
-    }
-
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary{
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      border-color:rgba(255,255,255,0.12);
-    }
-
-    .btn-secondary:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
-    }
-
-    .btn-danger{
-      background:rgba(255,107,107,0.12);
-      color:#ffdede;
-      border-color:rgba(255,107,107,0.24);
-    }
-
-    .btn-danger:hover{
-      background:rgba(255,107,107,0.18);
-      transform:translateY(-1px);
-    }
-
-    .btn[disabled],
-    .btn.is-disabled{
-      opacity:.5;
-      cursor:not-allowed;
-      pointer-events:none;
-      box-shadow:none;
-      transform:none;
-      filter:none;
-    }
-
-    .note-box{
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.10);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff4ea;
-      font-size:.92rem;
-    }
-
-    .note-box.soft{
-      background:rgba(255,255,255,0.04);
-      border-color:rgba(255,255,255,0.08);
-      color:var(--muted);
-    }
-
-    .note-box.success{
-      background:rgba(61,208,143,0.12);
-      border-color:rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .note-box.warning{
-      background:rgba(255,179,71,0.12);
-      border-color:rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .dossier-list{
-      display:grid;
-      gap:12px;
-      margin-top:14px;
-    }
-
-    .dossier-card{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    .dossier-card:hover{
-      background:rgba(255,255,255,0.06);
-      transform:translateY(-1px);
-    }
-
-    .dossier-card.active{
-      border-color:rgba(255,127,31,0.24);
-      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
-    }
-
-    .dossier-card strong{
-      display:block;
-      color:#fff;
-      font-size:.95rem;
-      margin-bottom:4px;
-    }
-
-    .dossier-card span{
-      display:block;
-      color:var(--muted);
-      font-size:.88rem;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:30px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .badge.included{
-      background:rgba(61,208,143,0.14);
-      border:1px solid rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .badge.warning{
-      background:rgba(255,179,71,0.14);
-      border:1px solid rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .badge.danger{
-      background:rgba(255,107,107,0.14);
-      border:1px solid rgba(255,107,107,0.20);
-      color:#ffdede;
-    }
-
-    .badge.neutral{
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-    }
-
-    .empty-state{
-      padding:18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.03);
-      border:1px dashed rgba(255,255,255,0.12);
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:14px;
-      margin-bottom:0;
-    }
-
-    .summary-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      min-width:0;
-    }
-
-    .summary-card.wide{
-      grid-column:1 / -1;
-    }
-
-    .summary-label{
-      color:var(--soft);
-      font-size:.84rem;
-      margin-bottom:8px;
-    }
-
-    .summary-value{
-      font-size:1.08rem;
-      line-height:1.25;
-      font-weight:800;
-      letter-spacing:-0.03em;
-      color:#fff;
-      word-break:break-word;
-    }
-
-    .actions-grid{
-      display:grid;
-      grid-template-columns:repeat(5, minmax(0,1fr));
-      gap:12px;
-    }
-
-    .action-card{
-      padding:16px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      min-width:0;
-    }
-
-    .action-card.done{
-      border-color:rgba(61,208,143,0.22);
-      background:rgba(61,208,143,0.08);
-    }
-
-    .action-card.current{
-      border-color:rgba(255,127,31,0.26);
-      background:rgba(255,127,31,0.10);
-    }
-
-    .action-card.locked{
-      opacity:.55;
-    }
-
-    .action-card h3{
-      margin:0 0 8px;
-      font-size:.98rem;
-      letter-spacing:-0.02em;
-    }
-
-    .action-card p{
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:.86rem;
-    }
-
-    .action-card .btn{
-      width:100%;
-      min-height:40px;
-      font-size:.84rem;
-    }
-
-    .timeline{
-      display:grid;
-      gap:12px;
-    }
-
-    .timeline-item{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:flex-start;
-    }
-
-    .timeline-main{
-      flex:1 1 auto;
-      min-width:0;
-    }
-
-    .timeline-main strong{
-      display:block;
-      font-size:1rem;
-      color:#fff;
-      margin-bottom:6px;
-    }
-
-    .timeline-main span{
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .timeline-meta{
-      display:inline-flex;
-      align-items:center;
-      min-height:28px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem !important;
-      font-weight:800;
-      color:#fff !important;
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      margin-bottom:10px;
-    }
-
-    .injunction-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      align-items:stretch;
-    }
-
-    .injunction-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-    }
-
-    .injunction-card.highlight{
-      border-color:rgba(255,127,31,0.24);
-      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
-    }
-
-    .injunction-card h3{
-      margin:0 0 8px;
-      font-size:1rem;
-      letter-spacing:-0.02em;
-    }
-
-    .injunction-card p{
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .price-box{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.12);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff;
-      margin-bottom:12px;
-    }
-
-    .price-box strong{
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
-    }
-
-    .checkbox-row{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      color:var(--muted);
-      font-size:.92rem;
-      margin:12px 0;
-    }
-
-    .checkbox-row input{
-      width:18px;
-      height:18px;
-      margin-top:2px;
-      accent-color:#ff7f1f;
-    }
-
-    .footer-note{
-      margin-top:18px;
-      color:var(--soft);
-      font-size:.88rem;
-      text-align:center;
-    }
-
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(2,10,15,0.72);
-      backdrop-filter:blur(4px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      z-index:100;
-    }
-
+    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .panel-title{margin:0 0 6px;font-size:1.15rem;letter-spacing:-0.02em}
+    .panel-sub{color:var(--soft);font-size:.9rem}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid transparent;font-weight:700;font-size:.92rem;transition:.2s ease;cursor:pointer;white-space:nowrap;text-align:center}
+    .btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;box-shadow:0 18px 40px rgba(255,127,31,0.22)}
+    .btn-primary:hover,.btn-secondary:hover,.btn-danger:hover{transform:translateY(-1px);filter:brightness(1.03)}
+    .btn-secondary{background:rgba(255,255,255,0.05);color:#fff;border-color:rgba(255,255,255,0.12)}
+    .btn-danger{background:rgba(255,107,107,0.12);color:#ffdede;border-color:rgba(255,107,107,0.24)}
+    .btn-warning{background:rgba(255,179,71,0.12);color:#ffe7c2;border-color:rgba(255,179,71,0.24)}
+    .btn[disabled],.btn.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none;box-shadow:none;transform:none;filter:none}
+    .note-box{padding:16px 18px;border-radius:18px;background:rgba(255,127,31,0.10);border:1px solid rgba(255,127,31,0.18);color:#fff4ea;font-size:.92rem}
+    .note-box.soft{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:var(--muted)}
+    .note-box.success{background:rgba(61,208,143,0.12);border-color:rgba(61,208,143,0.22);color:#d9ffee}
+    .note-box.warning{background:rgba(255,179,71,0.12);border-color:rgba(255,179,71,0.20);color:#ffe7c2}
+    .dossier-list{display:grid;gap:12px;margin-top:14px}
+    .dossier-card{padding:16px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;cursor:pointer;transition:.2s ease}
+    .dossier-card:hover{background:rgba(255,255,255,0.06);transform:translateY(-1px)}
+    .dossier-card.active{border-color:rgba(255,127,31,0.24);background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04))}
+    .dossier-card strong{display:block;color:#fff;font-size:.95rem;margin-bottom:4px}
+    .dossier-card span{display:block;color:var(--muted);font-size:.88rem}
+    .badge{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 10px;border-radius:999px;font-size:.78rem;font-weight:800;white-space:nowrap}
+    .badge.included{background:rgba(61,208,143,0.14);border:1px solid rgba(61,208,143,0.22);color:#d9ffee}
+    .badge.warning{background:rgba(255,179,71,0.14);border:1px solid rgba(255,179,71,0.20);color:#ffe7c2}
+    .badge.danger{background:rgba(255,107,107,0.14);border:1px solid rgba(255,107,107,0.20);color:#ffdede}
+    .badge.neutral{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);color:#fff}
+    .empty-state{padding:18px;border-radius:18px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.12);color:var(--muted);font-size:.92rem}
+    .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
+    .summary-card{padding:18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);min-width:0}
+    .summary-card.wide{grid-column:1 / -1}
+    .summary-label{color:var(--soft);font-size:.84rem;margin-bottom:8px}
+    .summary-value{font-size:1.08rem;line-height:1.25;font-weight:800;letter-spacing:-0.03em;color:#fff;word-break:break-word}
+    .identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .identity-card{padding:18px;border-radius:20px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08)}
+    .identity-card h3{margin:0 0 10px;font-size:.98rem}
+    .identity-line{color:var(--muted);font-size:.9rem;margin:4px 0}
+    .identity-line strong{color:#fff}
+    .actions-grid{display:grid;grid-template-columns:repeat(5, minmax(0,1fr));gap:12px}
+    .action-card{padding:16px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);min-width:0}
+    .action-card.done{border-color:rgba(61,208,143,0.22);background:rgba(61,208,143,0.08)}
+    .action-card.current{border-color:rgba(255,127,31,0.26);background:rgba(255,127,31,0.10)}
+    .action-card.locked{opacity:.55}
+    .action-card h3{margin:0 0 8px;font-size:.98rem;letter-spacing:-0.02em}
+    .action-card p{margin:0 0 12px;color:var(--muted);font-size:.86rem}
+    .action-card .btn{width:100%;min-height:40px;font-size:.84rem}
+    .timeline{display:grid;gap:12px}
+    .timeline-item{padding:18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .timeline-main{flex:1 1 auto;min-width:0}
+    .timeline-main strong{display:block;font-size:1rem;color:#fff;margin-bottom:6px}
+    .timeline-main span{color:var(--muted);font-size:.9rem}
+    .timeline-meta{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;font-size:.78rem!important;font-weight:800;color:#fff!important;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);margin-bottom:10px}
+    .injunction-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+    .injunction-card{padding:18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)}
+    .injunction-card.highlight{border-color:rgba(255,127,31,0.24);background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04))}
+    .injunction-card h3{margin:0 0 8px;font-size:1rem;letter-spacing:-0.02em}
+    .injunction-card p,.injunction-card li{color:var(--muted);font-size:.92rem}
+    .injunction-card ul{margin:10px 0 0;padding-left:18px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,10,15,0.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
     .modal-backdrop.open{display:flex}
-
-    .modal{
-      width:min(980px, 100%);
-      max-height:90vh;
-      overflow:auto;
-      border-radius:28px;
-      background:linear-gradient(180deg, #103448, #0a2535);
-      border:1px solid rgba(255,255,255,0.10);
-      box-shadow:var(--shadow);
-    }
-
+    .modal{width:min(1040px, 100%);max-height:90vh;overflow:auto;border-radius:28px;background:linear-gradient(180deg, #103448, #0a2535);border:1px solid rgba(255,255,255,0.10);box-shadow:var(--shadow)}
     .modal.small{width:min(860px, 100%)}
-
     .modal-inner{padding:22px}
-
-    .modal-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .modal h2{
-      margin:0 0 6px;
-      font-size:1.3rem;
-      letter-spacing:-0.02em;
-    }
-
-    .close-btn{
-      border:none;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-      min-width:40px;
-      min-height:40px;
-      border-radius:999px;
-      cursor:pointer;
-      font-size:1.05rem;
-    }
-
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .modal h2{margin:0 0 6px;font-size:1.3rem;letter-spacing:-0.02em}
+    .close-btn{border:none;background:rgba(255,255,255,0.08);color:#fff;min-width:40px;min-height:40px;border-radius:999px;cursor:pointer;font-size:1.05rem}
     .close-btn:hover{background:rgba(255,255,255,0.14)}
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin:14px 0 18px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 18px}
+    .field{display:flex;flex-direction:column;gap:8px}
     .field.full{grid-column:1 / -1}
-
-    .field label{
-      color:var(--soft);
-      font-size:.88rem;
-      font-weight:600;
+    .field label{color:var(--soft);font-size:.88rem;font-weight:600}
+    .field input,.field select,.field textarea{min-height:46px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;outline:none}
+    .field textarea{min-height:110px;padding:12px 14px;resize:vertical}
+    .field input::placeholder,.field textarea::placeholder{color:rgba(244,247,251,0.42)}
+    .text-preview{white-space:pre-wrap;padding:16px;border-radius:18px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#fff;font-size:.92rem;line-height:1.55;margin-top:14px}
+    .modal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .letter-header{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .letter-header .note-box{white-space:pre-wrap}
+    @media (max-width:1200px){
+      .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"dossiers summary" "actions actions" "timeline timeline" "injunction injunction"}
+      .actions-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
     }
-
-    .field input,
-    .field select,
-    .field textarea{
-      min-height:46px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.12);
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      outline:none;
+    @media (max-width:860px){
+      .dashboard-grid{grid-template-columns:1fr;grid-template-areas:"dossiers" "summary" "actions" "timeline" "injunction"}
+      .topbar-inner{min-height:unset;padding:14px 0;flex-direction:column;align-items:flex-start}
+      .top-actions{width:100%;justify-content:flex-start}
+      .summary-grid,.form-grid,.injunction-grid,.actions-grid,.identity-grid,.letter-header{grid-template-columns:1fr}
     }
-
-    .field textarea{
-      min-height:110px;
-      padding:12px 14px;
-      resize:vertical;
-    }
-
-    .field input::placeholder,
-    .field textarea::placeholder{
-      color:rgba(244,247,251,0.42);
-    }
-
-    .field input[readonly]{opacity:.9}
-
-    .text-preview{
-      white-space:pre-wrap;
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-      font-size:.92rem;
-      line-height:1.55;
-      margin-top:14px;
-    }
-
-    .modal-actions{
-      display:flex;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    @media (max-width: 1200px){
-      .dashboard-grid{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-        grid-template-areas:
-          "dossiers summary"
-          "actions actions"
-          "timeline timeline"
-          "injunction injunction";
-      }
-
-      .actions-grid{
-        grid-template-columns:repeat(3, minmax(0,1fr));
-      }
-    }
-
-    @media (max-width: 860px){
-      .dashboard-grid{
-        grid-template-columns:1fr;
-        grid-template-areas:
-          "dossiers"
-          "summary"
-          "actions"
-          "timeline"
-          "injunction";
-      }
-
-      .topbar-inner{
-        min-height:unset;
-        padding:14px 0;
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .top-actions{
-        width:100%;
-        justify-content:flex-start;
-      }
-
-      .timeline-item{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .summary-grid,
-      .form-grid,
-      .injunction-grid,
-      .actions-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media (max-width: 560px){
-      .container{
-        width:min(var(--max), calc(100% - 20px));
-      }
-
+    @media (max-width:560px){
+      .container{width:min(var(--max), calc(100% - 20px))}
       .btn{width:100%}
-
-      .panel-inner,
-      .hero,
-      .modal-inner{
-        padding:18px;
-      }
-
-      .user-chip{
-        max-width:100%;
-        width:100%;
-      }
-
-      .user-email{
-        max-width:100%;
-      }
-
-      .modal-actions{
-        justify-content:stretch;
-      }
+      .panel-inner,.hero,.modal-inner{padding:18px}
+      .user-chip{max-width:100%;width:100%}
+      .user-email{max-width:100%}
+      .modal-actions{justify-content:stretch}
     }
   </style>
 </head>
-<body>
 
+<body>
 <header class="topbar">
   <div class="container topbar-inner">
     <a href="index.html" class="brand">
@@ -882,199 +194,243 @@
         <span class="brand-sub">Tableau de bord client</span>
       </div>
     </a>
-
     <div class="top-actions">
       <div class="user-chip">
         <span class="user-email" id="userEmail">—</span>
         <span class="status-pill success" id="statusBadge">Actif</span>
         <span class="status-pill neutral" id="planBadge">Offre —</span>
       </div>
-      <button class="btn btn-secondary" id="logoutBtn">Déconnexion</button>
+      <button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button>
     </div>
   </div>
 </header>
 
 <main class="page">
   <div class="container">
-
     <section class="hero">
-      <div class="eyebrow">
-        <span class="eyebrow-dot"></span>
-        Recouvrement automatisé
-      </div>
-
+      <div class="eyebrow"><span class="eyebrow-dot"></span>Recouvrement automatisé</div>
       <h1>Tableau de bord</h1>
-
-      <p>
-        Suivez vos impayés et déclenchez chaque étape automatiquement :
-        relance, mise en demeure, injonction.
-      </p>
+      <p>Suivez vos impayés et déclenchez chaque étape : relance, mise en demeure, injonction.</p>
     </section>
 
     <section class="dashboard-grid">
-
-      <!-- DOSSIERS -->
       <div class="panel panel-dossiers">
         <div class="panel-inner">
-
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Vos dossiers</h2>
+              <div class="panel-sub" id="dossierSub">Sélectionnez un dossier.</div>
             </div>
-
-            <button class="btn btn-primary" id="addDossierBtn">
-              Ajouter un dossier
-            </button>
+            <button class="btn btn-primary" id="addDossierBtn" type="button">Ajouter un dossier</button>
           </div>
-
           <div class="dossier-list" id="dossierList"></div>
-
         </div>
       </div>
 
-      <!-- SYNTHÈSE -->
       <div class="panel panel-summary">
         <div class="panel-inner">
-
           <h2 class="panel-title">Synthèse</h2>
-
           <div class="summary-grid">
-
-            <div class="summary-card">
-              <div class="summary-label">Référence</div>
-              <div class="summary-value" id="summaryRef">—</div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-label">Montant</div>
-              <div class="summary-value" id="summaryAmount">—</div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-label">Débiteur</div>
-              <div class="summary-value" id="summaryDebtor">—</div>
-            </div>
-
-            <div class="summary-card wide">
-              <div class="summary-label">Prochaine action</div>
-              <div class="summary-value" id="nextAction">—</div>
-            </div>
-
+            <div class="summary-card"><div class="summary-label">Référence</div><div class="summary-value" id="summaryRef">—</div></div>
+            <div class="summary-card"><div class="summary-label">Montant</div><div class="summary-value" id="summaryAmount">—</div></div>
+            <div class="summary-card"><div class="summary-label">Débiteur</div><div class="summary-value" id="summaryDebtor">—</div></div>
+            <div class="summary-card wide"><div class="summary-label">Prochaine action</div><div class="summary-value" id="nextAction">—</div></div>
           </div>
 
+          <div class="identity-grid">
+            <div class="identity-card">
+              <h3>Créancier / Vous</h3>
+              <div class="identity-line"><strong id="creditorNameView">—</strong></div>
+              <div class="identity-line" id="creditorAddressView">—</div>
+              <div class="identity-line" id="creditorCityView">—</div>
+              <div class="identity-line" id="creditorEmailView">—</div>
+            </div>
+            <div class="identity-card">
+              <h3>Client débiteur</h3>
+              <div class="identity-line"><strong id="debtorNameView">—</strong></div>
+              <div class="identity-line" id="debtorAddressView">—</div>
+              <div class="identity-line" id="debtorCityView">—</div>
+              <div class="identity-line" id="debtorEmailView">—</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ACTIONS AUTOMATISÉES -->
       <div class="panel panel-actions">
         <div class="panel-inner">
-
-          <h2 class="panel-title">Actions</h2>
-
-          <div class="actions-grid">
-
-            <div class="action-card" data-step="1">
-              <h3>Relance 1</h3>
-              <p>Relance simple</p>
-              <button class="btn btn-primary" data-action="relance1">Voir</button>
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Actions</h2>
+              <div class="panel-sub">Générez les courriers et marquez chaque étape comme envoyée.</div>
             </div>
-
-            <div class="action-card" data-step="2">
-              <h3>Relance 2</h3>
-              <p>Relance ferme</p>
-              <button class="btn btn-primary" data-action="relance2">Voir</button>
-            </div>
-
-            <div class="action-card" data-step="3">
-              <h3>Relance 3</h3>
-              <p>Dernier rappel</p>
-              <button class="btn btn-primary" data-action="relance3">Voir</button>
-            </div>
-
-            <div class="action-card" data-step="4">
-              <h3>Mise en demeure</h3>
-              <p>Avant contentieux</p>
-              <button class="btn btn-danger" data-action="med">Voir</button>
-            </div>
-
-            <div class="action-card" data-step="5">
-              <h3>Injonction</h3>
-              <p>Procédure tribunal</p>
-              <button class="btn btn-secondary" disabled>Disponible après MED</button>
-            </div>
-
           </div>
-
+          <div class="actions-grid">
+            <div class="action-card" data-step="1">
+              <h3>Relance 1</h3><p>Relance simple</p>
+              <button class="btn btn-primary" type="button" data-action="relance1">Ouvrir</button>
+            </div>
+            <div class="action-card" data-step="2">
+              <h3>Relance 2</h3><p>Relance ferme</p>
+              <button class="btn btn-primary" type="button" data-action="relance2">Ouvrir</button>
+            </div>
+            <div class="action-card" data-step="3">
+              <h3>Relance 3</h3><p>Dernier rappel</p>
+              <button class="btn btn-primary" type="button" data-action="relance3">Ouvrir</button>
+            </div>
+            <div class="action-card" data-step="4">
+              <h3>Mise en demeure</h3><p>Avant contentieux</p>
+              <button class="btn btn-danger" type="button" data-action="med">Ouvrir</button>
+            </div>
+            <div class="action-card" data-step="5">
+              <h3>Injonction</h3><p>Dossier tribunal</p>
+              <button class="btn btn-secondary" type="button" data-action="injunction">Ouvrir</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- TIMELINE -->
       <div class="panel panel-timeline">
         <div class="panel-inner">
-
           <h2 class="panel-title">Historique</h2>
-
-          <div class="timeline" id="timeline">
-            <div class="empty-state">Aucune action</div>
-          </div>
-
+          <div class="timeline" id="timeline"><div class="empty-state">Aucune action</div></div>
         </div>
       </div>
 
-      <!-- INJONCTION -->
       <div class="panel panel-injunction">
         <div class="panel-inner">
-
-          <h2 class="panel-title">Injonction de payer</h2>
-
-          <div class="note-box">
-            Disponible après mise en demeure.
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Injonction de payer</h2>
+              <div class="panel-sub">Préparation du dossier tribunal à partir des données du dossier.</div>
+            </div>
+            <button class="btn btn-primary" id="openInjunctionBtn" type="button">Préparer</button>
           </div>
-
+          <div class="injunction-grid">
+            <div class="injunction-card highlight">
+              <h3>Dossier complet</h3>
+              <p>Génère un pack contenant le courrier au tribunal, le bordereau des pièces et la fiche de préremplissage du Cerfa 12946*02.</p>
+              <button class="btn btn-primary" id="downloadInjunctionPackBtn" type="button">Télécharger dossier injonction complet</button>
+            </div>
+            <div class="injunction-card">
+              <h3>Pièces à joindre</h3>
+              <ul>
+                <li>Facture impayée</li>
+                <li>Devis, contrat ou bon de commande</li>
+                <li>Preuve d’exécution ou livraison</li>
+                <li>Relances 1, 2 et 3</li>
+                <li>Mise en demeure et preuve d’envoi</li>
+                <li>Échanges utiles avec le débiteur</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-
     </section>
-
   </div>
 </main>
 
-<!-- MODAL TEXTE -->
+<div class="modal-backdrop" id="createDossierModal">
+  <div class="modal small">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div>
+          <h2>Ajouter un dossier</h2>
+          <div class="panel-sub">Ces informations servent aux courriers et au dossier d’injonction.</div>
+        </div>
+        <button class="close-btn" id="closeCreateDossier" type="button">×</button>
+      </div>
+
+      <form id="createDossierForm">
+        <div class="form-grid">
+          <div class="field"><label>Référence</label><input type="text" id="dossierRef" readonly /></div>
+          <div class="field"><label>Montant TTC (€)</label><input type="number" step="0.01" id="amountTTCInput" required /></div>
+          <div class="field"><label>Facture</label><input type="text" id="invoiceRefInput" placeholder="FA-2026-001" /></div>
+          <div class="field"><label>Date d’émission</label><input type="date" id="issuedDateInput" /></div>
+          <div class="field"><label>Date d’échéance</label><input type="date" id="dueDateInput" /></div>
+          <div class="field"><label>Objet / fondement</label><input type="text" id="contractBasisInput" placeholder="Facture de prestation impayée" /></div>
+
+          <div class="field"><label>Créancier — nom / société</label><input type="text" id="creditorNameInput" /></div>
+          <div class="field"><label>Créancier — email</label><input type="email" id="creditorEmailInput" /></div>
+          <div class="field full"><label>Créancier — adresse</label><input type="text" id="creditorAddressInput" /></div>
+          <div class="field"><label>Créancier — code postal</label><input type="text" id="creditorZipInput" /></div>
+          <div class="field"><label>Créancier — ville</label><input type="text" id="creditorCityInput" /></div>
+
+          <div class="field"><label>Débiteur — nom / société</label><input type="text" id="debtorNameInput" required /></div>
+          <div class="field"><label>Débiteur — email</label><input type="email" id="debtorEmailInput" /></div>
+          <div class="field full"><label>Débiteur — adresse</label><input type="text" id="debtorAddressInput" /></div>
+          <div class="field"><label>Débiteur — code postal</label><input type="text" id="debtorZipInput" /></div>
+          <div class="field"><label>Débiteur — ville</label><input type="text" id="debtorCityInput" /></div>
+        </div>
+        <button class="btn btn-primary" type="submit">Enregistrer le dossier</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modalText">
   <div class="modal">
     <div class="modal-inner">
-
       <div class="modal-head">
-        <h2 id="modalTitle">Document</h2>
-        <button class="close-btn" id="closeModal">×</button>
+        <div>
+          <h2 id="modalTitle">Document</h2>
+          <div class="panel-sub" id="modalSub">—</div>
+        </div>
+        <button class="close-btn" id="closeModal" type="button">×</button>
+      </div>
+
+      <div class="letter-header">
+        <div class="note-box soft" id="modalCreditorBox">Créancier : —</div>
+        <div class="note-box soft" id="modalDebtorBox">Débiteur : —</div>
       </div>
 
       <div class="text-preview" id="textContent"></div>
 
       <div class="modal-actions">
-        <button class="btn btn-secondary" id="copyBtn">Copier</button>
-        <a class="btn btn-primary" id="mailBtn" target="_blank">Envoyer par mail</a>
+        <button class="btn btn-secondary" id="copyBtn" type="button">Copier</button>
+        <button class="btn btn-secondary" id="shareBtn" type="button" style="display:none;">Partager</button>
+        <a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a>
+        <button class="btn btn-warning" id="letterBtn" type="button">Courrier</button>
+        <button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button>
       </div>
-
     </div>
   </div>
 </div>
+
+<div class="modal-backdrop" id="injunctionModal">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div>
+          <h2>Injonction de payer</h2>
+          <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.</div>
+        </div>
+        <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
+      </div>
+
+      <div class="note-box warning">
+        Imprimer le formulaire Cerfa 12946*02, vérifier les informations, dater et signer le formulaire.
+        Joindre les documents justificatifs. Envoyer ou déposer le dossier au tribunal compétent.
+        Le tribunal compétent est en principe celui du domicile du débiteur ou du lieu d’exécution du contrat.
+      </div>
+
+      <div class="text-preview" id="injunctionPreview"></div>
+
+      <div class="modal-actions">
+        <a class="btn btn-secondary" href="https://www.formulaires.service-public.gouv.fr/gf/cerfa_12946.do" target="_blank" rel="noopener">Ouvrir Cerfa officiel</a>
+        <button class="btn btn-secondary" id="copyInjunctionBtn" type="button">Copier courrier</button>
+        <button class="btn btn-primary" id="downloadInjunctionPackBtnModal" type="button">Télécharger dossier injonction complet</button>
+        <button class="btn btn-danger" id="markInjunctionBtn" type="button">Marquer comme préparé</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxV7S3TTntC1/7P0NDV+7zYzFf2NUT9E7vJ6VE1YjFNoPpEfLFfQv4ZnO/wQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, getDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
@@ -1089,84 +445,142 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const RELANCE_GAP_DAYS = 7;
+const MED_DELAY_DAYS = 8;
+const CERFA_URL = "https://www.formulaires.service-public.gouv.fr/gf/cerfa_12946.do";
+
 let currentUser = null;
+let currentUserData = {};
 let dossiers = [];
 let currentDossier = null;
 let currentText = "";
+let currentAction = "";
 
-const userEmail = document.getElementById("userEmail");
-const statusBadge = document.getElementById("statusBadge");
-const planBadge = document.getElementById("planBadge");
-const logoutBtn = document.getElementById("logoutBtn");
+const $ = (id) => document.getElementById(id);
 
-const dossierList = document.getElementById("dossierList");
-const addDossierBtn = document.getElementById("addDossierBtn");
+const userEmail = $("userEmail");
+const statusBadge = $("statusBadge");
+const planBadge = $("planBadge");
+const logoutBtn = $("logoutBtn");
+const dossierList = $("dossierList");
+const dossierSub = $("dossierSub");
+const addDossierBtn = $("addDossierBtn");
 
-const summaryRef = document.getElementById("summaryRef");
-const summaryAmount = document.getElementById("summaryAmount");
-const summaryDebtor = document.getElementById("summaryDebtor");
-const nextAction = document.getElementById("nextAction");
+const summaryRef = $("summaryRef");
+const summaryAmount = $("summaryAmount");
+const summaryDebtor = $("summaryDebtor");
+const nextAction = $("nextAction");
 
-const timeline = document.getElementById("timeline");
+const creditorNameView = $("creditorNameView");
+const creditorAddressView = $("creditorAddressView");
+const creditorCityView = $("creditorCityView");
+const creditorEmailView = $("creditorEmailView");
+const debtorNameView = $("debtorNameView");
+const debtorAddressView = $("debtorAddressView");
+const debtorCityView = $("debtorCityView");
+const debtorEmailView = $("debtorEmailView");
 
-const modalText = document.getElementById("modalText");
-const modalTitle = document.getElementById("modalTitle");
-const textContent = document.getElementById("textContent");
-const closeModal = document.getElementById("closeModal");
-const copyBtn = document.getElementById("copyBtn");
-const mailBtn = document.getElementById("mailBtn");
+const timeline = $("timeline");
+
+const createDossierModal = $("createDossierModal");
+const closeCreateDossier = $("closeCreateDossier");
+const createDossierForm = $("createDossierForm");
+
+const modalText = $("modalText");
+const modalTitle = $("modalTitle");
+const modalSub = $("modalSub");
+const textContent = $("textContent");
+const modalCreditorBox = $("modalCreditorBox");
+const modalDebtorBox = $("modalDebtorBox");
+const closeModal = $("closeModal");
+const copyBtn = $("copyBtn");
+const shareBtn = $("shareBtn");
+const mailBtn = $("mailBtn");
+const letterBtn = $("letterBtn");
+const markSentBtn = $("markSentBtn");
+
+const injunctionModal = $("injunctionModal");
+const openInjunctionBtn = $("openInjunctionBtn");
+const closeInjunctionModal = $("closeInjunctionModal");
+const injunctionPreview = $("injunctionPreview");
+const copyInjunctionBtn = $("copyInjunctionBtn");
+const downloadInjunctionPackBtn = $("downloadInjunctionPackBtn");
+const downloadInjunctionPackBtnModal = $("downloadInjunctionPackBtnModal");
+const markInjunctionBtn = $("markInjunctionBtn");
 
 function esc(s){
-  return String(s || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+  return String(s || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
-
+function clean(s){ return String(s || "").trim(); }
 function formatCurrency(v){
-  return Number(v || 0).toLocaleString("fr-FR", {
-    style:"currency",
-    currency:"EUR"
-  });
+  return Number(v || 0).toLocaleString("fr-FR", { style:"currency", currency:"EUR" });
 }
-
-function todayFR(){
-  return new Date().toLocaleDateString("fr-FR");
+function fmtDateFR(v){
+  if(!v) return "—";
+  try{
+    if(v?.toDate) return v.toDate().toLocaleDateString("fr-FR");
+    if(/^\d{4}-\d{2}-\d{2}$/.test(String(v))) {
+      const [y,m,d] = String(v).split("-");
+      return `${d}/${m}/${y}`;
+    }
+    const d = new Date(v);
+    if(!isNaN(d.getTime())) return d.toLocaleDateString("fr-FR");
+    return String(v);
+  }catch{ return "—"; }
 }
-
+function todayFR(){ return new Date().toLocaleDateString("fr-FR"); }
+function nowTimestamp(){ return Timestamp.fromDate(new Date()); }
+function plusDays(days){ return Timestamp.fromMillis(Date.now() + Number(days || 0) * 24 * 60 * 60 * 1000); }
 function generateRef(){
   const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const r = Math.floor(1000 + Math.random() * 9000);
-  return `AF-${y}${m}-${r}`;
+  return `AF-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}-${Math.floor(1000 + Math.random()*9000)}`;
+}
+function makeMailto(email, subject, body){
+  return `mailto:${encodeURIComponent(email || "")}?subject=${encodeURIComponent(subject || "")}&body=${encodeURIComponent(body || "")}`;
 }
 
-function getPlanLabel(userData = {}){
-  const plan = userData.planType || userData.plan || "one_shot_49";
-
-  if(plan === "subscription_89") return "Plan : Pro 89 €";
-  if(plan === "extra_19") return "Plan : extra 19 €";
-  return "Plan : dossier 49 €";
+function creditorName(d=currentDossier){
+  return clean(d?.creditorName) || clean(currentUserData?.businessProfile?.companyName) || clean(currentUserData?.displayName) || clean(currentUser?.email) || "Créancier";
 }
-
-function getStatusLabel(userData = {}){
-  const status = userData.accountStatus || "active";
-
-  if(status === "unpaid") return "Paiement requis";
-  if(status === "paused") return "Suspendu";
-  return "Actif";
+function creditorEmail(d=currentDossier){
+  return clean(d?.creditorEmail) || clean(currentUserData?.businessProfile?.email) || clean(currentUser?.email);
 }
+function creditorAddress(d=currentDossier){ return clean(d?.creditorAddress) || clean(currentUserData?.businessProfile?.address); }
+function creditorZip(d=currentDossier){ return clean(d?.creditorZip) || clean(currentUserData?.businessProfile?.zip); }
+function creditorCity(d=currentDossier){ return clean(d?.creditorCity) || clean(currentUserData?.businessProfile?.city); }
 
-function getStep(d){
-  return Number(d.step || 0);
+function debtorName(d=currentDossier){ return clean(d?.debtorName) || clean(d?.debiteurName) || "Madame, Monsieur"; }
+function debtorEmail(d=currentDossier){ return clean(d?.debtorEmail) || clean(d?.debiteurEmail); }
+function debtorAddress(d=currentDossier){ return clean(d?.debtorAddress) || clean(d?.debiteurAddress); }
+function debtorZip(d=currentDossier){ return clean(d?.debtorZip) || clean(d?.debiteurZip); }
+function debtorCity(d=currentDossier){ return clean(d?.debtorCity) || clean(d?.debiteurCity); }
+
+function invoiceNumber(d=currentDossier){ return clean(d?.invoiceRef) || clean(d?.invoiceNumber) || "—"; }
+function issuedDate(d=currentDossier){ return fmtDateFR(d?.issuedDate || d?.invoiceIssuedDate || d?.createdAt); }
+function dueDate(d=currentDossier){ return fmtDateFR(d?.dueDate || d?.invoiceDueDate); }
+function dueAmount(d=currentDossier){ return formatCurrency(d?.amountTTC || d?.amountDue || 0); }
+function introHome(d=currentDossier){
+  const home = clean(d?.homeName || d?.objectLabel);
+  return home ? ` concernant « ${home} »` : "";
 }
-
+function echeancePart(d=currentDossier){
+  const dd = dueDate(d);
+  return dd !== "—" ? ` (échéance : ${dd})` : "";
+}
+function contractBasis(d=currentDossier){
+  return clean(d?.contractBasis) || "Facture de prestation impayée";
+}
+function getStep(d){ return Number(d?.step || 0); }
+function sentDateField(action){
+  if(action === "relance1") return "relance1SentAt";
+  if(action === "relance2") return "relance2SentAt";
+  if(action === "relance3") return "relance3SentAt";
+  if(action === "med") return "miseEnDemeureSentAt";
+  if(action === "injunction") return "injunctionPreparedAt";
+  return "sentAt";
+}
 function getNextActionLabel(d){
   const step = getStep(d);
-
   if(step <= 0) return "Relance 1 à générer";
   if(step === 1) return "Relance 2 à générer";
   if(step === 2) return "Relance 3 à générer";
@@ -1174,137 +588,273 @@ function getNextActionLabel(d){
   if(step === 4) return "Injonction de payer disponible";
   return "Dossier avancé";
 }
-
-function buildRelanceText(level, d){
-  const debtor = d.debiteurName || "Madame, Monsieur";
-  const ref = d.ref || "—";
-  const amount = formatCurrency(d.amountTTC);
-  const invoice = d.invoiceRef || "—";
-  const dueDate = d.dueDate || "—";
-
-  if(level === 1){
-    return `Objet : Relance de paiement — Facture ${invoice}
-
-${debtor},
-
-Sauf erreur de notre part, la facture ${invoice}, rattachée au dossier ${ref}, reste impayée à ce jour.
-
-Montant restant dû : ${amount}
-Date d’échéance : ${dueDate}
-
-Nous vous remercions de procéder au règlement dans les meilleurs délais ou de nous indiquer toute difficulté éventuelle.
-
-Si le paiement a déjà été effectué, merci de ne pas tenir compte de cette relance.
-
-Cordialement,`;
-  }
-
-  if(level === 2){
-    return `Objet : Deuxième relance — Facture ${invoice}
-
-${debtor},
-
-Malgré une première relance, la facture ${invoice}, rattachée au dossier ${ref}, demeure impayée.
-
-Montant restant dû : ${amount}
-Date d’échéance : ${dueDate}
-
-Nous vous remercions de régulariser la situation sous 7 jours.
-
-À défaut de règlement ou de réponse, une dernière relance sera adressée avant mise en demeure.
-
-Cordialement,`;
-  }
-
-  return `Objet : Dernière relance avant mise en demeure — Facture ${invoice}
-
-${debtor},
-
-À ce jour, la facture ${invoice}, rattachée au dossier ${ref}, demeure impayée malgré nos précédentes relances.
-
-Montant restant dû : ${amount}
-Date d’échéance : ${dueDate}
-
-Nous vous mettons en mesure de régulariser la situation sous 7 jours.
-
-À défaut de paiement ou de réponse, une mise en demeure de payer sera établie.
-
-Cordialement,`;
+function getPlanLabel(userData = {}){
+  const plan = userData.planType || userData.plan || "one_shot_49";
+  if(plan === "subscription_89") return "Plan : Pro 89 €";
+  if(plan === "extra_19") return "Plan : extra 19 €";
+  return "Plan : dossier 49 €";
+}
+function getStatusLabel(userData = {}){
+  const status = userData.accountStatus || "active";
+  if(status === "unpaid") return "Paiement requis";
+  if(status === "paused") return "Suspendu";
+  return "Actif";
 }
 
-function buildMiseEnDemeureText(d){
-  const debtor = d.debiteurName || "Madame, Monsieur";
-  const ref = d.ref || "—";
-  const amount = formatCurrency(d.amountTTC);
-  const invoice = d.invoiceRef || "—";
-  const dueDate = d.dueDate || "—";
+function relance1Text(d){
+  const invNum = invoiceNumber(d);
+  const issued = issuedDate(d);
+  const due = dueAmount(d);
+  return `Objet : Relance de paiement – Facture ${invNum}
 
-  return `Objet : Mise en demeure de payer — Facture ${invoice}
+${debtorName(d)},
 
-${debtor},
+Sauf erreur de notre part, la facture ${invNum} émise le ${issued}${introHome(d)} présente à ce jour un solde restant dû de ${due}${echeancePart(d)}.
 
-Par la présente, nous vous mettons en demeure de régler la somme de ${amount}, correspondant à la facture ${invoice}, rattachée au dossier ${ref}.
+Nous vous remercions de procéder au règlement dans les plus brefs délais, ou de nous indiquer votre date de paiement.
+Si vous avez déjà effectué le paiement, nous vous prions de ne pas tenir compte de ce courrier.
 
-Date d’échéance initiale : ${dueDate}
+Cordialement,
+Service Comptabilité`;
+}
+function relance2Text(d){
+  const invNum = invoiceNumber(d);
+  const issued = issuedDate(d);
+  const due = dueAmount(d);
+  const r1 = fmtDateFR(d?.relance1SentAt);
+  const r1Part = r1 !== "—" ? ` du ${r1}` : "";
+  return `Objet : 2ème relance – Facture ${invNum}
 
-À défaut de paiement intégral sous 8 jours à compter de la réception de la présente, une procédure de recouvrement pourra être engagée, notamment par voie d’injonction de payer.
+${debtorName(d)},
 
-La présente vaut mise en demeure formelle.
+Malgré notre première relance${r1Part}, nous constatons que la facture ${invNum} émise le ${issued}${introHome(d)} n’est toujours pas réglée. Le solde restant dû est de ${due}${echeancePart(d)}.
 
-Cordialement,`;
+Merci de régulariser sous ${RELANCE_GAP_DAYS} jours à compter de la réception de ce message.
+À défaut, nous serons contraints d’envisager des démarches de recouvrement, ce que nous préférerions éviter.
+
+Nous restons bien entendu à votre disposition pour toute précision ou pour convenir d’un éventuel échéancier.
+
+Cordialement,
+Service Comptabilité`;
+}
+function relance3Text(d){
+  const invNum = invoiceNumber(d);
+  const issued = issuedDate(d);
+  const due = dueAmount(d);
+  return `Objet : 3ème relance avant mise en demeure – Facture ${invNum}
+
+${debtorName(d)},
+
+À ce jour, la facture ${invNum} émise le ${issued}${introHome(d)} demeure impayée. Le solde restant dû est de ${due}${echeancePart(d)}.
+
+Nous vous remercions de bien vouloir procéder au règlement sous ${RELANCE_GAP_DAYS} jours à compter de la réception de ce message.
+À défaut, nous engagerons une mise en demeure, puis une procédure de recouvrement, ce qui pourrait entraîner des frais supplémentaires à votre charge.
+
+Cordialement,
+Service Comptabilité`;
+}
+function medText(d){
+  const invNum = invoiceNumber(d);
+  const issued = issuedDate(d);
+  const due = dueAmount(d);
+  return `Objet : Mise en demeure de payer – Facture ${invNum}
+
+${debtorName(d)},
+
+Par la présente, nous vous mettons en demeure de régler la somme de ${due} au titre de la facture ${invNum} émise le ${issued}${introHome(d)}${echeancePart(d)}.
+
+À défaut de paiement intégral sous ${MED_DELAY_DAYS} jours à compter de la réception de ce message, nous nous réserverons le droit d’engager toute procédure de recouvrement (amiable et/ou judiciaire).
+
+Cordialement,
+Service Comptabilité`;
+}
+function injunctionText(d){
+  const amount = dueAmount(d);
+  return `Objet : Requête en injonction de payer – Facture ${invoiceNumber(d)}
+
+Madame, Monsieur,
+
+Je vous adresse ci-joint une requête en injonction de payer visant le règlement de factures impayées pour un montant principal de ${amount}, assorti le cas échéant des intérêts légaux.
+
+Vous trouverez l’ensemble des pièces justificatives listées au bordereau.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de ma considération distinguée.
+
+Cordialement,
+Service Comptabilité`;
+}
+function buildText(action, d){
+  if(action === "relance1") return relance1Text(d);
+  if(action === "relance2") return relance2Text(d);
+  if(action === "relance3") return relance3Text(d);
+  if(action === "med") return medText(d);
+  if(action === "injunction") return injunctionText(d);
+  return "";
+}
+function actionTitle(action){
+  if(action === "relance1") return "Relance 1";
+  if(action === "relance2") return "Relance 2";
+  if(action === "relance3") return "Relance 3";
+  if(action === "med") return "Mise en demeure";
+  if(action === "injunction") return "Injonction de payer";
+  return "Document";
+}
+function stepForAction(action){
+  if(action === "relance1") return 1;
+  if(action === "relance2") return 2;
+  if(action === "relance3") return 3;
+  if(action === "med") return 4;
+  if(action === "injunction") return 5;
+  return 0;
 }
 
-function openTextModal(title, body, email = ""){
-  currentText = body;
-  modalTitle.textContent = title;
-  textContent.textContent = body;
+function creditorBlock(d=currentDossier){
+  return `${creditorName(d)}
+${creditorAddress(d) || "Adresse à compléter"}
+${[creditorZip(d), creditorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}
+${creditorEmail(d) || ""}`.trim();
+}
+function debtorBlock(d=currentDossier){
+  return `${debtorName(d)}
+${debtorAddress(d) || "Adresse à compléter"}
+${[debtorZip(d), debtorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}
+${debtorEmail(d) || ""}`.trim();
+}
+function letterVersion(body, d=currentDossier){
+  return `${creditorBlock(d)}
 
-  const subject = title;
-  mailBtn.href = `mailto:${encodeURIComponent(email || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+À l’attention de :
+${debtorBlock(d)}
 
+Fait le ${todayFR()}
+
+${body}`;
+}
+function pieceList(d=currentDossier){
+  return [
+    `Pièce 1 — Facture impayée ${invoiceNumber(d)}`,
+    "Pièce 2 — Devis, contrat ou bon de commande",
+    "Pièce 3 — Preuve d’exécution de la prestation ou de livraison",
+    "Pièce 4 — Relance 1",
+    "Pièce 5 — Relance 2",
+    "Pièce 6 — Relance 3",
+    "Pièce 7 — Mise en demeure",
+    "Pièce 8 — Justificatif d’envoi de la mise en demeure",
+    "Pièce 9 — Échanges utiles avec le débiteur"
+  ];
+}
+function bordereauText(d=currentDossier){
+  return `BORDEREAU DES PIÈCES
+
+Dossier : ${d?.ref || "—"}
+Créancier : ${creditorName(d)}
+Débiteur : ${debtorName(d)}
+Montant principal : ${dueAmount(d)}
+
+${pieceList(d).join("\n")}`;
+}
+function cerfaPrefillText(d=currentDossier){
+  return `FICHE DE PRÉREMPLISSAGE — CERFA 12946*02
+
+Formulaire officiel :
+${CERFA_URL}
+
+DEMANDEUR / CRÉANCIER
+Nom ou société : ${creditorName(d)}
+Adresse : ${creditorAddress(d)}
+Code postal : ${creditorZip(d)}
+Ville : ${creditorCity(d)}
+Email : ${creditorEmail(d)}
+
+DÉBITEUR
+Nom ou société : ${debtorName(d)}
+Adresse : ${debtorAddress(d)}
+Code postal : ${debtorZip(d)}
+Ville : ${debtorCity(d)}
+Email : ${debtorEmail(d)}
+
+DEMANDE
+Montant principal : ${dueAmount(d)}
+Facture : ${invoiceNumber(d)}
+Date d’émission : ${issuedDate(d)}
+Date d’échéance : ${dueDate(d)}
+Fondement de la créance : ${contractBasis(d)}
+
+DOCUMENTS JUSTIFICATIFS
+${pieceList(d).join("\n")}
+
+NOTE
+Imprimer le formulaire.
+Remplir ou vérifier les champs.
+Dater et signer.
+Joindre les documents justificatifs.
+Envoyer ou déposer le dossier au tribunal compétent.
+
+Le tribunal compétent est en principe celui du domicile du débiteur ou du lieu d’exécution du contrat.`;
+}
+function injunctionPackText(d=currentDossier){
+  return `${injunctionText(d)}
+
+---
+
+${bordereauText(d)}
+
+---
+
+${cerfaPrefillText(d)}`;
+}
+
+function openTextModal(action){
+  if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
+  currentAction = action;
+  currentText = buildText(action, currentDossier);
+  modalTitle.textContent = actionTitle(action);
+  modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
+  modalCreditorBox.textContent = "Créancier / Vous :\n" + creditorBlock(currentDossier);
+  modalDebtorBox.textContent = "Client débiteur :\n" + debtorBlock(currentDossier);
+  textContent.textContent = currentText;
+  mailBtn.href = makeMailto(debtorEmail(currentDossier), actionTitle(action) + " – Facture " + invoiceNumber(currentDossier), currentText);
+  shareBtn.style.display = navigator.share ? "" : "none";
   modalText.classList.add("open");
 }
-
 function closeTextModal(){
   modalText.classList.remove("open");
   currentText = "";
+  currentAction = "";
+}
+function openInjunctionModal(){
+  if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
+  injunctionPreview.textContent = injunctionPackText(currentDossier);
+  injunctionModal.classList.add("open");
+}
+function closeInjunction(){
+  injunctionModal.classList.remove("open");
 }
 
 async function markStep(action){
   if(!currentUser || !currentDossier) return;
-
-  let step = 0;
-  let label = "";
-
-  if(action === "relance1"){
-    step = 1;
-    label = "Relance 1 générée";
-  }
-
-  if(action === "relance2"){
-    step = 2;
-    label = "Relance 2 générée";
-  }
-
-  if(action === "relance3"){
-    step = 3;
-    label = "Relance 3 générée";
-  }
-
-  if(action === "med"){
-    step = 4;
-    label = "Mise en demeure générée";
-  }
-
-  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossier.id), {
-    step,
+  const step = stepForAction(action);
+  const label = `${actionTitle(action)} ${action === "injunction" ? "préparée" : "envoyée"}`;
+  const sentField = sentDateField(action);
+  const patch = {
+    step: Math.max(step, getStep(currentDossier)),
     statusLabel: label,
-    updatedAt: serverTimestamp()
-  });
+    updatedAt: serverTimestamp(),
+    [sentField]: serverTimestamp()
+  };
+
+  if(action === "relance1") { patch.nextAction = "RELANCE_2"; patch.nextActionAt = plusDays(RELANCE_GAP_DAYS); }
+  if(action === "relance2") { patch.nextAction = "RELANCE_3"; patch.nextActionAt = plusDays(RELANCE_GAP_DAYS); }
+  if(action === "relance3") { patch.nextAction = "MED"; patch.nextActionAt = plusDays(RELANCE_GAP_DAYS); }
+  if(action === "med") { patch.nextAction = "INJONCTION"; patch.nextActionAt = plusDays(MED_DELAY_DAYS); }
+  if(action === "injunction") { patch.nextAction = "SIGNIFICATION"; }
+
+  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossier.id), patch);
 
   await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"), {
     title: label,
-    description: `Document généré le ${todayFR()}`,
+    description: `Date d’envoi : ${todayFR()}`,
+    action,
     createdAt: serverTimestamp()
   });
 
@@ -1313,136 +863,106 @@ async function markStep(action){
 
 function renderDossiers(){
   dossierList.innerHTML = "";
-
+  dossierSub.textContent = `${dossiers.length} dossier(s)`;
   if(!dossiers.length){
     dossierList.innerHTML = `<div class="empty-state">Aucun dossier pour le moment.</div>`;
     return;
   }
-
   dossiers.forEach(d => {
     const active = currentDossier && currentDossier.id === d.id;
-
     const el = document.createElement("div");
     el.className = `dossier-card ${active ? "active" : ""}`;
-
     el.innerHTML = `
       <div>
         <strong>${esc(d.ref || "Dossier")}</strong>
-        <span>${esc(d.debiteurName || "Débiteur non renseigné")}</span>
-        <span>${formatCurrency(d.amountTTC)}</span>
+        <span>${esc(debtorName(d))}</span>
+        <span>${formatCurrency(d.amountTTC || d.amountDue)}</span>
       </div>
       <span class="badge neutral">${esc(d.statusLabel || "Créé")}</span>
     `;
-
-    el.addEventListener("click", () => {
-      currentDossier = d;
-      renderAll();
-    });
-
+    el.addEventListener("click", () => { currentDossier = d; renderAll(); });
     dossierList.appendChild(el);
   });
 }
-
 function renderSummary(){
   if(!currentDossier){
-    summaryRef.textContent = "—";
-    summaryAmount.textContent = "—";
-    summaryDebtor.textContent = "—";
-    nextAction.textContent = "Sélectionnez un dossier.";
+    summaryRef.textContent = "—"; summaryAmount.textContent = "—"; summaryDebtor.textContent = "—"; nextAction.textContent = "Sélectionnez un dossier.";
+    creditorNameView.textContent = "—"; creditorAddressView.textContent = "—"; creditorCityView.textContent = "—"; creditorEmailView.textContent = "—";
+    debtorNameView.textContent = "—"; debtorAddressView.textContent = "—"; debtorCityView.textContent = "—"; debtorEmailView.textContent = "—";
     return;
   }
-
   summaryRef.textContent = currentDossier.ref || "—";
-  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC);
-  summaryDebtor.textContent = currentDossier.debiteurName || "—";
+  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC || currentDossier.amountDue);
+  summaryDebtor.textContent = debtorName(currentDossier);
   nextAction.textContent = getNextActionLabel(currentDossier);
-}
 
+  creditorNameView.textContent = creditorName(currentDossier);
+  creditorAddressView.textContent = creditorAddress(currentDossier) || "Adresse à compléter";
+  creditorCityView.textContent = [creditorZip(currentDossier), creditorCity(currentDossier)].filter(Boolean).join(" ") || "Code postal / ville à compléter";
+  creditorEmailView.textContent = creditorEmail(currentDossier) || "Email à compléter";
+
+  debtorNameView.textContent = debtorName(currentDossier);
+  debtorAddressView.textContent = debtorAddress(currentDossier) || "Adresse à compléter";
+  debtorCityView.textContent = [debtorZip(currentDossier), debtorCity(currentDossier)].filter(Boolean).join(" ") || "Code postal / ville à compléter";
+  debtorEmailView.textContent = debtorEmail(currentDossier) || "Email à compléter";
+}
 function renderActions(){
   document.querySelectorAll(".action-card").forEach(card => {
     const step = Number(card.dataset.step);
     const currentStep = currentDossier ? getStep(currentDossier) : 0;
-
-    card.classList.remove("done", "current", "locked");
-
-    if(!currentDossier){
-      card.classList.add("locked");
-      return;
-    }
-
-    if(step <= currentStep){
-      card.classList.add("done");
-    } else if(step === currentStep + 1){
-      card.classList.add("current");
-    } else {
-      card.classList.add("locked");
-    }
+    card.classList.remove("done","current","locked");
+    if(!currentDossier){ card.classList.add("locked"); return; }
+    if(step <= currentStep) card.classList.add("done");
+    else if(step === currentStep + 1) card.classList.add("current");
+    else card.classList.add("locked");
 
     const btn = card.querySelector("button");
     if(!btn) return;
-
-    if(step > currentStep + 1){
-      btn.disabled = true;
-    } else if(step === 5 && currentStep < 4){
-      btn.disabled = true;
-    } else {
-      btn.disabled = false;
-    }
+    if(step > currentStep + 1) btn.disabled = true;
+    else if(step === 5 && currentStep < 4) btn.disabled = true;
+    else btn.disabled = false;
   });
 }
-
 async function renderTimeline(){
   timeline.innerHTML = "";
-
   if(!currentUser || !currentDossier){
     timeline.innerHTML = `<div class="empty-state">Sélectionnez un dossier.</div>`;
     return;
   }
-
   const snap = await getDocs(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"));
-
   const events = [];
   snap.forEach(s => events.push({ id:s.id, ...s.data() }));
-
+  events.sort((a,b) => {
+    const ta = a.createdAt?.toMillis?.() || 0;
+    const tb = b.createdAt?.toMillis?.() || 0;
+    return tb - ta;
+  });
   if(!events.length){
     timeline.innerHTML = `<div class="empty-state">Aucune action enregistrée.</div>`;
     return;
   }
-
   events.forEach(ev => {
+    const date = ev.createdAt?.toDate?.() ? ev.createdAt.toDate().toLocaleDateString("fr-FR") : todayFR();
     const item = document.createElement("div");
     item.className = "timeline-item";
-
     item.innerHTML = `
       <div class="timeline-main">
-        <span class="timeline-meta">${esc(todayFR())}</span>
+        <span class="timeline-meta">${esc(date)}</span>
         <strong>${esc(ev.title || "Action")}</strong>
         <span>${esc(ev.description || "")}</span>
       </div>
     `;
-
     timeline.appendChild(item);
   });
 }
-
 function renderAddButton(){
   const planText = planBadge.textContent || "";
-
   if(planText.includes("Pro")){
-    if(dossiers.length < 3){
-      addDossierBtn.textContent = "Ajouter un dossier inclus";
-    } else {
-      addDossierBtn.textContent = "Ajouter un dossier — 19 €";
-    }
+    addDossierBtn.textContent = dossiers.length < 3 ? "Ajouter un dossier inclus" : "Ajouter un dossier — 19 €";
   } else {
-    if(dossiers.length === 0){
-      addDossierBtn.textContent = "Ajouter mon dossier";
-    } else {
-      addDossierBtn.textContent = "Nouveau dossier — 49 €";
-    }
+    addDossierBtn.textContent = dossiers.length === 0 ? "Ajouter mon dossier" : "Nouveau dossier — 49 €";
   }
 }
-
 async function renderAll(){
   renderDossiers();
   renderSummary();
@@ -1450,109 +970,144 @@ async function renderAll(){
   renderAddButton();
   await renderTimeline();
 }
-
+async function loadUserData(uid){
+  try{
+    const s = await getDoc(doc(db, "users", uid));
+    currentUserData = s.exists() ? (s.data() || {}) : {};
+  }catch{ currentUserData = {}; }
+}
 async function loadDossiers(uid){
   const snap = await getDocs(collection(db, "users", uid, "requests"));
-
   dossiers = [];
-  snap.forEach(s => {
-    dossiers.push({ id:s.id, ...s.data() });
-  });
-
+  snap.forEach(s => dossiers.push({ id:s.id, ...s.data() }));
   dossiers.sort((a,b) => {
-    const ar = String(a.ref || "");
-    const br = String(b.ref || "");
-    return br.localeCompare(ar);
+    const ta = a.createdAt?.toMillis?.() || 0;
+    const tb = b.createdAt?.toMillis?.() || 0;
+    return tb - ta;
   });
-
-  if(!currentDossier && dossiers.length){
-    currentDossier = dossiers[0];
-  } else if(currentDossier){
-    currentDossier = dossiers.find(d => d.id === currentDossier.id) || dossiers[0] || null;
-  }
-
+  if(!currentDossier && dossiers.length) currentDossier = dossiers[0];
+  else if(currentDossier) currentDossier = dossiers.find(d => d.id === currentDossier.id) || dossiers[0] || null;
   await renderAll();
 }
 
-addDossierBtn.addEventListener("click", async () => {
-  if(!currentUser) return;
-
-  const debiteurName = prompt("Nom du débiteur ?");
-  if(!debiteurName) return;
-
-  const amountRaw = prompt("Montant TTC de la créance ?");
-  const amount = Number(String(amountRaw || "").replace(",", "."));
-  if(!Number.isFinite(amount) || amount <= 0){
-    alert("Montant invalide.");
+async function downloadInjunctionPack(){
+  if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
+  if(!window.JSZip){
+    alert("Le module ZIP n'est pas chargé. Vérifie la connexion ou le CDN JSZip.");
     return;
   }
+  const zip = new JSZip();
+  const safeRef = String(currentDossier.ref || "dossier").replace(/[^\w\-]+/g, "_");
+  zip.file("01_courrier_tribunal.txt", injunctionText(currentDossier));
+  zip.file("02_bordereau_pieces.txt", bordereauText(currentDossier));
+  zip.file("03_fiche_preremplissage_cerfa_12946.txt", cerfaPrefillText(currentDossier));
+  zip.file("04_liste_pieces_a_joindre.txt", pieceList(currentDossier).join("\n"));
+  zip.file("LIEN_CERFA_OFFICIEL.txt", `Cerfa 12946*02 : ${CERFA_URL}\n\nTélécharger le formulaire officiel, puis le compléter avec la fiche de préremplissage.`);
+  const blob = await zip.generateAsync({ type:"blob" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${safeRef}_dossier_injonction.zip`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
 
-  const invoiceRef = prompt("Référence facture ?") || "";
-  const dueDate = prompt("Date d’échéance ? Exemple : 2026-05-30") || "";
+addDossierBtn.addEventListener("click", () => {
+  $("dossierRef").value = generateRef();
+  $("creditorNameInput").value = creditorName();
+  $("creditorEmailInput").value = creditorEmail();
+  $("creditorAddressInput").value = creditorAddress();
+  $("creditorZipInput").value = creditorZip();
+  $("creditorCityInput").value = creditorCity();
+  createDossierModal.classList.add("open");
+});
+closeCreateDossier.addEventListener("click", () => createDossierModal.classList.remove("open"));
+createDossierModal.addEventListener("click", e => { if(e.target === createDossierModal) createDossierModal.classList.remove("open"); });
+
+createDossierForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if(!currentUser) return;
+  const amount = Number(String($("amountTTCInput").value || "").replace(",", "."));
+  if(!Number.isFinite(amount) || amount <= 0){ alert("Montant invalide."); return; }
 
   await addDoc(collection(db, "users", currentUser.uid, "requests"), {
-    ref: generateRef(),
-    debiteurName,
+    ref: clean($("dossierRef").value) || generateRef(),
     amountTTC: amount,
-    invoiceRef,
-    dueDate,
+    invoiceRef: clean($("invoiceRefInput").value),
+    issuedDate: clean($("issuedDateInput").value),
+    dueDate: clean($("dueDateInput").value),
+    contractBasis: clean($("contractBasisInput").value) || "Facture de prestation impayée",
+
+    creditorName: clean($("creditorNameInput").value),
+    creditorEmail: clean($("creditorEmailInput").value),
+    creditorAddress: clean($("creditorAddressInput").value),
+    creditorZip: clean($("creditorZipInput").value),
+    creditorCity: clean($("creditorCityInput").value),
+
+    debtorName: clean($("debtorNameInput").value),
+    debiteurName: clean($("debtorNameInput").value),
+    debtorEmail: clean($("debtorEmailInput").value),
+    debiteurEmail: clean($("debtorEmailInput").value),
+    debtorAddress: clean($("debtorAddressInput").value),
+    debtorZip: clean($("debtorZipInput").value),
+    debtorCity: clean($("debtorCityInput").value),
+
     step: 0,
     statusLabel: "Dossier créé",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
 
+  createDossierForm.reset();
+  createDossierModal.classList.remove("open");
   await loadDossiers(currentUser.uid);
 });
 
 document.querySelectorAll("[data-action]").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    if(!currentDossier){
-      alert("Sélectionnez un dossier.");
-      return;
-    }
-
-    const action = btn.dataset.action;
-    let title = "";
-    let body = "";
-
-    if(action === "relance1"){
-      title = "Relance 1";
-      body = buildRelanceText(1, currentDossier);
-    }
-
-    if(action === "relance2"){
-      title = "Relance 2";
-      body = buildRelanceText(2, currentDossier);
-    }
-
-    if(action === "relance3"){
-      title = "Relance 3";
-      body = buildRelanceText(3, currentDossier);
-    }
-
-    if(action === "med"){
-      title = "Mise en demeure";
-      body = buildMiseEnDemeureText(currentDossier);
-    }
-
-    openTextModal(title, body, currentDossier.debiteurEmail || "");
-
-    await markStep(action);
-  });
+  btn.addEventListener("click", () => openTextModal(btn.dataset.action));
 });
 
 closeModal.addEventListener("click", closeTextModal);
-
-modalText.addEventListener("click", e => {
-  if(e.target === modalText) closeTextModal();
-});
+modalText.addEventListener("click", e => { if(e.target === modalText) closeTextModal(); });
 
 copyBtn.addEventListener("click", async () => {
   if(!currentText) return;
   await navigator.clipboard.writeText(currentText);
   copyBtn.textContent = "Copié";
   setTimeout(() => copyBtn.textContent = "Copier", 1200);
+});
+shareBtn.addEventListener("click", async () => {
+  if(!navigator.share || !currentText) return;
+  await navigator.share({ title: modalTitle.textContent, text: currentText });
+});
+letterBtn.addEventListener("click", () => {
+  if(!currentText) return;
+  const letter = letterVersion(currentText, currentDossier);
+  const w = window.open("", "_blank");
+  w.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.5;padding:32px;">${esc(letter)}</pre>`);
+  w.document.close();
+});
+markSentBtn.addEventListener("click", async () => {
+  if(!currentAction) return;
+  await markStep(currentAction);
+  closeTextModal();
+});
+
+openInjunctionBtn.addEventListener("click", openInjunctionModal);
+downloadInjunctionPackBtn.addEventListener("click", downloadInjunctionPack);
+downloadInjunctionPackBtnModal.addEventListener("click", downloadInjunctionPack);
+closeInjunctionModal.addEventListener("click", closeInjunction);
+injunctionModal.addEventListener("click", e => { if(e.target === injunctionModal) closeInjunction(); });
+copyInjunctionBtn.addEventListener("click", async () => {
+  if(!currentDossier) return;
+  await navigator.clipboard.writeText(injunctionPackText(currentDossier));
+  copyInjunctionBtn.textContent = "Copié";
+  setTimeout(() => copyInjunctionBtn.textContent = "Copier courrier", 1200);
+});
+markInjunctionBtn.addEventListener("click", async () => {
+  await markStep("injunction");
+  closeInjunction();
 });
 
 logoutBtn.addEventListener("click", async () => {
@@ -1565,19 +1120,15 @@ onAuthStateChanged(auth, async user => {
     location.href = "connexion.html";
     return;
   }
-
   currentUser = user;
   userEmail.textContent = user.email || "Client Axe Flow";
-
-  statusBadge.textContent = "Actif";
-  statusBadge.className = "status-pill success";
-
-  planBadge.textContent = "Plan : dossier 49 €";
+  await loadUserData(user.uid);
+  statusBadge.textContent = getStatusLabel(currentUserData);
+  statusBadge.className = currentUserData.accountStatus === "unpaid" ? "status-pill danger" : "status-pill success";
+  planBadge.textContent = getPlanLabel(currentUserData);
   planBadge.className = "status-pill neutral";
-
   await loadDossiers(user.uid);
 });
 </script>
-
 </body>
 </html>
