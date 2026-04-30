@@ -1250,7 +1250,23 @@ logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   location.href = "connexion.html";
 });
+saveCreditorBtn.addEventListener("click", async () => {
+  if(!currentUser || !currentDossier){
+    alert("Sélectionnez un dossier.");
+    return;
+  }
 
+  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossier.id), {
+    creditorName: clean(creditorNameEdit.value),
+    creditorEmail: clean(creditorEmailEdit.value),
+    creditorAddress: clean(creditorAddressEdit.value),
+    creditorZip: clean(creditorZipEdit.value),
+    creditorCity: clean(creditorCityEdit.value),
+    updatedAt: serverTimestamp()
+  });
+
+  await loadDossiers(currentUser.uid);
+});
 onAuthStateChanged(auth, async user => {
   if(!user){
     location.href = "connexion.html";
