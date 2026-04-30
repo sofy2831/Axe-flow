@@ -5,1585 +5,193 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow — Tableau de bord client</title>
-  <meta name="description" content="Axe Flow : relances automatiques, mise en demeure et préparation d’injonction de payer." />
+  <meta name="description" content="Tableau de bord client Axe Flow : suivi dossier, documents, relances et injonction." />
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="theme-color" content="#0b3145" />
-
-  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
-    :root{
-      --bg:#071e2b;
-      --bg2:#0b3145;
-      --panel:rgba(255,255,255,0.06);
-      --line:rgba(255,255,255,0.09);
-      --text:#f4f7fb;
-      --muted:rgba(244,247,251,0.76);
-      --soft:rgba(244,247,251,0.58);
-      --accent:#ff7f1f;
-      --accent2:#ff9b4a;
-      --success:#3dd08f;
-      --warning:#ffb347;
-      --danger:#ff6b6b;
-      --info:#7cc8ff;
-      --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --max:1320px;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-
     body{
       margin:0;
-      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
-        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
-        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
-      line-height:1.5;
+      font-family:Arial,sans-serif;
+      background:#0b1f2a;
+      color:#fff;
     }
-
-    a{color:inherit;text-decoration:none}
-    button,input,select,textarea{font:inherit}
-    img{max-width:100%;display:block}
 
     .container{
-      width:min(var(--max), calc(100% - 32px));
-      margin:0 auto;
-    }
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter:blur(14px);
-      background:rgba(6,20,29,0.68);
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-
-    .topbar-inner{
-      min-height:78px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-
-    .brand-logo{
-      width:54px;
-      height:54px;
-      border-radius:16px;
-      object-fit:cover;
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:var(--shadow);
-      background:rgba(255,255,255,0.04);
-      flex:0 0 auto;
-    }
-
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-    }
-
-    .brand-title{
-      font-weight:900;
-      letter-spacing:.02em;
-    }
-
-    .brand-sub{
-      color:var(--soft);
-      font-size:.86rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .top-actions{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .user-chip{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-height:42px;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-      font-size:.9rem;
-      font-weight:700;
-      flex-wrap:wrap;
-    }
-
-    .user-email{
-      max-width:220px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .status-pill,
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:30px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:900;
-      white-space:nowrap;
-    }
-
-    .status-pill.success,
-    .badge.success{
-      background:rgba(61,208,143,0.14);
-      border:1px solid rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .status-pill.warning,
-    .badge.warning{
-      background:rgba(255,179,71,0.14);
-      border:1px solid rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .status-pill.danger,
-    .badge.danger{
-      background:rgba(255,107,107,0.14);
-      border:1px solid rgba(255,107,107,0.20);
-      color:#ffdede;
-    }
-
-    .status-pill.neutral,
-    .badge.neutral{
-      background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-    }
-
-    .page{
-      padding:28px 0 44px;
-    }
-
-    .hero{
-      margin-bottom:18px;
-      padding:28px;
-      border-radius:30px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-    }
-
-    .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:var(--muted);
-      font-size:.88rem;
-      font-weight:700;
-      margin-bottom:14px;
-    }
-
-    .eyebrow-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--accent);
-      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
-    }
-
-    h1{
-      margin:0 0 10px;
-      font-size:clamp(2rem, 4vw, 3rem);
-      line-height:1.04;
-      letter-spacing:-0.04em;
-    }
-
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      font-size:1rem;
-    }
-
-    .hero-note{
-      margin-top:16px;
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      color:var(--muted);
-      font-size:.93rem;
-    }
-
-    .hero-note strong{color:#fff}
-
-    .flash-banner{
-      margin-bottom:18px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(61,208,143,0.22);
-      background:rgba(61,208,143,0.12);
-      color:#d9ffee;
-      font-size:.92rem;
-      display:none;
-    }
-
-    .flash-banner.show{display:block}
-
-    .dashboard-grid{
-      display:grid;
-      grid-template-columns:repeat(12, minmax(0,1fr));
-      gap:18px;
-      align-items:start;
-      grid-template-areas:
-        "dossiers dossiers dossiers dossiers summary summary summary summary summary summary summary summary"
-        "actions actions actions actions actions actions actions actions actions actions actions actions"
-        "choice choice choice choice choice choice choice choice choice choice choice choice";
-    }
-
-    .panel{
-      border-radius:28px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      min-width:0;
-    }
-
-    .panel-dossiers{grid-area:dossiers}
-    .panel-summary{grid-area:summary}
-    .panel-actions{grid-area:actions}
-    .panel-choice{grid-area:choice}
-
-    .panel-inner{padding:22px}
-
-    .panel-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .panel-title{
-      margin:0 0 6px;
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
-    }
-
-    .panel-sub{
-      color:var(--soft);
-      font-size:.9rem;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      min-height:44px;
-      padding:0 16px;
-      border-radius:999px;
-      border:1px solid transparent;
-      font-weight:800;
-      font-size:.92rem;
-      transition:.2s ease;
-      cursor:pointer;
-      white-space:nowrap;
-      text-align:center;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg, var(--accent), var(--accent2));
-      color:#fff;
-      box-shadow:0 18px 40px rgba(255,127,31,0.22);
-    }
-
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary{
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      border-color:rgba(255,255,255,0.12);
-    }
-
-    .btn-secondary:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
-    }
-
-    .btn-danger{
-      background:rgba(255,107,107,0.12);
-      color:#ffdede;
-      border-color:rgba(255,107,107,0.24);
-    }
-
-    .btn[disabled],
-    .btn.is-disabled{
-      opacity:.5;
-      cursor:not-allowed;
-      pointer-events:none;
-      box-shadow:none;
-      transform:none;
-      filter:none;
-    }
-
-    .note-box{
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.10);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff4ea;
-      font-size:.92rem;
-    }
-
-    .note-box.soft{
-      background:rgba(255,255,255,0.04);
-      border-color:rgba(255,255,255,0.08);
-      color:var(--muted);
-    }
-
-    .note-box.success{
-      background:rgba(61,208,143,0.12);
-      border-color:rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .note-box.warning{
-      background:rgba(255,179,71,0.12);
-      border-color:rgba(255,179,71,0.20);
-      color:#ffe7c2;
-    }
-
-    .dossier-list{
-      display:grid;
-      gap:12px;
-      margin-top:14px;
-    }
-
-    .dossier-card{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    .dossier-card:hover{
-      background:rgba(255,255,255,0.06);
-      transform:translateY(-1px);
-    }
-
-    .dossier-card.active{
-      border-color:rgba(255,127,31,0.24);
-      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
-    }
-
-    .dossier-card strong{
-      display:block;
-      color:#fff;
-      font-size:.95rem;
-      margin-bottom:4px;
-    }
-
-    .dossier-card span{
-      display:block;
-      color:var(--muted);
-      font-size:.88rem;
-    }
-
-    .empty-state{
-      padding:18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.03);
-      border:1px dashed rgba(255,255,255,0.12);
-      color:var(--muted);
-      font-size:.92rem;
-    }
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:14px;
-    }
-
-    .summary-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      min-width:0;
-    }
-
-    .summary-label{
-      color:var(--soft);
-      font-size:.84rem;
-      margin-bottom:8px;
-    }
-
-    .summary-value{
-      font-size:1.08rem;
-      line-height:1.25;
-      font-weight:900;
-      letter-spacing:-0.03em;
-      color:#fff;
-      word-break:break-word;
-    }
-
-    .action-list{
-      display:grid;
-      gap:12px;
-    }
-
-    .action-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:14px;
-      align-items:start;
-    }
-
-    .action-card.locked{
-      opacity:.55;
-    }
-
-    .action-card h3{
-      margin:0 0 6px;
-      font-size:1rem;
-      letter-spacing:-0.02em;
-      color:#fff;
-    }
-
-    .action-card p{
-      margin:0;
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .action-meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:12px;
-    }
-
-    .action-buttons{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      justify-content:flex-end;
-      min-width:240px;
-    }
-
-    .choice-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .choice-card{
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-    }
-
-    .choice-card.highlight{
-      border-color:rgba(255,127,31,0.24);
-      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
-    }
-
-    .choice-card h3{
-      margin:0 0 8px;
-      font-size:1rem;
-      letter-spacing:-0.02em;
-    }
-
-    .choice-card p{
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .price-box{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.12);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff;
-      margin-bottom:12px;
-    }
-
-    .price-box strong{
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
-    }
-
-    .footer-note{
-      margin-top:18px;
-      color:var(--soft);
-      font-size:.88rem;
-      text-align:center;
-    }
-
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(2,10,15,0.72);
-      backdrop-filter:blur(4px);
-      display:none;
-      align-items:center;
-      justify-content:center;
+      max-width:1100px;
+      margin:auto;
       padding:20px;
-      z-index:100;
     }
 
-    .modal-backdrop.open{
-      display:flex;
-    }
+    h1{margin-bottom:10px;}
 
-    .modal{
-      width:min(980px, 100%);
-      max-height:90vh;
-      overflow:auto;
-      border-radius:28px;
-      background:linear-gradient(180deg, #103448, #0a2535);
-      border:1px solid rgba(255,255,255,0.10);
-      box-shadow:var(--shadow);
-    }
-
-    .modal.small{
-      width:min(860px, 100%);
-    }
-
-    .modal-inner{
-      padding:22px;
-    }
-
-    .modal-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .modal h2{
-      margin:0 0 6px;
-      font-size:1.3rem;
-      letter-spacing:-0.02em;
-    }
-
-    .close-btn{
-      border:none;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-      min-width:40px;
-      min-height:40px;
-      border-radius:999px;
-      cursor:pointer;
-      font-size:1.05rem;
-    }
-
-    .close-btn:hover{
-      background:rgba(255,255,255,0.14);
-    }
-
-    .form-grid{
+    .grid{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin:14px 0 18px;
+      grid-template-columns:repeat(2,1fr);
+      gap:16px;
     }
 
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .field.full{
-      grid-column:1 / -1;
-    }
-
-    .field label{
-      color:var(--soft);
-      font-size:.88rem;
-      font-weight:700;
-    }
-
-    .field input,
-    .field select,
-    .field textarea{
-      min-height:46px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.12);
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      outline:none;
-    }
-
-    .field textarea{
-      min-height:110px;
-      padding:12px 14px;
-      resize:vertical;
-    }
-
-    .field input::placeholder,
-    .field textarea::placeholder{
-      color:rgba(244,247,251,0.42);
-    }
-
-    .text-block{
-      white-space:pre-wrap;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:18px;
+    .card{
+      background:#132f3f;
       padding:16px;
+      border-radius:12px;
+    }
+
+    .full{grid-column:1/-1;}
+
+    button{
+      padding:10px 14px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      background:#ff7f1f;
       color:#fff;
-      font-size:.92rem;
-      line-height:1.55;
+      font-weight:bold;
     }
 
-    .kv{
-      display:grid;
-      grid-template-columns:150px 1fr;
-      gap:8px 12px;
-      margin-bottom:14px;
-      font-size:.9rem;
+    input{
+      width:100%;
+      padding:8px;
+      margin-top:6px;
+      border-radius:6px;
+      border:none;
     }
 
-    .kv div:nth-child(odd){
-      color:var(--soft);
-      font-weight:800;
+    .price{
+      margin-top:10px;
+      font-weight:bold;
+      color:#ffd27a;
     }
 
-    .kv div:nth-child(even){
-      color:#fff;
-      font-weight:800;
-    }
-
-    .modal-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:flex-end;
-      margin-top:14px;
-    }
-
-    @media(max-width:1200px){
-      .dashboard-grid{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-        grid-template-areas:
-          "dossiers summary"
-          "actions actions"
-          "choice choice";
-      }
-    }
-
-    @media(max-width:860px){
-      .dashboard-grid{
-        grid-template-columns:1fr;
-        grid-template-areas:
-          "dossiers"
-          "summary"
-          "actions"
-          "choice";
-      }
-
-      .topbar-inner{
-        min-height:unset;
-        padding:14px 0;
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .top-actions{
-        width:100%;
-        justify-content:flex-start;
-      }
-
-      .summary-grid,
-      .choice-grid,
-      .form-grid{
-        grid-template-columns:1fr;
-      }
-
-      .action-card{
-        grid-template-columns:1fr;
-      }
-
-      .action-buttons{
-        justify-content:flex-start;
-        min-width:0;
-      }
-    }
-
-    @media(max-width:560px){
-      .container{
-        width:min(var(--max), calc(100% - 20px));
-      }
-
-      .btn{
-        width:100%;
-      }
-
-      .panel-inner,
-      .hero,
-      .modal-inner{
-        padding:18px;
-      }
-
-      .user-chip{
-        width:100%;
-      }
-
-      .user-email{
-        max-width:100%;
-      }
-
-      .kv{
-        grid-template-columns:1fr;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a href="index.html" class="brand">
-        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
-        <div class="brand-text">
-          <span class="brand-title">Axe Flow</span>
-          <span class="brand-sub">Tableau de bord client</span>
-        </div>
-      </a>
-
-      <div class="top-actions">
-        <div class="user-chip">
-          <span class="user-email" id="userEmail">Chargement...</span>
-          <span class="status-pill neutral" id="userStatusPill">Statut</span>
-          <span class="status-pill neutral" id="userPlanPill">Offre</span>
-        </div>
-        <button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="page">
-    <div class="container">
-
-      <div class="flash-banner" id="flashBanner"></div>
-
-      <section class="hero">
-        <div class="eyebrow">
-          <span class="eyebrow-dot"></span>
-          Recouvrement automatisé
-        </div>
-
-        <h1>Tableau de bord</h1>
-
-        <p>
-          Crée ton dossier, génère les relances, envoie-les depuis ta messagerie, puis avance automatiquement vers la mise en demeure et l’injonction.
-        </p>
-
-        <div class="hero-note">
-          <strong>Logique Axe Flow :</strong> 49 € = relances + mise en demeure automatiques. L’injonction est proposée ensuite en option assistée.
-        </div>
-      </section>
-
-      <section class="dashboard-grid">
-
-        <div class="panel panel-dossiers">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <div>
-                <h2 class="panel-title">Vos dossiers</h2>
-                <div class="panel-sub" id="planSubtitle"></div>
-              </div>
-
-              <button class="btn btn-primary" id="openCreateDossier" type="button">
-                Ajouter un dossier
-              </button>
-            </div>
-
-            <div class="note-box warning" id="createLimitNotice" style="display:none;"></div>
-
-            <div id="extraDossierBox" style="display:none;margin-top:12px;">
-              <div class="note-box">Vous avez atteint votre limite. Débloquez un dossier supplémentaire.</div>
-              <button class="btn btn-primary" id="buyExtraDossierBtn" type="button" style="margin-top:10px;">
-                Débloquer un dossier - 19 €
-              </button>
-            </div>
-
-            <div id="repurchaseOneShotBox" style="display:none;margin-top:12px;">
-              <div class="note-box">Crédit utilisé. Nouveau dossier disponible.</div>
-              <button class="btn btn-primary" id="buyOneShotBtn" type="button" style="margin-top:10px;">
-                Nouveau dossier - 49 €
-              </button>
-            </div>
-
-            <div id="upgradeMonthlyBox" style="display:none;margin-top:12px;">
-              <div class="note-box soft">Passez à l’offre Pro avec 3 dossiers inclus.</div>
-              <button class="btn btn-secondary" id="buyMonthlyBtn" type="button" style="margin-top:10px;">
-                Abonnement 89 € / mois
-              </button>
-            </div>
-
-            <div class="dossier-list" id="dossierList"></div>
-          </div>
-        </div>
-
-        <div class="panel panel-summary">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <h2 class="panel-title">Synthèse</h2>
-            </div>
-
-            <div class="summary-grid">
-              <div class="summary-card">
-                <div class="summary-label">Référence</div>
-                <div class="summary-value" id="summaryRef">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Montant</div>
-                <div class="summary-value" id="amountTTCDisplay">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Débiteur</div>
-                <div class="summary-value" id="summaryDebiteur">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Facture</div>
-                <div class="summary-value" id="summaryInvoice">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Étape</div>
-                <div class="summary-value" id="summaryStep">—</div>
-              </div>
-
-              <div class="summary-card">
-                <div class="summary-label">Prochaine action</div>
-                <div class="summary-value" id="summaryNextAction">—</div>
-              </div>
-            </div>
-
-            <div class="note-box warning" id="nextActionBox" style="margin-top:16px;">
-              <strong id="nextActionTitle" style="display:block;margin-bottom:6px;color:#fff;">
-                Ce que vous devez faire maintenant
-              </strong>
-              <div id="nextActionText">Sélectionnez un dossier pour voir la prochaine action.</div>
-            </div>
-          </div>
-        </div>
-        <div class="panel panel-actions">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <h2 class="panel-title">Actions</h2>
-              <div class="panel-sub">Relances et mise en demeure</div>
-            </div>
-
-            <div class="action-list">
-
-              <div class="action-card" id="cardRelance1">
-                <div>
-                  <h3>Relance 1</h3>
-                  <p>Première relance simple envoyée au débiteur.</p>
-                  <div class="action-meta" id="metaRelance1"></div>
-                </div>
-                <div class="action-buttons">
-                  <button class="btn btn-secondary" data-action="viewRelance1">Voir</button>
-                  <button class="btn btn-primary" data-action="sendRelance1">Marquer envoyée</button>
-                </div>
-              </div>
-
-              <div class="action-card" id="cardRelance2">
-                <div>
-                  <h3>Relance 2</h3>
-                  <p>Relance ferme avec délai supplémentaire.</p>
-                  <div class="action-meta" id="metaRelance2"></div>
-                </div>
-                <div class="action-buttons">
-                  <button class="btn btn-secondary" data-action="viewRelance2">Voir</button>
-                  <button class="btn btn-primary" data-action="sendRelance2">Marquer envoyée</button>
-                </div>
-              </div>
-
-              <div class="action-card" id="cardRelance3">
-                <div>
-                  <h3>Relance 3</h3>
-                  <p>Dernière relance avant mise en demeure.</p>
-                  <div class="action-meta" id="metaRelance3"></div>
-                </div>
-                <div class="action-buttons">
-                  <button class="btn btn-secondary" data-action="viewRelance3">Voir</button>
-                  <button class="btn btn-primary" data-action="sendRelance3">Marquer envoyée</button>
-                </div>
-              </div>
-
-              <div class="action-card" id="cardMed">
-                <div>
-                  <h3>Mise en demeure</h3>
-                  <p>Courrier officiel avant procédure judiciaire.</p>
-                  <div class="action-meta" id="metaMed"></div>
-                </div>
-                <div class="action-buttons">
-                  <button class="btn btn-secondary" data-action="viewMed">Voir</button>
-                  <button class="btn btn-danger" data-action="sendMed">Marquer envoyée</button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-choice">
-          <div class="panel-inner">
-            <div class="panel-head">
-              <h2 class="panel-title">Suite du dossier</h2>
-              <div class="panel-sub">Après mise en demeure</div>
-            </div>
-
-            <div class="choice-grid">
-              <div class="choice-card highlight">
-                <h3>Injonction avec Axe Flow</h3>
-                <p>Dossier pré-rempli + accompagnement complet.</p>
-                <div class="price-box">
-                  <strong>49 €</strong>
-                </div>
-                <button class="btn btn-primary" id="btnInjonction">Lancer l’injonction</button>
-              </div>
-
-              <div class="choice-card">
-                <h3>Par vous-même</h3>
-                <p>Vous utilisez votre propre commissaire de justice.</p>
-                <button class="btn btn-secondary">Je gère seul</button>
-              </div>
-            </div>
-
-            <div class="footer-note">
-              L’injonction devient pertinente après mise en demeure restée sans réponse.
-            </div>
-          </div>
-        </div>
-
-      </section>
-    </div>
-  </main>
-
-  <!-- MODAL CREATION DOSSIER -->
-  <div class="modal-backdrop" id="modalCreate">
-    <div class="modal">
-      <div class="modal-inner">
-
-        <div class="modal-head">
-          <div>
-            <h2>Nouveau dossier</h2>
-          </div>
-          <button class="close-btn" id="closeCreate">✕</button>
-        </div>
-
-        <div class="form-grid">
-
-          <div class="field">
-            <label>Nom débiteur</label>
-            <input id="debiteurNom" placeholder="Nom ou société">
-          </div>
-
-          <div class="field">
-            <label>Email</label>
-            <input id="debiteurEmail" placeholder="email@exemple.com">
-          </div>
-
-          <div class="field">
-            <label>Adresse</label>
-            <input id="debiteurAdresse">
-          </div>
-
-          <div class="field">
-            <label>Ville</label>
-            <input id="debiteurVille">
-          </div>
-
-          <div class="field">
-            <label>Code postal</label>
-            <input id="debiteurCP">
-          </div>
-
-          <div class="field">
-            <label>Montant (€)</label>
-            <input id="montant">
-          </div>
-
-          <div class="field">
-            <label>N° facture</label>
-            <input id="numeroFacture">
-          </div>
-
-          <div class="field">
-            <label>Date facture</label>
-            <input id="dateFacture" type="date">
-          </div>
-
-          <div class="field full">
-            <label>Description</label>
-            <textarea id="description"></textarea>
-          </div>
-
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn btn-secondary" id="cancelCreate">Annuler</button>
-          <button class="btn btn-primary" id="saveDossier">Créer dossier</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL TEXTE -->
-  <div class="modal-backdrop" id="modalText">
-    <div class="modal small">
-      <div class="modal-inner">
-
-        <div class="modal-head">
-          <div>
-            <h2 id="modalTitle">Relance</h2>
-          </div>
-          <button class="close-btn" id="closeText">✕</button>
-        </div>
-
-        <div class="kv">
-          <div>Débiteur</div><div id="kvClient"></div>
-          <div>Email</div><div id="kvEmail"></div>
-          <div>Facture</div><div id="kvFacture"></div>
-          <div>Montant</div><div id="kvMontant"></div>
-        </div>
-
-        <div class="text-block" id="textBlock"></div>
-
-        <div class="modal-actions">
-          <a class="btn btn-secondary" id="btnMail">Ouvrir email</a>
-        </div>
-
-      </div>
-    </div>
-  </div>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      orderBy,
-      getDocs,
-      addDoc,
-      doc,
-      getDoc,
-      updateDoc,
-      serverTimestamp,
-      Timestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-      authDomain: "axe-flow.firebaseapp.com",
-      projectId: "axe-flow",
-      storageBucket: "axe-flow.firebasestorage.app",
-      messagingSenderId: "295300543556",
-      appId: "1:295300543556:web:3facac2d0c612e3456b811"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const DAY_MS = 24 * 60 * 60 * 1000;
-
-    let currentUser = null;
-    let dossiers = [];
-    let currentDossier = null;
-
-    const userEmail = document.getElementById("userEmail");
-    const userStatusPill = document.getElementById("userStatusPill");
-    const userPlanPill = document.getElementById("userPlanPill");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    const openCreateDossier = document.getElementById("openCreateDossier");
-    const dossierList = document.getElementById("dossierList");
-
-    const summaryRef = document.getElementById("summaryRef");
-    const amountTTCDisplay = document.getElementById("amountTTCDisplay");
-    const summaryDebiteur = document.getElementById("summaryDebiteur");
-    const summaryType = document.getElementById("summaryType");
-    const summaryInvoice = document.getElementById("summaryInvoice");
-    const summaryStatus = document.getElementById("summaryStatus");
-
-    const nextActionTitle = document.getElementById("nextActionTitle");
-    const nextActionText = document.getElementById("nextActionText");
-
-    const metaRelance1 = document.getElementById("metaRelance1");
-    const metaRelance2 = document.getElementById("metaRelance2");
-    const metaRelance3 = document.getElementById("metaRelance3");
-    const metaMed = document.getElementById("metaMed");
-
-    const modalCreate = document.getElementById("modalCreate");
-    const closeCreate = document.getElementById("closeCreate");
-    const cancelCreate = document.getElementById("cancelCreate");
-    const saveDossier = document.getElementById("saveDossier");
-
-    const debiteurNom = document.getElementById("debiteurNom");
-    const debiteurEmail = document.getElementById("debiteurEmail");
-    const debiteurAdresse = document.getElementById("debiteurAdresse");
-    const debiteurVille = document.getElementById("debiteurVille");
-    const debiteurCP = document.getElementById("debiteurCP");
-    const montant = document.getElementById("montant");
-    const numeroFacture = document.getElementById("numeroFacture");
-    const dateFacture = document.getElementById("dateFacture");
-    const description = document.getElementById("description");
-
-    const modalText = document.getElementById("modalText");
-    const closeText = document.getElementById("closeText");
-    const modalTitle = document.getElementById("modalTitle");
-    const textBlock = document.getElementById("textBlock");
-    const btnMail = document.getElementById("btnMail");
-
-    const kvClient = document.getElementById("kvClient");
-    const kvEmail = document.getElementById("kvEmail");
-    const kvFacture = document.getElementById("kvFacture");
-    const kvMontant = document.getElementById("kvMontant");
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+<div class="container">
+
+<h1>Tableau de bord</h1>
+
+<!-- PLAN -->
+<div class="card full">
+  <strong>Votre offre :</strong>
+  <span id="planInfo">Chargement...</span>
+</div>
+
+<!-- DOSSIERS -->
+<div class="card">
+  <h3>Vos dossiers</h3>
+
+  <button onclick="createNewDossier()">Nouveau dossier (49€)</button>
+
+  <p style="margin-top:10px;">
+    ou
+  </p>
+
+  <button onclick="subscribe()">Abonnement 89€/mois (3 dossiers inclus)</button>
+</div>
+
+<!-- SYNTHESE -->
+<div class="card">
+  <h3>Synthèse</h3>
+
+  <div>Statut : <span id="status">—</span></div>
+  <div>Prochaine échéance : <span id="deadline">—</span></div>
+</div>
+
+<!-- RELANCES -->
+<div class="card full">
+  <h3>Relances</h3>
+
+  <button>Relance 1</button>
+  <button>Relance 2</button>
+  <button>Relance 3</button>
+  <button>Mise en demeure</button>
+</div>
+
+<!-- INJONCTION -->
+<div class="card full">
+  <h3>Injonction de payer (Axe Flow)</h3>
+
+  <input id="amount" type="number" placeholder="Montant de la facture (€)" />
+
+  <label style="display:flex;gap:8px;margin-top:10px;">
+    <input type="checkbox" id="urgent" />
+    Traitement prioritaire 24h (+90€)
+  </label>
+
+  <div class="price" id="price">—</div>
+
+  <p style="font-size:0.9rem;margin-top:10px;color:#ccc;">
+    Les frais peuvent être demandés au débiteur dans la procédure.
+  </p>
+
+  <button style="margin-top:10px;" onclick="payInjunction()">
+    Lancer l’injonction
+  </button>
+</div>
+<script>
+  const STRIPE_LINKS = {
+    oneShot49: "#",
+    monthly89: "#",
+    inj85: "#",
+    inj140: "#",
+    inj247: "#",
+    inj175: "#",
+    inj230: "#",
+    inj337: "#"
+  };
+
+  function calculateInjunctionPrice(amount, urgent) {
+    if (amount < 128) return urgent ? 175 : 85;
+    if (amount <= 1280) return urgent ? 230 : 140;
+    return urgent ? 337 : 247;
+  }
+
+  function updatePrice() {
+    const amount = Number(document.getElementById("amount").value || 0);
+    const urgent = document.getElementById("urgent").checked;
+    const price = amount > 0 ? calculateInjunctionPrice(amount, urgent) : null;
+
+    document.getElementById("price").textContent =
+      price ? `Tarif Axe Flow : ${price} €` : "Indiquez le montant de la facture.";
+  }
+
+  function payInjunction() {
+    const amount = Number(document.getElementById("amount").value || 0);
+    const urgent = document.getElementById("urgent").checked;
+
+    if (!amount) {
+      alert("Indique le montant de la facture.");
+      return;
     }
 
-    function formatMoney(value) {
-      const n = Number(value || 0);
-      return n.toLocaleString("fr-FR", {
-        style: "currency",
-        currency: "EUR"
-      });
-    }
-
-    function formatDate(value) {
-      if (!value) return "—";
-      const date = value?.toDate ? value.toDate() : new Date(value);
-      if (isNaN(date.getTime())) return "—";
-      return date.toLocaleDateString("fr-FR");
-    }
-
-    function tsPlusDays(days) {
-      return Timestamp.fromMillis(Date.now() + Number(days || 0) * DAY_MS);
-    }
-
-    function openModal(modal) {
-      modal.classList.add("open");
-    }
-
-    function closeModal(modal) {
-      modal.classList.remove("open");
-    }
-
-    function generateRef() {
-      return `AF-${new Date().getFullYear()}-${String(dossiers.length + 1).padStart(3, "0")}`;
-    }
-
-    function getDossierDocRef(id) {
-      return doc(db, "users", currentUser.uid, "requests", id);
-    }
-
-    function getRelanceData(dossier) {
-      return dossier.recouvrement || {};
-    }
-
-    function getNextActionLabel(dossier) {
-      const rec = getRelanceData(dossier);
-
-      if (!rec.relance1At) return "Relance 1 à envoyer";
-      if (!rec.relance2At) return "Relance 2 à envoyer";
-      if (!rec.relance3At) return "Relance 3 à envoyer";
-      if (!rec.miseEnDemeureAt) return "Mise en demeure à envoyer";
-
-      return "Proposition d’injonction";
-    }
-
-    function updateSummary(dossier) {
-      currentDossier = dossier;
-
-      summaryRef.textContent = dossier.ref || "—";
-      amountTTCDisplay.textContent = formatMoney(dossier.amountTTC);
-      summaryDebiteur.textContent = dossier.debiteurName || "—";
-      summaryType.textContent = dossier.debiteurType || "—";
-      summaryInvoice.textContent = `${dossier.invoiceRef || "—"} — ${formatDate(dossier.invoiceDate)}`;
-      summaryStatus.textContent = dossier.statusLabel || "Dossier créé";
-
-      nextActionTitle.textContent = getNextActionLabel(dossier);
-      nextActionText.textContent =
-        "Ouvrez le document, envoyez-le au débiteur, puis marquez l’étape comme envoyée.";
-
-      renderActionState(dossier);
-      renderDossiers();
-    }
-
-    function renderActionState(dossier) {
-      const rec = getRelanceData(dossier);
-
-      metaRelance1.textContent = rec.relance1At
-        ? `Envoyée le ${formatDate(rec.relance1At)}`
-        : "Disponible maintenant";
-
-      metaRelance2.textContent = rec.relance2At
-        ? `Envoyée le ${formatDate(rec.relance2At)}`
-        : rec.relance1At
-          ? "Disponible après relance 1"
-          : "Verrouillée";
-
-      metaRelance3.textContent = rec.relance3At
-        ? `Envoyée le ${formatDate(rec.relance3At)}`
-        : rec.relance2At
-          ? "Disponible après relance 2"
-          : "Verrouillée";
-
-      metaMed.textContent = rec.miseEnDemeureAt
-        ? `Envoyée le ${formatDate(rec.miseEnDemeureAt)}`
-        : rec.relance3At
-          ? "Disponible après relance 3"
-          : "Verrouillée";
-    }
-
-    function renderDossiers() {
-      dossierList.innerHTML = "";
-
-      if (!dossiers.length) {
-        dossierList.innerHTML = `<div class="empty-state">Aucun dossier créé.</div>`;
-        return;
-      }
-
-      dossiers.forEach((dossier) => {
-        const isActive = currentDossier && currentDossier.id === dossier.id;
-
-        const card = document.createElement("div");
-        card.className = `dossier-card ${isActive ? "active" : ""}`;
-
-        card.innerHTML = `
-          <div>
-            <strong>${escapeHtml(dossier.ref || "Dossier")}</strong>
-            <span>${escapeHtml(dossier.debiteurName || "Débiteur non renseigné")}</span>
-            <span>${escapeHtml(formatMoney(dossier.amountTTC || 0))}</span>
-          </div>
-          <span class="badge warning">${escapeHtml(getNextActionLabel(dossier))}</span>
-        `;
-
-        card.addEventListener("click", () => updateSummary(dossier));
-        dossierList.appendChild(card);
-      });
-    }
-
-    async function loadDossiers() {
-      const ref = collection(db, "users", currentUser.uid, "requests");
-      const snap = await getDocs(query(ref, orderBy("createdAt", "asc")));
-
-      dossiers = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data()
-      }));
-
-      if (!dossiers.length) {
-        renderDossiers();
-        return;
-      }
-
-      updateSummary(currentDossier || dossiers[0]);
-    }
-
-    async function createDossier() {
-      const name = debiteurNom.value.trim();
-      const email = debiteurEmail.value.trim();
-      const address = debiteurAdresse.value.trim();
-      const city = debiteurVille.value.trim();
-      const zip = debiteurCP.value.trim();
-      const amount = Number(montant.value || 0);
-      const invoiceRef = numeroFacture.value.trim();
-      const invoiceDate = dateFacture.value;
-      const summary = description.value.trim();
-
-      if (!name || !amount || !invoiceRef || !invoiceDate) {
-        alert("Nom débiteur, montant, numéro de facture et date de facture sont obligatoires.");
-        return;
-      }
-
-      await addDoc(collection(db, "users", currentUser.uid, "requests"), {
-        ref: generateRef(),
-        label: `Dossier ${name}`,
-        debiteurName: name,
-        debiteurEmail: email,
-        debiteurAddress: address,
-        debiteurCity: city,
-        debiteurZip: zip,
-        debiteurType: "professionnel",
-        amountTTC: amount,
-        invoiceRef,
-        invoiceDate,
-        dossierSummary: summary,
-        status: "open",
-        statusLabel: "Dossier créé",
-        currentStep: "relance_1_ready",
-        lifecycleStatus: "open",
-        paymentStatus: "paid",
-        clientUid: currentUser.uid,
-        recouvrement: {
-          relanceLevel: 0,
-          nextAction: "RELANCE_1",
-          nextActionAt: serverTimestamp()
-        },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
-      closeModal(modalCreate);
-      debiteurNom.value = "";
-      debiteurEmail.value = "";
-      debiteurAdresse.value = "";
-      debiteurVille.value = "";
-      debiteurCP.value = "";
-      montant.value = "";
-      numeroFacture.value = "";
-      dateFacture.value = "";
-      description.value = "";
-
-      await loadDossiers();
-    }
-
-    function buildRelanceText(level, dossier) {
-      const client = dossier.debiteurName || "Madame, Monsieur";
-      const invoice = dossier.invoiceRef || "—";
-      const amount = formatMoney(dossier.amountTTC);
-      const date = formatDate(dossier.invoiceDate);
-
-      if (level === 1) {
-        return `Objet : Relance de paiement – Facture ${invoice}
-
-${client},
-
-Sauf erreur de notre part, la facture ${invoice}, émise le ${date}, présente à ce jour un solde restant dû de ${amount}.
-
-Nous vous remercions de procéder au règlement dans les plus brefs délais, ou de nous indiquer votre date de paiement.
-
-Si vous avez déjà effectué le paiement, nous vous prions de ne pas tenir compte de ce message.
-
-Cordialement,
-Service recouvrement Axe Flow`;
-      }
-
-      if (level === 2) {
-        return `Objet : Deuxième relance – Facture ${invoice}
-
-${client},
-
-Malgré une première relance, la facture ${invoice}, émise le ${date}, demeure impayée.
-
-Le solde restant dû est de ${amount}.
-
-Nous vous remercions de régulariser la situation sous 7 jours.
-
-À défaut, une dernière relance avant mise en demeure sera émise.
-
-Cordialement,
-Service recouvrement Axe Flow`;
-      }
-
-      return `Objet : Dernière relance avant mise en demeure – Facture ${invoice}
-
-${client},
-
-À ce jour, la facture ${invoice}, émise le ${date}, reste impayée malgré nos précédentes relances.
-
-Le solde restant dû est de ${amount}.
-
-Sans règlement sous 7 jours, une mise en demeure sera établie.
-
-Cordialement,
-Service recouvrement Axe Flow`;
-    }
-
-    function buildMiseEnDemeureText(dossier) {
-      const client = dossier.debiteurName || "Madame, Monsieur";
-      const invoice = dossier.invoiceRef || "—";
-      const amount = formatMoney(dossier.amountTTC);
-      const date = formatDate(dossier.invoiceDate);
-
-      return `Objet : Mise en demeure de payer – Facture ${invoice}
-
-${client},
-
-Par la présente, nous vous mettons en demeure de régler la somme de ${amount} au titre de la facture ${invoice}, émise le ${date}.
-
-À défaut de paiement intégral sous 8 jours à compter de la réception du présent courrier, une procédure de recouvrement pourra être engagée.
-
-Cordialement,
-Service recouvrement Axe Flow`;
-    }
-
-    function openText(kind, level = 1) {
-      if (!currentDossier) return;
-
-      const text = kind === "MED"
-        ? buildMiseEnDemeureText(currentDossier)
-        : buildRelanceText(level, currentDossier);
-
-      const subject = kind === "MED"
-        ? `Mise en demeure de payer – Facture ${currentDossier.invoiceRef || ""}`
-        : `Relance ${level} – Facture ${currentDossier.invoiceRef || ""}`;
-
-      modalTitle.textContent = kind === "MED" ? "Mise en demeure" : `Relance ${level}`;
-      textBlock.textContent = text;
-
-      kvClient.textContent = currentDossier.debiteurName || "—";
-      kvEmail.textContent = currentDossier.debiteurEmail || "—";
-      kvFacture.textContent = currentDossier.invoiceRef || "—";
-      kvMontant.textContent = formatMoney(currentDossier.amountTTC);
-
-      btnMail.href = `mailto:${encodeURIComponent(currentDossier.debiteurEmail || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
-
-      openModal(modalText);
-    }
-
-    async function markSent(kind, level = 1) {
-      if (!currentDossier) return;
-
-      const patch = {
-        updatedAt: serverTimestamp()
-      };
-
-      if (kind === "RELANCE") {
-        patch["recouvrement.relanceLevel"] = level;
-        patch[`recouvrement.relance${level}At`] = serverTimestamp();
-
-        if (level === 1) {
-          patch["recouvrement.nextAction"] = "RELANCE_2";
-          patch["recouvrement.nextActionAt"] = tsPlusDays(7);
-          patch.statusLabel = "Relance 1 envoyée";
-          patch.currentStep = "relance_2_ready";
-        }
-
-        if (level === 2) {
-          patch["recouvrement.nextAction"] = "RELANCE_3";
-          patch["recouvrement.nextActionAt"] = tsPlusDays(7);
-          patch.statusLabel = "Relance 2 envoyée";
-          patch.currentStep = "relance_3_ready";
-        }
-
-        if (level === 3) {
-          patch["recouvrement.nextAction"] = "MISE_EN_DEMEURE";
-          patch["recouvrement.nextActionAt"] = tsPlusDays(7);
-          patch.statusLabel = "Relance 3 envoyée";
-          patch.currentStep = "mise_en_demeure_ready";
-        }
-      }
-
-      if (kind === "MED") {
-        patch["recouvrement.miseEnDemeureAt"] = serverTimestamp();
-        patch["recouvrement.nextAction"] = "INJONCTION";
-        patch["recouvrement.nextActionAt"] = tsPlusDays(8);
-        patch.statusLabel = "Mise en demeure envoyée";
-        patch.currentStep = "injunction_ready";
-      }
-
-      await updateDoc(getDossierDocRef(currentDossier.id), patch);
-      await loadDossiers();
-    }
-
-    document.addEventListener("click", async (event) => {
-      const btn = event.target.closest("[data-action]");
-      if (!btn) return;
-
-      const action = btn.dataset.action;
-
-      if (action === "viewRelance1") openText("RELANCE", 1);
-      if (action === "viewRelance2") openText("RELANCE", 2);
-      if (action === "viewRelance3") openText("RELANCE", 3);
-      if (action === "viewMed") openText("MED");
-
-      if (action === "sendRelance1") await markSent("RELANCE", 1);
-      if (action === "sendRelance2") await markSent("RELANCE", 2);
-      if (action === "sendRelance3") await markSent("RELANCE", 3);
-      if (action === "sendMed") await markSent("MED");
-    });
-
-    openCreateDossier.addEventListener("click", () => openModal(modalCreate));
-    closeCreate.addEventListener("click", () => closeModal(modalCreate));
-    cancelCreate.addEventListener("click", () => closeModal(modalCreate));
-    saveDossier.addEventListener("click", createDossier);
-    closeText.addEventListener("click", () => closeModal(modalText));
-
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "connexion.html";
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "connexion.html";
-        return;
-      }
-
-      currentUser = user;
-      userEmail.textContent = user.email || "Compte connecté";
-      userStatusPill.textContent = "Actif";
-      userStatusPill.className = "status-pill success";
-      userPlanPill.textContent = "Axe Flow";
-      userPlanPill.className = "status-pill neutral";
-
-      await loadDossiers();
-    });
-  </script>
+    const price = calculateInjunctionPrice(amount, urgent);
+
+    const link =
+      price === 85 ? STRIPE_LINKS.inj85 :
+      price === 140 ? STRIPE_LINKS.inj140 :
+      price === 247 ? STRIPE_LINKS.inj247 :
+      price === 175 ? STRIPE_LINKS.inj175 :
+      price === 230 ? STRIPE_LINKS.inj230 :
+      STRIPE_LINKS.inj337;
+
+    window.location.href = link;
+  }
+
+  function createNewDossier() {
+    window.location.href = STRIPE_LINKS.oneShot49;
+  }
+
+  function subscribe() {
+    window.location.href = STRIPE_LINKS.monthly89;
+  }
+
+  document.getElementById("amount").addEventListener("input", updatePrice);
+  document.getElementById("urgent").addEventListener("change", updatePrice);
+
+  document.getElementById("planInfo").textContent =
+    "Offre ponctuelle 49€ ou abonnement 89€/mois avec 3 dossiers inclus.";
+</script>
+
+</div>
 </body>
 </html>
-
-    
