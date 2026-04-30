@@ -5,193 +5,1449 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow — Tableau de bord client</title>
-  <meta name="description" content="Tableau de bord client Axe Flow : suivi dossier, documents, relances et injonction." />
+  <meta name="description" content="Tableau de bord client Axe Flow : création du dossier, dépôt des pièces, suivi des étapes publiées, action injonction et dépôt des justificatifs." />
   <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
+    :root{
+      --bg:#071e2b;
+      --bg-2:#0b3145;
+      --bg-3:#0f3e56;
+      --panel:rgba(255,255,255,0.06);
+      --panel-2:rgba(255,255,255,0.04);
+      --line:rgba(255,255,255,0.09);
+      --line-strong:rgba(255,255,255,0.14);
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,0.76);
+      --soft:rgba(244,247,251,0.58);
+      --accent:#ff7f1f;
+      --accent-2:#ff9b4a;
+      --success:#3dd08f;
+      --warning:#ffb347;
+      --danger:#ff6b6b;
+      --shadow:0 24px 80px rgba(0,0,0,0.28);
+      --max:1320px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
     body{
       margin:0;
-      font-family:Arial,sans-serif;
-      background:#0b1f2a;
-      color:#fff;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,127,31,0.08), transparent 24%),
+        linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
+      line-height:1.5;
     }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button,input,select,textarea{font:inherit}
 
     .container{
-      max-width:1100px;
-      margin:auto;
-      padding:20px;
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
     }
 
-    h1{margin-bottom:10px;}
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:16px;
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,0.66);
+      border-bottom:1px solid rgba(255,255,255,0.08);
     }
 
-    .card{
-      background:#132f3f;
-      padding:16px;
-      border-radius:12px;
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
     }
 
-    .full{grid-column:1/-1;}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
 
-    button{
-      padding:10px 14px;
-      border:none;
-      border-radius:8px;
-      cursor:pointer;
-      background:#ff7f1f;
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .user-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
       color:#fff;
-      font-weight:bold;
+      font-size:.9rem;
+      font-weight:600;
+      max-width:100%;
+      flex-wrap:wrap;
     }
 
-    input{
+    .user-email{
+      max-width:220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .status-pill.success{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .status-pill.warning{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .status-pill.danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .status-pill.neutral{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
+    .page{
+      padding:28px 0 44px;
+    }
+
+    .hero{
+      margin-bottom:18px;
+      padding:28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:none;
       width:100%;
-      padding:8px;
-      margin-top:6px;
-      border-radius:6px;
+      font-size:1rem;
+    }
+
+    .hero-note{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .hero-note strong{color:#fff}
+
+    .flash-banner{
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:18px;
+      border:1px solid rgba(61,208,143,0.22);
+      background:rgba(61,208,143,0.12);
+      color:#d9ffee;
+      font-size:.92rem;
+      display:none;
+    }
+
+    .flash-banner.show{display:block}
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0,1fr));
+      gap:18px;
+      align-items:start;
+      grid-template-areas:
+        "dossiers dossiers dossiers dossiers summary summary summary summary summary summary summary summary"
+        "upload upload upload upload upload upload timeline timeline timeline timeline timeline timeline"
+        "injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction";
+    }
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-width:0;
+    }
+
+    .panel-dossiers{grid-area:dossiers}
+    .panel-summary{grid-area:summary}
+    .panel-upload{grid-area:upload}
+    .panel-timeline{grid-area:timeline}
+    .panel-injunction{grid-area:injunction}
+
+    .panel-inner{padding:22px}
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0 0 6px;
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-sub{
+      color:var(--soft);
+      font-size:.9rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.92rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+      text-align:center;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,0.12);
+      color:#ffdede;
+      border-color:rgba(255,107,107,0.24);
+    }
+
+    .btn-danger:hover{
+      background:rgba(255,107,107,0.18);
+      transform:translateY(-1px);
+    }
+
+    .btn[disabled],
+    .btn.is-disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      pointer-events:none;
+      box-shadow:none;
+      transform:none;
+      filter:none;
+    }
+
+    .note-box{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.10);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff4ea;
+      font-size:.92rem;
+    }
+
+    .note-box.soft{
+      background:rgba(255,255,255,0.04);
+      border-color:rgba(255,255,255,0.08);
+      color:var(--muted);
+    }
+
+    .note-box.success{
+      background:rgba(61,208,143,0.12);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .note-box.warning{
+      background:rgba(255,179,71,0.12);
+      border-color:rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .dossier-list{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .dossier-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .dossier-card:hover{
+      background:rgba(255,255,255,0.06);
+      transform:translateY(-1px);
+    }
+
+    .dossier-card.active{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .dossier-card strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .dossier-card span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .badge.included{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .badge.warning{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .badge.danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .badge.neutral{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
+    .empty-state{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px dashed rgba(255,255,255,0.12);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:14px;
+      margin-bottom:0;
+    }
+
+    .summary-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      min-width:0;
+    }
+
+    .summary-card.wide{
+      grid-column:1 / -1;
+    }
+
+    .summary-label{
+      color:var(--soft);
+      font-size:.84rem;
+      margin-bottom:8px;
+    }
+
+    .summary-value{
+      font-size:1.08rem;
+      line-height:1.25;
+      font-weight:800;
+      letter-spacing:-0.03em;
+      color:#fff;
+      word-break:break-word;
+    }
+
+    .upload-grid{
+      display:grid;
+      gap:12px;
+    }
+
+    .upload-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .upload-card strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .upload-card span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+      max-width:54ch;
+    }
+
+    .upload-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      flex:0 0 auto;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .upload-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:40px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#fff;
+      font-size:.86rem;
+      font-weight:800;
+      white-space:nowrap;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .upload-btn:hover{
+      background:rgba(255,255,255,0.09);
+      transform:translateY(-1px);
+    }
+
+    .upload-btn input{display:none}
+
+    .file-status{
+      margin-top:8px;
+      font-size:.82rem !important;
+      color:var(--soft) !important;
+    }
+
+    .file-status.ok{color:#d9ffee !important}
+
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .timeline-item{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+    }
+
+    .timeline-main{
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    .timeline-main strong{
+      display:block;
+      font-size:1rem;
+      color:#fff;
+      margin-bottom:6px;
+    }
+
+    .timeline-main span{
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .timeline-meta{
+      display:inline-flex;
+      align-items:center;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem !important;
+      font-weight:800;
+      color:#fff !important;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      margin-bottom:10px;
+    }
+
+    .injunction-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .injunction-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .injunction-card.highlight{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .injunction-card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+      letter-spacing:-0.02em;
+    }
+
+    .injunction-card p{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .price-box{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.12);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff;
+      margin-bottom:12px;
+    }
+
+    .price-box strong{
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    .checkbox-row{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      color:var(--muted);
+      font-size:.92rem;
+      margin:12px 0;
+    }
+
+    .checkbox-row input{
+      width:18px;
+      height:18px;
+      margin-top:2px;
+      accent-color:#ff7f1f;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(2,10,15,0.72);
+      backdrop-filter:blur(4px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:100;
+    }
+
+    .modal-backdrop.open{display:flex}
+
+    .modal{
+      width:min(980px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border-radius:28px;
+      background:linear-gradient(180deg, #103448, #0a2535);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:var(--shadow);
+    }
+
+    .modal.small{width:min(860px, 100%)}
+
+    .modal-inner{padding:22px}
+
+    .modal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .modal h2{
+      margin:0 0 6px;
+      font-size:1.3rem;
+      letter-spacing:-0.02em;
+    }
+
+    .close-btn{
       border:none;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      min-width:40px;
+      min-height:40px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:1.05rem;
     }
 
-    .price{
+    .close-btn:hover{background:rgba(255,255,255,0.14)}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin:14px 0 18px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field.full{grid-column:1 / -1}
+
+    .field label{
+      color:var(--soft);
+      font-size:.88rem;
+      font-weight:600;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      min-height:46px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:110px;
+      padding:12px 14px;
+      resize:vertical;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder{
+      color:rgba(244,247,251,0.42);
+    }
+
+    .field input[readonly]{opacity:.9}
+
+    .file-list{
+      display:grid;
+      gap:10px;
       margin-top:10px;
-      font-weight:bold;
-      color:#ffd27a;
     }
 
+    .file-item{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .file-item strong{
+      display:block;
+      font-size:.92rem;
+      margin-bottom:4px;
+      color:#fff;
+    }
+
+    .file-item span{
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    @media (max-width: 1200px){
+      .dashboard-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+        grid-template-areas:
+          "dossiers summary"
+          "upload upload"
+          "timeline timeline"
+          "injunction injunction";
+      }
+    }
+
+    @media (max-width: 860px){
+      .dashboard-grid{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "dossiers"
+          "summary"
+          "upload"
+          "timeline"
+          "injunction";
+      }
+
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .top-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .upload-card,
+      .file-item,
+      .timeline-item{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .summary-grid,
+      .form-grid,
+      .injunction-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .btn{width:100%}
+
+      .panel-inner,
+      .hero,
+      .modal-inner{
+        padding:18px;
+      }
+
+      .upload-actions{
+        width:100%;
+      }
+
+      .upload-actions .btn,
+      .upload-actions .upload-btn{
+        width:100%;
+      }
+
+      .user-chip{
+        max-width:100%;
+        width:100%;
+      }
+
+      .user-email{
+        max-width:100%;
+      }
+
+      .file-item > div:last-child{
+        width:100%;
+      }
+
+      .file-item > div:last-child .btn{
+        width:100%;
+      }
+    }
   </style>
 </head>
-
 <body>
-<div class="container">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div class="brand-text">
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Tableau de bord client</span>
+        </div>
+      </a>
 
-<h1>Tableau de bord</h1>
+      <div class="top-actions">
+        <div class="user-chip" id="userChip">
+          <span class="user-email" id="userEmail">Chargement...</span>
+          <span class="status-pill neutral" id="userStatusPill">Statut</span>
+          <span class="status-pill neutral" id="userPlanPill">Offre</span>
+        </div>
+        <button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button>
+      </div>
+    </div>
+  </header>
 
-<!-- PLAN -->
-<div class="card full">
-  <strong>Votre offre :</strong>
-  <span id="planInfo">Chargement...</span>
-</div>
+  <main class="page">
+    <div class="container">
 
-<!-- DOSSIERS -->
-<div class="card">
-  <h3>Vos dossiers</h3>
+      <div class="flash-banner" id="flashBanner"></div>
 
-  <button onclick="createNewDossier()">Nouveau dossier (49€)</button>
+      <section class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Gestion complète de vos impayés
+        </div>
 
-  <p style="margin-top:10px;">
-    ou
-  </p>
+        <h1>Tableau de bord</h1>
 
-  <button onclick="subscribe()">Abonnement 89€/mois (3 dossiers inclus)</button>
-</div>
+        <p>
+          Centralisez vos dossiers, déposez vos pièces, suivez les actions menées et pilotez votre recouvrement.
+        </p>
 
-<!-- SYNTHESE -->
-<div class="card">
-  <h3>Synthèse</h3>
+        <div class="hero-note">
+          <strong>Important :</strong> Axe Flow prépare les documents. L’injonction est ensuite gérée depuis votre espace selon le montant de la créance.
+        </div>
+      </section>
 
-  <div>Statut : <span id="status">—</span></div>
-  <div>Prochaine échéance : <span id="deadline">—</span></div>
-</div>
+      <section class="dashboard-grid">
 
-<!-- RELANCES -->
-<div class="card full">
-  <h3>Relances</h3>
+        <div class="panel panel-dossiers">
+          <div class="panel-inner">
 
-  <button>Relance 1</button>
-  <button>Relance 2</button>
-  <button>Relance 3</button>
-  <button>Mise en demeure</button>
-</div>
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Vos dossiers</h2>
+                <div class="panel-sub" id="planSubtitle"></div>
+              </div>
 
-<!-- INJONCTION -->
-<div class="card full">
-  <h3>Injonction de payer (Axe Flow)</h3>
+              <button class="btn btn-primary" id="openCreateDossier" type="button">
+                Ajouter un dossier
+              </button>
+            </div>
 
-  <input id="amount" type="number" placeholder="Montant de la facture (€)" />
+            <div class="note-box warning" id="createLimitNotice" style="display:none;"></div>
 
-  <label style="display:flex;gap:8px;margin-top:10px;">
-    <input type="checkbox" id="urgent" />
-    Traitement prioritaire 24h (+90€)
-  </label>
+            <div id="extraDossierBox" style="display:none;margin-top:12px;">
+              <div class="note-box">
+                Vous avez atteint votre limite. Débloquez un dossier supplémentaire.
+              </div>
+              <button class="btn btn-primary" id="buyExtraDossierBtn" type="button" style="margin-top:10px;">
+                Débloquer un dossier - 19 €
+              </button>
+            </div>
 
-  <div class="price" id="price">—</div>
+            <div id="repurchaseOneShotBox" style="display:none;margin-top:12px;">
+              <div class="note-box">
+                Crédit utilisé. Vous pouvez ouvrir un nouveau dossier ponctuel.
+              </div>
+              <button class="btn btn-primary" id="buyOneShotBtn" type="button" style="margin-top:10px;">
+                Nouveau dossier - 49 €
+              </button>
+            </div>
 
-  <p style="font-size:0.9rem;margin-top:10px;color:#ccc;">
-    Les frais peuvent être demandés au débiteur dans la procédure.
-  </p>
+            <div id="upgradeMonthlyBox" style="display:none;margin-top:12px;">
+              <div class="note-box soft">
+                Passez à l’offre Pro : 3 dossiers inclus puis 19 € par dossier supplémentaire.
+              </div>
+              <button class="btn btn-secondary" id="buyMonthlyBtn" type="button" style="margin-top:10px;">
+                Abonnement 89 € / mois
+              </button>
+            </div>
 
-  <button style="margin-top:10px;" onclick="payInjunction()">
-    Lancer l’injonction
-  </button>
-</div>
-<script>
-  const STRIPE_LINKS = {
-    oneShot49: "#",
-    monthly89: "#",
-    inj85: "#",
-    inj140: "#",
-    inj247: "#",
-    inj175: "#",
-    inj230: "#",
-    inj337: "#"
-  };
+            <div class="dossier-list" id="dossierList"></div>
 
-  function calculateInjunctionPrice(amount, urgent) {
-    if (amount < 128) return urgent ? 175 : 85;
-    if (amount <= 1280) return urgent ? 230 : 140;
-    return urgent ? 337 : 247;
+          </div>
+        </div>
+
+        <div class="panel panel-summary">
+          <div class="panel-inner">
+
+            <div class="panel-head">
+              <h2 class="panel-title">Synthèse</h2>
+            </div>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <div class="summary-label">Référence</div>
+                <div class="summary-value" id="summaryRef">—</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Montant</div>
+                <div class="summary-value" id="amountTTCDisplay">—</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Débiteur</div>
+                <div class="summary-value" id="summaryDebiteur">—</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Type</div>
+                <div class="summary-value" id="summaryType">—</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Facture</div>
+                <div class="summary-value" id="summaryInvoice">—</div>
+              </div>
+
+              <div class="summary-card">
+                <div class="summary-label">Échéance</div>
+                <div class="summary-value" id="summaryDueDate">—</div>
+              </div>
+
+              <div class="summary-card wide">
+                <div class="summary-label">Statut</div>
+                <div class="summary-value" id="summaryStatus">—</div>
+              </div>
+
+              <div class="summary-card wide">
+                <div class="note-box warning" id="nextActionBox">
+                  <strong id="nextActionTitle" style="display:block;margin-bottom:6px;color:#fff;">
+                    Ce que vous devez faire maintenant
+                  </strong>
+                  <div id="nextActionText">Sélectionnez un dossier pour voir la prochaine action.</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="panel panel-upload">
+          <div class="panel-inner">
+
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Pièces du dossier</h2>
+                <div class="panel-sub">Déposez ici vos pièces dossier. Vous pouvez ensuite les envoyer, les voir ou les supprimer.</div>
+              </div>
+            </div>
+
+            <div class="upload-grid">
+
+              <div class="upload-card" data-doc-type="quote">
+                <div>
+                  <strong>Devis / bon de commande</strong>
+                  <span>Ajoutez le document à l’origine de la créance.</span>
+                  <span class="file-status" id="status-quote">Aucun fichier envoyé.</span>
+                </div>
+
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="quote" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="quote">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="quote">Voir</button>
+                  <button class="btn btn-danger" type="button" data-upload-delete="quote">Supprimer</button>
+                </div>
+              </div>
+
+              <div class="upload-card" data-doc-type="invoice">
+                <div>
+                  <strong>Facture impayée</strong>
+                  <span>Déposez la facture concernée par le dossier.</span>
+                  <span class="file-status" id="status-invoice">Aucun fichier envoyé.</span>
+                </div>
+
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="invoice" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="invoice">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="invoice">Voir</button>
+                  <button class="btn btn-danger" type="button" data-upload-delete="invoice">Supprimer</button>
+                </div>
+              </div>
+
+              <div class="upload-card" data-doc-type="recovery">
+                <div>
+                  <strong>Relances déjà faites</strong>
+                  <span>Ajoutez les relances ou mises en demeure déjà envoyées de votre côté.</span>
+                  <span class="file-status" id="status-recovery">Aucun fichier envoyé.</span>
+                </div>
+
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="recovery" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="recovery">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="recovery">Voir</button>
+                  <button class="btn btn-danger" type="button" data-upload-delete="recovery">Supprimer</button>
+                </div>
+              </div>
+
+              <div class="upload-card" data-doc-type="supporting">
+                <div>
+                  <strong>Autres justificatifs</strong>
+                  <span>Déposez mails, preuves et documents utiles au dossier.</span>
+                  <span class="file-status" id="status-supporting">Aucun fichier envoyé.</span>
+                </div>
+
+                <div class="upload-actions">
+                  <label class="upload-btn">
+                    Télécharger
+                    <input type="file" data-doc-type-input="supporting" multiple />
+                  </label>
+                  <button class="btn btn-secondary" type="button" data-upload-send="supporting">Envoyer</button>
+                  <button class="btn btn-secondary" type="button" data-upload-view="supporting">Voir</button>
+                  <button class="btn btn-danger" type="button" data-upload-delete="supporting">Supprimer</button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <div class="panel panel-timeline">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Suivi des étapes</h2>
+                <div class="panel-sub">Chaque publication Axe Flow apparaît ici avec son document et ses consignes.</div>
+              </div>
+            </div>
+
+            <div class="timeline" id="timelineList">
+              <div class="empty-state">Aucune publication pour le moment.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-injunction" id="injunctionPanel">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">Injonction de payer</h2>
+                <div class="panel-sub">L’étape contentieuse est préparée et pilotée par Axe Flow.</div>
+              </div>
+            </div>
+
+            <div class="note-box" id="injunctionNotice">
+              Disponible après mise en demeure publiée par Axe Flow.
+            </div>
+
+            <div class="injunction-grid" style="margin-top:12px;">
+              <div class="injunction-card highlight">
+                <h3>Dossier d’injonction Axe Flow</h3>
+                <p>
+                  Axe Flow prépare le dossier d’injonction selon les éléments du dossier et le montant de la créance.
+                </p>
+
+                <div class="price-box">
+                  <strong id="calculatedPrice">—</strong>
+                </div>
+
+                <label class="checkbox-row">
+                  <input type="checkbox" id="expressOption" />
+                  <span>Traitement prioritaire sous 24h : supplément de 90 €.</span>
+                </label>
+
+                <div class="note-box success" style="margin-bottom:12px;">
+                  Les frais sont en principe mis à la charge du débiteur. Vous pourrez en demander le remboursement dans le dossier.
+                </div>
+
+                <button class="btn btn-primary" id="payInjunction" type="button">
+                  Lancer l’injonction
+                </button>
+              </div>
+
+              <div class="injunction-card">
+                <h3>Barème indicatif</h3>
+                <p>Le montant est calculé automatiquement selon la facture sélectionnée.</p>
+
+                <div class="note-box soft">
+                  <strong style="display:block;color:#fff;margin-bottom:6px;">Créance &lt; 128 €</strong>
+                  85 € — ou 175 € en 24h.
+                </div>
+
+                <div class="note-box soft" style="margin-top:10px;">
+                  <strong style="display:block;color:#fff;margin-bottom:6px;">Créance de 128 € à 1 280 €</strong>
+                  140 € — ou 230 € en 24h.
+                </div>
+
+                <div class="note-box soft" style="margin-top:10px;">
+                  <strong style="display:block;color:#fff;margin-bottom:6px;">Créance &gt; 1 280 €</strong>
+                  247 € — ou 337 € en 24h.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+      <div class="footer-note">
+        Axe Flow - tableau de bord client
+      </div>
+
+    </div>
+  </main>
+    <div class="modal-backdrop" id="createDossierModal">
+    <div class="modal small">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <h2>Ajouter / Modifier un dossier</h2>
+          <button class="close-btn" id="closeCreateDossier">×</button>
+        </div>
+
+        <form id="createDossierForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Référence</label>
+              <input type="text" id="dossierRef" readonly />
+            </div>
+
+            <div class="field">
+              <label>Nom débiteur</label>
+              <input type="text" id="debiteurName" required />
+            </div>
+
+            <div class="field">
+              <label>Montant TTC (€)</label>
+              <input type="number" id="amountTTCInput" required />
+            </div>
+
+            <div class="field">
+              <label>Type</label>
+              <select id="debiteurType">
+                <option value="particulier">Particulier</option>
+                <option value="professionnel">Professionnel</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Référence facture</label>
+              <input type="text" id="invoiceRefInput" />
+            </div>
+
+            <div class="field">
+              <label>Date d’échéance</label>
+              <input type="date" id="dueDateInput" />
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="submit">Enregistrer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "axe-flow.firebaseapp.com",
+  projectId: "axe-flow",
+  storageBucket: "axe-flow.appspot.com",
+  messagingSenderId: "295300543556",
+  appId: "1:295300543556:web"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let currentDossier = null;
+
+const dossierList = document.getElementById("dossierList");
+const summaryRef = document.getElementById("summaryRef");
+const summaryDebiteur = document.getElementById("summaryDebiteur");
+const summaryType = document.getElementById("summaryType");
+const amountTTCDisplay = document.getElementById("amountTTCDisplay");
+const summaryInvoice = document.getElementById("summaryInvoice");
+const summaryDueDate = document.getElementById("summaryDueDate");
+const summaryStatus = document.getElementById("summaryStatus");
+
+const calculatedPrice = document.getElementById("calculatedPrice");
+const expressOption = document.getElementById("expressOption");
+
+function formatCurrency(val){
+  return Number(val || 0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+}
+
+function calculateInjunctionPrice(amount, express=false){
+  let base = 0;
+
+  if(amount < 128) base = 85;
+  else if(amount <= 1280) base = 140;
+  else base = 247;
+
+  return express ? base + 90 : base;
+}
+
+function updatePrice(){
+  if(!currentDossier){
+    calculatedPrice.textContent = "—";
+    return;
+  }
+  const price = calculateInjunctionPrice(currentDossier.amountTTC, expressOption.checked);
+  calculatedPrice.textContent = formatCurrency(price);
+}
+
+expressOption.addEventListener("change", updatePrice);
+
+async function loadDossiers(uid){
+  const snap = await getDocs(collection(db,"users",uid,"requests"));
+  dossierList.innerHTML = "";
+
+  snap.forEach(docSnap=>{
+    const d = {id:docSnap.id, ...docSnap.data()};
+
+    const el = document.createElement("div");
+    el.className = "dossier-card";
+
+    el.innerHTML = `
+      <div>
+        <strong>${d.ref || "-"}</strong>
+        <span>${d.debiteurName || "-"}</span>
+        <span>${formatCurrency(d.amountTTC)}</span>
+      </div>
+      <span class="badge neutral">${d.statusLabel || "En cours"}</span>
+    `;
+
+    el.onclick = ()=>{
+      currentDossier = d;
+      renderSummary();
+      updatePrice();
+    };
+
+    dossierList.appendChild(el);
+  });
+}
+
+function renderSummary(){
+  if(!currentDossier) return;
+
+  summaryRef.textContent = currentDossier.ref;
+  summaryDebiteur.textContent = currentDossier.debiteurName;
+  summaryType.textContent = currentDossier.debiteurType;
+  amountTTCDisplay.textContent = formatCurrency(currentDossier.amountTTC);
+  summaryInvoice.textContent = currentDossier.invoiceRef || "-";
+  summaryDueDate.textContent = currentDossier.dueDate || "-";
+  summaryStatus.textContent = currentDossier.statusLabel || "Dossier créé";
+}
+
+document.getElementById("payInjunction").onclick = ()=>{
+  if(!currentDossier){
+    alert("Sélectionne un dossier");
+    return;
   }
 
-  function updatePrice() {
-    const amount = Number(document.getElementById("amount").value || 0);
-    const urgent = document.getElementById("urgent").checked;
-    const price = amount > 0 ? calculateInjunctionPrice(amount, urgent) : null;
+  const price = calculateInjunctionPrice(currentDossier.amountTTC, expressOption.checked);
 
-    document.getElementById("price").textContent =
-      price ? `Tarif Axe Flow : ${price} €` : "Indiquez le montant de la facture.";
+  alert("Paiement injonction : " + formatCurrency(price));
+  // brancher Stripe ici
+};
+
+document.getElementById("createDossierForm").onsubmit = async (e)=>{
+  e.preventDefault();
+
+  if(!currentUser) return;
+
+  const ref = document.getElementById("dossierRef").value;
+  const debiteurName = document.getElementById("debiteurName").value;
+  const amount = Number(document.getElementById("amountTTCInput").value);
+  const type = document.getElementById("debiteurType").value;
+  const invoice = document.getElementById("invoiceRefInput").value;
+  const due = document.getElementById("dueDateInput").value;
+
+  await addDoc(collection(db,"users",currentUser.uid,"requests"),{
+    ref,
+    debiteurName,
+    amountTTC: amount,
+    debiteurType: type,
+    invoiceRef: invoice,
+    dueDate: due,
+    statusLabel:"Dossier créé",
+    createdAt: serverTimestamp()
+  });
+
+  loadDossiers(currentUser.uid);
+};
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    location.href="connexion.html";
+    return;
   }
 
-  function payInjunction() {
-    const amount = Number(document.getElementById("amount").value || 0);
-    const urgent = document.getElementById("urgent").checked;
-
-    if (!amount) {
-      alert("Indique le montant de la facture.");
-      return;
-    }
-
-    const price = calculateInjunctionPrice(amount, urgent);
-
-    const link =
-      price === 85 ? STRIPE_LINKS.inj85 :
-      price === 140 ? STRIPE_LINKS.inj140 :
-      price === 247 ? STRIPE_LINKS.inj247 :
-      price === 175 ? STRIPE_LINKS.inj175 :
-      price === 230 ? STRIPE_LINKS.inj230 :
-      STRIPE_LINKS.inj337;
-
-    window.location.href = link;
-  }
-
-  function createNewDossier() {
-    window.location.href = STRIPE_LINKS.oneShot49;
-  }
-
-  function subscribe() {
-    window.location.href = STRIPE_LINKS.monthly89;
-  }
-
-  document.getElementById("amount").addEventListener("input", updatePrice);
-  document.getElementById("urgent").addEventListener("change", updatePrice);
-
-  document.getElementById("planInfo").textContent =
-    "Offre ponctuelle 49€ ou abonnement 89€/mois avec 3 dossiers inclus.";
+  currentUser = user;
+  loadDossiers(user.uid);
+});
 </script>
 
-</div>
 </body>
 </html>
