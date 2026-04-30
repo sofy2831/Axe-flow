@@ -1437,9 +1437,14 @@ document.getElementById("createDossierForm").onsubmit = async (e)=>{
   loadDossiers(currentUser.uid);
 };
 
+let authChecked = false;
+
 onAuthStateChanged(auth, async (user)=>{
+  if (authChecked) return;
+  authChecked = true;
+
   if(!user){
-    location.href="connexion.html";
+    location.href = "connexion.html";
     return;
   }
 
