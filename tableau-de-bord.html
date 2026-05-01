@@ -548,8 +548,6 @@
       font-size:.84rem;
     }
 
-    /* États visuels des actions :
-       vert = fait, orange = action disponible, gris = verrouillé */
     .action-card.done .btn{
       background:rgba(61,208,143,0.14);
       border:1px solid rgba(61,208,143,0.26);
@@ -875,50 +873,56 @@
     <section class="dashboard-grid">
       <div class="panel panel-dossiers">
         <div class="panel-inner">
-          
-  <div class="panel-head">
-  <div>
-    <h2 class="panel-title">Vos dossiers</h2>
-    <div class="panel-sub" id="dossierSub">Sélectionnez un dossier.</div>
-  </div>
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Vos dossiers</h2>
+              <div class="panel-sub" id="dossierSub">Sélectionnez un dossier.</div>
+            </div>
 
-  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-    <button class="btn btn-primary" id="addDossierBtn" type="button">
-      Nouveau dossier — 49 €
-    </button>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+              <button class="btn btn-primary" id="addDossierBtn" type="button">
+                Nouveau dossier — 49 €
+              </button>
 
-    <button class="btn btn-secondary" id="subscribeBtn" type="button">
-      Passer en abonnement — 89 €/mois
-    </button>
+              <button class="btn btn-secondary" id="subscribeBtn" type="button">
+                Passer en abonnement — 89 €/mois
+              </button>
 
-    <div style="font-size:.75rem;color:var(--muted);text-align:right;">
-      3 dossiers inclus • 19 € / dossier supplémentaire
-    </div>
-  </div>
-</div>       
+              <div style="font-size:.75rem;color:var(--muted);text-align:right;">
+                3 dossiers inclus • 19 € / dossier supplémentaire
+              </div>
+            </div>
+          </div>
 
-    <div class="panel panel-summary">
-  <div class="panel-inner">
-    <h2 class="panel-title">Synthèse</h2>
-
-    <div class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-label">Référence</div>
-        <div class="summary-value" id="summaryRef">—</div>
+          <div class="dossier-list" id="dossierList">
+            <div class="empty-state">Chargement des dossiers...</div>
+          </div>
+        </div>
       </div>
 
-      <div class="summary-card">
-        <div class="summary-label">Montant</div>
-        <div class="summary-value" id="summaryAmount">—</div>
-      </div>
+      <div class="panel panel-summary">
+        <div class="panel-inner">
+          <h2 class="panel-title">Synthèse</h2>
 
-      <div class="summary-card">
-        <div class="summary-label">Débiteur</div>
-        <div class="summary-value" id="summaryDebtor">—</div>
-      </div>
-    </div>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-label">Référence</div>
+              <div class="summary-value" id="summaryRef">—</div>
+            </div>
 
-           
+            <div class="summary-card">
+              <div class="summary-label">Montant</div>
+              <div class="summary-value" id="summaryAmount">—</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Débiteur</div>
+              <div class="summary-value" id="summaryDebtor">—</div>
+            </div>
+          </div>
+
+          <div class="note-box soft" id="nextActionBox">Prochaine action : —</div>
+
           <div class="identity-grid">
             <div class="identity-card">
               <h3>Vous / Créancier</h3>
@@ -1253,10 +1257,12 @@ const logoutBtn = $("logoutBtn");
 const dossierList = $("dossierList");
 const dossierSub = $("dossierSub");
 const addDossierBtn = $("addDossierBtn");
+const subscribeBtn = $("subscribeBtn");
 
 const summaryRef = $("summaryRef");
 const summaryAmount = $("summaryAmount");
 const summaryDebtor = $("summaryDebtor");
+const nextActionBox = $("nextActionBox");
 
 const creditorNameEdit = $("creditorNameEdit");
 const creditorEmailEdit = $("creditorEmailEdit");
@@ -1826,6 +1832,7 @@ function openTextModal(action){
   shareBtn.style.display = navigator.share ? "" : "none";
   modalText.classList.add("open");
 }
+
 function closeTextModal(){
   modalText.classList.remove("open");
   currentText = "";
@@ -1834,6 +1841,7 @@ function closeTextModal(){
   markSentBtn.disabled = false;
   markSentBtn.textContent = "Marquer comme envoyé";
 }
+
 function openInjunctionModal(){
   if(!currentDossier){
     alert("Sélectionnez un dossier.");
@@ -1934,7 +1942,7 @@ function renderSummary(){
     summaryRef.textContent = "—";
     summaryAmount.textContent = "—";
     summaryDebtor.textContent = "—";
-   
+    nextActionBox.textContent = "Prochaine action : —";
 
     creditorNameEdit.value = "";
     creditorEmailEdit.value = "";
@@ -1950,9 +1958,9 @@ function renderSummary(){
   }
 
   summaryRef.textContent = currentDossier.ref || "—";
-  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC);
+  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC || currentDossier.amountDue);
   summaryDebtor.textContent = debtorName(currentDossier);
-  nextAction.textContent = getNextActionLabel(currentDossier);
+  nextActionBox.textContent = "Prochaine action : " + getNextActionLabel(currentDossier);
 
   creditorNameEdit.value = creditorName(currentDossier);
   creditorEmailEdit.value = creditorEmail(currentDossier);
@@ -1975,17 +1983,18 @@ function renderActions(){
 
     card.classList.remove("done","current","locked");
 
+    const btn = card.querySelector("button");
+    if(!btn) return;
+
     if(!currentDossier){
       card.classList.add("locked");
+      btn.disabled = true;
       return;
     }
 
     if(step <= currentStep) card.classList.add("done");
     else if(step === currentStep + 1) card.classList.add("current");
     else card.classList.add("locked");
-
-    const btn = card.querySelector("button");
-    if(!btn) return;
 
     if(step > currentStep + 1) btn.disabled = true;
     else if(step === 5 && currentStep < 4) btn.disabled = true;
@@ -2103,16 +2112,17 @@ async function downloadInjunctionPack(){
   zip.file("LIEN_CERFA_OFFICIEL.txt", `Cerfa 12946*02 : ${CERFA_URL}\n\nTélécharger le formulaire officiel, puis le compléter avec la fiche de préremplissage.`);
 
   const blob = await zip.generateAsync({ type:"blob" });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
 
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = `${safeRef}_dossier_injonction.zip`;
 
   document.body.appendChild(a);
   a.click();
   a.remove();
 
-  URL.revokeObjectURL(a.href);
+  URL.revokeObjectURL(url);
 }
 
 addDossierBtn.addEventListener("click", () => {
@@ -2123,6 +2133,10 @@ addDossierBtn.addEventListener("click", () => {
   $("creditorZipInput").value = creditorZip();
   $("creditorCityInput").value = creditorCity();
   createDossierModal.classList.add("open");
+});
+
+subscribeBtn.addEventListener("click", () => {
+  alert("Paiement abonnement à connecter à Stripe.");
 });
 
 closeCreateDossier.addEventListener("click", () => createDossierModal.classList.remove("open"));
@@ -2162,20 +2176,23 @@ createDossierForm.addEventListener("submit", async (e) => {
     debtorEmail: clean($("debtorEmailInput").value),
     debiteurEmail: clean($("debtorEmailInput").value),
     debtorAddress: clean($("debtorAddressInput").value),
+    debiteurAddress: clean($("debtorAddressInput").value),
     debtorZip: clean($("debtorZipInput").value),
+    debiteurZip: clean($("debtorZipInput").value),
     debtorCity: clean($("debtorCityInput").value),
+    debiteurCity: clean($("debtorCityInput").value),
 
     step: 0,
-status: "new",
-statusLabel: "Dossier créé",
-currentStep: "new",
-nextAction: "RELANCE_1",
-clientUid: currentUser.uid,
-lifecycleStatus: "open",
-paymentStatus: "paid",
-injunctionPublished: false,
-createdAt: serverTimestamp(),
-updatedAt: serverTimestamp()
+    status: "new",
+    statusLabel: "Dossier créé",
+    currentStep: "new",
+    nextAction: "RELANCE_1",
+    clientUid: currentUser.uid,
+    lifecycleStatus: "open",
+    paymentStatus: "paid",
+    injunctionPublished: false,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
   });
 
   createDossierForm.reset();
@@ -2241,6 +2258,7 @@ markSentBtn.addEventListener("click", async () => {
     markSentBtn.textContent = "Marquer comme envoyé";
   }
 });
+
 openInjunctionBtn.addEventListener("click", openInjunctionModal);
 downloadInjunctionPackBtn.addEventListener("click", downloadInjunctionPack);
 downloadInjunctionPackBtnModal.addEventListener("click", downloadInjunctionPack);
