@@ -1259,17 +1259,34 @@ saveCreditorBtn.addEventListener("click", async () => {
     return;
   }
 
-  await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossier.id), {
+  const patch = {
     creditorName: clean(creditorNameEdit.value),
     creditorEmail: clean(creditorEmailEdit.value),
     creditorAddress: clean(creditorAddressEdit.value),
     creditorZip: clean(creditorZipEdit.value),
     creditorCity: clean(creditorCityEdit.value),
     updatedAt: serverTimestamp()
-  });
+  };
+
+  await updateDoc(
+    doc(db, "users", currentUser.uid, "requests", currentDossier.id),
+    patch
+  );
+
+  // 🔥 IMPORTANT : refresh direct
+  currentDossier = {
+    ...currentDossier,
+    ...patch
+  };
+
+  saveCreditorBtn.textContent = "Enregistré ✔";
+  setTimeout(() => {
+    saveCreditorBtn.textContent = "Enregistrer créancier";
+  }, 1200);
 
   await loadDossiers(currentUser.uid);
 });
+  
 onAuthStateChanged(auth, async user => {
   if(!user){
     location.href = "connexion.html";
