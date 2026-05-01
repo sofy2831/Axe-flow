@@ -97,6 +97,27 @@
     .btn-danger{background:rgba(255,107,107,0.12);color:#ffdede;border-color:rgba(255,107,107,0.24)}
     .btn-warning{background:rgba(255,179,71,0.12);color:#ffe7c2;border-color:rgba(255,179,71,0.24)}
     .btn[disabled],.btn.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none;box-shadow:none;transform:none;filter:none}
+    /* ÉTATS DES ACTIONS */
+
+.action-card.done .btn{
+  background:rgba(61,208,143,0.14);
+  border:1px solid rgba(61,208,143,0.26);
+  color:#d9ffee;
+  box-shadow:none;
+}
+
+.action-card.current .btn{
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  border:1px solid transparent;
+  color:#fff;
+}
+
+.action-card.locked .btn{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  color:#fff;
+  box-shadow:none;
+}
     .note-box{padding:16px 18px;border-radius:18px;background:rgba(255,127,31,0.10);border:1px solid rgba(255,127,31,0.18);color:#fff4ea;font-size:.92rem}
     .note-box.soft{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:var(--muted)}
     .note-box.success{background:rgba(61,208,143,0.12);border-color:rgba(61,208,143,0.22);color:#d9ffee}
