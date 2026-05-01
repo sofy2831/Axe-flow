@@ -34,6 +34,7 @@
 
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
+
     body{
       margin:0;
       font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -44,36 +45,185 @@
         linear-gradient(180deg, #081b27 0%, #0a2d40 45%, #081b27 100%);
       line-height:1.5;
     }
+
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
     button,input,select,textarea{font:inherit}
-    .container{width:min(var(--max), calc(100% - 32px));margin:0 auto}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
     .topbar{
-      position:sticky;top:0;z-index:50;
+      position:sticky;
+      top:0;
+      z-index:50;
       backdrop-filter:blur(14px);
       background:rgba(6,20,29,0.66);
       border-bottom:1px solid rgba(255,255,255,0.08);
     }
-    .topbar-inner{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .brand{display:flex;align-items:center;gap:14px;min-width:0}
-    .brand-logo{width:54px;height:54px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,0.12);box-shadow:var(--shadow);background:rgba(255,255,255,0.04);flex:0 0 auto}
-    .brand-text{display:flex;flex-direction:column;min-width:0}
-    .brand-title{font-size:1rem;font-weight:800;letter-spacing:.02em}
-    .brand-sub{color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-    .user-chip{display:flex;align-items:center;gap:10px;min-height:42px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:#fff;font-size:.9rem;font-weight:600;max-width:100%;flex-wrap:wrap}
-    .user-email{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .status-pill{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 10px;border-radius:999px;font-size:.78rem;font-weight:800;white-space:nowrap}
-    .status-pill.success{background:rgba(61,208,143,0.14);border:1px solid rgba(61,208,143,0.22);color:#d9ffee}
-    .status-pill.warning{background:rgba(255,179,71,0.14);border:1px solid rgba(255,179,71,0.20);color:#ffe7c2}
-    .status-pill.danger{background:rgba(255,107,107,0.14);border:1px solid rgba(255,107,107,0.20);color:#ffdede}
-    .status-pill.neutral{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);color:#fff}
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,0.04);
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .brand-title{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .brand-sub{
+      color:var(--soft);
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .user-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:600;
+      max-width:100%;
+      flex-wrap:wrap;
+    }
+
+    .user-email{
+      max-width:220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .status-pill.success{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .status-pill.warning{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .status-pill.danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .status-pill.neutral{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
     .page{padding:28px 0 44px}
-    .hero{margin-bottom:18px;padding:28px;border-radius:30px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow)}
-    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:var(--muted);font-size:.88rem;font-weight:600;margin-bottom:14px}
-    .eyebrow-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px rgba(255,127,31,0.12)}
-    h1{margin:0 0 10px;font-size:clamp(2rem, 4vw, 3rem);line-height:1.04;letter-spacing:-0.04em}
-    .hero p{margin:0;color:var(--muted);width:100%;font-size:1rem}
+
+    .hero{
+      margin-bottom:18px;
+      padding:28px;
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:var(--muted);
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    .eyebrow-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:1.04;
+      letter-spacing:-0.04em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      width:100%;
+      font-size:1rem;
+    }
+
     .dashboard-grid{
       display:grid;
       grid-template-columns:repeat(12, minmax(0,1fr));
@@ -84,140 +234,606 @@
         "actions actions actions actions actions actions timeline timeline timeline timeline timeline timeline"
         "injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction injunction";
     }
-    .panel{border-radius:28px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow);overflow:hidden;min-width:0}
-    .panel-dossiers{grid-area:dossiers}.panel-summary{grid-area:summary}.panel-actions{grid-area:actions}.panel-timeline{grid-area:timeline}.panel-injunction{grid-area:injunction}
+
+    .panel{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-width:0;
+    }
+
+    .panel-dossiers{grid-area:dossiers}
+    .panel-summary{grid-area:summary}
+    .panel-actions{grid-area:actions}
+    .panel-timeline{grid-area:timeline}
+    .panel-injunction{grid-area:injunction}
+
     .panel-inner{padding:22px}
-    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .panel-title{margin:0 0 6px;font-size:1.15rem;letter-spacing:-0.02em}
-    .panel-sub{color:var(--soft);font-size:.9rem}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid transparent;font-weight:700;font-size:.92rem;transition:.2s ease;cursor:pointer;white-space:nowrap;text-align:center}
-    .btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;box-shadow:0 18px 40px rgba(255,127,31,0.22)}
-    .btn-primary:hover,.btn-secondary:hover,.btn-danger:hover{transform:translateY(-1px);filter:brightness(1.03)}
-    .btn-secondary{background:rgba(255,255,255,0.05);color:#fff;border-color:rgba(255,255,255,0.12)}
-    .btn-danger{background:rgba(255,107,107,0.12);color:#ffdede;border-color:rgba(255,107,107,0.24)}
-    .btn-warning{background:rgba(255,179,71,0.12);color:#ffe7c2;border-color:rgba(255,179,71,0.24)}
-    .btn[disabled],.btn.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none;box-shadow:none;transform:none;filter:none}
-    /* ÉTATS DES ACTIONS */
 
-.action-card.done .btn{
-  background:rgba(61,208,143,0.14);
-  border:1px solid rgba(61,208,143,0.26);
-  color:#d9ffee;
-  box-shadow:none;
-}
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
 
-.action-card.current .btn{
-  background:linear-gradient(135deg, var(--accent), var(--accent-2));
-  border:1px solid transparent;
-  color:#fff;
-}
+    .panel-title{
+      margin:0 0 6px;
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
 
-.action-card.locked .btn{
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  color:#fff;
-  box-shadow:none;
-}
-    .note-box{padding:16px 18px;border-radius:18px;background:rgba(255,127,31,0.10);border:1px solid rgba(255,127,31,0.18);color:#fff4ea;font-size:.92rem}
-    .note-box.soft{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:var(--muted)}
-    .note-box.success{background:rgba(61,208,143,0.12);border-color:rgba(61,208,143,0.22);color:#d9ffee}
-    .note-box.warning{background:rgba(255,179,71,0.12);border-color:rgba(255,179,71,0.20);color:#ffe7c2}
-    .dossier-list{display:grid;gap:12px;margin-top:14px}
-    .dossier-card{padding:16px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;cursor:pointer;transition:.2s ease}
-    .dossier-card:hover{background:rgba(255,255,255,0.06);transform:translateY(-1px)}
-    .dossier-card.active{border-color:rgba(255,127,31,0.24);background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04))}
-    .dossier-card strong{display:block;color:#fff;font-size:.95rem;margin-bottom:4px}
-    .dossier-card span{display:block;color:var(--muted);font-size:.88rem}
-    .badge{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 10px;border-radius:999px;font-size:.78rem;font-weight:800;white-space:nowrap}
-    .badge.included{background:rgba(61,208,143,0.14);border:1px solid rgba(61,208,143,0.22);color:#d9ffee}
-    .badge.warning{background:rgba(255,179,71,0.14);border:1px solid rgba(255,179,71,0.20);color:#ffe7c2}
-    .badge.danger{background:rgba(255,107,107,0.14);border:1px solid rgba(255,107,107,0.20);color:#ffdede}
-    .badge.neutral{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);color:#fff}
-    .empty-state{padding:18px;border-radius:18px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.12);color:var(--muted);font-size:.92rem}
-    .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
-    .summary-card{padding:18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);min-width:0}
+    .panel-sub{
+      color:var(--soft);
+      font-size:.9rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.92rem;
+      transition:.2s ease;
+      cursor:pointer;
+      white-space:nowrap;
+      text-align:center;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-danger:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,0.12);
+      color:#ffdede;
+      border-color:rgba(255,107,107,0.24);
+    }
+
+    .btn-warning{
+      background:rgba(255,179,71,0.12);
+      color:#ffe7c2;
+      border-color:rgba(255,179,71,0.24);
+    }
+
+    .btn[disabled],
+    .btn.is-disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      pointer-events:none;
+      box-shadow:none;
+      transform:none;
+      filter:none;
+    }
+
+    .note-box{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,127,31,0.10);
+      border:1px solid rgba(255,127,31,0.18);
+      color:#fff4ea;
+      font-size:.92rem;
+    }
+
+    .note-box.soft{
+      background:rgba(255,255,255,0.04);
+      border-color:rgba(255,255,255,0.08);
+      color:var(--muted);
+    }
+
+    .note-box.success{
+      background:rgba(61,208,143,0.12);
+      border-color:rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .note-box.warning{
+      background:rgba(255,179,71,0.12);
+      border-color:rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .dossier-list{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .dossier-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .dossier-card:hover{
+      background:rgba(255,255,255,0.06);
+      transform:translateY(-1px);
+    }
+
+    .dossier-card.active{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .dossier-card strong{
+      display:block;
+      color:#fff;
+      font-size:.95rem;
+      margin-bottom:4px;
+    }
+
+    .dossier-card span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .badge.included{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.22);
+      color:#d9ffee;
+    }
+
+    .badge.warning{
+      background:rgba(255,179,71,0.14);
+      border:1px solid rgba(255,179,71,0.20);
+      color:#ffe7c2;
+    }
+
+    .badge.danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.20);
+      color:#ffdede;
+    }
+
+    .badge.neutral{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+    }
+
+    .empty-state{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px dashed rgba(255,255,255,0.12);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .summary-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      min-width:0;
+    }
+
     .summary-card.wide{grid-column:1 / -1}
-    .summary-label{color:var(--soft);font-size:.84rem;margin-bottom:8px}
-    .summary-value{font-size:1.08rem;line-height:1.25;font-weight:800;letter-spacing:-0.03em;color:#fff;word-break:break-word}
-    .identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-    .identity-card{padding:18px;border-radius:20px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08)}
-    .identity-card h3{margin:0 0 10px;font-size:.98rem}
-    .identity-line{color:var(--muted);font-size:.9rem;margin:4px 0}
+
+    .summary-label{
+      color:var(--soft);
+      font-size:.84rem;
+      margin-bottom:8px;
+    }
+
+    .summary-value{
+      font-size:1.08rem;
+      line-height:1.25;
+      font-weight:800;
+      letter-spacing:-0.03em;
+      color:#fff;
+      word-break:break-word;
+    }
+
+    .identity-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+
+    .identity-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.035);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .identity-card h3{
+      margin:0 0 10px;
+      font-size:.98rem;
+    }
+
+    .identity-line{
+      color:var(--muted);
+      font-size:.9rem;
+      margin:4px 0;
+    }
+
     .identity-line strong{color:#fff}
-    .actions-grid{display:grid;grid-template-columns:repeat(5, minmax(0,1fr));gap:12px}
-    .action-card{padding:16px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);min-width:0}
-    .action-card.done{border-color:rgba(61,208,143,0.22);background:rgba(61,208,143,0.08)}
-    .action-card.current{border-color:rgba(255,127,31,0.26);background:rgba(255,127,31,0.10)}
-    .action-card.locked{opacity:.55}
-    .action-card h3{margin:0 0 8px;font-size:.98rem;letter-spacing:-0.02em}
-    .action-card p{margin:0 0 12px;color:var(--muted);font-size:.86rem}
-    .action-card .btn{width:100%;min-height:40px;font-size:.84rem}
-    .timeline{display:grid;gap:12px}
-    .timeline-item{padding:18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-    .timeline-main{flex:1 1 auto;min-width:0}
-    .timeline-main strong{display:block;font-size:1rem;color:#fff;margin-bottom:6px}
-    .timeline-main span{color:var(--muted);font-size:.9rem}
-    .timeline-meta{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;font-size:.78rem!important;font-weight:800;color:#fff!important;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);margin-bottom:10px}
-    .injunction-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
-    .injunction-card{padding:18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)}
-    .injunction-card.highlight{border-color:rgba(255,127,31,0.24);background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04))}
-    .injunction-card h3{margin:0 0 8px;font-size:1rem;letter-spacing:-0.02em}
-    .injunction-card p,.injunction-card li{color:var(--muted);font-size:.92rem}
-    .injunction-card ul{margin:10px 0 0;padding-left:18px}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,10,15,0.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+
+    .actions-grid{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .action-card{
+      padding:16px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      min-width:0;
+    }
+
+    .action-card.done{
+      border-color:rgba(61,208,143,0.22);
+      background:rgba(61,208,143,0.08);
+    }
+
+    .action-card.current{
+      border-color:rgba(255,127,31,0.26);
+      background:rgba(255,127,31,0.10);
+    }
+
+    .action-card.locked{
+      opacity:.55;
+    }
+
+    .action-card h3{
+      margin:0 0 8px;
+      font-size:.98rem;
+      letter-spacing:-0.02em;
+    }
+
+    .action-card p{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .action-card .btn{
+      width:100%;
+      min-height:40px;
+      font-size:.84rem;
+    }
+
+    /* États visuels des actions :
+       vert = fait, orange = action disponible, gris = verrouillé */
+    .action-card.done .btn{
+      background:rgba(61,208,143,0.14);
+      border:1px solid rgba(61,208,143,0.26);
+      color:#d9ffee;
+      box-shadow:none;
+    }
+
+    .action-card.current .btn{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      border:1px solid transparent;
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,0.22);
+    }
+
+    .action-card.locked .btn{
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#fff;
+      box-shadow:none;
+    }
+
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .timeline-item{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+    }
+
+    .timeline-main{
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    .timeline-main strong{
+      display:block;
+      font-size:1rem;
+      color:#fff;
+      margin-bottom:6px;
+    }
+
+    .timeline-main span{
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .timeline-meta{
+      display:inline-flex;
+      align-items:center;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:.78rem!important;
+      font-weight:800;
+      color:#fff!important;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      margin-bottom:10px;
+    }
+
+    .injunction-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .injunction-card{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .injunction-card.highlight{
+      border-color:rgba(255,127,31,0.24);
+      background:linear-gradient(180deg, rgba(255,127,31,0.10), rgba(255,255,255,0.04));
+    }
+
+    .injunction-card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+      letter-spacing:-0.02em;
+    }
+
+    .injunction-card p,
+    .injunction-card li{
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .injunction-card ul{
+      margin:10px 0 0;
+      padding-left:18px;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(2,10,15,0.72);
+      backdrop-filter:blur(4px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:100;
+    }
+
     .modal-backdrop.open{display:flex}
-    .modal{width:min(1040px, 100%);max-height:90vh;overflow:auto;border-radius:28px;background:linear-gradient(180deg, #103448, #0a2535);border:1px solid rgba(255,255,255,0.10);box-shadow:var(--shadow)}
+
+    .modal{
+      width:min(1040px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border-radius:28px;
+      background:linear-gradient(180deg, #103448, #0a2535);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:var(--shadow);
+    }
+
     .modal.small{width:min(860px, 100%)}
+
     .modal-inner{padding:22px}
-    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .modal h2{margin:0 0 6px;font-size:1.3rem;letter-spacing:-0.02em}
-    .close-btn{border:none;background:rgba(255,255,255,0.08);color:#fff;min-width:40px;min-height:40px;border-radius:999px;cursor:pointer;font-size:1.05rem}
+
+    .modal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .modal h2{
+      margin:0 0 6px;
+      font-size:1.3rem;
+      letter-spacing:-0.02em;
+    }
+
+    .close-btn{
+      border:none;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      min-width:40px;
+      min-height:40px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:1.05rem;
+    }
+
     .close-btn:hover{background:rgba(255,255,255,0.14)}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 18px}
-    .field{display:flex;flex-direction:column;gap:8px}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin:14px 0 18px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
     .field.full{grid-column:1 / -1}
-    .field label{color:var(--soft);font-size:.88rem;font-weight:600}
-    .field input,.field select,.field textarea{min-height:46px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;outline:none}
-    .field textarea{min-height:110px;padding:12px 14px;resize:vertical}
-    .field input::placeholder,.field textarea::placeholder{color:rgba(244,247,251,0.42)}
-    .text-preview{white-space:pre-wrap;padding:16px;border-radius:18px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#fff;font-size:.92rem;line-height:1.55;margin-top:14px}
-    .modal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:14px}
-    .letter-header{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+
+    .field label{
+      color:var(--soft);
+      font-size:.88rem;
+      font-weight:600;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      min-height:46px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:110px;
+      padding:12px 14px;
+      resize:vertical;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder{
+      color:rgba(244,247,251,0.42);
+    }
+
+    .text-preview{
+      white-space:pre-wrap;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font-size:.92rem;
+      line-height:1.55;
+      margin-top:14px;
+    }
+
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .letter-header{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
     .letter-header .note-box{white-space:pre-wrap}
-.action-card.done .btn{
-  background:linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-color:transparent;
-  color:#fff;
-  box-shadow:none;
-}
 
-.action-card.current .btn{
-  background:linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-color:transparent;
-  color:#fff;
-}
-
-.action-card.locked .btn{
-  background:rgba(255,255,255,0.05);
-  border-color:rgba(255,255,255,0.12);
-  color:#fff;
-  box-shadow:none;
-}
-    
     @media (max-width:1200px){
-      .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"dossiers summary" "actions actions" "timeline timeline" "injunction injunction"}
+      .dashboard-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        grid-template-areas:
+          "dossiers summary"
+          "actions actions"
+          "timeline timeline"
+          "injunction injunction";
+      }
+
       .actions-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
     }
+
     @media (max-width:860px){
-      .dashboard-grid{grid-template-columns:1fr;grid-template-areas:"dossiers" "summary" "actions" "timeline" "injunction"}
-      .topbar-inner{min-height:unset;padding:14px 0;flex-direction:column;align-items:flex-start}
-      .top-actions{width:100%;justify-content:flex-start}
-      .summary-grid,.form-grid,.injunction-grid,.actions-grid,.identity-grid,.letter-header{grid-template-columns:1fr}
+      .dashboard-grid{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "dossiers"
+          "summary"
+          "actions"
+          "timeline"
+          "injunction";
+      }
+
+      .topbar-inner{
+        min-height:unset;
+        padding:14px 0;
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .top-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .summary-grid,
+      .form-grid,
+      .injunction-grid,
+      .actions-grid,
+      .identity-grid,
+      .letter-header{
+        grid-template-columns:1fr;
+      }
     }
+
     @media (max-width:560px){
       .container{width:min(var(--max), calc(100% - 20px))}
       .btn{width:100%}
-      .panel-inner,.hero,.modal-inner{padding:18px}
+      .panel-inner,
+      .hero,
+      .modal-inner{padding:18px}
       .user-chip{max-width:100%;width:100%}
       .user-email{max-width:100%}
       .modal-actions{justify-content:stretch}
@@ -235,12 +851,14 @@
         <span class="brand-sub">Tableau de bord client</span>
       </div>
     </a>
+
     <div class="top-actions">
       <div class="user-chip">
         <span class="user-email" id="userEmail">—</span>
         <span class="status-pill success" id="statusBadge">Actif</span>
         <span class="status-pill neutral" id="planBadge">Offre —</span>
       </div>
+
       <button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button>
     </div>
   </div>
@@ -262,8 +880,10 @@
               <h2 class="panel-title">Vos dossiers</h2>
               <div class="panel-sub" id="dossierSub">Sélectionnez un dossier.</div>
             </div>
+
             <button class="btn btn-primary" id="addDossierBtn" type="button">Ajouter un dossier</button>
           </div>
+
           <div class="dossier-list" id="dossierList"></div>
         </div>
       </div>
@@ -271,47 +891,65 @@
       <div class="panel panel-summary">
         <div class="panel-inner">
           <h2 class="panel-title">Synthèse</h2>
+
           <div class="summary-grid">
-            <div class="summary-card"><div class="summary-label">Référence</div><div class="summary-value" id="summaryRef">—</div></div>
-            <div class="summary-card"><div class="summary-label">Montant</div><div class="summary-value" id="summaryAmount">—</div></div>
-            <div class="summary-card"><div class="summary-label">Débiteur</div><div class="summary-value" id="summaryDebtor">—</div></div>
-            <div class="summary-card wide"><div class="summary-label">Prochaine action</div><div class="summary-value" id="nextAction">—</div></div>
+            <div class="summary-card">
+              <div class="summary-label">Référence</div>
+              <div class="summary-value" id="summaryRef">—</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Montant</div>
+              <div class="summary-value" id="summaryAmount">—</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Débiteur</div>
+              <div class="summary-value" id="summaryDebtor">—</div>
+            </div>
+
+            <div class="summary-card wide">
+              <div class="summary-label">Prochaine action</div>
+              <div class="summary-value" id="nextAction">—</div>
+            </div>
           </div>
 
           <div class="identity-grid">
-           <div class="identity-card">
-  <h3>Vous / Créancier</h3>
+            <div class="identity-card">
+              <h3>Vous / Créancier</h3>
 
-  <div class="field">
-    <label>Nom / société</label>
-    <input type="text" id="creditorNameEdit" placeholder="Votre nom ou société" />
-  </div>
+              <div class="field">
+                <label>Nom / société</label>
+                <input type="text" id="creditorNameEdit" placeholder="Votre nom ou société" />
+              </div>
 
-  <div class="field">
-    <label>Email</label>
-    <input type="email" id="creditorEmailEdit" placeholder="votre@email.fr" />
-  </div>
+              <div class="field">
+                <label>Email</label>
+                <input type="email" id="creditorEmailEdit" placeholder="votre@email.fr" />
+              </div>
 
-  <div class="field">
-    <label>Adresse</label>
-    <input type="text" id="creditorAddressEdit" placeholder="Adresse" />
-  </div>
+              <div class="field">
+                <label>Adresse</label>
+                <input type="text" id="creditorAddressEdit" placeholder="Adresse" />
+              </div>
 
-  <div class="form-grid" style="margin:0;">
-    <div class="field">
-      <label>Code postal</label>
-      <input type="text" id="creditorZipEdit" placeholder="31000" />
-    </div>
-    <div class="field">
-      <label>Ville</label>
-      <input type="text" id="creditorCityEdit" placeholder="Toulouse" />
-    </div>
-  </div>
+              <div class="form-grid" style="margin:0;">
+                <div class="field">
+                  <label>Code postal</label>
+                  <input type="text" id="creditorZipEdit" placeholder="31000" />
+                </div>
 
-  <button class="btn btn-secondary" id="saveCreditorBtn" type="button" style="margin-top:12px;width:100%;">
-    Enregistrer créancier
-  </button>
-</div>
+                <div class="field">
+                  <label>Ville</label>
+                  <input type="text" id="creditorCityEdit" placeholder="Toulouse" />
+                </div>
+              </div>
+
+              <button class="btn btn-secondary" id="saveCreditorBtn" type="button" style="margin-top:12px;width:100%;">
+                Enregistrer créancier
+              </button>
+            </div>
+
             <div class="identity-card">
               <h3>Votre client / Débiteur</h3>
               <div class="identity-line"><strong id="debtorNameView">—</strong></div>
@@ -331,26 +969,36 @@
               <div class="panel-sub">Générez les courriers et marquez chaque étape comme envoyée.</div>
             </div>
           </div>
+
           <div class="actions-grid">
             <div class="action-card" data-step="1">
-              <h3>Relance 1</h3><p>Relance simple</p>
-              <button class="btn btn-primary" type="button" data-action="relance1">Ouvrir</button>
+              <h3>Relance 1</h3>
+              <p>Relance simple</p>
+              <button class="btn" type="button" data-action="relance1">Ouvrir</button>
             </div>
+
             <div class="action-card" data-step="2">
-              <h3>Relance 2</h3><p>Relance ferme</p>
-              <button class="btn btn-primary" type="button" data-action="relance2">Ouvrir</button>
+              <h3>Relance 2</h3>
+              <p>Relance ferme</p>
+              <button class="btn" type="button" data-action="relance2">Ouvrir</button>
             </div>
+
             <div class="action-card" data-step="3">
-              <h3>Relance 3</h3><p>Dernier rappel</p>
-              <button class="btn btn-primary" type="button" data-action="relance3">Ouvrir</button>
+              <h3>Relance 3</h3>
+              <p>Dernier rappel</p>
+              <button class="btn" type="button" data-action="relance3">Ouvrir</button>
             </div>
+
             <div class="action-card" data-step="4">
-              <h3>Mise en demeure</h3><p>Avant contentieux</p>
-              <button class="btn btn-danger" type="button" data-action="med">Ouvrir</button>
+              <h3>Mise en demeure</h3>
+              <p>Avant contentieux</p>
+              <button class="btn" type="button" data-action="med">Ouvrir</button>
             </div>
+
             <div class="action-card" data-step="5">
-              <h3>Injonction</h3><p>Dossier tribunal</p>
-              <button class="btn btn-secondary" type="button" data-action="injunction">Ouvrir</button>
+              <h3>Injonction</h3>
+              <p>Dossier tribunal</p>
+              <button class="btn" type="button" data-action="injunction">Ouvrir</button>
             </div>
           </div>
         </div>
@@ -359,7 +1007,9 @@
       <div class="panel panel-timeline">
         <div class="panel-inner">
           <h2 class="panel-title">Historique</h2>
-          <div class="timeline" id="timeline"><div class="empty-state">Aucune action</div></div>
+          <div class="timeline" id="timeline">
+            <div class="empty-state">Aucune action</div>
+          </div>
         </div>
       </div>
 
@@ -370,14 +1020,17 @@
               <h2 class="panel-title">Injonction de payer</h2>
               <div class="panel-sub">Préparation du dossier tribunal à partir des données du dossier.</div>
             </div>
+
             <button class="btn btn-primary" id="openInjunctionBtn" type="button">Préparer</button>
           </div>
+
           <div class="injunction-grid">
             <div class="injunction-card highlight">
               <h3>Dossier complet</h3>
               <p>Génère un pack contenant le courrier au tribunal, le bordereau des pièces et la fiche de préremplissage du Cerfa 12946*02.</p>
               <button class="btn btn-primary" id="downloadInjunctionPackBtn" type="button">Télécharger dossier injonction complet</button>
             </div>
+
             <div class="injunction-card">
               <h3>Pièces à joindre</h3>
               <ul>
@@ -404,30 +1057,93 @@
           <h2>Ajouter un dossier</h2>
           <div class="panel-sub">Ces informations servent aux courriers et au dossier d’injonction.</div>
         </div>
+
         <button class="close-btn" id="closeCreateDossier" type="button">×</button>
       </div>
 
       <form id="createDossierForm">
         <div class="form-grid">
-          <div class="field"><label>Référence</label><input type="text" id="dossierRef" readonly /></div>
-          <div class="field"><label>Montant TTC (€)</label><input type="number" step="0.01" id="amountTTCInput" required /></div>
-          <div class="field"><label>Facture</label><input type="text" id="invoiceRefInput" placeholder="FA-2026-001" /></div>
-          <div class="field"><label>Date d’émission</label><input type="date" id="issuedDateInput" /></div>
-          <div class="field"><label>Date d’échéance</label><input type="date" id="dueDateInput" /></div>
-          <div class="field"><label>Objet / fondement</label><input type="text" id="contractBasisInput" placeholder="Facture de prestation impayée" /></div>
+          <div class="field">
+            <label>Référence</label>
+            <input type="text" id="dossierRef" readonly />
+          </div>
 
-          <div class="field"><label>Créancier — nom / société</label><input type="text" id="creditorNameInput" /></div>
-          <div class="field"><label>Créancier — email</label><input type="email" id="creditorEmailInput" /></div>
-          <div class="field full"><label>Créancier — adresse</label><input type="text" id="creditorAddressInput" required /></div>
-          <div class="field"><label>Créancier — code postal</label><input type="text" id="creditorZipInput" required /></div>
-          <div class="field"><label>Créancier — ville</label><input type="text" id="creditorCityInput" required /></div>
+          <div class="field">
+            <label>Montant TTC (€)</label>
+            <input type="number" step="0.01" id="amountTTCInput" required />
+          </div>
 
-          <div class="field"><label>Débiteur — nom / société</label><input type="text" id="debtorNameInput" required /></div>
-          <div class="field"><label>Débiteur — email</label><input type="email" id="debtorEmailInput" /></div>
-          <div class="field full"><label>Débiteur — adresse</label><input type="text" id="debtorAddressInput" /></div>
-          <div class="field"><label>Débiteur — code postal</label><input type="text" id="debtorZipInput" /></div>
-          <div class="field"><label>Débiteur — ville</label><input type="text" id="debtorCityInput" /></div>
+          <div class="field">
+            <label>Facture</label>
+            <input type="text" id="invoiceRefInput" placeholder="FA-2026-001" />
+          </div>
+
+          <div class="field">
+            <label>Date d’émission</label>
+            <input type="date" id="issuedDateInput" />
+          </div>
+
+          <div class="field">
+            <label>Date d’échéance</label>
+            <input type="date" id="dueDateInput" />
+          </div>
+
+          <div class="field">
+            <label>Objet / fondement</label>
+            <input type="text" id="contractBasisInput" placeholder="Facture de prestation impayée" />
+          </div>
+
+          <div class="field">
+            <label>Créancier — nom / société</label>
+            <input type="text" id="creditorNameInput" />
+          </div>
+
+          <div class="field">
+            <label>Créancier — email</label>
+            <input type="email" id="creditorEmailInput" />
+          </div>
+
+          <div class="field full">
+            <label>Créancier — adresse</label>
+            <input type="text" id="creditorAddressInput" required />
+          </div>
+
+          <div class="field">
+            <label>Créancier — code postal</label>
+            <input type="text" id="creditorZipInput" required />
+          </div>
+
+          <div class="field">
+            <label>Créancier — ville</label>
+            <input type="text" id="creditorCityInput" required />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — nom / société</label>
+            <input type="text" id="debtorNameInput" required />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — email</label>
+            <input type="email" id="debtorEmailInput" />
+          </div>
+
+          <div class="field full">
+            <label>Débiteur — adresse</label>
+            <input type="text" id="debtorAddressInput" />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — code postal</label>
+            <input type="text" id="debtorZipInput" />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — ville</label>
+            <input type="text" id="debtorCityInput" />
+          </div>
         </div>
+
         <button class="btn btn-primary" type="submit">Enregistrer le dossier</button>
       </form>
     </div>
@@ -442,6 +1158,7 @@
           <h2 id="modalTitle">Document</h2>
           <div class="panel-sub" id="modalSub">—</div>
         </div>
+
         <button class="close-btn" id="closeModal" type="button">×</button>
       </div>
 
@@ -453,10 +1170,40 @@
       <div class="text-preview" id="textContent"></div>
 
       <div class="modal-actions">
-              <button class="btn btn-secondary" id="shareBtn" type="button" style="display:none;">Partager</button>
-      <a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a>
-<button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button>
-<button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button>
+        <button class="btn btn-secondary" id="shareBtn" type="button" style="display:none;">Partager</button>
+        <a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a>
+        <button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button>
+        <button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="injunctionModal">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div>
+          <h2>Injonction de payer</h2>
+          <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.</div>
+        </div>
+
+        <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
+      </div>
+
+      <div class="note-box warning">
+        Imprimer le formulaire Cerfa 12946*02, vérifier les informations, dater et signer le formulaire.
+        Joindre les documents justificatifs. Envoyer ou déposer le dossier au tribunal compétent.
+        Le tribunal compétent est en principe celui du domicile du débiteur ou du lieu d’exécution du contrat.
+      </div>
+
+      <div class="text-preview" id="injunctionPreview"></div>
+
+      <div class="modal-actions">
+        <a class="btn btn-secondary" href="https://www.formulaires.service-public.gouv.fr/gf/cerfa_12946.do" target="_blank" rel="noopener">Ouvrir Cerfa officiel</a>
+        <button class="btn btn-secondary" id="copyInjunctionBtn" type="button">Copier courrier</button>
+        <button class="btn btn-primary" id="downloadInjunctionPackBtnModal" type="button">Télécharger dossier injonction complet</button>
+        <button class="btn btn-danger" id="markInjunctionBtn" type="button">Marquer comme préparé</button>
       </div>
     </div>
   </div>
