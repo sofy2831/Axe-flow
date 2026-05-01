@@ -1286,23 +1286,35 @@ saveCreditorBtn.addEventListener("click", async () => {
     updatedAt: serverTimestamp()
   };
 
-  await updateDoc(
-    doc(db, "users", currentUser.uid, "requests", currentDossier.id),
-    patch
-  );
+  try{
+    saveCreditorBtn.disabled = true;
+    saveCreditorBtn.textContent = "Enregistrement...";
 
-  // 🔥 IMPORTANT : refresh direct
-  currentDossier = {
-    ...currentDossier,
-    ...patch
-  };
+    await updateDoc(
+      doc(db, "users", currentUser.uid, "requests", currentDossier.id),
+      patch
+    );
 
-  saveCreditorBtn.textContent = "Enregistré ✔";
-  setTimeout(() => {
+    currentDossier = {
+      ...currentDossier,
+      ...patch
+    };
+
+    saveCreditorBtn.textContent = "Enregistré ✔";
+
+    await loadDossiers(currentUser.uid);
+
+    setTimeout(() => {
+      saveCreditorBtn.disabled = false;
+      saveCreditorBtn.textContent = "Enregistrer créancier";
+    }, 1200);
+
+  }catch(error){
+    console.error("Erreur enregistrement créancier :", error);
+    alert("Erreur Firestore : le créancier n’a pas été enregistré. Regarde la console.");
+    saveCreditorBtn.disabled = false;
     saveCreditorBtn.textContent = "Enregistrer créancier";
-  }, 1200);
-
-  await loadDossiers(currentUser.uid);
+  }
 });
   
 onAuthStateChanged(auth, async user => {
