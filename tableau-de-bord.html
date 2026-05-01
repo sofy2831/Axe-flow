@@ -933,7 +933,7 @@ ${cerfaPrefillText(d)}`;
 function openTextModal(action){
   if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
   currentAction = action;
-  currentText = buildText(action, currentDossier);
+  currentText = letterVersion(buildText(action, currentDossier), currentDossier);
   modalTitle.textContent = actionTitle(action);
   modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
   modalCreditorBox.textContent = "Vous / Créancier :\n" + creditorBlock(currentDossier);
