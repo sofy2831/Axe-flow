@@ -246,6 +246,22 @@ exports.createLrarDraft = onRequest(
 
       const dossier = requestSnap.data();
       const now = admin.firestore.Timestamp.now();
+      const existingLrarSnap = await requestRef
+  .collection("lrar")
+  .where("documentType", "==", "mise_en_demeure")
+  .where("status", "in", ["draft", "pending", "sent"])
+  .limit(1)
+  .get();
+
+if (!existingLrarSnap.empty) {
+  const existingDoc = existingLrarSnap.docs[0];
+
+  return res.status(200).json({
+    success: true,
+    reused: true,
+    lrarId: existingDoc.id,
+  });
+}
 
       const lrarPayload = {
         status: "draft",
