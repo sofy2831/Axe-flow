@@ -1,4 +1,4 @@
-const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -145,6 +145,7 @@ exports.stripeWebhook = onRequest(
         }
 
         const offer = OFFERS[offerType];
+
         if (!offer) {
           return res.status(400).send("Offre inconnue");
         }
@@ -209,3 +210,77 @@ exports.stripeWebhook = onRequest(
     }
   }
 );
+
+exports.createLrarDraft = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Utilisateur non connecté.");
+  }
+
+  const uid = request.auth.uid;
+  const requestId = request.data?.requestId;
+
+  if (!requestId) {
+    throw new HttpsError("invalid-argument", "requestId manquant.");
+  }
+
+  const requestRef = db
+    .collection("users")
+    .doc(uid)
+    .collection("requests")
+    .doc(requestId);
+
+  const requestSnap = await requestRef.get();
+
+  if (!requestSnap.exists) {
+    throw new HttpsError("not-found", "Dossier introuvable.");
+  }
+
+  const dossier = requestSnap.data();
+  const now = admin.firestore.Timestamp.now();
+
+  const lrarPayload = {
+    status: "draft",
+    provider: "laposte",
+    type: "lrar",
+    documentType: "mise_en_demeure",
+
+    price: 7.35,
+    currency: "EUR",
+    pages: 1,
+
+    dossierRef: dossier.ref || "",
+    invoiceRef: dossier.invoiceRef || "",
+
+    senderName: dossier.creditorName || "",
+    senderAddress: dossier.creditorAddress || "",
+    senderZip: dossier.creditorZip || "",
+    senderCity: dossier.creditorCity || "",
+
+    recipientName: dossier.debtorName || dossier.debiteurName || "",
+    recipientAddress: dossier.debtorAddress || dossier.debiteurAddress || "",
+    recipientZip: dossier.debtorZip || dossier.debiteurZip || "",
+    recipientCity: dossier.debtorCity || dossier.debiteurCity || "",
+
+    trackingNumber: "",
+    proofUrl: "",
+
+    createdAt: now,
+    updatedAt: now,
+    sentAt: null,
+  };
+
+  const lrarRef = await requestRef.collection("lrar").add(lrarPayload);
+
+  await requestRef.collection("events").add({
+    title: "Brouillon LRAR créé",
+    description: "Mise en demeure prête pour envoi recommandé en ligne La Poste.",
+    action: "lrar_draft",
+    lrarId: lrarRef.id,
+    createdAt: now,
+  });
+
+  return {
+    success: true,
+    lrarId: lrarRef.id,
+  };
+});
