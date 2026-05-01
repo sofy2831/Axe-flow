@@ -2513,25 +2513,45 @@ printPdfBtn.addEventListener("click", () => {
 });
 
 sendLrarBtn.addEventListener("click", async () => {
+  if(!currentDossier || currentAction !== "med"){
+    alert("LRAR uniquement pour la mise en demeure");
+    return;
+  }
+
   try{
     sendLrarBtn.disabled = true;
     sendLrarBtn.textContent = "Préparation LRAR...";
 
-    if(!LAPOSTE_LRAR_ENDPOINT){
-      await createLrarDraft();
-      sendLrarBtn.textContent = "Brouillon LRAR créé";
-      setTimeout(() => {
-        sendLrarBtn.disabled = false;
-        sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
-      }, 1200);
-      return;
+    const res = await fetch(LAPOSTE_LRAR_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": currentUser.uid
+      },
+      body: JSON.stringify({
+        requestId: currentDossier.id
+      })
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      throw new Error(data.error || "Erreur serveur");
     }
 
-    alert("Appel API La Poste à connecter via Cloud Function sécurisée.");
+    sendLrarBtn.textContent = "LRAR créée ✔";
+
+    // recharge les données
+    await loadDossiers(currentUser.uid);
+
+    setTimeout(() => {
+      sendLrarBtn.disabled = false;
+      sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
+    }, 1200);
 
   }catch(error){
-    console.error("Erreur préparation LRAR :", error);
-    alert("Erreur : la LRAR n’a pas été préparée. Regarde la console Firestore.");
+    console.error("Erreur LRAR :", error);
+    alert("Erreur : " + error.message);
 
     sendLrarBtn.disabled = false;
     sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
