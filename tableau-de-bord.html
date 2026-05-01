@@ -1200,19 +1200,10 @@ document.querySelectorAll("[data-action]").forEach(btn => {
 closeModal.addEventListener("click", closeTextModal);
 modalText.addEventListener("click", e => { if(e.target === modalText) closeTextModal(); });
 
-copyBtn.addEventListener("click", async () => {
-  if(!currentText) return;
-  await navigator.clipboard.writeText(currentText);
-  copyBtn.textContent = "Copié";
-  setTimeout(() => copyBtn.textContent = "Copier", 1200);
-});
+
 shareBtn.addEventListener("click", async () => {
   if(!navigator.share || !currentText) return;
   await navigator.share({ title: modalTitle.textContent, text: currentText });
-});
-letterBtn.addEventListener("click", () => {
-  if(!currentText) return;
-  openProfessionalLetter(currentText, currentDossier, false);
 });
 
 printPdfBtn.addEventListener("click", () => {
