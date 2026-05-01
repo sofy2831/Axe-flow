@@ -1,4 +1,4 @@
-const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -211,76 +211,90 @@ exports.stripeWebhook = onRequest(
   }
 );
 
-exports.createLrarDraft = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Utilisateur non connecté.");
+exports.createLrarDraft = onRequest(
+  {
+    cors: true,
+  },
+  async (req, res) => {
+    try {
+      if (req.method !== "POST") {
+        return res.status(405).json({ error: "Méthode non autorisée" });
+      }
+
+      const uid = req.headers["x-user-id"];
+      const { requestId } = req.body || {};
+
+      if (!uid) {
+        return res.status(401).json({ error: "Utilisateur non identifié." });
+      }
+
+      if (!requestId) {
+        return res.status(400).json({ error: "requestId manquant." });
+      }
+
+      const requestRef = db
+        .collection("users")
+        .doc(uid)
+        .collection("requests")
+        .doc(requestId);
+
+      const requestSnap = await requestRef.get();
+
+      if (!requestSnap.exists) {
+        return res.status(404).json({ error: "Dossier introuvable." });
+      }
+
+      const dossier = requestSnap.data();
+      const now = admin.firestore.Timestamp.now();
+
+      const lrarPayload = {
+        status: "draft",
+        provider: "laposte",
+        type: "lrar",
+        documentType: "mise_en_demeure",
+
+        price: 7.35,
+        currency: "EUR",
+        pages: 1,
+
+        dossierRef: dossier.ref || "",
+        invoiceRef: dossier.invoiceRef || "",
+
+        senderName: dossier.creditorName || "",
+        senderAddress: dossier.creditorAddress || "",
+        senderZip: dossier.creditorZip || "",
+        senderCity: dossier.creditorCity || "",
+
+        recipientName: dossier.debtorName || dossier.debiteurName || "",
+        recipientAddress: dossier.debtorAddress || dossier.debiteurAddress || "",
+        recipientZip: dossier.debtorZip || dossier.debiteurZip || "",
+        recipientCity: dossier.debtorCity || dossier.debiteurCity || "",
+
+        trackingNumber: "",
+        proofUrl: "",
+
+        createdAt: now,
+        updatedAt: now,
+        sentAt: null,
+      };
+
+      const lrarRef = await requestRef.collection("lrar").add(lrarPayload);
+
+      await requestRef.collection("events").add({
+        title: "Brouillon LRAR créé",
+        description: "Mise en demeure prête pour envoi recommandé en ligne La Poste.",
+        action: "lrar_draft",
+        lrarId: lrarRef.id,
+        createdAt: now,
+      });
+
+      return res.status(200).json({
+        success: true,
+        lrarId: lrarRef.id,
+      });
+    } catch (error) {
+      console.error("createLrarDraft:", error);
+      return res.status(500).json({ error: "Erreur serveur createLrarDraft" });
+    }
   }
-
-  const uid = request.auth.uid;
-  const requestId = request.data?.requestId;
-
-  if (!requestId) {
-    throw new HttpsError("invalid-argument", "requestId manquant.");
-  }
-
-  const requestRef = db
-    .collection("users")
-    .doc(uid)
-    .collection("requests")
-    .doc(requestId);
-
-  const requestSnap = await requestRef.get();
-
-  if (!requestSnap.exists) {
-    throw new HttpsError("not-found", "Dossier introuvable.");
-  }
-
-  const dossier = requestSnap.data();
-  const now = admin.firestore.Timestamp.now();
-
-  const lrarPayload = {
-    status: "draft",
-    provider: "laposte",
-    type: "lrar",
-    documentType: "mise_en_demeure",
-
-    price: 7.35,
-    currency: "EUR",
-    pages: 1,
-
-    dossierRef: dossier.ref || "",
-    invoiceRef: dossier.invoiceRef || "",
-
-    senderName: dossier.creditorName || "",
-    senderAddress: dossier.creditorAddress || "",
-    senderZip: dossier.creditorZip || "",
-    senderCity: dossier.creditorCity || "",
-
-    recipientName: dossier.debtorName || dossier.debiteurName || "",
-    recipientAddress: dossier.debtorAddress || dossier.debiteurAddress || "",
-    recipientZip: dossier.debtorZip || dossier.debiteurZip || "",
-    recipientCity: dossier.debtorCity || dossier.debiteurCity || "",
-
-    trackingNumber: "",
-    proofUrl: "",
-
-    createdAt: now,
-    updatedAt: now,
-    sentAt: null,
-  };
-
-  const lrarRef = await requestRef.collection("lrar").add(lrarPayload);
-
-  await requestRef.collection("events").add({
-    title: "Brouillon LRAR créé",
-    description: "Mise en demeure prête pour envoi recommandé en ligne La Poste.",
-    action: "lrar_draft",
-    lrarId: lrarRef.id,
-    createdAt: now,
-  });
-
-  return {
-    success: true,
-    lrarId: lrarRef.id,
-  };
-});
+);
