@@ -875,45 +875,50 @@
     <section class="dashboard-grid">
       <div class="panel panel-dossiers">
         <div class="panel-inner">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Vos dossiers</h2>
-              <div class="panel-sub" id="dossierSub">Sélectionnez un dossier.</div>
-            </div>
+          
+  <div class="panel-head">
+  <div>
+    <h2 class="panel-title">Vos dossiers</h2>
+    <div class="panel-sub" id="dossierSub">Sélectionnez un dossier.</div>
+  </div>
 
-            <button class="btn btn-primary" id="addDossierBtn" type="button">Ajouter un dossier</button>
-          </div>
+  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+    <button class="btn btn-primary" id="addDossierBtn" type="button">
+      Nouveau dossier — 49 €
+    </button>
 
-          <div class="dossier-list" id="dossierList"></div>
-        </div>
+    <button class="btn btn-secondary" id="subscribeBtn" type="button">
+      Passer en abonnement — 89 €/mois
+    </button>
+
+    <div style="font-size:.75rem;color:var(--muted);text-align:right;">
+      3 dossiers inclus • 19 € / dossier supplémentaire
+    </div>
+  </div>
+</div>       
+
+    <div class="panel panel-summary">
+  <div class="panel-inner">
+    <h2 class="panel-title">Synthèse</h2>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Référence</div>
+        <div class="summary-value" id="summaryRef">—</div>
       </div>
 
-      <div class="panel panel-summary">
-        <div class="panel-inner">
-          <h2 class="panel-title">Synthèse</h2>
+      <div class="summary-card">
+        <div class="summary-label">Montant</div>
+        <div class="summary-value" id="summaryAmount">—</div>
+      </div>
 
-          <div class="summary-grid">
-            <div class="summary-card">
-              <div class="summary-label">Référence</div>
-              <div class="summary-value" id="summaryRef">—</div>
-            </div>
+      <div class="summary-card">
+        <div class="summary-label">Débiteur</div>
+        <div class="summary-value" id="summaryDebtor">—</div>
+      </div>
+    </div>
 
-            <div class="summary-card">
-              <div class="summary-label">Montant</div>
-              <div class="summary-value" id="summaryAmount">—</div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-label">Débiteur</div>
-              <div class="summary-value" id="summaryDebtor">—</div>
-            </div>
-
-            <div class="summary-card wide">
-              <div class="summary-label">Prochaine action</div>
-              <div class="summary-value" id="nextAction">—</div>
-            </div>
-          </div>
-
+           
           <div class="identity-grid">
             <div class="identity-card">
               <h3>Vous / Créancier</h3>
@@ -1187,36 +1192,6 @@
           <h2>Injonction de payer</h2>
           <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.</div>
         </div>
-
-        <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
-      </div>
-
-      <div class="note-box warning">
-        Imprimer le formulaire Cerfa 12946*02, vérifier les informations, dater et signer le formulaire.
-        Joindre les documents justificatifs. Envoyer ou déposer le dossier au tribunal compétent.
-        Le tribunal compétent est en principe celui du domicile du débiteur ou du lieu d’exécution du contrat.
-      </div>
-
-      <div class="text-preview" id="injunctionPreview"></div>
-
-      <div class="modal-actions">
-        <a class="btn btn-secondary" href="https://www.formulaires.service-public.gouv.fr/gf/cerfa_12946.do" target="_blank" rel="noopener">Ouvrir Cerfa officiel</a>
-        <button class="btn btn-secondary" id="copyInjunctionBtn" type="button">Copier courrier</button>
-        <button class="btn btn-primary" id="downloadInjunctionPackBtnModal" type="button">Télécharger dossier injonction complet</button>
-        <button class="btn btn-danger" id="markInjunctionBtn" type="button">Marquer comme préparé</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="injunctionModal">
-  <div class="modal">
-    <div class="modal-inner">
-      <div class="modal-head">
-        <div>
-          <h2>Injonction de payer</h2>
-          <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.</div>
-        </div>
         <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
       </div>
 
@@ -1282,7 +1257,6 @@ const addDossierBtn = $("addDossierBtn");
 const summaryRef = $("summaryRef");
 const summaryAmount = $("summaryAmount");
 const summaryDebtor = $("summaryDebtor");
-const nextAction = $("nextAction");
 
 const creditorNameEdit = $("creditorNameEdit");
 const creditorEmailEdit = $("creditorEmailEdit");
@@ -1960,7 +1934,7 @@ function renderSummary(){
     summaryRef.textContent = "—";
     summaryAmount.textContent = "—";
     summaryDebtor.textContent = "—";
-    nextAction.textContent = "Sélectionnez un dossier.";
+   
 
     creditorNameEdit.value = "";
     creditorEmailEdit.value = "";
