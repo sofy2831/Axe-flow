@@ -1405,7 +1405,14 @@ createDossierForm.addEventListener("submit", async (e) => {
     debtorCity: clean($("debtorCityInput").value),
 
     step: 0,
+    status: "new",
     statusLabel: "Dossier créé",
+    currentStep: "new",
+nextAction: "RELANCE_1",
+clientUid: currentUser.uid,
+lifecycleStatus: "open",
+paymentStatus: "paid",
+injunctionPublished: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
