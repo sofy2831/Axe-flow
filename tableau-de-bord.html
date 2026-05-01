@@ -931,15 +931,35 @@ ${cerfaPrefillText(d)}`;
 }
 
 function openTextModal(action){
-  if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
+  if(!currentDossier){
+    alert("Sélectionnez un dossier.");
+    return;
+  }
+
+  currentDossier = {
+    ...currentDossier,
+    creditorName: clean(creditorNameEdit.value),
+    creditorEmail: clean(creditorEmailEdit.value),
+    creditorAddress: clean(creditorAddressEdit.value),
+    creditorZip: clean(creditorZipEdit.value),
+    creditorCity: clean(creditorCityEdit.value)
+  };
+
   currentAction = action;
   currentText = letterVersion(buildText(action, currentDossier), currentDossier);
+
   modalTitle.textContent = actionTitle(action);
   modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
   modalCreditorBox.textContent = "Vous / Créancier :\n" + creditorBlock(currentDossier);
   modalDebtorBox.textContent = "Votre client / Débiteur :\n" + debtorBlock(currentDossier);
   textContent.textContent = currentText;
-  mailBtn.href = makeMailto(debtorEmail(currentDossier), actionTitle(action) + " – Facture " + invoiceNumber(currentDossier), currentText);
+
+  mailBtn.href = makeMailto(
+    debtorEmail(currentDossier),
+    actionTitle(action) + " – Facture " + invoiceNumber(currentDossier),
+    currentText
+  );
+
   shareBtn.style.display = navigator.share ? "" : "none";
   modalText.classList.add("open");
 }
