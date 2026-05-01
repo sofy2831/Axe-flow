@@ -1439,10 +1439,37 @@ printPdfBtn.addEventListener("click", () => {
 });
 
 markSentBtn.addEventListener("click", async () => {
-  if(!currentAction) return;
+  if(!currentAction){
+    alert("Aucune action sélectionnée.");
+    return;
+  }
 
-  await markStep(currentAction);
-  closeTextModal();
+  if(!currentUser || !currentDossier){
+    alert("Aucun dossier sélectionné.");
+    return;
+  }
+
+  try{
+    markSentBtn.disabled = true;
+    markSentBtn.textContent = "Enregistrement...";
+
+    await markStep(currentAction);
+
+    markSentBtn.textContent = "Envoyé ✔";
+
+    setTimeout(() => {
+      closeTextModal();
+      markSentBtn.disabled = false;
+      markSentBtn.textContent = "Marquer comme envoyé";
+    }, 700);
+
+  }catch(error){
+    console.error("Erreur marquer comme envoyé :", error);
+    alert("Erreur : l’action n’a pas été enregistrée. Regarde la console Firestore.");
+
+    markSentBtn.disabled = false;
+    markSentBtn.textContent = "Marquer comme envoyé";
+  }
 });
 
 openInjunctionBtn.addEventListener("click", openInjunctionModal);
