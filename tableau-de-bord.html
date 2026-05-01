@@ -496,12 +496,13 @@ const summaryAmount = $("summaryAmount");
 const summaryDebtor = $("summaryDebtor");
 const nextAction = $("nextAction");
 
-  const creditorNameEdit = $("creditorNameEdit");
+const creditorNameEdit = $("creditorNameEdit");
 const creditorEmailEdit = $("creditorEmailEdit");
 const creditorAddressEdit = $("creditorAddressEdit");
 const creditorZipEdit = $("creditorZipEdit");
 const creditorCityEdit = $("creditorCityEdit");
 const saveCreditorBtn = $("saveCreditorBtn");
+
 const debtorNameView = $("debtorNameView");
 const debtorAddressView = $("debtorAddressView");
 const debtorCityView = $("debtorCityView");
@@ -523,7 +524,6 @@ const closeModal = $("closeModal");
 
 const shareBtn = $("shareBtn");
 const mailBtn = $("mailBtn");
-
 const printPdfBtn = $("printPdfBtn");
 const markSentBtn = $("markSentBtn");
 
@@ -537,12 +537,29 @@ const downloadInjunctionPackBtnModal = $("downloadInjunctionPackBtnModal");
 const markInjunctionBtn = $("markInjunctionBtn");
 
 function esc(s){
-  return String(s || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
+
+function escapeHtml(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
 function clean(s){ return String(s || "").trim(); }
+
 function formatCurrency(v){
   return Number(v || 0).toLocaleString("fr-FR", { style:"currency", currency:"EUR" });
 }
+
 function fmtDateFR(v){
   if(!v) return "—";
   try{
@@ -554,15 +571,24 @@ function fmtDateFR(v){
     const d = new Date(v);
     if(!isNaN(d.getTime())) return d.toLocaleDateString("fr-FR");
     return String(v);
-  }catch{ return "—"; }
+  }catch{
+    return "—";
+  }
 }
-function todayFR(){ return new Date().toLocaleDateString("fr-FR"); }
-function nowTimestamp(){ return Timestamp.fromDate(new Date()); }
-function plusDays(days){ return Timestamp.fromMillis(Date.now() + Number(days || 0) * 24 * 60 * 60 * 1000); }
+
+function todayFR(){
+  return new Date().toLocaleDateString("fr-FR");
+}
+
+function plusDays(days){
+  return Timestamp.fromMillis(Date.now() + Number(days || 0) * 24 * 60 * 60 * 1000);
+}
+
 function generateRef(){
   const d = new Date();
   return `AF-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}-${Math.floor(1000 + Math.random()*9000)}`;
 }
+
 function makeMailto(email, subject, body){
   return `mailto:${encodeURIComponent(email || "")}?subject=${encodeURIComponent(subject || "")}&body=${encodeURIComponent(body || "")}`;
 }
@@ -570,35 +596,77 @@ function makeMailto(email, subject, body){
 function creditorName(d=currentDossier){
   return clean(d?.creditorName) || clean(currentUserData?.businessProfile?.companyName) || clean(currentUserData?.displayName) || clean(currentUser?.email) || "Créancier";
 }
+
 function creditorEmail(d=currentDossier){
   return clean(d?.creditorEmail) || clean(currentUserData?.businessProfile?.email) || clean(currentUser?.email);
 }
-function creditorAddress(d=currentDossier){ return clean(d?.creditorAddress) || clean(currentUserData?.businessProfile?.address); }
-function creditorZip(d=currentDossier){ return clean(d?.creditorZip) || clean(currentUserData?.businessProfile?.zip); }
-function creditorCity(d=currentDossier){ return clean(d?.creditorCity) || clean(currentUserData?.businessProfile?.city); }
 
-function debtorName(d=currentDossier){ return clean(d?.debtorName) || clean(d?.debiteurName) || "Madame, Monsieur"; }
-function debtorEmail(d=currentDossier){ return clean(d?.debtorEmail) || clean(d?.debiteurEmail); }
-function debtorAddress(d=currentDossier){ return clean(d?.debtorAddress) || clean(d?.debiteurAddress); }
-function debtorZip(d=currentDossier){ return clean(d?.debtorZip) || clean(d?.debiteurZip); }
-function debtorCity(d=currentDossier){ return clean(d?.debtorCity) || clean(d?.debiteurCity); }
+function creditorAddress(d=currentDossier){
+  return clean(d?.creditorAddress) || clean(currentUserData?.businessProfile?.address);
+}
 
-function invoiceNumber(d=currentDossier){ return clean(d?.invoiceRef) || clean(d?.invoiceNumber) || "—"; }
-function issuedDate(d=currentDossier){ return fmtDateFR(d?.issuedDate || d?.invoiceIssuedDate || d?.createdAt); }
-function dueDate(d=currentDossier){ return fmtDateFR(d?.dueDate || d?.invoiceDueDate); }
-function dueAmount(d=currentDossier){ return formatCurrency(d?.amountTTC || d?.amountDue || 0); }
+function creditorZip(d=currentDossier){
+  return clean(d?.creditorZip) || clean(currentUserData?.businessProfile?.zip);
+}
+
+function creditorCity(d=currentDossier){
+  return clean(d?.creditorCity) || clean(currentUserData?.businessProfile?.city);
+}
+
+function debtorName(d=currentDossier){
+  return clean(d?.debtorName) || clean(d?.debiteurName) || "Madame, Monsieur";
+}
+
+function debtorEmail(d=currentDossier){
+  return clean(d?.debtorEmail) || clean(d?.debiteurEmail);
+}
+
+function debtorAddress(d=currentDossier){
+  return clean(d?.debtorAddress) || clean(d?.debiteurAddress);
+}
+
+function debtorZip(d=currentDossier){
+  return clean(d?.debtorZip) || clean(d?.debiteurZip);
+}
+
+function debtorCity(d=currentDossier){
+  return clean(d?.debtorCity) || clean(d?.debiteurCity);
+}
+
+function invoiceNumber(d=currentDossier){
+  return clean(d?.invoiceRef) || clean(d?.invoiceNumber) || "—";
+}
+
+function issuedDate(d=currentDossier){
+  return fmtDateFR(d?.issuedDate || d?.invoiceIssuedDate || d?.createdAt);
+}
+
+function dueDate(d=currentDossier){
+  return fmtDateFR(d?.dueDate || d?.invoiceDueDate);
+}
+
+function dueAmount(d=currentDossier){
+  return formatCurrency(d?.amountTTC || d?.amountDue || 0);
+}
+
 function introHome(d=currentDossier){
   const home = clean(d?.homeName || d?.objectLabel);
   return home ? ` concernant « ${home} »` : "";
 }
+
 function echeancePart(d=currentDossier){
   const dd = dueDate(d);
   return dd !== "—" ? ` (échéance : ${dd})` : "";
 }
+
 function contractBasis(d=currentDossier){
   return clean(d?.contractBasis) || "Facture de prestation impayée";
 }
-function getStep(d){ return Number(d?.step || 0); }
+
+function getStep(d){
+  return Number(d?.step || 0);
+}
+
 function sentDateField(action){
   if(action === "relance1") return "relance1SentAt";
   if(action === "relance2") return "relance2SentAt";
@@ -607,6 +675,7 @@ function sentDateField(action){
   if(action === "injunction") return "injunctionPreparedAt";
   return "sentAt";
 }
+
 function getNextActionLabel(d){
   const step = getStep(d);
   if(step <= 0) return "Relance 1 à générer";
@@ -616,17 +685,40 @@ function getNextActionLabel(d){
   if(step === 4) return "Injonction de payer disponible";
   return "Dossier avancé";
 }
+
 function getPlanLabel(userData = {}){
   const plan = userData.planType || userData.plan || "one_shot_49";
   if(plan === "subscription_89") return "Plan : Pro 89 €";
   if(plan === "extra_19") return "Plan : extra 19 €";
   return "Plan : dossier 49 €";
 }
+
 function getStatusLabel(userData = {}){
   const status = userData.accountStatus || "active";
   if(status === "unpaid") return "Paiement requis";
   if(status === "paused") return "Suspendu";
   return "Actif";
+}
+
+function creditorBlock(d=currentDossier){
+  return `${creditorName(d)}
+${creditorAddress(d) || "Adresse à compléter"}
+${[creditorZip(d), creditorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}`.trim();
+}
+
+function debtorBlock(d=currentDossier){
+  return `${debtorName(d)}
+${debtorAddress(d) || "Adresse à compléter"}
+${[debtorZip(d), debtorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}`.trim();
+}
+
+function bodyWithoutSubject(body){
+  return String(body || "").replace(/^Objet\s*:\s*(.+?)\n\n/i, "").trim();
+}
+
+function extractSubject(body, fallback="Courrier"){
+  const m = String(body || "").match(/^Objet\s*:\s*(.+?)\n/i);
+  return m ? m[1].trim() : fallback;
 }
 
 function relance1Text(d){
@@ -645,6 +737,7 @@ Si vous avez déjà effectué le paiement, nous vous prions de ne pas tenir comp
 Cordialement,
 Service Comptabilité`;
 }
+
 function relance2Text(d){
   const invNum = invoiceNumber(d);
   const issued = issuedDate(d);
@@ -665,6 +758,7 @@ Nous restons bien entendu à votre disposition pour toute précision ou pour con
 Cordialement,
 Service Comptabilité`;
 }
+
 function relance3Text(d){
   const invNum = invoiceNumber(d);
   const issued = issuedDate(d);
@@ -681,6 +775,7 @@ Nous vous remercions de bien vouloir procéder au règlement sous ${RELANCE_GAP_
 Cordialement,
 Service Comptabilité`;
 }
+
 function medText(d){
   const invNum = invoiceNumber(d);
   const issued = issuedDate(d);
@@ -691,11 +786,12 @@ ${debtorName(d)},
 
 Par la présente, nous vous mettons en demeure de régler la somme de ${due} au titre de la facture ${invNum} émise le ${issued}${introHome(d)}${echeancePart(d)}.
 
-À défaut de paiement intégral sous ${MED_DELAY_DAYS} jours à compter de la réception de ce message, nous nous réserverons le droit d’engager toute procédure de recouvrement (amiable et/ou judiciaire).
+À défaut de paiement intégral sous ${MED_DELAY_DAYS} jours à compter de la réception de ce message, nous nous réserverons le droit d’engager toute procédure de recouvrement amiable et/ou judiciaire.
 
 Cordialement,
 Service Comptabilité`;
 }
+
 function injunctionText(d){
   const amount = dueAmount(d);
   return `Objet : Requête en injonction de payer – Facture ${invoiceNumber(d)}
@@ -711,6 +807,7 @@ Je vous prie d’agréer, Madame, Monsieur, l’expression de ma considération 
 Cordialement,
 Service Comptabilité`;
 }
+
 function buildText(action, d){
   if(action === "relance1") return relance1Text(d);
   if(action === "relance2") return relance2Text(d);
@@ -719,6 +816,7 @@ function buildText(action, d){
   if(action === "injunction") return injunctionText(d);
   return "";
 }
+
 function actionTitle(action){
   if(action === "relance1") return "Relance 1";
   if(action === "relance2") return "Relance 2";
@@ -727,6 +825,7 @@ function actionTitle(action){
   if(action === "injunction") return "Injonction de payer";
   return "Document";
 }
+
 function stepForAction(action){
   if(action === "relance1") return 1;
   if(action === "relance2") return 2;
@@ -735,83 +834,71 @@ function stepForAction(action){
   if(action === "injunction") return 5;
   return 0;
 }
-function creditorBlock(d=currentDossier){
-  return `${creditorName(d)}
-${creditorAddress(d) || "Adresse à compléter"}
-${[creditorZip(d), creditorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}`.trim();
-}
-function debtorBlock(d=currentDossier){
-  return `${debtorName(d)}
-${debtorAddress(d) || "Adresse à compléter"}
-${[debtorZip(d), debtorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}`.trim();
-}
-  
-function letterVersion(body, d=currentDossier){
-  return `${creditorBlock(d)}
 
-À l’attention de :
-${debtorBlock(d)}
-
-Fait le ${todayFR()}
-
-${bodyWithoutSubject(body)}`;
-}
-function escapeHtml(s){
-  return String(s || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-function bodyWithoutSubject(body){
-  return String(body || "").replace(/^Objet\\s*:\\s*(.+?)\\n\\n/i, "").trim();
-}
-function extractSubject(body, fallback="Courrier"){
-  const m = String(body || "").match(/^Objet\\s*:\\s*(.+?)\\n/i);
-  return m ? m[1].trim() : fallback;
-}
 function professionalLetterHtml(body, d=currentDossier){
   const cleanBody = bodyWithoutSubject(body);
+  const subject = extractSubject(body, actionTitle(currentAction));
 
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>${escapeHtml(actionTitle(currentAction))}</title>
+<title>${escapeHtml(subject)}</title>
 <style>
-  @page{ size:A4; margin:18mm; }
-  *{ box-sizing:border-box; }
+  @page{
+    size:A4;
+    margin:18mm;
+  }
+
+  *{
+    box-sizing:border-box;
+  }
+
   body{
     margin:0;
     font-family:Arial, Helvetica, sans-serif;
     color:#111;
     font-size:12.5pt;
     line-height:1.5;
+    background:#fff;
   }
+
   .top{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:35mm;
-    margin-bottom:22mm;
+    margin-bottom:18mm;
   }
+
   .sender,
   .recipient{
     white-space:pre-line;
   }
+
   .recipient{
-    padding-top:24mm;
+    padding-top:22mm;
   }
+
   .date{
-    margin-top:18mm;
+    margin-top:14mm;
     text-align:left;
   }
+
+  .subject{
+    margin:18mm 0 10mm;
+    font-weight:700;
+  }
+
   .body{
     white-space:pre-line;
-    margin-top:18mm;
+    margin-top:0;
   }
+
   @media print{
-    body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body{
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
   }
 </style>
 </head>
@@ -826,35 +913,45 @@ ${escapeHtml(debtorBlock(d))}
 <div class="date">Fait le ${escapeHtml(todayFR())}</div></div>
     </section>
 
+    <section class="subject">Objet : ${escapeHtml(subject)}</section>
     <section class="body">${escapeHtml(cleanBody)}</section>
   </main>
 </body>
 </html>`;
 }
-  
+
 function openProfessionalLetter(body, d=currentDossier){
-  const printWindow = document.createElement("iframe");
-  printWindow.style.position = "fixed";
-  printWindow.style.right = "0";
-  printWindow.style.bottom = "0";
-  printWindow.style.width = "0";
-  printWindow.style.height = "0";
-  printWindow.style.border = "0";
+  const iframe = document.createElement("iframe");
 
-  document.body.appendChild(printWindow);
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.style.opacity = "0";
 
-  const doc = printWindow.contentWindow.document;
-  doc.open();
-  doc.write(professionalLetterHtml(body, d));
-  doc.close();
+  document.body.appendChild(iframe);
+
+  const frameWindow = iframe.contentWindow;
+  const frameDoc = frameWindow.document;
+
+  frameDoc.open();
+  frameDoc.write(professionalLetterHtml(body, d));
+  frameDoc.close();
 
   setTimeout(() => {
-    printWindow.contentWindow.focus();
-    printWindow.contentWindow.print();
-    document.body.removeChild(printWindow);
+    frameWindow.focus();
+    frameWindow.print();
+
+    setTimeout(() => {
+      if(iframe && iframe.parentNode){
+        iframe.parentNode.removeChild(iframe);
+      }
+    }, 1000);
   }, 300);
 }
-}
+
 function pieceList(d=currentDossier){
   return [
     `Pièce 1 — Facture impayée ${invoiceNumber(d)}`,
@@ -868,6 +965,7 @@ function pieceList(d=currentDossier){
     "Pièce 9 — Échanges utiles avec le débiteur"
   ];
 }
+
 function bordereauText(d=currentDossier){
   return `BORDEREAU DES PIÈCES
 
@@ -878,6 +976,7 @@ Montant principal : ${dueAmount(d)}
 
 ${pieceList(d).join("\n")}`;
 }
+
 function cerfaPrefillText(d=currentDossier){
   return `FICHE DE PRÉREMPLISSAGE — CERFA 12946*02
 
@@ -917,6 +1016,7 @@ Envoyer ou déposer le dossier au tribunal compétent.
 
 Le tribunal compétent est en principe celui du domicile du débiteur ou du lieu d’exécution du contrat.`;
 }
+
 function injunctionPackText(d=currentDossier){
   return `${injunctionText(d)}
 
@@ -945,20 +1045,14 @@ function openTextModal(action){
   };
 
   currentAction = action;
-
-  // On garde le courrier simple dans la modale :
-  // Objet + corps du courrier uniquement.
-  // Les blocs adresse restent affichés séparément au-dessus.
   currentText = buildText(action, currentDossier);
 
   modalTitle.textContent = actionTitle(action);
   modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
 
-  // Image 1 conservée
   modalCreditorBox.textContent = "Vous / Créancier :\n" + creditorBlock(currentDossier);
   modalDebtorBox.textContent = "Votre client / Débiteur :\n" + debtorBlock(currentDossier);
 
-  // Image 2 supprimée : plus de répétition adresse dans le texte
   textContent.textContent = currentText;
 
   mailBtn.href = makeMailto(
@@ -970,25 +1064,33 @@ function openTextModal(action){
   shareBtn.style.display = navigator.share ? "" : "none";
   modalText.classList.add("open");
 }
+
 function closeTextModal(){
   modalText.classList.remove("open");
   currentText = "";
   currentAction = "";
 }
+
 function openInjunctionModal(){
-  if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
+  if(!currentDossier){
+    alert("Sélectionnez un dossier.");
+    return;
+  }
   injunctionPreview.textContent = injunctionPackText(currentDossier);
   injunctionModal.classList.add("open");
 }
+
 function closeInjunction(){
   injunctionModal.classList.remove("open");
 }
 
 async function markStep(action){
   if(!currentUser || !currentDossier) return;
+
   const step = stepForAction(action);
   const label = `${actionTitle(action)} ${action === "injunction" ? "préparée" : "envoyée"}`;
   const sentField = sentDateField(action);
+
   const patch = {
     step: Math.max(step, getStep(currentDossier)),
     statusLabel: label,
@@ -996,11 +1098,29 @@ async function markStep(action){
     [sentField]: serverTimestamp()
   };
 
-  if(action === "relance1") { patch.nextAction = "RELANCE_2"; patch.nextActionAt = plusDays(RELANCE_GAP_DAYS); }
-  if(action === "relance2") { patch.nextAction = "RELANCE_3"; patch.nextActionAt = plusDays(RELANCE_GAP_DAYS); }
-  if(action === "relance3") { patch.nextAction = "MED"; patch.nextActionAt = plusDays(RELANCE_GAP_DAYS); }
-  if(action === "med") { patch.nextAction = "INJONCTION"; patch.nextActionAt = plusDays(MED_DELAY_DAYS); }
-  if(action === "injunction") { patch.nextAction = "SIGNIFICATION"; }
+  if(action === "relance1"){
+    patch.nextAction = "RELANCE_2";
+    patch.nextActionAt = plusDays(RELANCE_GAP_DAYS);
+  }
+
+  if(action === "relance2"){
+    patch.nextAction = "RELANCE_3";
+    patch.nextActionAt = plusDays(RELANCE_GAP_DAYS);
+  }
+
+  if(action === "relance3"){
+    patch.nextAction = "MED";
+    patch.nextActionAt = plusDays(RELANCE_GAP_DAYS);
+  }
+
+  if(action === "med"){
+    patch.nextAction = "INJONCTION";
+    patch.nextActionAt = plusDays(MED_DELAY_DAYS);
+  }
+
+  if(action === "injunction"){
+    patch.nextAction = "SIGNIFICATION";
+  }
 
   await updateDoc(doc(db, "users", currentUser.uid, "requests", currentDossier.id), patch);
 
@@ -1017,13 +1137,16 @@ async function markStep(action){
 function renderDossiers(){
   dossierList.innerHTML = "";
   dossierSub.textContent = `${dossiers.length} dossier(s)`;
+
   if(!dossiers.length){
     dossierList.innerHTML = `<div class="empty-state">Aucun dossier pour le moment.</div>`;
     return;
   }
+
   dossiers.forEach(d => {
     const active = currentDossier && currentDossier.id === d.id;
     const el = document.createElement("div");
+
     el.className = `dossier-card ${active ? "active" : ""}`;
     el.innerHTML = `
       <div>
@@ -1033,10 +1156,16 @@ function renderDossiers(){
       </div>
       <span class="badge neutral">${esc(d.statusLabel || "Créé")}</span>
     `;
-    el.addEventListener("click", () => { currentDossier = d; renderAll(); });
+
+    el.addEventListener("click", () => {
+      currentDossier = d;
+      renderAll();
+    });
+
     dossierList.appendChild(el);
   });
 }
+
 function renderSummary(){
   if(!currentDossier){
     summaryRef.textContent = "—";
@@ -1062,7 +1191,6 @@ function renderSummary(){
   summaryDebtor.textContent = debtorName(currentDossier);
   nextAction.textContent = getNextActionLabel(currentDossier);
 
-  // 🔥 ICI = chargement créancier
   creditorNameEdit.value = creditorName(currentDossier);
   creditorEmailEdit.value = creditorEmail(currentDossier);
   creditorAddressEdit.value = creditorAddress(currentDossier);
@@ -1076,44 +1204,60 @@ function renderSummary(){
     || "Code postal / ville à compléter";
   debtorEmailView.textContent = debtorEmail(currentDossier) || "Email à compléter";
 }
+
 function renderActions(){
   document.querySelectorAll(".action-card").forEach(card => {
     const step = Number(card.dataset.step);
     const currentStep = currentDossier ? getStep(currentDossier) : 0;
+
     card.classList.remove("done","current","locked");
-    if(!currentDossier){ card.classList.add("locked"); return; }
+
+    if(!currentDossier){
+      card.classList.add("locked");
+      return;
+    }
+
     if(step <= currentStep) card.classList.add("done");
     else if(step === currentStep + 1) card.classList.add("current");
     else card.classList.add("locked");
 
     const btn = card.querySelector("button");
     if(!btn) return;
+
     if(step > currentStep + 1) btn.disabled = true;
     else if(step === 5 && currentStep < 4) btn.disabled = true;
     else btn.disabled = false;
   });
 }
+
 async function renderTimeline(){
   timeline.innerHTML = "";
+
   if(!currentUser || !currentDossier){
     timeline.innerHTML = `<div class="empty-state">Sélectionnez un dossier.</div>`;
     return;
   }
+
   const snap = await getDocs(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"));
   const events = [];
+
   snap.forEach(s => events.push({ id:s.id, ...s.data() }));
+
   events.sort((a,b) => {
     const ta = a.createdAt?.toMillis?.() || 0;
     const tb = b.createdAt?.toMillis?.() || 0;
     return tb - ta;
   });
+
   if(!events.length){
     timeline.innerHTML = `<div class="empty-state">Aucune action enregistrée.</div>`;
     return;
   }
+
   events.forEach(ev => {
     const date = ev.createdAt?.toDate?.() ? ev.createdAt.toDate().toLocaleDateString("fr-FR") : todayFR();
     const item = document.createElement("div");
+
     item.className = "timeline-item";
     item.innerHTML = `
       <div class="timeline-main">
@@ -1122,17 +1266,21 @@ async function renderTimeline(){
         <span>${esc(ev.description || "")}</span>
       </div>
     `;
+
     timeline.appendChild(item);
   });
 }
+
 function renderAddButton(){
   const planText = planBadge.textContent || "";
+
   if(planText.includes("Pro")){
     addDossierBtn.textContent = dossiers.length < 3 ? "Ajouter un dossier inclus" : "Ajouter un dossier — 19 €";
   } else {
     addDossierBtn.textContent = dossiers.length === 0 ? "Ajouter mon dossier" : "Nouveau dossier — 49 €";
   }
 }
+
 async function renderAll(){
   renderDossiers();
   renderSummary();
@@ -1140,46 +1288,67 @@ async function renderAll(){
   renderAddButton();
   await renderTimeline();
 }
+
 async function loadUserData(uid){
   try{
     const s = await getDoc(doc(db, "users", uid));
     currentUserData = s.exists() ? (s.data() || {}) : {};
-  }catch{ currentUserData = {}; }
+  }catch{
+    currentUserData = {};
+  }
 }
+
 async function loadDossiers(uid){
   const snap = await getDocs(collection(db, "users", uid, "requests"));
   dossiers = [];
+
   snap.forEach(s => dossiers.push({ id:s.id, ...s.data() }));
+
   dossiers.sort((a,b) => {
     const ta = a.createdAt?.toMillis?.() || 0;
     const tb = b.createdAt?.toMillis?.() || 0;
     return tb - ta;
   });
-  if(!currentDossier && dossiers.length) currentDossier = dossiers[0];
-  else if(currentDossier) currentDossier = dossiers.find(d => d.id === currentDossier.id) || dossiers[0] || null;
+
+  if(!currentDossier && dossiers.length){
+    currentDossier = dossiers[0];
+  } else if(currentDossier){
+    currentDossier = dossiers.find(d => d.id === currentDossier.id) || dossiers[0] || null;
+  }
+
   await renderAll();
 }
 
 async function downloadInjunctionPack(){
-  if(!currentDossier){ alert("Sélectionnez un dossier."); return; }
+  if(!currentDossier){
+    alert("Sélectionnez un dossier.");
+    return;
+  }
+
   if(!window.JSZip){
     alert("Le module ZIP n'est pas chargé. Vérifie la connexion ou le CDN JSZip.");
     return;
   }
+
   const zip = new JSZip();
   const safeRef = String(currentDossier.ref || "dossier").replace(/[^\w\-]+/g, "_");
+
   zip.file("01_courrier_tribunal.txt", injunctionText(currentDossier));
   zip.file("02_bordereau_pieces.txt", bordereauText(currentDossier));
   zip.file("03_fiche_preremplissage_cerfa_12946.txt", cerfaPrefillText(currentDossier));
   zip.file("04_liste_pieces_a_joindre.txt", pieceList(currentDossier).join("\n"));
   zip.file("LIEN_CERFA_OFFICIEL.txt", `Cerfa 12946*02 : ${CERFA_URL}\n\nTélécharger le formulaire officiel, puis le compléter avec la fiche de préremplissage.`);
+
   const blob = await zip.generateAsync({ type:"blob" });
   const a = document.createElement("a");
+
   a.href = URL.createObjectURL(blob);
   a.download = `${safeRef}_dossier_injonction.zip`;
+
   document.body.appendChild(a);
   a.click();
   a.remove();
+
   URL.revokeObjectURL(a.href);
 }
 
@@ -1192,14 +1361,24 @@ addDossierBtn.addEventListener("click", () => {
   $("creditorCityInput").value = creditorCity();
   createDossierModal.classList.add("open");
 });
+
 closeCreateDossier.addEventListener("click", () => createDossierModal.classList.remove("open"));
-createDossierModal.addEventListener("click", e => { if(e.target === createDossierModal) createDossierModal.classList.remove("open"); });
+
+createDossierModal.addEventListener("click", e => {
+  if(e.target === createDossierModal) createDossierModal.classList.remove("open");
+});
 
 createDossierForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   if(!currentUser) return;
+
   const amount = Number(String($("amountTTCInput").value || "").replace(",", "."));
-  if(!Number.isFinite(amount) || amount <= 0){ alert("Montant invalide."); return; }
+
+  if(!Number.isFinite(amount) || amount <= 0){
+    alert("Montant invalide.");
+    return;
+  }
 
   await addDoc(collection(db, "users", currentUser.uid, "requests"), {
     ref: clean($("dossierRef").value) || generateRef(),
@@ -1231,6 +1410,7 @@ createDossierForm.addEventListener("submit", async (e) => {
 
   createDossierForm.reset();
   createDossierModal.classList.remove("open");
+
   await loadDossiers(currentUser.uid);
 });
 
@@ -1239,21 +1419,28 @@ document.querySelectorAll("[data-action]").forEach(btn => {
 });
 
 closeModal.addEventListener("click", closeTextModal);
-modalText.addEventListener("click", e => { if(e.target === modalText) closeTextModal(); });
 
+modalText.addEventListener("click", e => {
+  if(e.target === modalText) closeTextModal();
+});
 
 shareBtn.addEventListener("click", async () => {
   if(!navigator.share || !currentText) return;
-  await navigator.share({ title: modalTitle.textContent, text: currentText });
+
+  await navigator.share({
+    title: modalTitle.textContent,
+    text: currentText
+  });
 });
 
 printPdfBtn.addEventListener("click", () => {
   if(!currentText) return;
-  openProfessionalLetter(currentText, currentDossier, true);
+  openProfessionalLetter(currentText, currentDossier);
 });
 
 markSentBtn.addEventListener("click", async () => {
   if(!currentAction) return;
+
   await markStep(currentAction);
   closeTextModal();
 });
@@ -1261,14 +1448,25 @@ markSentBtn.addEventListener("click", async () => {
 openInjunctionBtn.addEventListener("click", openInjunctionModal);
 downloadInjunctionPackBtn.addEventListener("click", downloadInjunctionPack);
 downloadInjunctionPackBtnModal.addEventListener("click", downloadInjunctionPack);
+
 closeInjunctionModal.addEventListener("click", closeInjunction);
-injunctionModal.addEventListener("click", e => { if(e.target === injunctionModal) closeInjunction(); });
+
+injunctionModal.addEventListener("click", e => {
+  if(e.target === injunctionModal) closeInjunction();
+});
+
 copyInjunctionBtn.addEventListener("click", async () => {
   if(!currentDossier) return;
+
   await navigator.clipboard.writeText(injunctionPackText(currentDossier));
+
   copyInjunctionBtn.textContent = "Copié";
-  setTimeout(() => copyInjunctionBtn.textContent = "Copier courrier", 1200);
+
+  setTimeout(() => {
+    copyInjunctionBtn.textContent = "Copier courrier";
+  }, 1200);
 });
+
 markInjunctionBtn.addEventListener("click", async () => {
   await markStep("injunction");
   closeInjunction();
@@ -1278,6 +1476,7 @@ logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   location.href = "connexion.html";
 });
+
 saveCreditorBtn.addEventListener("click", async () => {
   if(!currentUser || !currentDossier){
     alert("Sélectionnez un dossier.");
@@ -1319,23 +1518,29 @@ saveCreditorBtn.addEventListener("click", async () => {
   }catch(error){
     console.error("Erreur enregistrement créancier :", error);
     alert("Erreur Firestore : le créancier n’a pas été enregistré. Regarde la console.");
+
     saveCreditorBtn.disabled = false;
     saveCreditorBtn.textContent = "Enregistrer créancier";
   }
 });
-  
+
 onAuthStateChanged(auth, async user => {
   if(!user){
     location.href = "connexion.html";
     return;
   }
+
   currentUser = user;
   userEmail.textContent = user.email || "Client Axe Flow";
+
   await loadUserData(user.uid);
+
   statusBadge.textContent = getStatusLabel(currentUserData);
   statusBadge.className = currentUserData.accountStatus === "unpaid" ? "status-pill danger" : "status-pill success";
+
   planBadge.textContent = getPlanLabel(currentUserData);
   planBadge.className = "status-pill neutral";
+
   await loadDossiers(user.uid);
 });
 </script>
