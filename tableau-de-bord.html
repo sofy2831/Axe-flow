@@ -881,11 +881,11 @@
 
             <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
               <button class="btn btn-primary" id="addDossierBtn" type="button">
-                Nouveau dossier - 49 €
+                Nouveau dossier — 49 €
               </button>
 
               <button class="btn btn-secondary" id="subscribeBtn" type="button">
-                Passer en abonnement - 89 €/mois
+                Passer en abonnement — 89 €/mois
               </button>
 
               <div style="font-size:.75rem;color:var(--muted);text-align:right;">
@@ -1265,7 +1265,7 @@
       <div class="note-box warning" id="lrarNotice" style="display:none;margin-top:12px;">
         <strong>Envoi recommandé :</strong><br>
         Pour une valeur juridique optimale, envoyez cette mise en demeure en courrier recommandé avec accusé de réception (LRAR), en complément du mail.<br><br>
-        <strong>Option :</strong> envoi via La Poste recommandée en ligne - tarif indicatif : 7,35 € par page.
+        <strong>Option :</strong> envoi via La Poste recommandée en ligne — tarif indicatif : 7,35 € par page.
       </div>
 
       <div class="modal-actions">
@@ -1285,7 +1285,10 @@
       <div class="modal-head">
         <div>
           <h2>Injonction de payer</h2>
-          <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.</div>
+          <div class="panel-sub">
+            Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.<br>
+            Une mise en demeure envoyée en LRAR est fortement recommandée avant dépôt.
+          </div>
         </div>
         <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
       </div>
@@ -1346,7 +1349,7 @@ const STRIPE_EXTRA_19_URL = "https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03
   Placeholder technique. À remplacer ensuite par l'appel réel à ton backend / Cloud Function.
   Important : ne jamais appeler directement l'API La Poste depuis le navigateur avec une clé secrète.
 */
-const LAPOSTE_LRAR_PRICE_LABEL = "8,60 €";
+const LAPOSTE_LRAR_PRICE_LABEL = "7,35 €";
 const LAPOSTE_LRAR_ENDPOINT = "";
 
 let currentUser = null;
@@ -2160,9 +2163,9 @@ async function renderTimeline(){
 
 function renderAddButton(){
   if(isProPlan()){
-    addDossierBtn.textContent = dossiers.length < 3 ? "Ajouter un dossier inclus" : "Ajouter un dossier - 19 €";
+    addDossierBtn.textContent = dossiers.length < 3 ? "Ajouter un dossier inclus" : "Ajouter un dossier — 19 €";
   } else {
-    addDossierBtn.textContent = dossiers.length === 0 ? "Ajouter mon dossier" : "Nouveau dossier - 49 €";
+    addDossierBtn.textContent = dossiers.length === 0 ? "Ajouter mon dossier" : "Nouveau dossier — 49 €";
   }
 }
 
@@ -2236,6 +2239,60 @@ async function downloadInjunctionPack(){
   a.remove();
 
   URL.revokeObjectURL(url);
+}
+
+
+
+async function createLrarDraft(){
+  if(!currentUser || !currentDossier){
+    alert("Aucun dossier sélectionné.");
+    return;
+  }
+
+  if(currentAction !== "med"){
+    alert("La LRAR est disponible uniquement pour la mise en demeure.");
+    return;
+  }
+
+  const payload = {
+    status: "draft",
+    provider: "laposte",
+    type: "lrar",
+    documentType: "mise_en_demeure",
+    price: 7.35,
+    currency: "EUR",
+    pages: 1,
+    recipientName: debtorName(currentDossier),
+    recipientAddress: debtorAddress(currentDossier),
+    recipientZip: debtorZip(currentDossier),
+    recipientCity: debtorCity(currentDossier),
+    senderName: creditorName(currentDossier),
+    senderAddress: creditorAddress(currentDossier),
+    senderZip: creditorZip(currentDossier),
+    senderCity: creditorCity(currentDossier),
+    dossierRef: currentDossier.ref || "",
+    invoiceRef: invoiceNumber(currentDossier),
+    trackingNumber: "",
+    proofUrl: "",
+    sentAt: null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  await addDoc(
+    collection(db, "users", currentUser.uid, "requests", currentDossier.id, "lrar"),
+    payload
+  );
+
+  await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"), {
+    title: "Brouillon LRAR créé",
+    description: "Mise en demeure prête pour envoi recommandé en ligne La Poste.",
+    action: "lrar_draft",
+    createdAt: serverTimestamp()
+  });
+
+  await loadDossiers(currentUser.uid);
+  alert("Brouillon LRAR créé dans Firestore. API La Poste à brancher ensuite.");
 }
 
 
@@ -2455,18 +2512,30 @@ printPdfBtn.addEventListener("click", () => {
   openProfessionalLetter(currentText, currentDossier);
 });
 
-sendLrarBtn.addEventListener("click", () => {
-  if(!currentDossier || currentAction !== "med"){
-    alert("La LRAR est disponible uniquement pour la mise en demeure.");
-    return;
-  }
+sendLrarBtn.addEventListener("click", async () => {
+  try{
+    sendLrarBtn.disabled = true;
+    sendLrarBtn.textContent = "Préparation LRAR...";
 
-  if(!LAPOSTE_LRAR_ENDPOINT){
-    alert("Fonction LRAR via La Poste recommandée en ligne à connecter. Prochaine étape : créer un backend / Cloud Function sécurisé.");
-    return;
-  }
+    if(!LAPOSTE_LRAR_ENDPOINT){
+      await createLrarDraft();
+      sendLrarBtn.textContent = "Brouillon LRAR créé";
+      setTimeout(() => {
+        sendLrarBtn.disabled = false;
+        sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
+      }, 1200);
+      return;
+    }
 
-  alert("Appel API La Poste à connecter.");
+    alert("Appel API La Poste à connecter via Cloud Function sécurisée.");
+
+  }catch(error){
+    console.error("Erreur préparation LRAR :", error);
+    alert("Erreur : la LRAR n’a pas été préparée. Regarde la console Firestore.");
+
+    sendLrarBtn.disabled = false;
+    sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
+  }
 });
 
 markSentBtn.addEventListener("click", async () => {
