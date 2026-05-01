@@ -832,21 +832,28 @@ ${escapeHtml(debtorBlock(d))}
 </html>`;
 }
   
-function openProfessionalLetter(body, d=currentDossier, autoPrint=false){
-  const w = window.open("", "_blank");
-  if(!w){
-    alert("La fenêtre d’impression a été bloquée par le navigateur.");
-    return;
-  }
-  w.document.open();
-  w.document.write(professionalLetterHtml(body, d));
-  w.document.close();
-  if(autoPrint){
-    setTimeout(() => {
-      w.focus();
-      w.print();
-    }, 400);
-  }
+function openProfessionalLetter(body, d=currentDossier){
+  const printWindow = document.createElement("iframe");
+  printWindow.style.position = "fixed";
+  printWindow.style.right = "0";
+  printWindow.style.bottom = "0";
+  printWindow.style.width = "0";
+  printWindow.style.height = "0";
+  printWindow.style.border = "0";
+
+  document.body.appendChild(printWindow);
+
+  const doc = printWindow.contentWindow.document;
+  doc.open();
+  doc.write(professionalLetterHtml(body, d));
+  doc.close();
+
+  setTimeout(() => {
+    printWindow.contentWindow.focus();
+    printWindow.contentWindow.print();
+    document.body.removeChild(printWindow);
+  }, 300);
+}
 }
 function pieceList(d=currentDossier){
   return [
