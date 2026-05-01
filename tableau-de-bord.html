@@ -938,12 +938,20 @@ function openTextModal(action){
   };
 
   currentAction = action;
-  currentText = letterVersion(buildText(action, currentDossier), currentDossier);
+
+  // On garde le courrier simple dans la modale :
+  // Objet + corps du courrier uniquement.
+  // Les blocs adresse restent affichés séparément au-dessus.
+  currentText = buildText(action, currentDossier);
 
   modalTitle.textContent = actionTitle(action);
   modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
+
+  // Image 1 conservée
   modalCreditorBox.textContent = "Vous / Créancier :\n" + creditorBlock(currentDossier);
   modalDebtorBox.textContent = "Votre client / Débiteur :\n" + debtorBlock(currentDossier);
+
+  // Image 2 supprimée : plus de répétition adresse dans le texte
   textContent.textContent = currentText;
 
   mailBtn.href = makeMailto(
