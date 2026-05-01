@@ -735,7 +735,11 @@ function stepForAction(action){
   if(action === "injunction") return 5;
   return 0;
 }
-
+function creditorBlock(d=currentDossier){
+  return `${creditorName(d)}
+${creditorAddress(d) || "Adresse à compléter"}
+${[creditorZip(d), creditorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}`.trim();
+}
 function debtorBlock(d=currentDossier){
   return `${debtorName(d)}
 ${debtorAddress(d) || "Adresse à compléter"}
