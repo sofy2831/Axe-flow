@@ -736,18 +736,12 @@ function stepForAction(action){
   return 0;
 }
 
-function creditorBlock(d=currentDossier){
-  return `${creditorName(d)}
-${creditorAddress(d) || "Adresse à compléter"}
-${[creditorZip(d), creditorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}
-${creditorEmail(d) || ""}`.trim();
-}
 function debtorBlock(d=currentDossier){
   return `${debtorName(d)}
 ${debtorAddress(d) || "Adresse à compléter"}
-${[debtorZip(d), debtorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}
-${debtorEmail(d) || ""}`.trim();
+${[debtorZip(d), debtorCity(d)].filter(Boolean).join(" ") || "Code postal / ville à compléter"}`.trim();
 }
+  
 function letterVersion(body, d=currentDossier){
   return `${creditorBlock(d)}
 
@@ -756,7 +750,7 @@ ${debtorBlock(d)}
 
 Fait le ${todayFR()}
 
-${body}`;
+${bodyWithoutSubject(body)}`;
 }
 function escapeHtml(s){
   return String(s || "")
@@ -774,14 +768,13 @@ function extractSubject(body, fallback="Courrier"){
   return m ? m[1].trim() : fallback;
 }
 function professionalLetterHtml(body, d=currentDossier){
-  const subject = extractSubject(body, actionTitle(currentAction));
   const cleanBody = bodyWithoutSubject(body);
 
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>${escapeHtml(subject)}</title>
+<title>${escapeHtml(actionTitle(currentAction))}</title>
 <style>
   @page{ size:A4; margin:18mm; }
   *{ box-sizing:border-box; }
@@ -792,54 +785,49 @@ function professionalLetterHtml(body, d=currentDossier){
     font-size:12.5pt;
     line-height:1.5;
   }
-  .page{ width:100%; min-height:100%; }
   .top{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:30mm;
+    gap:35mm;
     margin-bottom:22mm;
   }
   .sender,
-  .recipient{ white-space:pre-line; }
-  .recipient{ padding-top:28mm; }
+  .recipient{
+    white-space:pre-line;
+  }
+  .recipient{
+    padding-top:24mm;
+  }
   .date{
-    text-align:right;
-    margin-bottom:16mm;
+    margin-top:18mm;
+    text-align:left;
   }
-  .subject{
-    font-weight:700;
-    margin-bottom:14mm;
+  .body{
+    white-space:pre-line;
+    margin-top:18mm;
   }
-  .body{ white-space:pre-line; }
-  .print-note{
-    margin-top:20mm;
-    padding-top:6mm;
-    border-top:1px solid #ddd;
-    font-size:9pt;
-    color:#666;
+  @media print{
+    body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
-  @media print{ .print-note{ display:none; } }
 </style>
 </head>
 <body>
-  <main class="page">
+  <main>
     <section class="top">
       <div class="sender">${escapeHtml(creditorBlock(d))}</div>
+
       <div class="recipient">À l’attention de :
-${escapeHtml(debtorBlock(d))}</div>
+${escapeHtml(debtorBlock(d))}
+
+<div class="date">Fait le ${escapeHtml(todayFR())}</div></div>
     </section>
 
-    <div class="date">Fait le ${escapeHtml(todayFR())}</div>
-    <div class="subject">Objet : ${escapeHtml(subject)}</div>
     <section class="body">${escapeHtml(cleanBody)}</section>
-
-    <div class="print-note">
-      Conseil : utilisez “Imprimer” puis “Enregistrer au format PDF” pour obtenir le courrier en PDF.
-    </div>
   </main>
 </body>
 </html>`;
 }
+  
 function openProfessionalLetter(body, d=currentDossier, autoPrint=false){
   const w = window.open("", "_blank");
   if(!w){
