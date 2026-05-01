@@ -921,7 +921,9 @@
             </div>
           </div>
 
-          <div class="note-box soft" id="nextActionBox">Prochaine action : —</div>
+          <button class="btn btn-secondary" id="editDossierBtn" type="button" style="width:100%;margin-bottom:14px;">
+            Modifier le dossier sélectionné
+          </button>
 
           <div class="identity-grid">
             <div class="identity-card">
@@ -1159,6 +1161,85 @@
   </div>
 </div>
 
+
+<div class="modal-backdrop" id="editDossierModal">
+  <div class="modal small">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div>
+          <h2>Modifier le dossier</h2>
+          <div class="panel-sub">Mettez à jour les informations utiles aux relances, courriers et au dossier d’injonction.</div>
+        </div>
+
+        <button class="close-btn" id="closeEditDossier" type="button">×</button>
+      </div>
+
+      <form id="editDossierForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>Référence</label>
+            <input type="text" id="editDossierRef" />
+          </div>
+
+          <div class="field">
+            <label>Montant TTC (€)</label>
+            <input type="number" step="0.01" id="editAmountTTCInput" required />
+          </div>
+
+          <div class="field">
+            <label>Facture</label>
+            <input type="text" id="editInvoiceRefInput" placeholder="FA-2026-001" />
+          </div>
+
+          <div class="field">
+            <label>Date d’émission</label>
+            <input type="date" id="editIssuedDateInput" />
+          </div>
+
+          <div class="field">
+            <label>Date d’échéance</label>
+            <input type="date" id="editDueDateInput" />
+          </div>
+
+          <div class="field">
+            <label>Objet / fondement</label>
+            <input type="text" id="editContractBasisInput" placeholder="Facture de prestation impayée" />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — nom / société</label>
+            <input type="text" id="editDebtorNameInput" required />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — email</label>
+            <input type="email" id="editDebtorEmailInput" />
+          </div>
+
+          <div class="field full">
+            <label>Débiteur — adresse</label>
+            <input type="text" id="editDebtorAddressInput" />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — code postal</label>
+            <input type="text" id="editDebtorZipInput" />
+          </div>
+
+          <div class="field">
+            <label>Débiteur — ville</label>
+            <input type="text" id="editDebtorCityInput" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" type="submit">Enregistrer les modifications</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modalText">
   <div class="modal">
     <div class="modal-inner">
@@ -1241,6 +1322,15 @@ const RELANCE_GAP_DAYS = 7;
 const MED_DELAY_DAYS = 8;
 const CERFA_URL = "https://www.formulaires.service-public.gouv.fr/gf/cerfa_12946.do";
 
+/*
+  Stripe :
+  Remplace ces 3 liens par tes Payment Links Stripe.
+  Important : ajoute dans Stripe une URL de succès vers tableau-de-bord.html.
+*/
+const STRIPE_ONE_SHOT_49_URL = "A_REMPLACER_PAR_PAYMENT_LINK_DOSSIER_49";
+const STRIPE_SUBSCRIPTION_89_URL = "A_REMPLACER_PAR_PAYMENT_LINK_ABONNEMENT_89";
+const STRIPE_EXTRA_19_URL = "A_REMPLACER_PAR_PAYMENT_LINK_DOSSIER_SUPPLEMENTAIRE_19";
+
 let currentUser = null;
 let currentUserData = {};
 let dossiers = [];
@@ -1262,7 +1352,6 @@ const subscribeBtn = $("subscribeBtn");
 const summaryRef = $("summaryRef");
 const summaryAmount = $("summaryAmount");
 const summaryDebtor = $("summaryDebtor");
-const nextActionBox = $("nextActionBox");
 
 const creditorNameEdit = $("creditorNameEdit");
 const creditorEmailEdit = $("creditorEmailEdit");
@@ -1281,6 +1370,11 @@ const timeline = $("timeline");
 const createDossierModal = $("createDossierModal");
 const closeCreateDossier = $("closeCreateDossier");
 const createDossierForm = $("createDossierForm");
+
+const editDossierBtn = $("editDossierBtn");
+const editDossierModal = $("editDossierModal");
+const closeEditDossier = $("closeEditDossier");
+const editDossierForm = $("editDossierForm");
 
 const modalText = $("modalText");
 const modalTitle = $("modalTitle");
@@ -1942,8 +2036,6 @@ function renderSummary(){
     summaryRef.textContent = "—";
     summaryAmount.textContent = "—";
     summaryDebtor.textContent = "—";
-    nextActionBox.textContent = "Prochaine action : —";
-
     creditorNameEdit.value = "";
     creditorEmailEdit.value = "";
     creditorAddressEdit.value = "";
@@ -1960,8 +2052,6 @@ function renderSummary(){
   summaryRef.textContent = currentDossier.ref || "—";
   summaryAmount.textContent = formatCurrency(currentDossier.amountTTC || currentDossier.amountDue);
   summaryDebtor.textContent = debtorName(currentDossier);
-  nextActionBox.textContent = "Prochaine action : " + getNextActionLabel(currentDossier);
-
   creditorNameEdit.value = creditorName(currentDossier);
   creditorEmailEdit.value = creditorEmail(currentDossier);
   creditorAddressEdit.value = creditorAddress(currentDossier);
@@ -2044,9 +2134,7 @@ async function renderTimeline(){
 }
 
 function renderAddButton(){
-  const planText = planBadge.textContent || "";
-
-  if(planText.includes("Pro")){
+  if(isProPlan()){
     addDossierBtn.textContent = dossiers.length < 3 ? "Ajouter un dossier inclus" : "Ajouter un dossier — 19 €";
   } else {
     addDossierBtn.textContent = dossiers.length === 0 ? "Ajouter mon dossier" : "Nouveau dossier — 49 €";
@@ -2125,7 +2213,58 @@ async function downloadInjunctionPack(){
   URL.revokeObjectURL(url);
 }
 
+
+function isProPlan(){
+  const plan = currentUserData.planType || currentUserData.plan || "";
+  return plan === "subscription_89";
+}
+
+function openStripeUrl(url, label){
+  if(!url || url.startsWith("A_REMPLACER")){
+    alert(`Lien Stripe manquant pour : ${label}. Ajoute le Payment Link dans le script.`);
+    return;
+  }
+
+  window.location.href = url;
+}
+
+function canCreateIncludedDossier(){
+  return isProPlan() && dossiers.length < 3;
+}
+
+function openEditDossierModal(){
+  if(!currentDossier){
+    alert("Sélectionnez un dossier.");
+    return;
+  }
+
+  $("editDossierRef").value = currentDossier.ref || "";
+  $("editAmountTTCInput").value = currentDossier.amountTTC || currentDossier.amountDue || "";
+  $("editInvoiceRefInput").value = invoiceNumber(currentDossier) === "—" ? "" : invoiceNumber(currentDossier);
+  $("editIssuedDateInput").value = clean(currentDossier.issuedDate || currentDossier.invoiceIssuedDate);
+  $("editDueDateInput").value = clean(currentDossier.dueDate || currentDossier.invoiceDueDate);
+  $("editContractBasisInput").value = contractBasis(currentDossier);
+
+  $("editDebtorNameInput").value = debtorName(currentDossier) === "Madame, Monsieur" ? "" : debtorName(currentDossier);
+  $("editDebtorEmailInput").value = debtorEmail(currentDossier);
+  $("editDebtorAddressInput").value = debtorAddress(currentDossier);
+  $("editDebtorZipInput").value = debtorZip(currentDossier);
+  $("editDebtorCityInput").value = debtorCity(currentDossier);
+
+  editDossierModal.classList.add("open");
+}
+
 addDossierBtn.addEventListener("click", () => {
+  if(!isProPlan() && dossiers.length >= 1){
+    openStripeUrl(STRIPE_ONE_SHOT_49_URL, "nouveau dossier ponctuel 49 €");
+    return;
+  }
+
+  if(isProPlan() && dossiers.length >= 3){
+    openStripeUrl(STRIPE_EXTRA_19_URL, "dossier supplémentaire 19 €");
+    return;
+  }
+
   $("dossierRef").value = generateRef();
   $("creditorNameInput").value = creditorName();
   $("creditorEmailInput").value = creditorEmail();
@@ -2136,7 +2275,7 @@ addDossierBtn.addEventListener("click", () => {
 });
 
 subscribeBtn.addEventListener("click", () => {
-  alert("Paiement abonnement à connecter à Stripe.");
+  openStripeUrl(STRIPE_SUBSCRIPTION_89_URL, "abonnement 89 €/mois");
 });
 
 closeCreateDossier.addEventListener("click", () => createDossierModal.classList.remove("open"));
@@ -2199,6 +2338,72 @@ createDossierForm.addEventListener("submit", async (e) => {
   createDossierModal.classList.remove("open");
 
   await loadDossiers(currentUser.uid);
+});
+
+
+editDossierBtn.addEventListener("click", openEditDossierModal);
+
+closeEditDossier.addEventListener("click", () => editDossierModal.classList.remove("open"));
+
+editDossierModal.addEventListener("click", e => {
+  if(e.target === editDossierModal) editDossierModal.classList.remove("open");
+});
+
+editDossierForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if(!currentUser || !currentDossier){
+    alert("Aucun dossier sélectionné.");
+    return;
+  }
+
+  const amount = Number(String($("editAmountTTCInput").value || "").replace(",", "."));
+
+  if(!Number.isFinite(amount) || amount <= 0){
+    alert("Montant invalide.");
+    return;
+  }
+
+  const patch = {
+    ref: clean($("editDossierRef").value) || currentDossier.ref || generateRef(),
+    amountTTC: amount,
+    invoiceRef: clean($("editInvoiceRefInput").value),
+    issuedDate: clean($("editIssuedDateInput").value),
+    dueDate: clean($("editDueDateInput").value),
+    contractBasis: clean($("editContractBasisInput").value) || "Facture de prestation impayée",
+
+    debtorName: clean($("editDebtorNameInput").value),
+    debiteurName: clean($("editDebtorNameInput").value),
+    debtorEmail: clean($("editDebtorEmailInput").value),
+    debiteurEmail: clean($("editDebtorEmailInput").value),
+    debtorAddress: clean($("editDebtorAddressInput").value),
+    debiteurAddress: clean($("editDebtorAddressInput").value),
+    debtorZip: clean($("editDebtorZipInput").value),
+    debiteurZip: clean($("editDebtorZipInput").value),
+    debtorCity: clean($("editDebtorCityInput").value),
+    debiteurCity: clean($("editDebtorCityInput").value),
+
+    updatedAt: serverTimestamp()
+  };
+
+  try{
+    await updateDoc(
+      doc(db, "users", currentUser.uid, "requests", currentDossier.id),
+      patch
+    );
+
+    currentDossier = {
+      ...currentDossier,
+      ...patch
+    };
+
+    editDossierModal.classList.remove("open");
+    await loadDossiers(currentUser.uid);
+
+  }catch(error){
+    console.error("Erreur modification dossier :", error);
+    alert("Erreur Firestore : le dossier n’a pas été modifié. Regarde la console.");
+  }
 });
 
 document.querySelectorAll("[data-action]").forEach(btn => {
