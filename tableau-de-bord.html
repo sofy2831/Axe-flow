@@ -1014,25 +1014,41 @@ function renderDossiers(){
 }
 function renderSummary(){
   if(!currentDossier){
-    summaryRef.textContent = "—"; summaryAmount.textContent = "—"; summaryDebtor.textContent = "—"; nextAction.textContent = "Sélectionnez un dossier.";
-    creditorNameView.textContent = "—"; creditorAddressView.textContent = "—"; creditorCityView.textContent = "—"; creditorEmailView.textContent = "—";
-    debtorNameView.textContent = "—"; debtorAddressView.textContent = "—"; debtorCityView.textContent = "—"; debtorEmailView.textContent = "—";
+    summaryRef.textContent = "—";
+    summaryAmount.textContent = "—";
+    summaryDebtor.textContent = "—";
+    nextAction.textContent = "Sélectionnez un dossier.";
+
+    creditorNameEdit.value = "";
+    creditorEmailEdit.value = "";
+    creditorAddressEdit.value = "";
+    creditorZipEdit.value = "";
+    creditorCityEdit.value = "";
+
+    debtorNameView.textContent = "—";
+    debtorAddressView.textContent = "—";
+    debtorCityView.textContent = "—";
+    debtorEmailView.textContent = "—";
     return;
   }
+
   summaryRef.textContent = currentDossier.ref || "—";
-  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC || currentDossier.amountDue);
+  summaryAmount.textContent = formatCurrency(currentDossier.amountTTC);
   summaryDebtor.textContent = debtorName(currentDossier);
   nextAction.textContent = getNextActionLabel(currentDossier);
 
+  // 🔥 ICI = chargement créancier
   creditorNameEdit.value = creditorName(currentDossier);
-creditorEmailEdit.value = creditorEmail(currentDossier);
-creditorAddressEdit.value = creditorAddress(currentDossier);
-creditorZipEdit.value = creditorZip(currentDossier);
-creditorCityEdit.value = creditorCity(currentDossier);
+  creditorEmailEdit.value = creditorEmail(currentDossier);
+  creditorAddressEdit.value = creditorAddress(currentDossier);
+  creditorZipEdit.value = creditorZip(currentDossier);
+  creditorCityEdit.value = creditorCity(currentDossier);
 
   debtorNameView.textContent = debtorName(currentDossier);
   debtorAddressView.textContent = debtorAddress(currentDossier) || "Adresse à compléter";
-  debtorCityView.textContent = [debtorZip(currentDossier), debtorCity(currentDossier)].filter(Boolean).join(" ") || "Code postal / ville à compléter";
+  debtorCityView.textContent =
+    [debtorZip(currentDossier), debtorCity(currentDossier)].filter(Boolean).join(" ")
+    || "Code postal / ville à compléter";
   debtorEmailView.textContent = debtorEmail(currentDossier) || "Email à compléter";
 }
 function renderActions(){
