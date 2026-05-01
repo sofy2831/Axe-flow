@@ -945,7 +945,7 @@ function openProfessionalLetter(body, d=currentDossier){
     frameWindow.print();
 
     setTimeout(() => {
-      if(iframe && iframe.parentNode){
+      if(iframe.parentNode){
         iframe.parentNode.removeChild(iframe);
       }
     }, 1000);
