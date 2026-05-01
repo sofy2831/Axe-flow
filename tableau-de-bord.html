@@ -1358,6 +1358,7 @@ let dossiers = [];
 let currentDossier = null;
 let currentText = "";
 let currentAction = "";
+let currentLrarDraft = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -1914,7 +1915,67 @@ ${bordereauText(d)}
 ${cerfaPrefillText(d)}`;
 }
 
-function openTextModal(action){
+
+function resetLrarButton(){
+  currentLrarDraft = null;
+  sendLrarBtn.disabled = false;
+  sendLrarBtn.textContent = "Préparer LRAR (La Poste)";
+}
+
+function applyLrarButtonState(lrar){
+  if(!lrar){
+    resetLrarButton();
+    return;
+  }
+
+  currentLrarDraft = lrar;
+
+  if(lrar.status === "sent"){
+    sendLrarBtn.textContent = "LRAR envoyée ✔";
+    sendLrarBtn.disabled = true;
+    return;
+  }
+
+  if(lrar.status === "pending"){
+    sendLrarBtn.textContent = "LRAR en cours ✔";
+    sendLrarBtn.disabled = true;
+    return;
+  }
+
+  sendLrarBtn.textContent = "LRAR déjà préparée ✔";
+  sendLrarBtn.disabled = true;
+}
+
+async function getCurrentLrarDraft(){
+  if(!currentUser || !currentDossier) return null;
+
+  const snap = await getDocs(
+    collection(db, "users", currentUser.uid, "requests", currentDossier.id, "lrar")
+  );
+
+  const validStatuses = ["draft", "pending", "sent"];
+  const lrars = [];
+
+  snap.forEach(s => {
+    const data = s.data() || {};
+
+    if(data.documentType === "mise_en_demeure" && validStatuses.includes(data.status || "draft")){
+      lrars.push({ id:s.id, ...data });
+    }
+  });
+
+  if(!lrars.length) return null;
+
+  lrars.sort((a,b) => {
+    const ta = a.createdAt?.toMillis?.() || 0;
+    const tb = b.createdAt?.toMillis?.() || 0;
+    return tb - ta;
+  });
+
+  return lrars[0];
+}
+
+async function openTextModal(action){
   if(!currentDossier){
     alert("Sélectionnez un dossier.");
     return;
@@ -1951,6 +2012,15 @@ function openTextModal(action){
   const isMed = action === "med";
   lrarNotice.style.display = isMed ? "" : "none";
   sendLrarBtn.style.display = isMed ? "" : "none";
+
+  if(isMed){
+    sendLrarBtn.disabled = true;
+    sendLrarBtn.textContent = "Vérification LRAR...";
+    const existingLrar = await getCurrentLrarDraft();
+    applyLrarButtonState(existingLrar);
+  } else {
+    resetLrarButton();
+  }
 
   modalText.classList.add("open");
 }
@@ -2243,59 +2313,6 @@ async function downloadInjunctionPack(){
 
 
 
-async function createLrarDraft(){
-  if(!currentUser || !currentDossier){
-    alert("Aucun dossier sélectionné.");
-    return;
-  }
-
-  if(currentAction !== "med"){
-    alert("La LRAR est disponible uniquement pour la mise en demeure.");
-    return;
-  }
-
-  const payload = {
-    status: "draft",
-    provider: "laposte",
-    type: "lrar",
-    documentType: "mise_en_demeure",
-    price: 7.35,
-    currency: "EUR",
-    pages: 1,
-    recipientName: debtorName(currentDossier),
-    recipientAddress: debtorAddress(currentDossier),
-    recipientZip: debtorZip(currentDossier),
-    recipientCity: debtorCity(currentDossier),
-    senderName: creditorName(currentDossier),
-    senderAddress: creditorAddress(currentDossier),
-    senderZip: creditorZip(currentDossier),
-    senderCity: creditorCity(currentDossier),
-    dossierRef: currentDossier.ref || "",
-    invoiceRef: invoiceNumber(currentDossier),
-    trackingNumber: "",
-    proofUrl: "",
-    sentAt: null,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
-
-  await addDoc(
-    collection(db, "users", currentUser.uid, "requests", currentDossier.id, "lrar"),
-    payload
-  );
-
-  await addDoc(collection(db, "users", currentUser.uid, "requests", currentDossier.id, "events"), {
-    title: "Brouillon LRAR créé",
-    description: "Mise en demeure prête pour envoi recommandé en ligne La Poste.",
-    action: "lrar_draft",
-    createdAt: serverTimestamp()
-  });
-
-  await loadDossiers(currentUser.uid);
-  alert("Brouillon LRAR créé dans Firestore. API La Poste à brancher ensuite.");
-}
-
-
 function isProPlan(){
   const plan = currentUserData.planType || currentUserData.plan || "";
   return plan === "subscription_89";
@@ -2533,28 +2550,32 @@ sendLrarBtn.addEventListener("click", async () => {
       })
     });
 
-    const data = await res.json();
+    let data = {};
+    try{
+      data = await res.json();
+    }catch{
+      data = {};
+    }
 
     if(!res.ok){
       throw new Error(data.error || "Erreur serveur");
     }
 
-    sendLrarBtn.textContent = "LRAR créée ✔";
+    currentLrarDraft = {
+      id: data.lrarId || "",
+      status: "draft",
+      documentType: "mise_en_demeure"
+    };
 
-    // recharge les données
-    await loadDossiers(currentUser.uid);
-
-    setTimeout(() => {
-      sendLrarBtn.disabled = false;
-      sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
-    }, 1200);
+    applyLrarButtonState(currentLrarDraft);
+    await renderTimeline();
 
   }catch(error){
     console.error("Erreur LRAR :", error);
-    alert("Erreur : " + error.message);
+    alert("Erreur : " + (error.message || "LRAR impossible"));
 
     sendLrarBtn.disabled = false;
-    sendLrarBtn.textContent = "Envoyer en LRAR (La Poste)";
+    sendLrarBtn.textContent = "Préparer LRAR (La Poste)";
   }
 });
 
