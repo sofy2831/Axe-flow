@@ -1259,10 +1259,20 @@
 
       <div class="text-preview" id="textContent"></div>
 
+      <div class="note-box warning" style="margin-top:12px;">
+  <strong>Envoi recommandé :</strong><br>
+  Pour une valeur juridique optimale, envoyez cette mise en demeure en courrier recommandé avec accusé de réception (LRAR), en complément du mail.<br><br>
+  
+  <strong>Option :</strong> envoi via La Poste (API) — tarif indicatif : 8,60 € pour 1 page.
+</div>
+      
       <div class="modal-actions">
   <button class="btn btn-secondary" id="shareBtn" type="button" style="display:none;">Partager</button>
   <a class="btn btn-secondary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a>
   <button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button>
+        <button class="btn btn-warning" id="sendLrarBtn" type="button">
+  Envoyer en LRAR (La Poste) — 8,60 €
+</button>
   <button class="btn btn-primary" id="markSentBtn" type="button">Marquer comme envoyé</button>
 </div>
     </div>
@@ -1275,7 +1285,9 @@
       <div class="modal-head">
         <div>
           <h2>Injonction de payer</h2>
-          <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.</div>
+          <div class="panel-sub">Préparation du dossier Cerfa 12946*02 + bordereau + courrier tribunal.<br>
+            Une mise en demeure envoyée en LRAR est fortement recommandée avant dépôt.
+          </div>
         </div>
         <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
       </div>
