@@ -588,7 +588,7 @@
 
             <div class="action-card" data-step="4">
               <h3>Mise en demeure</h3>
-              <p>Avant contentieux</p>
+              <p>Avant contentieux • LRAR fortement recommandée + mail</p>
               <button class="btn" type="button" data-action="med">Ouvrir</button>
             </div>
 
@@ -731,6 +731,15 @@
         <div class="note-box soft" id="modalDebtorBox">Débiteur : —</div>
       </div>
 
+      <div class="note-box warning" id="medSendBox" style="display:none;margin-bottom:14px;">
+        <strong>Mise en demeure : LRAR fortement recommandée.</strong><br />
+        Envoie conseillé : <strong>lettre recommandée avec accusé de réception</strong> via La Poste + copie simple par mail.
+        Prévoir environ <strong>7,35 €</strong> pour l’envoi en ligne, selon poids et options.
+        <div style="margin-top:10px;">
+          <a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a>
+        </div>
+      </div>
+
       <div class="text-preview" id="textContent"></div>
 
       <div class="modal-actions">
@@ -796,6 +805,10 @@ const RELANCE_GAP_DAYS = 7;
 const MED_DELAY_DAYS = 8;
 const CERFA_URL = "https://www.formulaires.service-public.gouv.fr/gf/cerfa_12946.do";
 
+const STRIPE_DOSSIER_49 = "https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01";
+const STRIPE_ABONNEMENT_89 = "https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02";
+const STRIPE_DOSSIER_SUP_19 = "https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03";
+
 let currentUser = null;
 let currentUserData = {};
 let dossiers = [];
@@ -847,6 +860,7 @@ const modalSub = $("modalSub");
 const textContent = $("textContent");
 const modalCreditorBox = $("modalCreditorBox");
 const modalDebtorBox = $("modalDebtorBox");
+const medSendBox = $("medSendBox");
 const closeModal = $("closeModal");
 
 const shareBtn = $("shareBtn");
@@ -1015,6 +1029,21 @@ function getStatusLabel(userData = {}){
   if(status === "unpaid") return "Paiement requis";
   if(status === "paused") return "Suspendu";
   return "Actif";
+}
+
+function isSubscriptionPlan(){
+  const plan = currentUserData.planType || currentUserData.plan || "";
+  return plan === "subscription_89" || plan === "pro_89" || plan === "Pro 89" || String(planBadge.textContent || "").includes("Pro");
+}
+
+function openCreateDossierModal(){
+  $("dossierRef").value = generateRef();
+  $("creditorNameInput").value = creditorName();
+  $("creditorEmailInput").value = creditorEmail();
+  $("creditorAddressInput").value = creditorAddress();
+  $("creditorZipInput").value = creditorZip();
+  $("creditorCityInput").value = creditorCity();
+  createDossierModal.classList.add("open");
 }
 
 function creditorBlock(d=currentDossier){
@@ -1316,6 +1345,7 @@ function openTextModal(action){
   modalSub.textContent = `${currentDossier.ref || "Dossier"} • Facture ${invoiceNumber(currentDossier)}`;
   modalCreditorBox.textContent = "Vous / Créancier :\n" + creditorBlock(currentDossier);
   modalDebtorBox.textContent = "Votre client / Débiteur :\n" + debtorBlock(currentDossier);
+  medSendBox.style.display = action === "med" ? "block" : "none";
   textContent.textContent = currentText;
 
   mailBtn.href = makeMailto(
@@ -1332,6 +1362,7 @@ function closeTextModal(){
   modalText.classList.remove("open");
   currentText = "";
   currentAction = "";
+  medSendBox.style.display = "none";
   markSentBtn.disabled = false;
   markSentBtn.textContent = "Marquer comme envoyé";
 }
@@ -1656,17 +1687,29 @@ async function downloadInjunctionPack(){
 }
 
 addDossierBtn.addEventListener("click", () => {
-  $("dossierRef").value = generateRef();
-  $("creditorNameInput").value = creditorName();
-  $("creditorEmailInput").value = creditorEmail();
-  $("creditorAddressInput").value = creditorAddress();
-  $("creditorZipInput").value = creditorZip();
-  $("creditorCityInput").value = creditorCity();
-  createDossierModal.classList.add("open");
+  const hasDossier = dossiers.length > 0;
+  const isPro = isSubscriptionPlan();
+
+  if(!hasDossier){
+    openCreateDossierModal();
+    return;
+  }
+
+  if(isPro && dossiers.length < 3){
+    openCreateDossierModal();
+    return;
+  }
+
+  if(isPro && dossiers.length >= 3){
+    window.location.href = STRIPE_DOSSIER_SUP_19;
+    return;
+  }
+
+  window.location.href = STRIPE_DOSSIER_49;
 });
 
 subscribeBtn.addEventListener("click", () => {
-  alert("Paiement abonnement à brancher sur Stripe : 89 €/mois, 3 dossiers inclus, puis 19 € par dossier supplémentaire.");
+  window.location.href = STRIPE_ABONNEMENT_89;
 });
 
 closeCreateDossier.addEventListener("click", () => createDossierModal.classList.remove("open"));
