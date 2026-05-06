@@ -78,8 +78,8 @@
           <div class="hero-points">
             <div class="point"><span class="point-mark">01</span><span>Choisissez l’offre adaptée : dossier ponctuel ou mode Pro.</span></div>
             <div class="point"><span class="point-mark">02</span><span>Créez votre compte ou connectez-vous à votre espace client.</span></div>
-            <div class="point"><span class="point-mark">03</span><span>Ouvrez votre dossier depuis le tableau de bord.</span></div>
-            <div class="point"><span class="point-mark">04</span><span>Renseignez la facture, le débiteur, puis suivez les actions.</span></div>
+            <div class="point"><span class="point-mark">03</span><span>Validez le paiement sécurisé de l’offre choisie.</span></div>
+            <div class="point"><span class="point-mark">04</span><span>Ouvrez votre dossier depuis le tableau de bord.</span></div>
           </div>
         </div>
 
@@ -102,7 +102,7 @@
 
     <section id="usages"><div class="container"><div class="section-head"><span class="section-tag">Positionnement</span><h2 class="section-title">Plus structuré qu’un suivi maison. Plus ciblé qu’un outil de facturation.</h2><p class="section-text">Axe Flow s’adresse aux structures qui veulent arrêter de gérer leurs impayés au hasard, entre mails, rappels isolés et documents éparpillés.</p></div><div class="compare"><article class="compare-card"><h3>Pourquoi Axe Flow complète un outil de facturation classique</h3><table class="compare-table"><thead><tr><th>Fonction</th><th>Outil de facturation</th><th>Axe Flow</th></tr></thead><tbody><tr><td>Émission de facture</td><td>Oui</td><td class="no">Non</td></tr><tr><td>Suivi des impayés</td><td>Partiel</td><td class="yes">Oui</td></tr><tr><td>Relances structurées</td><td>Variable</td><td class="yes">Oui</td></tr><tr><td>Mise en demeure</td><td>Rare</td><td class="yes">Oui</td></tr><tr><td>Bordereau des pièces</td><td class="no">Non</td><td class="yes">Oui</td></tr><tr><td>Dossier d’injonction</td><td class="no">Non</td><td class="yes">Oui</td></tr></tbody></table></article><article class="usage-card"><h3>Pour qui</h3><div class="usage-list"><div class="usage-item"><strong>Indépendants</strong><span>Pour ouvrir un dossier proprement sans traitement artisanal.</span></div><div class="usage-item"><strong>Artisans</strong><span>Pour suivre les impayés clients avec une méthode claire.</span></div><div class="usage-item"><strong>Prestataires de services</strong><span>Pour avancer sans perdre le fil des relances.</span></div><div class="usage-item"><strong>TPE et structures locales</strong><span>Pour centraliser les dossiers sur un tableau de bord unique.</span></div></div><div class="mail-note">Axe Flow prépare les documents et les étapes. Le créancier effectue l’envoi au débiteur et conserve ses justificatifs.</div></article></div></div></section>
 
-    <section><div class="container"><div class="final-cta"><div class="final-cta-inner"><div><h2>Un impayé ne doit plus dormir dans une boîte mail.</h2><p>Choisissez l’offre, créez votre compte, puis ouvrez votre dossier dans le tableau de bord.</p></div><div class="hero-actions" style="margin:0"><a href="#tarifs" class="btn btn-primary">Choisir mon offre</a></div></div></div></div></section>
+    <section><div class="container"><div class="final-cta"><div class="final-cta-inner"><div><h2>Un impayé ne doit plus dormir dans une boîte mail.</h2><p>Choisissez l’offre, créez votre compte, validez le paiement, puis ouvrez votre dossier dans le tableau de bord.</p></div><div class="hero-actions" style="margin:0"><a href="#tarifs" class="btn btn-primary">Choisir mon offre</a></div></div></div></div></section>
   </main>
 
   <footer><div class="container footer-inner"><div>© Axe Flow - Suivi des impayés, de la relance à l’injonction</div><div class="footer-links"><a href="#fonctionnalites">Fonctionnalités</a><a href="#tarifs">Tarifs</a><a href="#usages">Pour qui</a><a href="connexion.html">Connexion</a></div></div></footer>
@@ -111,7 +111,15 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    const firebaseConfig = { apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8", authDomain:"axe-flow.firebaseapp.com", projectId:"axe-flow", storageBucket:"axe-flow.firebasestorage.app", messagingSenderId:"295300543556", appId:"1:295300543556:web:3facac2d0c612e3456b811" };
+    const firebaseConfig = {
+      apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+      authDomain:"axe-flow.firebaseapp.com",
+      projectId:"axe-flow",
+      storageBucket:"axe-flow.firebasestorage.app",
+      messagingSenderId:"295300543556",
+      appId:"1:295300543556:web:3facac2d0c612e3456b811"
+    };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const CHECKOUT_ENDPOINT = "https://createcheckoutsession-pqz4ycvjmq-od.a.run.app";
@@ -120,14 +128,26 @@
     let authReady = false;
     const checkoutState = document.getElementById("checkoutState");
 
-    function setCheckoutState(message){ if(!checkoutState) return; checkoutState.textContent = message || ""; checkoutState.classList.toggle("show", !!message); }
-    function setCheckoutButtonsDisabled(disabled){ document.querySelectorAll("[data-checkout-offer]").forEach(btn => { btn.disabled = !!disabled; }); }
+    function setCheckoutState(message){
+      if(!checkoutState) return;
+      checkoutState.textContent = message || "";
+      checkoutState.classList.toggle("show", !!message);
+    }
+
+    function setCheckoutButtonsDisabled(disabled){
+      document.querySelectorAll("[data-checkout-offer]").forEach(btn => {
+        btn.disabled = !!disabled;
+      });
+    }
 
     onAuthStateChanged(auth, async (user) => {
       currentUser = user || null;
       authReady = true;
-      const pendingOffer = sessionStorage.getItem("axeFlowPendingOffer");
-      if (currentUser && pendingOffer && new URLSearchParams(location.search).get("checkout") === "1") {
+
+      const params = new URLSearchParams(location.search);
+      const pendingOffer = sessionStorage.getItem("axeFlowPendingOffer") || params.get("offer");
+
+      if (currentUser && pendingOffer && params.get("checkout") === "1") {
         sessionStorage.removeItem("axeFlowPendingOffer");
         await startCheckout(pendingOffer);
       }
@@ -136,8 +156,16 @@
     async function waitForAuthReady(){
       if(authReady) return;
       await new Promise(resolve => {
-        const timer = setInterval(() => { if(authReady){ clearInterval(timer); resolve(); } }, 50);
-        setTimeout(() => { clearInterval(timer); resolve(); }, 2500);
+        const timer = setInterval(() => {
+          if(authReady){
+            clearInterval(timer);
+            resolve();
+          }
+        }, 50);
+        setTimeout(() => {
+          clearInterval(timer);
+          resolve();
+        }, 2500);
       });
     }
 
@@ -154,19 +182,26 @@
       try {
         setCheckoutButtonsDisabled(true);
         setCheckoutState("Préparation du paiement sécurisé...");
+
         const response = await fetch(CHECKOUT_ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uid: currentUser.uid, email: currentUser.email, offerType })
+          body: JSON.stringify({
+            uid: currentUser.uid,
+            email: currentUser.email,
+            offerType
+          })
         });
+
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.url) throw new Error(data.error || "Erreur Stripe");
+        if (!response.ok || !data.url) throw new Error(data.error || "Erreur paiement");
+
         window.location.href = data.url;
       } catch (error) {
         console.error("Erreur checkout :", error);
         setCheckoutState("");
         setCheckoutButtonsDisabled(false);
-        alert("Impossible de lancer le paiement. Vérifie la Cloud Function Stripe et l’offerType envoyé.");
+        alert("Impossible de lancer le paiement. Vérifie la Cloud Function et l’offre envoyée.");
       }
     }
 
