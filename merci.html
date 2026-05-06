@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Axe Flow — Paiement confirmé</title>
-  <meta name="description" content="Paiement confirmé sur Axe Flow. Accédez à votre espace client pour créer ou suivre votre dossier." />
+  <meta name="description" content="Paiement confirmé sur Axe Flow. Accédez à votre tableau de bord pour créer votre dossier impayé." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b3145" />
 
@@ -140,6 +140,17 @@
       filter:brightness(1.03);
     }
 
+    .btn-secondary{
+      background:rgba(255,255,255,0.06);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.10);
+      transform:translateY(-1px);
+    }
+
     .page{
       padding:38px 0 44px;
     }
@@ -196,7 +207,7 @@
       font-size:clamp(2rem, 4.2vw, 3.4rem);
       line-height:1.04;
       letter-spacing:-0.04em;
-      max-width:14ch;
+      max-width:15ch;
     }
 
     .hero-lead{
@@ -345,14 +356,15 @@
             Paiement confirmé
           </div>
 
-          <h1>Votre accès Axe Flow est prêt</h1>
+          <h1>Votre droit de création est prêt</h1>
 
           <p class="hero-lead">
-            Le paiement a bien été pris en compte. Vous pouvez maintenant vous connecter à votre espace client pour créer votre dossier impayé ou reprendre un dossier existant.
+            Le paiement a bien été pris en compte. Vous pouvez maintenant retourner sur votre tableau de bord pour créer votre dossier impayé, renseigner la facture, le débiteur et lancer le suivi.
           </p>
 
           <div class="hero-actions">
-            <a href="connexion.html" class="btn btn-primary">Me connecter</a>
+            <a href="tableau-de-bord.html" class="btn btn-primary">Créer mon dossier</a>
+            <a href="index.html" class="btn btn-secondary">Retour à l’accueil</a>
           </div>
         </section>
 
@@ -361,16 +373,16 @@
             <span class="section-tag">Suite</span>
             <h2 class="section-title">Ce qu’il faut faire maintenant</h2>
             <p class="section-text">
-              Le parcours est simple : connexion, création du dossier, puis suivi des étapes dans votre espace Axe Flow.
+              Le paiement ouvre le droit. Le dossier se crée ensuite dans le tableau de bord, proprement rattaché à votre compte.
             </p>
           </div>
 
           <div class="steps-grid">
             <article class="step">
               <div class="step-number">01</div>
-              <h3>Connectez-vous</h3>
+              <h3>Accédez au tableau de bord</h3>
               <p>
-                Utilisez votre email et votre mot de passe sur la page de connexion. Si votre compte n’existe pas encore, créez-le depuis cette page.
+                Cliquez sur « Créer mon dossier » pour revenir dans votre espace client Axe Flow.
               </p>
             </article>
 
@@ -378,15 +390,15 @@
               <div class="step-number">02</div>
               <h3>Créez votre dossier</h3>
               <p>
-                Une fois connecté, ouvrez votre dossier impayé et renseignez les informations essentielles du débiteur et de la facture.
+                Ouvrez le nouveau dossier autorisé par votre paiement et renseignez la facture, le montant et le débiteur.
               </p>
             </article>
 
             <article class="step">
               <div class="step-number">03</div>
-              <h3>Suivez les étapes</h3>
+              <h3>Suivez les actions</h3>
               <p>
-                Retrouvez ensuite l’avancement de votre dossier et les étapes publiées directement dans votre espace Axe Flow.
+                Lancez ensuite les relances, la mise en demeure puis l’injonction si le dossier doit aller plus loin.
               </p>
             </article>
           </div>
@@ -394,7 +406,7 @@
       </div>
 
       <div class="footer-note">
-        Axe Flow - confirmation de paiement et accès à l’espace client.
+        Axe Flow - paiement confirmé, création du dossier dans le tableau de bord.
       </div>
     </div>
   </main>
