@@ -17,6 +17,8 @@ const OFFERS = {
   one_shot_49: {
     mode: "payment",
     amount: 49,
+    grantedCaseCount: 1,
+    plan: "one_shot_49",
     line_items: [
       {
         price_data: {
@@ -31,9 +33,11 @@ const OFFERS = {
     ],
   },
 
-  monthly_89: {
+  subscription_89: {
     mode: "subscription",
     amount: 89,
+    grantedCaseCount: 3,
+    plan: "subscription_89",
     line_items: [
       {
         price_data: {
@@ -49,9 +53,11 @@ const OFFERS = {
     ],
   },
 
-  extra_case_19: {
+  extra_19: {
     mode: "payment",
     amount: 19,
+    grantedCaseCount: 1,
+    plan: "subscription_89",
     line_items: [
       {
         price_data: {
@@ -178,7 +184,7 @@ exports.stripeWebhook = onRequest(
         await userRef.collection("entitlements").add({
           type: offerType,
           status: "active",
-          grantedCaseCount: offerType === "monthly_89" ? 3 : 1,
+          grantedCaseCount: offer.grantedCaseCount,
           usedCaseCount: 0,
           source: "stripe",
           sourcePaymentId: session.id,
@@ -187,16 +193,27 @@ exports.stripeWebhook = onRequest(
         });
 
         const userSnap = await userRef.get();
-        const currentPlan = userSnap.exists ? userSnap.data().plan || "unknown" : "unknown";
+        const currentPlan = userSnap.exists
+          ? userSnap.data().plan || "unknown"
+          : "unknown";
+
+        const finalPlan = offerType === "extra_19" ? currentPlan : offer.plan;
 
         const userUpdate = {
+          uid,
           email,
-          plan: offerType === "extra_case_19" ? currentPlan : offerType,
+          role: "client",
+          plan: finalPlan,
+          planType: finalPlan,
+          entitlement: offerType,
+          entitlementStatus: "active",
+          paymentStatus: "paid",
           subscriptionStatus: "active",
+          accountStatus: "active",
           updatedAt: now,
         };
 
-        if (offerType === "monthly_89") {
+        if (offerType === "subscription_89") {
           userUpdate.monthlyQuota = 3;
         }
 
@@ -246,22 +263,23 @@ exports.createLrarDraft = onRequest(
 
       const dossier = requestSnap.data();
       const now = admin.firestore.Timestamp.now();
+
       const existingLrarSnap = await requestRef
-  .collection("lrar")
-  .where("documentType", "==", "mise_en_demeure")
-  .where("status", "in", ["draft", "pending", "sent"])
-  .limit(1)
-  .get();
+        .collection("lrar")
+        .where("documentType", "==", "mise_en_demeure")
+        .where("status", "in", ["draft", "pending", "sent"])
+        .limit(1)
+        .get();
 
-if (!existingLrarSnap.empty) {
-  const existingDoc = existingLrarSnap.docs[0];
+      if (!existingLrarSnap.empty) {
+        const existingDoc = existingLrarSnap.docs[0];
 
-  return res.status(200).json({
-    success: true,
-    reused: true,
-    lrarId: existingDoc.id,
-  });
-}
+        return res.status(200).json({
+          success: true,
+          reused: true,
+          lrarId: existingDoc.id,
+        });
+      }
 
       const lrarPayload = {
         status: "draft",
