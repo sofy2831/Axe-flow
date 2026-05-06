@@ -55,506 +55,70 @@
     a{color:inherit;text-decoration:none}
     button,input{font:inherit}
 
-    .container{
-      width:min(var(--max), calc(100% - 32px));
-      margin:0 auto;
-    }
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:20;
-      backdrop-filter:blur(14px);
-      background:rgba(6,20,29,0.66);
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-
-    .topbar-inner{
-      min-height:78px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-
-    .brand-logo{
-      width:54px;
-      height:54px;
-      border-radius:16px;
-      object-fit:cover;
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:var(--shadow);
-      background:rgba(255,255,255,0.04);
-      flex:0 0 auto;
-    }
-
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-    }
-
-    .brand-title{
-      font-size:1rem;
-      font-weight:800;
-      letter-spacing:.02em;
-    }
-
-    .brand-sub{
-      color:var(--soft);
-      font-size:.86rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .top-links{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .top-link{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:42px;
-      padding:0 16px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-      font-size:.9rem;
-      font-weight:700;
-      transition:.2s ease;
-    }
-
-    .top-link:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
-    }
-
-    .page{
-      padding:42px 0 44px;
-    }
-
-    .auth-shell{
-      display:grid;
-      grid-template-columns:minmax(0, 1.08fr) minmax(420px, .92fr);
-      gap:24px;
-      align-items:stretch;
-    }
-
-    .hero-card,
-    .auth-card{
-      border-radius:30px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      min-width:0;
-    }
-
-    .hero-card{
-      padding:34px 32px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:26px;
-      min-height:620px;
-    }
-
-    .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      width:max-content;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      color:var(--muted);
-      font-size:.88rem;
-      font-weight:600;
-      margin-bottom:16px;
-    }
-
-    .eyebrow-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--accent);
-      box-shadow:0 0 0 6px rgba(255,127,31,0.12);
-    }
-
-    h1{
-      margin:0 0 14px;
-      font-size:clamp(2.1rem, 4.2vw, 3.4rem);
-      line-height:1.02;
-      letter-spacing:-0.045em;
-      max-width:11ch;
-    }
-
-    .hero-text{
-      margin:0;
-      color:var(--muted);
-      font-size:1rem;
-      max-width:58ch;
-    }
-
-    .hero-points{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-
-    .point{
-      display:flex;
-      align-items:flex-start;
-      gap:12px;
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      min-height:118px;
-    }
-
-    .point.point-full{
-      grid-column:1 / -1;
-    }
-
-    .point-mark{
-      width:30px;
-      height:30px;
-      border-radius:12px;
-      display:grid;
-      place-items:center;
-      flex:0 0 auto;
-      font-weight:800;
-      color:var(--accent);
-      background:rgba(255,127,31,0.14);
-      border:1px solid rgba(255,127,31,0.22);
-    }
-
-    .point strong{
-      display:block;
-      margin-bottom:4px;
-      font-size:.95rem;
-      color:#fff;
-    }
-
-    .point span{
-      display:block;
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .hero-note{
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,127,31,0.10);
-      border:1px solid rgba(255,127,31,0.18);
-      color:#fff4ea;
-      font-size:.92rem;
-    }
-
-    .auth-card{
-      padding:28px 24px;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
-    }
-
-    .tabs{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:18px;
-    }
-
-    .tab-btn{
-      min-height:48px;
-      border:none;
-      border-radius:999px;
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.10);
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    .tab-btn.active{
-      background:linear-gradient(135deg, var(--accent), var(--accent-2));
-      border-color:transparent;
-      box-shadow:0 18px 40px rgba(255,127,31,0.22);
-    }
-
-    .tab-panel{
-      display:none;
-    }
-
-    .tab-panel.active{
-      display:block;
-    }
-
-    .panel-head{
-      margin-bottom:16px;
-    }
-
-    .panel-head h2{
-      margin:0 0 8px;
-      font-size:1.35rem;
-      letter-spacing:-0.03em;
-    }
-
-    .panel-head p{
-      margin:0;
-      color:var(--muted);
-      font-size:.94rem;
-    }
-
-    .form-grid{
-      display:grid;
-      gap:14px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .field label{
-      color:var(--soft);
-      font-size:.88rem;
-      font-weight:600;
-    }
-
-    .field input{
-      min-height:50px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.12);
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      outline:none;
-    }
-
-    .field input::placeholder{
-      color:rgba(244,247,251,0.42);
-    }
-
-    .field input:focus{
-      border-color:rgba(255,127,31,0.34);
-      box-shadow:0 0 0 4px rgba(255,127,31,0.10);
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      min-height:48px;
-      padding:0 18px;
-      border-radius:999px;
-      border:1px solid transparent;
-      font-weight:800;
-      font-size:.95rem;
-      transition:.2s ease;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg, var(--accent), var(--accent-2));
-      color:#fff;
-      box-shadow:0 18px 40px rgba(255,127,31,0.22);
-    }
-
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary{
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      border-color:rgba(255,255,255,0.10);
-    }
-
-    .btn-secondary:hover{
-      background:rgba(255,255,255,0.09);
-      transform:translateY(-1px);
-    }
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:2px;
-    }
-
-    .muted-actions{
-      margin-top:14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .text-btn{
-      border:none;
-      background:none;
-      color:#fff4ea;
-      text-decoration:underline;
-      text-underline-offset:3px;
-      font-weight:700;
-      cursor:pointer;
-      padding:0;
-    }
-
-    .status-box{
-      margin-top:16px;
-      padding:14px 16px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.04);
-      color:var(--muted);
-      font-size:.9rem;
-      display:none;
-    }
-
-    .status-box.show{
-      display:block;
-    }
-
-    .status-box.success{
-      background:rgba(61,208,143,0.12);
-      border-color:rgba(61,208,143,0.22);
-      color:#d9ffee;
-    }
-
-    .status-box.error{
-      background:rgba(255,107,107,0.12);
-      border-color:rgba(255,107,107,0.22);
-      color:#ffdede;
-    }
-
-    .status-box.info{
-      background:rgba(255,255,255,0.05);
-      border-color:rgba(255,255,255,0.10);
-      color:var(--muted);
-    }
-
-   .password-wrap{
-  position:relative;
-}
-
-.password-wrap input{
-  width:100%;
-  padding-right:90px;
-}
-
-.password-toggle{
-  position:absolute;
-  top:50%;
-  right:12px;
-  transform:translateY(-50%);
-  border:none;
-  background:none;
-  color:rgba(244,247,251,0.78);
-  cursor:pointer;
-  font-size:.82rem;
-  font-weight:700;
-  padding:4px 0;
-  line-height:1;
-}
-
-.password-toggle:hover{
-  color:#fff;
-}
-
-.loading{
-  opacity:.75;
-  pointer-events:none;
-}
-
-    .footer-note{
-      margin-top:22px;
-      color:var(--soft);
-      font-size:.88rem;
-      text-align:center;
-    }
-
-    @media (max-width: 1080px){
-      .auth-shell{
-        grid-template-columns:1fr;
-      }
-
-      .hero-card{
-        min-height:auto;
-      }
-
-      h1{
-        max-width:none;
-      }
-    }
-
-    @media (max-width: 720px){
-      .topbar-inner{
-        min-height:unset;
-        padding:14px 0;
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .top-links{
-        width:100%;
-        justify-content:flex-start;
-      }
-
-      .hero-points{
-        grid-template-columns:1fr;
-      }
-
-      .point.point-full{
-        grid-column:auto;
-      }
-    }
-
-    @media (max-width: 560px){
-      .container{
-        width:min(var(--max), calc(100% - 20px));
-      }
-
-      .hero-card,
-      .auth-card{
-        padding:20px 18px;
-        border-radius:24px;
-      }
-
-      .actions,
-      .muted-actions{
-        flex-direction:column;
-      }
-
-      .btn,
-      .top-link{
-        width:100%;
-      }
-
-      .tabs{
-        grid-template-columns:1fr;
-      }
-    }
+    .container{width:min(var(--max), calc(100% - 32px));margin:0 auto;}
+    .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(6,20,29,0.66);border-bottom:1px solid rgba(255,255,255,0.08);}
+    .topbar-inner{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0;}
+    .brand-logo{width:54px;height:54px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,0.12);box-shadow:var(--shadow);background:rgba(255,255,255,0.04);flex:0 0 auto;}
+    .brand-text{display:flex;flex-direction:column;min-width:0;}
+    .brand-title{font-size:1rem;font-weight:800;letter-spacing:.02em;}
+    .brand-sub{color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .top-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .top-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#fff;font-size:.9rem;font-weight:700;transition:.2s ease;}
+    .top-link:hover{background:rgba(255,255,255,0.09);transform:translateY(-1px);}
+    .page{padding:42px 0 44px;}
+    .auth-shell{display:grid;grid-template-columns:minmax(0, 1.08fr) minmax(420px, .92fr);gap:24px;align-items:stretch;}
+    .hero-card,.auth-card{border-radius:30px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow);overflow:hidden;min-width:0;}
+    .hero-card{padding:34px 32px;display:flex;flex-direction:column;justify-content:space-between;gap:26px;min-height:620px;}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;width:max-content;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:var(--muted);font-size:.88rem;font-weight:600;margin-bottom:16px;}
+    .eyebrow-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px rgba(255,127,31,0.12);}
+    h1{margin:0 0 14px;font-size:clamp(2.1rem, 4.2vw, 3.4rem);line-height:1.02;letter-spacing:-0.045em;max-width:11ch;}
+    .hero-text{margin:0;color:var(--muted);font-size:1rem;max-width:58ch;}
+    .hero-points{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .point{display:flex;align-items:flex-start;gap:12px;padding:16px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);min-height:118px;}
+    .point.point-full{grid-column:1 / -1;}
+    .point-mark{width:30px;height:30px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;font-weight:800;color:var(--accent);background:rgba(255,127,31,0.14);border:1px solid rgba(255,127,31,0.22);}
+    .point strong{display:block;margin-bottom:4px;font-size:.95rem;color:#fff;}
+    .point span{display:block;color:var(--muted);font-size:.9rem;}
+    .hero-note{padding:16px 18px;border-radius:18px;background:rgba(255,127,31,0.10);border:1px solid rgba(255,127,31,0.18);color:#fff4ea;font-size:.92rem;}
+    .auth-card{padding:28px 24px;display:flex;flex-direction:column;justify-content:flex-start;}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+    .tab-btn{min-height:48px;border:none;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#fff;font-weight:800;cursor:pointer;transition:.2s ease;}
+    .tab-btn.active{background:linear-gradient(135deg, var(--accent), var(--accent-2));border-color:transparent;box-shadow:0 18px 40px rgba(255,127,31,0.22);}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+    .panel-head{margin-bottom:16px;}
+    .panel-head h2{margin:0 0 8px;font-size:1.35rem;letter-spacing:-0.03em;}
+    .panel-head p{margin:0;color:var(--muted);font-size:.94rem;}
+    .form-grid{display:grid;gap:14px;}
+    .field{display:flex;flex-direction:column;gap:8px;}
+    .field label{color:var(--soft);font-size:.88rem;font-weight:600;}
+    .field input{min-height:50px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;outline:none;}
+    .field input::placeholder{color:rgba(244,247,251,0.42);}
+    .field input:focus{border-color:rgba(255,127,31,0.34);box-shadow:0 0 0 4px rgba(255,127,31,0.10);}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 18px;border-radius:999px;border:1px solid transparent;font-weight:800;font-size:.95rem;transition:.2s ease;cursor:pointer;white-space:nowrap;}
+    .btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;box-shadow:0 18px 40px rgba(255,127,31,0.22);}
+    .btn-primary:hover{transform:translateY(-1px);filter:brightness(1.03);}
+    .btn-secondary{background:rgba(255,255,255,0.05);color:#fff;border-color:rgba(255,255,255,0.10);}
+    .btn-secondary:hover{background:rgba(255,255,255,0.09);transform:translateY(-1px);}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:2px;}
+    .muted-actions{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;}
+    .text-btn{border:none;background:none;color:#fff4ea;text-decoration:underline;text-underline-offset:3px;font-weight:700;cursor:pointer;padding:0;}
+    .status-box{margin-top:16px;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--muted);font-size:.9rem;display:none;}
+    .status-box.show{display:block;}
+    .status-box.success{background:rgba(61,208,143,0.12);border-color:rgba(61,208,143,0.22);color:#d9ffee;}
+    .status-box.error{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.22);color:#ffdede;}
+    .status-box.info{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.10);color:var(--muted);}
+    .password-wrap{position:relative;}
+    .password-wrap input{width:100%;padding-right:90px;}
+    .password-toggle{position:absolute;top:50%;right:12px;transform:translateY(-50%);border:none;background:none;color:rgba(244,247,251,0.78);cursor:pointer;font-size:.82rem;font-weight:700;padding:4px 0;line-height:1;}
+    .password-toggle:hover{color:#fff;}
+    .loading{opacity:.75;pointer-events:none;}
+    .footer-note{margin-top:22px;color:var(--soft);font-size:.88rem;text-align:center;}
+
+    @media (max-width: 1080px){.auth-shell{grid-template-columns:1fr}.hero-card{min-height:auto}h1{max-width:none}}
+    @media (max-width: 720px){.topbar-inner{min-height:unset;padding:14px 0;flex-direction:column;align-items:flex-start}.top-links{width:100%;justify-content:flex-start}.hero-points{grid-template-columns:1fr}.point.point-full{grid-column:auto}}
+    @media (max-width: 560px){.container{width:min(var(--max), calc(100% - 20px))}.hero-card,.auth-card{padding:20px 18px;border-radius:24px}.actions,.muted-actions{flex-direction:column}.btn,.top-link{width:100%}.tabs{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -570,7 +134,7 @@
 
       <div class="top-links">
         <a class="top-link" href="index.html">Retour à l’accueil</a>
-        <a class="top-link" href="tarifs.html">Voir les offres</a>
+        <a class="top-link" href="index.html#tarifs">Voir les offres</a>
       </div>
     </div>
   </header>
@@ -580,47 +144,18 @@
       <section class="auth-shell">
         <div class="hero-card">
           <div>
-            <div class="eyebrow">
-              <span class="eyebrow-dot"></span>
-              Espace client Axe Flow
-            </div>
-
+            <div class="eyebrow"><span class="eyebrow-dot"></span>Espace client Axe Flow</div>
             <h1>Connectez-vous à votre tableau de bord impayés</h1>
-
-            <p class="hero-text">
-              Retrouvez vos dossiers, créez un nouvel impayé, suivez les publications Axe Flow et préparez la suite du dossier dans un espace clair.
-            </p>
+            <p class="hero-text">Créez votre compte ou connectez-vous. Si vous venez de choisir une offre, vous serez ensuite dirigé vers le paiement sécurisé, puis vers votre tableau de bord pour créer votre dossier.</p>
           </div>
 
           <div class="hero-points">
-            <div class="point">
-              <div class="point-mark">01</div>
-              <div>
-                <strong>Connexion simple</strong>
-                <span>Accédez à votre espace client avec votre email et votre mot de passe.</span>
-              </div>
-            </div>
-
-            <div class="point">
-              <div class="point-mark">02</div>
-              <div>
-                <strong>Création de compte</strong>
-                <span>Créez votre accès si votre compte n’existe pas encore.</span>
-              </div>
-            </div>
-
-            <div class="point point-full">
-              <div class="point-mark">03</div>
-              <div>
-                <strong>Mot de passe oublié</strong>
-                <span>Recevez un lien de réinitialisation pour rétablir votre accès.</span>
-              </div>
-            </div>
+            <div class="point"><div class="point-mark">01</div><div><strong>Compte client</strong><span>Créez votre accès ou connectez-vous avec votre email.</span></div></div>
+            <div class="point"><div class="point-mark">02</div><div><strong>Paiement</strong><span>Après connexion, l’offre choisie est confirmée par paiement sécurisé.</span></div></div>
+            <div class="point point-full"><div class="point-mark">03</div><div><strong>Tableau de bord</strong><span>Après paiement, vous revenez dans l’espace client pour créer le dossier impayé.</span></div></div>
           </div>
 
-          <div class="hero-note">
-            Un seul espace pour suivre vos démarches, vos publications et les prochaines étapes du dossier.
-          </div>
+          <div class="hero-note">Parcours propre : compte client → paiement → tableau de bord → création du dossier impayé.</div>
         </div>
 
         <div class="auth-card">
@@ -632,31 +167,16 @@
           <section class="tab-panel active" id="panel-login">
             <div class="panel-head">
               <h2>Connexion</h2>
-              <p>Entrez vos identifiants pour accéder à votre tableau de bord.</p>
+              <p>Entrez vos identifiants pour continuer.</p>
             </div>
 
             <form id="loginForm" class="form-grid">
-              <div class="field">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" name="loginEmail" placeholder="vous@exemple.fr" required />
-              </div>
-
-              <div class="field">
-  <label for="loginPassword">Mot de passe</label>
-  <div class="password-wrap">
-    <input type="password" id="loginPassword" name="loginPassword" placeholder="Votre mot de passe" required />
-   <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Afficher le mot de passe">Afficher</button>
-  </div>
-</div>
-
-              <div class="actions">
-                <button class="btn btn-primary" type="submit" id="loginSubmit">Se connecter</button>
-              </div>
+              <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" name="loginEmail" placeholder="vous@exemple.fr" required /></div>
+              <div class="field"><label for="loginPassword">Mot de passe</label><div class="password-wrap"><input type="password" id="loginPassword" name="loginPassword" placeholder="Votre mot de passe" required /><button type="button" class="password-toggle" data-target="loginPassword" aria-label="Afficher le mot de passe">Afficher</button></div></div>
+              <div class="actions"><button class="btn btn-primary" type="submit" id="loginSubmit">Se connecter</button></div>
             </form>
 
-            <div class="muted-actions">
-              <button class="text-btn" type="button" id="forgotPasswordBtn">Mot de passe oublié</button>
-            </div>
+            <div class="muted-actions"><button class="text-btn" type="button" id="forgotPasswordBtn">Mot de passe oublié</button></div>
           </section>
 
           <section class="tab-panel" id="panel-register">
@@ -666,61 +186,25 @@
             </div>
 
             <form id="registerForm" class="form-grid">
-              <div class="field">
-                <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" name="registerEmail" placeholder="vous@exemple.fr" required />
-              </div>
-
-              <div class="field">
-  <label for="registerPassword">Mot de passe</label>
-  <div class="password-wrap">
-    <input type="password" id="registerPassword" name="registerPassword" placeholder="8 caractères minimum" required minlength="8" />
-    <button type="button" class="password-toggle" data-target="registerPassword">👁</button>
-  </div>
-</div>
-
-             <div class="field">
-  <label for="registerPasswordConfirm">Confirmer le mot de passe</label>
-  <div class="password-wrap">
-    <input type="password" id="registerPasswordConfirm" name="registerPasswordConfirm" placeholder="Confirmez votre mot de passe" required minlength="8" />
-    <button type="button" class="password-toggle" data-target="registerPasswordConfirm">👁</button>
-  </div>
-</div>
-
-              <div class="actions">
-                <button class="btn btn-primary" type="submit" id="registerSubmit">Créer mon compte</button>
-              </div>
+              <div class="field"><label for="registerEmail">Email</label><input type="email" id="registerEmail" name="registerEmail" placeholder="vous@exemple.fr" required /></div>
+              <div class="field"><label for="registerPassword">Mot de passe</label><div class="password-wrap"><input type="password" id="registerPassword" name="registerPassword" placeholder="8 caractères minimum" required minlength="8" /><button type="button" class="password-toggle" data-target="registerPassword" aria-label="Afficher le mot de passe">Afficher</button></div></div>
+              <div class="field"><label for="registerPasswordConfirm">Confirmer le mot de passe</label><div class="password-wrap"><input type="password" id="registerPasswordConfirm" name="registerPasswordConfirm" placeholder="Confirmez votre mot de passe" required minlength="8" /><button type="button" class="password-toggle" data-target="registerPasswordConfirm" aria-label="Afficher le mot de passe">Afficher</button></div></div>
+              <div class="actions"><button class="btn btn-primary" type="submit" id="registerSubmit">Créer mon compte</button></div>
             </form>
           </section>
 
-          <div class="status-box info show" id="statusBox">
-            Connectez-vous ou créez votre compte pour accéder à votre tableau de bord Axe Flow.
-          </div>
+          <div class="status-box info show" id="statusBox">Connectez-vous ou créez votre compte pour continuer.</div>
         </div>
       </section>
 
-      <div class="footer-note">
-        Axe Flow - accès client sécurisé par email et mot de passe.
-      </div>
+      <div class="footer-note">Axe Flow - accès client sécurisé par email et mot de passe.</div>
     </div>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      sendPasswordResetEmail
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
@@ -734,33 +218,34 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const CHECKOUT_ENDPOINT = "https://createcheckoutsession-pqz4ycvjmq-od.a.run.app";
 
     const loginForm = document.getElementById("loginForm");
     const registerForm = document.getElementById("registerForm");
     const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
     const statusBox = document.getElementById("statusBox");
-
     const loginSubmit = document.getElementById("loginSubmit");
     const registerSubmit = document.getElementById("registerSubmit");
-
     const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
     const loginPanel = document.getElementById("panel-login");
     const registerPanel = document.getElementById("panel-register");
 
-document.querySelectorAll(".password-toggle").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const input = document.getElementById(btn.dataset.target);
-    const isHidden = input.type === "password";
+    const params = new URLSearchParams(window.location.search);
+    const urlOffer = params.get("offer") || params.get("plan");
+    const urlCheckout = params.get("checkout") === "1";
+    if (urlOffer) sessionStorage.setItem("axeFlowPendingOffer", urlOffer);
+    if (urlCheckout) sessionStorage.setItem("axeFlowCheckoutAfterAuth", "1");
 
-    input.type = isHidden ? "text" : "password";
-    btn.textContent = isHidden ? "Masquer" : "Afficher";
-    btn.setAttribute(
-      "aria-label",
-      isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe"
-    );
-  });
-});
-    
+    document.querySelectorAll(".password-toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.target);
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        btn.textContent = isHidden ? "Masquer" : "Afficher";
+        btn.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
+      });
+    });
+
     function setStatus(message, type = "info") {
       statusBox.className = `status-box show ${type}`;
       statusBox.textContent = message;
@@ -768,7 +253,6 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
 
     function setLoading(button, isLoading, loadingText) {
       if (!button) return;
-
       if (isLoading) {
         button.dataset.originalText = button.textContent;
         button.textContent = loadingText;
@@ -782,10 +266,7 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
     }
 
     function switchTab(tabName) {
-      tabButtons.forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === tabName);
-      });
-
+      tabButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tabName));
       loginPanel.classList.toggle("active", tabName === "login");
       registerPanel.classList.toggle("active", tabName === "register");
     }
@@ -793,15 +274,16 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
     async function ensureUserProfile(user) {
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
-
       if (snap.exists()) return;
-
       await setDoc(userRef, {
         uid: user.uid,
         email: user.email || "",
         role: "client",
-        plan: "unknown",
-        subscriptionStatus: "unknown",
+        plan: "none",
+        entitlement: "none",
+        paymentStatus: "none",
+        subscriptionStatus: "none",
+        entitlementStatus: "none",
         monthlyQuota: 0,
         monthlyUsed: 0,
         isTestAccount: false,
@@ -812,52 +294,71 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
 
     function mapAuthError(error) {
       const code = error?.code || "";
-
       switch (code) {
         case "auth/invalid-credential":
         case "auth/wrong-password":
-        case "auth/user-not-found":
-          return "Identifiants invalides.";
-        case "auth/invalid-email":
-          return "Adresse email invalide.";
-        case "auth/email-already-in-use":
-          return "Cet email est déjà utilisé.";
-        case "auth/weak-password":
-          return "Mot de passe trop faible.";
-        case "auth/too-many-requests":
-          return "Trop de tentatives. Réessaie plus tard.";
-        case "auth/network-request-failed":
-          return "Erreur réseau. Vérifie ta connexion.";
-        default:
-          return "Une erreur est survenue. Regarde la console si besoin.";
+        case "auth/user-not-found": return "Identifiants invalides.";
+        case "auth/invalid-email": return "Adresse email invalide.";
+        case "auth/email-already-in-use": return "Cet email est déjà utilisé.";
+        case "auth/weak-password": return "Mot de passe trop faible.";
+        case "auth/too-many-requests": return "Trop de tentatives. Réessaie plus tard.";
+        case "auth/network-request-failed": return "Erreur réseau. Vérifie ta connexion.";
+        default: return "Une erreur est survenue. Regarde la console si besoin.";
       }
     }
 
-    tabButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        switchTab(btn.dataset.tab);
-      });
-    });
+    function normalizeOfferType(offerType) {
+      if (offerType === "monthly_89") return "subscription_89";
+      if (offerType === "pro_89") return "subscription_89";
+      return offerType || "";
+    }
+
+    async function continueAfterAuth(user) {
+      await ensureUserProfile(user);
+      const pendingOffer = normalizeOfferType(sessionStorage.getItem("axeFlowPendingOffer"));
+      const shouldCheckout = sessionStorage.getItem("axeFlowCheckoutAfterAuth") === "1";
+
+      if (pendingOffer && shouldCheckout) {
+        await startCheckout(user, pendingOffer);
+        return;
+      }
+
+      window.location.href = "tableau-de-bord.html";
+    }
+
+    async function startCheckout(user, offerType) {
+      try {
+        setStatus("Préparation du paiement sécurisé...", "info");
+        const response = await fetch(CHECKOUT_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid: user.uid, email: user.email, offerType })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.url) throw new Error(data.error || "Erreur Stripe");
+        sessionStorage.removeItem("axeFlowPendingOffer");
+        sessionStorage.removeItem("axeFlowCheckoutAfterAuth");
+        window.location.href = data.url;
+      } catch (error) {
+        console.error("Erreur checkout :", error);
+        setStatus("Compte connecté, mais le paiement n’a pas pu démarrer. Retourne à l’accueil et choisis à nouveau ton offre.", "error");
+      }
+    }
+
+    tabButtons.forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
-
-      if (!email || !password) {
-        setStatus("Complète l’email et le mot de passe.", "error");
-        return;
-      }
+      if (!email || !password) { setStatus("Complète l’email et le mot de passe.", "error"); return; }
 
       try {
         setLoading(loginSubmit, true, "Connexion...");
         setStatus("Connexion en cours...", "info");
-
-        await signInWithEmailAndPassword(auth, email, password);
-
+        const cred = await signInWithEmailAndPassword(auth, email, password);
         setStatus("Connexion réussie. Redirection...", "success");
-        window.location.href = "tableau-de-bord.html";
+        await continueAfterAuth(cred.user);
       } catch (error) {
         console.error("Erreur connexion:", error);
         setStatus(mapAuthError(error), "error");
@@ -868,35 +369,19 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
 
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const email = document.getElementById("registerEmail").value.trim();
       const password = document.getElementById("registerPassword").value;
       const confirmPassword = document.getElementById("registerPasswordConfirm").value;
-
-      if (!email || !password || !confirmPassword) {
-        setStatus("Complète tous les champs du formulaire.", "error");
-        return;
-      }
-
-      if (password.length < 8) {
-        setStatus("Le mot de passe doit contenir au moins 8 caractères.", "error");
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        setStatus("Les mots de passe ne correspondent pas.", "error");
-        return;
-      }
+      if (!email || !password || !confirmPassword) { setStatus("Complète tous les champs du formulaire.", "error"); return; }
+      if (password.length < 8) { setStatus("Le mot de passe doit contenir au moins 8 caractères.", "error"); return; }
+      if (password !== confirmPassword) { setStatus("Les mots de passe ne correspondent pas.", "error"); return; }
 
       try {
         setLoading(registerSubmit, true, "Création...");
         setStatus("Création du compte en cours...", "info");
-
         const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await ensureUserProfile(cred.user);
-
-        setStatus("Compte créé. Redirection vers le tableau de bord...", "success");
-        window.location.href = "tableau-de-bord.html";
+        setStatus("Compte créé. Redirection...", "success");
+        await continueAfterAuth(cred.user);
       } catch (error) {
         console.error("Erreur création compte:", error);
         setStatus(mapAuthError(error), "error");
@@ -907,12 +392,7 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
 
     forgotPasswordBtn.addEventListener("click", async () => {
       const loginEmail = document.getElementById("loginEmail").value.trim();
-
-      if (!loginEmail) {
-        setStatus("Entre d’abord ton email dans le champ connexion pour recevoir le lien de réinitialisation.", "error");
-        return;
-      }
-
+      if (!loginEmail) { setStatus("Entre d’abord ton email dans le champ connexion pour recevoir le lien de réinitialisation.", "error"); return; }
       try {
         setStatus("Envoi de l’email de réinitialisation...", "info");
         await sendPasswordResetEmail(auth, loginEmail);
@@ -923,15 +403,14 @@ document.querySelectorAll(".password-toggle").forEach((btn) => {
       }
     });
 
-   onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      try { await ensureUserProfile(user); } catch (error) { console.error("Erreur chargement profil utilisateur:", error); }
+    });
 
-  try {
-    await ensureUserProfile(user);
-  } catch (error) {
-    console.error("Erreur chargement profil utilisateur:", error);
-  }
-});
+    if (sessionStorage.getItem("axeFlowPendingOffer")) {
+      setStatus("Connectez-vous ou créez votre compte pour continuer vers le paiement de l’offre choisie.", "info");
+    }
   </script>
 </body>
 </html>
