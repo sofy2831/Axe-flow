@@ -272,25 +272,19 @@
     }
 
     async function ensureUserProfile(user) {
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) return;
-      await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email || "",
-        role: "client",
-        plan: "none",
-        entitlement: "none",
-        paymentStatus: "none",
-        subscriptionStatus: "none",
-        entitlementStatus: "none",
-        monthlyQuota: 0,
-        monthlyUsed: 0,
-        isTestAccount: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-    }
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+
+  if (snap.exists()) return;
+
+  await setDoc(userRef, {
+    uid: user.uid,
+    email: user.email || "",
+    role: "client",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+}
 
     function mapAuthError(error) {
       const code = error?.code || "";
