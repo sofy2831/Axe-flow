@@ -112,7 +112,7 @@ exports.createCheckoutSession = onRequest(
 
       return res.status(200).json({ url: session.url });
     } catch (error) {
-      console.error("createCheckoutSession:", error);
+      console.error("createCheckoutSession FULL:", error);
       return res.status(500).json({ error: "Erreur session Stripe" });
     }
   }
