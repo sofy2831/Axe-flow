@@ -111,10 +111,41 @@ function subscriptionUsed(){
   }).length;
 }
 function canOpenCreateModal(){
-  if(!isPaymentPaid())return false;
-  const e=entitlementValue(),id=activeEntitlementId();
-  if(isSubscriptionPlan())return subscriptionUsed()<subscriptionQuota();
-  if(e==="one_shot_49"||e==="extra_19")return id?usedByEntitlement(id)<1:false;
+
+  if(!isPaymentPaid()) return false;
+
+  const e = entitlementValue();
+  const id = activeEntitlementId();
+
+  // abonnement 89
+  if(isSubscriptionPlan()){
+    return subscriptionUsed() < subscriptionQuota();
+  }
+
+  // dossier ponctuel 49 €
+  if(e === "one_shot_49"){
+
+    // aucun dossier encore créé
+    if(dossiers.length === 0) return true;
+
+    // sécurité entitlement
+    if(id){
+      return usedByEntitlement(id) < 1;
+    }
+
+    return false;
+  }
+
+  // dossier supplémentaire 19 €
+  if(e === "extra_19"){
+
+    if(id){
+      return usedByEntitlement(id) < 1;
+    }
+
+    return false;
+  }
+
   return false;
 }
 function redirectToCorrectPayment(){
