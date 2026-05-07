@@ -30,10 +30,6 @@
       --success:#3dd08f;
       --danger:#ff6b6b;
       --shadow:0 24px 80px rgba(0,0,0,0.28);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:18px;
-      --radius-sm:14px;
       --max:1040px;
     }
 
@@ -53,10 +49,7 @@
 
     a{color:inherit;text-decoration:none}
 
-    .container{
-      width:min(var(--max), calc(100% - 32px));
-      margin:0 auto;
-    }
+    .container{width:min(var(--max), calc(100% - 32px));margin:0 auto;}
 
     .topbar{
       position:sticky;
@@ -75,12 +68,7 @@
       gap:20px;
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
+    .brand{display:flex;align-items:center;gap:14px;min-width:0;}
 
     .brand-logo{
       width:54px;
@@ -93,25 +81,9 @@
       flex:0 0 auto;
     }
 
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-    }
-
-    .brand-title{
-      font-size:1rem;
-      font-weight:800;
-      letter-spacing:.02em;
-    }
-
-    .brand-sub{
-      color:var(--soft);
-      font-size:.86rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .brand-text{display:flex;flex-direction:column;min-width:0;}
+    .brand-title{font-size:1rem;font-weight:800;letter-spacing:.02em;}
+    .brand-sub{color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
     .btn{
       display:inline-flex;
@@ -135,10 +107,7 @@
       box-shadow:0 18px 40px rgba(255,127,31,0.22);
     }
 
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
+    .btn-primary:hover{transform:translateY(-1px);filter:brightness(1.03);}
 
     .btn-secondary{
       background:rgba(255,255,255,0.06);
@@ -146,20 +115,10 @@
       border-color:rgba(255,255,255,0.12);
     }
 
-    .btn-secondary:hover{
-      background:rgba(255,255,255,0.10);
-      transform:translateY(-1px);
-    }
+    .btn-secondary:hover{background:rgba(255,255,255,0.10);transform:translateY(-1px);}
 
-    .page{
-      padding:38px 0 44px;
-    }
-
-    .shell{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:20px;
-    }
+    .page{padding:38px 0 44px;}
+    .shell{display:grid;grid-template-columns:1fr;gap:20px;}
 
     .hero-card,
     .steps-card{
@@ -217,19 +176,10 @@
       font-size:1rem;
     }
 
-    .hero-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-    }
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;}
 
-    .steps-card{
-      padding:24px;
-    }
-
-    .section-head{
-      margin-bottom:18px;
-    }
+    .steps-card{padding:24px;}
+    .section-head{margin-bottom:18px;}
 
     .section-tag{
       display:inline-block;
@@ -281,16 +231,18 @@
       border:1px solid rgba(255,127,31,0.22);
     }
 
-    .step h3{
-      margin:0 0 8px;
-      font-size:1rem;
-      letter-spacing:-0.02em;
-    }
+    .step h3{margin:0 0 8px;font-size:1rem;letter-spacing:-0.02em;}
+    .step p{margin:0;color:var(--muted);font-size:.93rem;}
 
-    .step p{
-      margin:0;
+    .status-note{
+      margin:16px 0 0;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
       color:var(--muted);
-      font-size:.93rem;
+      font-size:.92rem;
+      max-width:720px;
     }
 
     .footer-note{
@@ -301,39 +253,22 @@
     }
 
     @media (max-width: 900px){
-      .steps-grid{
-        grid-template-columns:1fr;
-      }
+      .steps-grid{grid-template-columns:1fr;}
     }
 
     @media (max-width: 720px){
-      .topbar-inner{
-        min-height:unset;
-        padding:14px 0;
-      }
+      .topbar-inner{min-height:unset;padding:14px 0;}
     }
 
     @media (max-width: 560px){
-      .container{
-        width:min(var(--max), calc(100% - 20px));
-      }
-
-      .hero-card,
-      .steps-card{
-        padding:20px 18px;
-      }
-
-      .hero-actions{
-        flex-direction:column;
-        align-items:stretch;
-      }
-
-      .btn{
-        width:100%;
-      }
+      .container{width:min(var(--max), calc(100% - 20px));}
+      .hero-card,.steps-card{padding:20px 18px;}
+      .hero-actions{flex-direction:column;align-items:stretch;}
+      .btn{width:100%;}
     }
   </style>
 </head>
+
 <body>
   <header class="topbar">
     <div class="container topbar-inner">
@@ -356,16 +291,20 @@
             Paiement confirmé
           </div>
 
-          <h1>Votre droit de création est prêt</h1>
+          <h1>Votre droit de création est en cours d’activation</h1>
 
           <p class="hero-lead">
-            Le paiement a bien été pris en compte. Vous pouvez maintenant retourner sur votre tableau de bord pour créer votre dossier impayé, renseigner la facture, le débiteur et lancer le suivi.
+            Le paiement a bien été pris en compte. Axe Flow vérifie maintenant l’activation de votre droit de création avant de vous renvoyer vers le tableau de bord.
           </p>
 
           <div class="hero-actions">
-            <a href="tableau-de-bord.html" class="btn btn-primary">Créer mon dossier</a>
+            <a href="tableau-de-bord.html" class="btn btn-primary" id="dashboardBtn">Validation du paiement...</a>
             <a href="index.html" class="btn btn-secondary">Retour à l’accueil</a>
           </div>
+
+          <p class="status-note" id="paymentStatusNote">
+            Validation en cours. Cette étape peut prendre quelques secondes après le retour Stripe.
+          </p>
         </section>
 
         <section class="steps-card">
@@ -381,25 +320,19 @@
             <article class="step">
               <div class="step-number">01</div>
               <h3>Accédez au tableau de bord</h3>
-              <p>
-                Cliquez sur « Créer mon dossier » pour revenir dans votre espace client Axe Flow.
-              </p>
+              <p>Cliquez sur « Créer mon dossier » pour revenir dans votre espace client Axe Flow.</p>
             </article>
 
             <article class="step">
               <div class="step-number">02</div>
               <h3>Créez votre dossier</h3>
-              <p>
-                Ouvrez le nouveau dossier autorisé par votre paiement et renseignez la facture, le montant et le débiteur.
-              </p>
+              <p>Ouvrez le nouveau dossier autorisé par votre paiement et renseignez la facture, le montant et le débiteur.</p>
             </article>
 
             <article class="step">
               <div class="step-number">03</div>
               <h3>Suivez les actions</h3>
-              <p>
-                Lancez ensuite les relances, la mise en demeure puis l’injonction si le dossier doit aller plus loin.
-              </p>
+              <p>Lancez ensuite les relances, la mise en demeure puis l’injonction si le dossier doit aller plus loin.</p>
             </article>
           </div>
         </section>
@@ -410,5 +343,78 @@
       </div>
     </div>
   </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+      authDomain:"axe-flow.firebaseapp.com",
+      projectId:"axe-flow",
+      storageBucket:"axe-flow.firebasestorage.app",
+      messagingSenderId:"295300543556",
+      appId:"1:295300543556:web:3facac2d0c612e3456b811"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const dashboardBtn = document.getElementById("dashboardBtn");
+    const paymentStatusNote = document.getElementById("paymentStatusNote");
+
+    function lockDashboardButton(message){
+      dashboardBtn.style.pointerEvents = "none";
+      dashboardBtn.style.opacity = ".65";
+      dashboardBtn.textContent = message || "Validation du paiement...";
+    }
+
+    function unlockDashboardButton(message){
+      dashboardBtn.style.pointerEvents = "auto";
+      dashboardBtn.style.opacity = "1";
+      dashboardBtn.textContent = message || "Créer mon dossier";
+    }
+
+    function setNote(message){
+      if(paymentStatusNote) paymentStatusNote.textContent = message;
+    }
+
+    async function waitForEntitlement(uid){
+      lockDashboardButton("Validation du paiement...");
+      setNote("Validation en cours. Cette étape peut prendre quelques secondes après le retour Stripe.");
+
+      for(let i = 0; i < 15; i++){
+        const userRef = doc(db, "users", uid);
+        const snap = await getDoc(userRef);
+
+        if(snap.exists()){
+          const data = snap.data();
+
+          if(data.paymentStatus === "paid" && data.entitlementStatus === "active"){
+            unlockDashboardButton("Créer mon dossier");
+            setNote("Paiement validé. Votre droit est actif. Vous pouvez créer votre dossier depuis le tableau de bord.");
+            return true;
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+
+      unlockDashboardButton("Accéder au tableau de bord");
+      setNote("Le paiement est confirmé, mais l’activation peut encore être en cours. Accédez au tableau de bord : si le droit n’apparaît pas tout de suite, actualisez la page.");
+      return false;
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if(!user){
+        window.location.href = "connexion.html";
+        return;
+      }
+
+      await waitForEntitlement(user.uid);
+    });
+  </script>
 </body>
 </html>
