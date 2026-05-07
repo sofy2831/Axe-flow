@@ -79,9 +79,7 @@ exports.createCheckoutSession = onRequest(
     secrets: [STRIPE_SECRET_KEY],
   },
   async (req, res) => {
-    const stripe = Stripe(STRIPE_SECRET_KEY.value(), {
-      apiVersion: "2025-03-31.basil",
-    });
+    const stripe = Stripe(STRIPE_SECRET_KEY.value());
 
     try {
       if (req.method !== "POST") {
