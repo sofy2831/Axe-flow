@@ -200,210 +200,306 @@
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
-      authDomain: "axe-flow.firebaseapp.com",
-      projectId: "axe-flow",
-      storageBucket: "axe-flow.firebasestorage.app",
-      messagingSenderId: "295300543556",
-      appId: "1:295300543556:web:3facac2d0c612e3456b811"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "295300543556",
+    appId: "1:295300543556:web:3facac2d0c612e3456b811"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const CHECKOUT_ENDPOINT = "https://createcheckoutsession-pqz4ycvjmq-od.a.run.app";
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const loginForm = document.getElementById("loginForm");
-    const registerForm = document.getElementById("registerForm");
-    const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
-    const statusBox = document.getElementById("statusBox");
-    const loginSubmit = document.getElementById("loginSubmit");
-    const registerSubmit = document.getElementById("registerSubmit");
-    const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
-    const loginPanel = document.getElementById("panel-login");
-    const registerPanel = document.getElementById("panel-register");
+  const CHECKOUT_ENDPOINT = "https://createcheckoutsession-pqz4ycvjmq-od.a.run.app";
 
-    const params = new URLSearchParams(window.location.search);
-    const urlOffer = params.get("offer") || params.get("plan");
-    const urlCheckout = params.get("checkout") === "1";
-    if (urlOffer) sessionStorage.setItem("axeFlowPendingOffer", urlOffer);
-    if (urlCheckout) sessionStorage.setItem("axeFlowCheckoutAfterAuth", "1");
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+  const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+  const statusBox = document.getElementById("statusBox");
+  const loginSubmit = document.getElementById("loginSubmit");
+  const registerSubmit = document.getElementById("registerSubmit");
+  const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
+  const loginPanel = document.getElementById("panel-login");
+  const registerPanel = document.getElementById("panel-register");
 
-    document.querySelectorAll(".password-toggle").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const input = document.getElementById(btn.dataset.target);
-        const isHidden = input.type === "password";
-        input.type = isHidden ? "text" : "password";
-        btn.textContent = isHidden ? "Masquer" : "Afficher";
-        btn.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
+  const params = new URLSearchParams(window.location.search);
+  const urlOffer = normalizeOfferType(params.get("offer") || params.get("plan") || "");
+
+  if (urlOffer) {
+    sessionStorage.setItem("axeFlowPendingOffer", urlOffer);
+  }
+
+  function setStatus(message, type = "info") {
+    statusBox.className = `status-box show ${type}`;
+    statusBox.textContent = message;
+  }
+
+  function setLoading(button, isLoading, loadingText) {
+    if (!button) return;
+
+    if (isLoading) {
+      button.dataset.originalText = button.textContent;
+      button.textContent = loadingText;
+      button.classList.add("loading");
+      button.disabled = true;
+    } else {
+      button.textContent = button.dataset.originalText || button.textContent;
+      button.classList.remove("loading");
+      button.disabled = false;
+    }
+  }
+
+  function switchTab(tabName) {
+    tabButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+
+    loginPanel.classList.toggle("active", tabName === "login");
+    registerPanel.classList.toggle("active", tabName === "register");
+  }
+
+  function normalizeOfferType(offerType) {
+    if (!offerType) return "";
+    if (offerType === "one_shot_49") return "one_shot_49";
+    if (offerType === "monthly_89") return "monthly_89";
+    if (offerType === "subscription_89") return "monthly_89";
+    if (offerType === "pro_89") return "monthly_89";
+    if (offerType === "extra_19") return "extra_19";
+    return "";
+  }
+
+  function mapAuthError(error) {
+    const code = error?.code || "";
+
+    switch (code) {
+      case "auth/invalid-credential":
+      case "auth/wrong-password":
+      case "auth/user-not-found":
+        return "Identifiants invalides.";
+      case "auth/invalid-email":
+        return "Adresse email invalide.";
+      case "auth/email-already-in-use":
+        return "Cet email est déjà utilisé.";
+      case "auth/weak-password":
+        return "Mot de passe trop faible.";
+      case "auth/too-many-requests":
+        return "Trop de tentatives. Réessaie plus tard.";
+      case "auth/network-request-failed":
+        return "Erreur réseau. Vérifie ta connexion.";
+      default:
+        return error?.message || "Une erreur est survenue.";
+    }
+  }
+
+  async function ensureUserProfile(user) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email || "",
+        role: snap.data().role || "client",
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      return;
+    }
+
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email || "",
+      role: "client",
+      accountStatus: "active",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  async function continueAfterAuth(user) {
+    await ensureUserProfile(user);
+
+    const pendingOffer = normalizeOfferType(sessionStorage.getItem("axeFlowPendingOffer"));
+
+    if (pendingOffer) {
+      await startCheckout(user, pendingOffer);
+      return;
+    }
+
+    window.location.href = "tableau-de-bord.html";
+  }
+
+  async function startCheckout(user, offerType) {
+    try {
+      setStatus("Préparation du paiement sécurisé...", "info");
+
+      const payload = {
+        uid: user.uid,
+        email: user.email || "",
+        offerType
+      };
+
+      console.log("Payload checkout envoyé :", payload);
+
+      const response = await fetch(CHECKOUT_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
       });
-    });
 
-    function setStatus(message, type = "info") {
-      statusBox.className = `status-box show ${type}`;
-      statusBox.textContent = message;
-    }
+      const data = await response.json().catch(() => ({}));
 
-    function setLoading(button, isLoading, loadingText) {
-      if (!button) return;
-      if (isLoading) {
-        button.dataset.originalText = button.textContent;
-        button.textContent = loadingText;
-        button.classList.add("loading");
-        button.disabled = true;
-      } else {
-        button.textContent = button.dataset.originalText || button.textContent;
-        button.classList.remove("loading");
-        button.disabled = false;
+      console.log("Réponse checkout :", response.status, data);
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || `Erreur HTTP ${response.status}`);
       }
+
+      sessionStorage.removeItem("axeFlowPendingOffer");
+      window.location.href = data.url;
+
+    } catch (error) {
+      console.error("Erreur checkout :", error);
+      setStatus(
+        "Compte connecté, mais Stripe n’a pas démarré : " + (error.message || "erreur inconnue"),
+        "error"
+      );
     }
+  }
 
-    function switchTab(tabName) {
-      tabButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tabName));
-      loginPanel.classList.toggle("active", tabName === "login");
-      registerPanel.classList.toggle("active", tabName === "register");
-    }
+  document.querySelectorAll(".password-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.target);
+      const isHidden = input.type === "password";
 
-    async function ensureUserProfile(user) {
-  const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
-
-  if (snap.exists()) return;
-
-  await setDoc(userRef, {
-    uid: user.uid,
-    email: user.email || "",
-    role: "client",
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
+      input.type = isHidden ? "text" : "password";
+      btn.textContent = isHidden ? "Masquer" : "Afficher";
+      btn.setAttribute(
+        "aria-label",
+        isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe"
+      );
+    });
   });
-}
 
-    function mapAuthError(error) {
-      const code = error?.code || "";
-      switch (code) {
-        case "auth/invalid-credential":
-        case "auth/wrong-password":
-        case "auth/user-not-found": return "Identifiants invalides.";
-        case "auth/invalid-email": return "Adresse email invalide.";
-        case "auth/email-already-in-use": return "Cet email est déjà utilisé.";
-        case "auth/weak-password": return "Mot de passe trop faible.";
-        case "auth/too-many-requests": return "Trop de tentatives. Réessaie plus tard.";
-        case "auth/network-request-failed": return "Erreur réseau. Vérifie ta connexion.";
-        default: return "Une erreur est survenue. Regarde la console si besoin.";
-      }
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if (!email || !password) {
+      setStatus("Complète l’email et le mot de passe.", "error");
+      return;
     }
 
-   function normalizeOfferType(offerType) {
-  if (offerType === "monthly_89") return "monthly_89";
-  if (offerType === "subscription_89") return "monthly_89";
-  if (offerType === "pro_89") return "monthly_89";
-  return offerType || "";
-}
+    try {
+      setLoading(loginSubmit, true, "Connexion...");
+      setStatus("Connexion en cours...", "info");
 
-    async function continueAfterAuth(user) {
-      await ensureUserProfile(user);
-      const pendingOffer = normalizeOfferType(sessionStorage.getItem("axeFlowPendingOffer"));
-      const shouldCheckout = sessionStorage.getItem("axeFlowCheckoutAfterAuth") === "1";
+      const cred = await signInWithEmailAndPassword(auth, email, password);
 
-      if (pendingOffer && shouldCheckout) {
-        await startCheckout(user, pendingOffer);
-        return;
-      }
+      setStatus("Connexion réussie. Préparation de la suite...", "success");
+      await continueAfterAuth(cred.user);
 
-      window.location.href = "tableau-de-bord.html";
+    } catch (error) {
+      console.error("Erreur connexion :", error);
+      setStatus(mapAuthError(error), "error");
+
+    } finally {
+      setLoading(loginSubmit, false);
+    }
+  });
+
+  registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const confirmPassword = document.getElementById("registerPasswordConfirm").value;
+
+    if (!email || !password || !confirmPassword) {
+      setStatus("Complète tous les champs du formulaire.", "error");
+      return;
     }
 
-    async function startCheckout(user, offerType) {
-      try {
-        setStatus("Préparation du paiement sécurisé...", "info");
-        const response = await fetch(CHECKOUT_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uid: user.uid, email: user.email, offerType })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.url) throw new Error(data.error || "Erreur Stripe");
-        sessionStorage.removeItem("axeFlowPendingOffer");
-        sessionStorage.removeItem("axeFlowCheckoutAfterAuth");
-        window.location.href = data.url;
-      } catch (error) {
-        console.error("Erreur checkout :", error);
-        setStatus("Compte connecté, mais le paiement n’a pas pu démarrer. Retourne à l’accueil et choisis à nouveau ton offre.", "error");
-      }
+    if (password.length < 8) {
+      setStatus("Le mot de passe doit contenir au moins 8 caractères.", "error");
+      return;
     }
 
-    tabButtons.forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
-      if (!email || !password) { setStatus("Complète l’email et le mot de passe.", "error"); return; }
-
-      try {
-        setLoading(loginSubmit, true, "Connexion...");
-        setStatus("Connexion en cours...", "info");
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        setStatus("Connexion réussie. Redirection...", "success");
-        await continueAfterAuth(cred.user);
-      } catch (error) {
-        console.error("Erreur connexion:", error);
-        setStatus(mapAuthError(error), "error");
-      } finally {
-        setLoading(loginSubmit, false);
-      }
-    });
-
-    registerForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("registerEmail").value.trim();
-      const password = document.getElementById("registerPassword").value;
-      const confirmPassword = document.getElementById("registerPasswordConfirm").value;
-      if (!email || !password || !confirmPassword) { setStatus("Complète tous les champs du formulaire.", "error"); return; }
-      if (password.length < 8) { setStatus("Le mot de passe doit contenir au moins 8 caractères.", "error"); return; }
-      if (password !== confirmPassword) { setStatus("Les mots de passe ne correspondent pas.", "error"); return; }
-
-      try {
-        setLoading(registerSubmit, true, "Création...");
-        setStatus("Création du compte en cours...", "info");
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        setStatus("Compte créé. Redirection...", "success");
-        await continueAfterAuth(cred.user);
-      } catch (error) {
-        console.error("Erreur création compte:", error);
-        setStatus(mapAuthError(error), "error");
-      } finally {
-        setLoading(registerSubmit, false);
-      }
-    });
-
-    forgotPasswordBtn.addEventListener("click", async () => {
-      const loginEmail = document.getElementById("loginEmail").value.trim();
-      if (!loginEmail) { setStatus("Entre d’abord ton email dans le champ connexion pour recevoir le lien de réinitialisation.", "error"); return; }
-      try {
-        setStatus("Envoi de l’email de réinitialisation...", "info");
-        await sendPasswordResetEmail(auth, loginEmail);
-        setStatus("Email de réinitialisation envoyé.", "success");
-      } catch (error) {
-        console.error("Erreur reset password:", error);
-        setStatus(mapAuthError(error), "error");
-      }
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try { await ensureUserProfile(user); } catch (error) { console.error("Erreur chargement profil utilisateur:", error); }
-    });
-
-    if (sessionStorage.getItem("axeFlowPendingOffer")) {
-      setStatus("Connectez-vous ou créez votre compte pour continuer vers le paiement de l’offre choisie.", "info");
+    if (password !== confirmPassword) {
+      setStatus("Les mots de passe ne correspondent pas.", "error");
+      return;
     }
-  </script>
+
+    try {
+      setLoading(registerSubmit, true, "Création...");
+      setStatus("Création du compte en cours...", "info");
+
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      setStatus("Compte créé. Préparation de la suite...", "success");
+      await continueAfterAuth(cred.user);
+
+    } catch (error) {
+      console.error("Erreur création compte :", error);
+      setStatus(mapAuthError(error), "error");
+
+    } finally {
+      setLoading(registerSubmit, false);
+    }
+  });
+
+  forgotPasswordBtn.addEventListener("click", async () => {
+    const loginEmail = document.getElementById("loginEmail").value.trim();
+
+    if (!loginEmail) {
+      setStatus("Entre d’abord ton email dans le champ connexion.", "error");
+      return;
+    }
+
+    try {
+      setStatus("Envoi de l’email de réinitialisation...", "info");
+      await sendPasswordResetEmail(auth, loginEmail);
+      setStatus("Email de réinitialisation envoyé.", "success");
+
+    } catch (error) {
+      console.error("Erreur reset password :", error);
+      setStatus(mapAuthError(error), "error");
+    }
+  });
+
+  const pendingOffer = normalizeOfferType(sessionStorage.getItem("axeFlowPendingOffer"));
+
+  if (pendingOffer) {
+    setStatus("Connectez-vous ou créez votre compte pour continuer vers le paiement.", "info");
+  } else {
+    setStatus("Connectez-vous ou créez votre compte pour accéder au tableau de bord.", "info");
+  }
+</script>
 </body>
 </html>
