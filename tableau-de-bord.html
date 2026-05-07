@@ -36,7 +36,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObjec
 
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
-const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="./documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
+const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const STRIPE_DOSSIER_49="https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01",STRIPE_ABONNEMENT_89="https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02",STRIPE_DOSSIER_SUP_19="https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03";
 let currentUser=null,currentUserData={},dossiers=[],currentDossier=null,currentText="",currentAction="";
 const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryAmount","summaryDebtor","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","editDossierModal","closeEditDossier","editDossierForm","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","printInjunctionBtn","printInjunctionBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning"];
@@ -171,7 +171,119 @@ function safeCheck(form,name,shouldCheck=true){try{const field=form.getCheckBox(
 function splitEmail(email){const parts=String(email||"").split("@");return{left:parts[0]||"",right:parts[1]||""}}
 function infogreffeSearchUrl(d=currentDossier){return `${INFOGREFFE_SEARCH_URL}?q=${encodeURIComponent(debtorName(d))}`}
 function syncDebtorGuidance(){if(!currentDossier)return;const pro=isProfessionalDebtor(currentDossier),url=infogreffeSearchUrl(currentDossier);E.proTribunalSearchBtn.href=url;E.nonOppositionInfogreffeBtn.href=url;E.privateTribunalSearchBtn.href=JUSTICE_ANNUAIRE_URL;E.nonOppositionPrivateBtn.href=JUSTICE_ANNUAIRE_URL;E.professionalPathCard.classList.toggle("active",pro);E.privatePathCard.classList.toggle("active",!pro);E.professionalPathCard.classList.toggle("muted",!pro);E.privatePathCard.classList.toggle("muted",pro);if(E.pathWarning)E.pathWarning.textContent=""}
-async function generateCerfaPrefilled(){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const response=await fetch(CERFA_FILLABLE_URL,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${CERFA_FILLABLE_URL}`);const pdfDoc=await PDFLib.PDFDocument.load(await response.arrayBuffer()),form=pdfDoc.getForm(),email=splitEmail(creditorEmail(currentDossier)),debtorEmailParts=splitEmail(debtorEmail(currentDossier));safeSetText(form,"claimant_last_name",creditorName(currentDossier));safeSetText(form,"claimant_first_names",creditorName(currentDossier));safeSetText(form,"claimant_address",creditorAddress(currentDossier));safeSetText(form,"claimant_zip",creditorZip(currentDossier));safeSetText(form,"claimant_city",creditorCity(currentDossier));safeSetText(form,"claimant_country","France");safeSetText(form,"claimant_email",email.left);safeSetText(form,"claimant_email_2",email.right);safeSetText(form,"claimant_phone",creditorPhone(currentDossier));safeSetText(form,"claimant_company_name",creditorName(currentDossier));safeSetText(form,"claimant_company_address",creditorAddress(currentDossier));safeSetText(form,"claimant_company_zip",creditorZip(currentDossier));safeSetText(form,"claimant_company_city",creditorCity(currentDossier));safeSetText(form,"claimant_company_email",email.left);safeSetText(form,"claimant_company_email_2",email.right);if(isProfessionalDebtor(currentDossier)){safeSetText(form,"debtor1_company_name",debtorName(currentDossier));safeSetText(form,"debtor1_company_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_company_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_company_city",debtorCity(currentDossier));safeSetText(form,"debtor1_company_email",debtorEmailParts.left);safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right)}else{safeSetText(form,"debtor1_last_name",debtorName(currentDossier));safeSetText(form,"debtor1_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_city",debtorCity(currentDossier));safeSetText(form,"debtor1_country","France");safeSetText(form,"debtor1_email",debtorEmailParts.left);safeSetText(form,"debtor1_email_2",debtorEmailParts.right)}const courtName=clean(prompt("Nom du tribunal compétent à reporter page 4 du Cerfa :", "")),courtAddress=clean(prompt("Adresse du tribunal compétent à reporter page 4 du Cerfa :", ""));safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);safeSetText(form,"claim_principal_amount_1",dueAmountCerfa(currentDossier));safeSetText(form,"claim_principal_amount_2",dueAmountCerfa(currentDossier));safeSetText(form,"claim_principal_basis_1",`Facture ${invoiceNumber(currentDossier)}`);safeSetText(form,"claim_principal_basis_2",contractBasis(currentDossier));safeSetText(form,"claim_principal_basis_3",`Échéance ${dueDate(currentDossier)}`);safeSetText(form,"supporting_documents_1",pieceList(currentDossier).slice(0,5).join(" ; "));safeSetText(form,"supporting_documents_2",pieceList(currentDossier).slice(5).join(" ; "));safeSetText(form,"claim_date",todayFR());const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-cerfa-12946-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Vérifie documents/cerfa-12946-remplissable.pdf et les noms des champs.")}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Générer Cerfa prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Générer Cerfa prérempli"}}
+async function generateCerfaPrefilled(){
+  if(!currentDossier){alert("Sélectionnez un dossier.");return}
+  if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}
+
+  const setLoading = (loading)=>{
+    [E.generateCerfaBtn,E.generateCerfaBtnPrivate].filter(Boolean).forEach(btn=>{
+      btn.disabled=loading;
+      btn.textContent=loading?"Génération...":"Générer Cerfa prérempli";
+    });
+  };
+
+  try{
+    setLoading(true);
+
+    const response=await fetch(CERFA_FILLABLE_URL,{cache:"no-store"});
+    if(!response.ok)throw new Error(`PDF introuvable ou non accessible : ${CERFA_FILLABLE_URL} — HTTP ${response.status}`);
+
+    const pdfBytes=await response.arrayBuffer();
+    const pdfDoc=await PDFLib.PDFDocument.load(pdfBytes,{ignoreEncryption:true});
+    const font=await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const bold=await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    const pages=pdfDoc.getPages();
+
+    const draw=(pageIndex,text,x,y,size=9,opts={})=>{
+      const page=pages[pageIndex];
+      if(!page||!text)return;
+      page.drawText(String(text),{x,y,size,font:opts.bold?bold:font,color:PDFLib.rgb(0,0,0),maxWidth:opts.maxWidth||430,lineHeight:size+3});
+    };
+    const drawBox=(pageIndex,text,x,y,w,h,size=8)=>{
+      const page=pages[pageIndex];
+      if(!page||!text)return;
+      const value=String(text);
+      const lines=[];
+      let line="";
+      value.split(/\s+/).forEach(word=>{
+        const test=line?line+" "+word:word;
+        if(test.length>Math.max(22,Math.floor(w/4.7))){lines.push(line);line=word}else line=test;
+      });
+      if(line)lines.push(line);
+      lines.slice(0,Math.max(1,Math.floor(h/(size+3)))).forEach((l,i)=>draw(pageIndex,l,x,y-(i*(size+3)),size,{maxWidth:w}));
+    };
+    const cross=(pageIndex,x,y)=>{
+      const page=pages[pageIndex];
+      if(!page)return;
+      page.drawText("X",{x,y,size:11,font:bold,color:PDFLib.rgb(0,0,0)});
+    };
+
+    const courtName=clean(prompt("Nom du tribunal compétent à reporter dans le Cerfa :", isProfessionalDebtor(currentDossier)?"Tribunal de commerce de ":"Tribunal judiciaire de "));
+    const courtAddress=clean(prompt("Adresse du tribunal compétent à reporter dans le Cerfa :", ""));
+
+    /*
+      Version robuste : on écrit par-dessus le Cerfa au lieu d'utiliser les champs PDF internes.
+      Pourquoi : les Cerfa officiels utilisent souvent des noms de champs XFA/AcroForm instables.
+      Résultat : plus de crash si les noms de champs ne correspondent pas.
+    */
+
+    // Page 1 — identité créancier + débiteur principal
+    if(isProfessionalDebtor(currentDossier)){
+      cross(0,166,336); // créancier personne morale approximatif
+      draw(0,creditorName(currentDossier),245,292,9);
+      drawBox(0,creditorAddress(currentDossier),245,263,300,22,8);
+      draw(0,creditorZip(currentDossier),245,229,9);
+      draw(0,creditorCity(currentDossier),340,229,9);
+      draw(0,creditorEmail(currentDossier),245,198,8);
+    }else{
+      cross(0,166,336);
+      draw(0,creditorName(currentDossier),245,292,9);
+      drawBox(0,creditorAddress(currentDossier),245,263,300,22,8);
+      draw(0,creditorZip(currentDossier),245,229,9);
+      draw(0,creditorCity(currentDossier),340,229,9);
+      draw(0,creditorEmail(currentDossier),245,198,8);
+    }
+
+    // Page 2 — débiteur approximatif, selon version Cerfa
+    if(pages[1]){
+      draw(1,debtorName(currentDossier),245,700,9);
+      drawBox(1,debtorAddress(currentDossier),245,672,300,22,8);
+      draw(1,debtorZip(currentDossier),245,638,9);
+      draw(1,debtorCity(currentDossier),340,638,9);
+      draw(1,debtorEmail(currentDossier),245,608,8);
+    }
+
+    // Page 4 — juridiction et créance
+    const p4=pages.length>=4?3:pages.length-1;
+    draw(p4,courtName,150,705,9);
+    drawBox(p4,courtAddress,150,684,340,28,8);
+    draw(p4,`Facture ${invoiceNumber(currentDossier)} — ${contractBasis(currentDossier)}`,115,548,8);
+    draw(p4,dueAmountCerfa(currentDossier),445,548,9,{bold:true});
+    draw(p4,`Date émission : ${issuedDate(currentDossier)} — Échéance : ${dueDate(currentDossier)}`,115,526,8);
+    drawBox(p4,bordereauText(currentDossier),95,400,430,95,7);
+
+    // Page 5 — date/signature si la page existe
+    if(pages[4]){
+      draw(4,todayFR(),390,210,9);
+      draw(4,creditorName(currentDossier),110,190,9,{bold:true});
+    }
+
+    const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"});
+    const a=document.createElement("a");
+    const safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");
+    a.href=URL.createObjectURL(blob);
+    a.download=`${safeRef}-cerfa-12946-pre rempli.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }catch(error){
+    console.error("Erreur génération Cerfa :",error);
+    alert("Impossible de générer le Cerfa prérempli. Détail : "+(error?.message||error));
+  }finally{
+    setLoading(false);
+  }
+}
 async function renderInjunctionFiles(){if(!currentUser||!currentDossier||!E.injunctionFilesList)return;E.injunctionFilesList.innerHTML="";try{const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files")),files=[];snap.forEach(s=>{const f=s.data()||{};if(f.type==="injunction_piece")files.push({id:s.id,...f})});files.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));if(!files.length){E.injunctionFilesList.innerHTML=`<div class="upload-status">Aucune pièce déposée pour ce dossier.</div>`;return}files.forEach(f=>{const item=document.createElement("div");item.className="uploaded-file-item";const name=esc(f.name||f.filename||"Pièce jointe"),url=esc(f.url||"#"),size=f.size?`<span class="uploaded-file-meta">${Math.ceil(Number(f.size||0)/1024)} Ko</span>`:"",path=esc(f.path||"");item.innerHTML=`<span title="${name}">${name}</span>${size}<div class="uploaded-file-actions"><a href="${url}" target="_blank" rel="noopener">Voir</a><button class="mini-delete-file-btn" type="button" data-delete-file="${esc(f.id)}" data-delete-path="${path}">Supprimer</button></div>`;E.injunctionFilesList.appendChild(item)})}catch(err){console.error(err);E.injunctionFilesList.innerHTML=`<div class="upload-status">Impossible de charger les pièces du dossier.</div>`}}
 async function deleteInjunctionFile(fileId,path){if(!currentUser||!currentDossier||!fileId)return;if(!confirm("Supprimer cette pièce du dossier ?"))return;try{await deleteDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id,"files",fileId));if(path){try{await deleteObject(storageRef(storage,path))}catch(storageError){console.warn("Fichier Storage non supprimé :",storageError)}}await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:"Pièce injonction supprimée",description:`Une pièce a été supprimée le ${todayFR()}`,action:"delete_injunction_file",type:"file_delete",createdAt:serverTimestamp()});await renderInjunctionFiles();await renderTimeline()}catch(err){console.error(err);alert("Suppression impossible. Vérifie les règles Firebase.")}}
 async function uploadInjunctionFiles(files){if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}if(!files||!files.length)return;try{E.uploadInjunctionFilesBtnPro.disabled=true;E.uploadInjunctionFilesBtnPrivate.disabled=true;let done=0;for(const file of files){const safeName=String(file.name||"piece").replace(/[^A-Za-z0-9_.-]+/g,"-"),path=`users/${currentUser.uid}/requests/${currentDossier.id}/injunction/${Date.now()}_${safeName}`,r=storageRef(storage,path);await uploadBytes(r,file,{contentType:file.type||"application/octet-stream"});const url=await getDownloadURL(r);await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"),{name:file.name,filename:file.name,url,path,type:"injunction_piece",mimeType:file.type||"",size:file.size||0,uploadedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});done++}E.injunctionUploadStatus.textContent=`${done} fichier(s) ajouté(s) au dossier.`;await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:"Pièces injonction ajoutées",description:`${done} fichier(s) uploadé(s) le ${todayFR()}`,action:"upload_injunction_files",type:"file_upload",createdAt:serverTimestamp()});await renderTimeline();await renderInjunctionFiles()}catch(err){console.error(err);alert("Upload impossible. Vérifie les règles Firebase Storage.")}finally{E.uploadInjunctionFilesBtnPro.disabled=false;E.uploadInjunctionFilesBtnPrivate.disabled=false;E.injunctionFilesInput.value=""}}
