@@ -33,11 +33,11 @@ const OFFERS = {
     ],
   },
 
-  subscription_89: {
+  monthly_89: {
     mode: "subscription",
     amount: 89,
     grantedCaseCount: 3,
-    plan: "subscription_89",
+    plan: "monthly_89",
     line_items: [
       {
         price_data: {
@@ -57,7 +57,7 @@ const OFFERS = {
     mode: "payment",
     amount: 19,
     grantedCaseCount: 1,
-    plan: "subscription_89",
+    plan: "monthly_89",
     line_items: [
       {
         price_data: {
@@ -213,7 +213,7 @@ exports.stripeWebhook = onRequest(
           updatedAt: now,
         };
 
-        if (offerType === "subscription_89") {
+        if (offerType === "monthly_89") {
           userUpdate.monthlyQuota = 3;
         }
 
