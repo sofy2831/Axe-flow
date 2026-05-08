@@ -252,20 +252,9 @@
       text-align:center;
     }
 
-    @media (max-width: 900px){
-      .steps-grid{grid-template-columns:1fr;}
-    }
-
-    @media (max-width: 720px){
-      .topbar-inner{min-height:unset;padding:14px 0;}
-    }
-
-    @media (max-width: 560px){
-      .container{width:min(var(--max), calc(100% - 20px));}
-      .hero-card,.steps-card{padding:20px 18px;}
-      .hero-actions{flex-direction:column;align-items:stretch;}
-      .btn{width:100%;}
-    }
+    @media (max-width: 900px){.steps-grid{grid-template-columns:1fr;}}
+    @media (max-width: 720px){.topbar-inner{min-height:unset;padding:14px 0;}}
+    @media (max-width: 560px){.container{width:min(var(--max), calc(100% - 20px));}.hero-card,.steps-card{padding:20px 18px;}.hero-actions{flex-direction:column;align-items:stretch;}.btn{width:100%;}}
   </style>
 </head>
 
@@ -291,19 +280,19 @@
             Paiement confirmé
           </div>
 
-          <h1>Votre droit de création est en cours d’activation</h1>
+          <h1>Votre crédit dossier est en cours d’activation</h1>
 
           <p class="hero-lead">
-            Le paiement a bien été pris en compte. Axe Flow vérifie maintenant l’activation de votre droit de création avant de vous renvoyer vers le tableau de bord.
+            Le paiement a bien été pris en compte. Axe Flow active maintenant votre crédit dossier avant de vous renvoyer vers le tableau de bord.
           </p>
 
           <div class="hero-actions">
-            <a href="tableau-de-bord.html" class="btn btn-primary" id="dashboardBtn">Validation du paiement...</a>
+            <a href="tableau-de-bord.html" class="btn btn-primary" id="dashboardBtn">Activation du crédit...</a>
             <a href="index.html" class="btn btn-secondary">Retour à l’accueil</a>
           </div>
 
           <p class="status-note" id="paymentStatusNote">
-            Validation en cours. Cette étape peut prendre quelques secondes après le retour Stripe.
+            Activation en cours. Cette étape rattache votre paiement à un crédit dossier utilisable.
           </p>
         </section>
 
@@ -312,7 +301,7 @@
             <span class="section-tag">Suite</span>
             <h2 class="section-title">Ce qu’il faut faire maintenant</h2>
             <p class="section-text">
-              Le paiement ouvre le droit. Le dossier se crée ensuite dans le tableau de bord, proprement rattaché à votre compte.
+              Le paiement crée un crédit. Le dossier se crée ensuite dans le tableau de bord, proprement rattaché à votre compte.
             </p>
           </div>
 
@@ -326,7 +315,7 @@
             <article class="step">
               <div class="step-number">02</div>
               <h3>Créez votre dossier</h3>
-              <p>Ouvrez le nouveau dossier autorisé par votre paiement et renseignez la facture, le montant et le débiteur.</p>
+              <p>Ouvrez le nouveau dossier autorisé par votre crédit et renseignez la facture, le montant et le débiteur.</p>
             </article>
 
             <article class="step">
@@ -339,7 +328,7 @@
       </div>
 
       <div class="footer-note">
-        Axe Flow - paiement confirmé, création du dossier dans le tableau de bord.
+        Axe Flow - paiement confirmé, crédit dossier activé dans le tableau de bord.
       </div>
     </div>
   </main>
@@ -347,7 +336,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",
@@ -368,7 +357,7 @@
     function lockDashboardButton(message){
       dashboardBtn.style.pointerEvents = "none";
       dashboardBtn.style.opacity = ".65";
-      dashboardBtn.textContent = message || "Validation du paiement...";
+      dashboardBtn.textContent = message || "Activation du crédit...";
     }
 
     function unlockDashboardButton(message){
@@ -381,30 +370,173 @@
       if(paymentStatusNote) paymentStatusNote.textContent = message;
     }
 
-    async function waitForEntitlement(uid){
-      lockDashboardButton("Validation du paiement...");
-      setNote("Validation en cours. Cette étape peut prendre quelques secondes après le retour Stripe.");
+    function clean(value){
+      return String(value || "").trim();
+    }
 
-      for(let i = 0; i < 15; i++){
-        const userRef = doc(db, "users", uid);
-        const snap = await getDoc(userRef);
+    function getUrlParams(){
+      return new URLSearchParams(window.location.search || "");
+    }
 
-        if(snap.exists()){
-          const data = snap.data();
+    function normalizeOffer(raw){
+      const value = clean(raw).toLowerCase();
 
-          if(data.paymentStatus === "paid" && data.entitlementStatus === "active"){
-            unlockDashboardButton("Créer mon dossier");
-            setNote("Paiement validé. Votre droit est actif. Vous pouvez créer votre dossier depuis le tableau de bord.");
-            return true;
-          }
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      if(["monthly_89", "subscription_89", "abonnement_89", "pro_89", "89"].includes(value)){
+        return "monthly_89";
       }
 
-      unlockDashboardButton("Accéder au tableau de bord");
-      setNote("Le paiement est confirmé, mais l’activation peut encore être en cours. Accédez au tableau de bord : si le droit n’apparaît pas tout de suite, actualisez la page.");
-      return false;
+      if(["extra_19", "supplement_19", "dossier_sup_19", "19"].includes(value)){
+        return "extra_19";
+      }
+
+      if(["one_shot_49", "dossier_49", "49", ""].includes(value)){
+        return "one_shot_49";
+      }
+
+      return "one_shot_49";
+    }
+
+    function offerConfig(type){
+      if(type === "monthly_89"){
+        return {
+          type:"monthly_89",
+          grantedCaseCount:3,
+          userPatch:{
+            plan:"monthly_89",
+            planType:"monthly_89",
+            entitlement:"monthly_89",
+            paymentStatus:"paid",
+            entitlementStatus:"active",
+            subscriptionStatus:"active",
+            accountStatus:"active",
+            monthlyQuota:3,
+            monthlyUsed:0,
+            updatedAt:serverTimestamp()
+          },
+          button:"Créer un dossier inclus",
+          note:"Abonnement validé : 3 crédits dossiers inclus sont actifs."
+        };
+      }
+
+      if(type === "extra_19"){
+        return {
+          type:"extra_19",
+          grantedCaseCount:1,
+          userPatch:{
+            paymentStatus:"paid",
+            entitlementStatus:"active",
+            accountStatus:"active",
+            updatedAt:serverTimestamp()
+          },
+          button:"Créer mon dossier supplémentaire",
+          note:"Paiement validé : 1 crédit dossier supplémentaire est actif."
+        };
+      }
+
+      return {
+        type:"one_shot_49",
+        grantedCaseCount:1,
+        userPatch:{
+          plan:"one_shot_49",
+          planType:"one_shot_49",
+          entitlement:"one_shot_49",
+          paymentStatus:"paid",
+          entitlementStatus:"active",
+          accountStatus:"active",
+          updatedAt:serverTimestamp()
+        },
+        button:"Créer mon dossier",
+        note:"Paiement validé : 1 crédit dossier est actif."
+      };
+    }
+
+    async function hasUnusedEntitlement(uid, type){
+      const snap = await getDocs(collection(db, "users", uid, "entitlements"));
+      let found = false;
+
+      snap.forEach(docSnap => {
+        const data = docSnap.data() || {};
+        const sameType = data.type === type;
+        const active = data.status === "active";
+        const granted = Number(data.grantedCaseCount || 0);
+        const used = Number(data.usedCaseCount || 0);
+
+        if(sameType && active && used < granted){
+          found = true;
+        }
+      });
+
+      return found;
+    }
+
+    async function activateCredit(uid){
+      const params = getUrlParams();
+      const offerRaw = params.get("offer") || params.get("type") || params.get("plan") || "one_shot_49";
+      const type = normalizeOffer(offerRaw);
+      const config = offerConfig(type);
+
+      const sessionId = clean(params.get("session_id") || params.get("session") || params.get("checkout_session_id"));
+      const userRef = doc(db, "users", uid);
+
+      lockDashboardButton("Activation du crédit...");
+      setNote("Activation du crédit dossier en cours.");
+
+      await updateDoc(userRef, config.userPatch);
+
+      let entitlementId;
+
+      if(sessionId){
+        entitlementId = `stripe_${sessionId}`.replace(/[^A-Za-z0-9_-]/g, "_");
+      }else{
+        const alreadyHasUnused = await hasUnusedEntitlement(uid, config.type);
+
+        if(alreadyHasUnused){
+          unlockDashboardButton(config.button);
+          setNote(`${config.note} Aucun doublon créé au rechargement de la page.`);
+          return true;
+        }
+
+        entitlementId = `manual_${config.type}_${Date.now()}`;
+      }
+
+      const entitlementRef = doc(db, "users", uid, "entitlements", entitlementId);
+      const existing = await getDoc(entitlementRef);
+
+      if(!existing.exists()){
+        await setDoc(entitlementRef, {
+          type:config.type,
+          status:"active",
+          grantedCaseCount:config.grantedCaseCount,
+          usedCaseCount:0,
+          validFrom:serverTimestamp(),
+          validUntil:null,
+          sourcePaymentId:sessionId || entitlementId,
+          source:"stripe_return_merci",
+          createdAt:serverTimestamp(),
+          updatedAt:serverTimestamp()
+        });
+      }
+
+      const paymentRef = doc(db, "users", uid, "payments", entitlementId);
+      const paymentSnap = await getDoc(paymentRef);
+
+      if(!paymentSnap.exists()){
+        await setDoc(paymentRef, {
+          type:config.type,
+          status:"paid",
+          amount:config.type === "monthly_89" ? 89 : config.type === "extra_19" ? 19 : 49,
+          currency:"EUR",
+          provider:"stripe",
+          stripeSessionId:sessionId || "missing_session_id",
+          stripePaymentIntentId:"",
+          createdAt:serverTimestamp(),
+          updatedAt:serverTimestamp()
+        });
+      }
+
+      unlockDashboardButton(config.button);
+      setNote(config.note + " Vous pouvez revenir au tableau de bord.");
+      return true;
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -413,7 +545,13 @@
         return;
       }
 
-      await waitForEntitlement(user.uid);
+      try{
+        await activateCredit(user.uid);
+      }catch(error){
+        console.error(error);
+        unlockDashboardButton("Accéder au tableau de bord");
+        setNote("Paiement confirmé, mais l’activation automatique du crédit a échoué. Vérifie les rules Firestore et les champs autorisés.");
+      }
     });
   </script>
 </body>
