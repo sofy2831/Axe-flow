@@ -1,0 +1,218 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["admin", "superadmin"];
+    }
+
+    function allowedUserKeys() {
+  return [
+    "uid", "email", "role",
+    "plan", "planType", "accountStatus", "subscriptionStatus",
+    "entitlement", "entitlementStatus", "paymentStatus",
+    "monthlyQuota", "monthlyUsed", "isTestAccount",
+    "businessProfile", "displayName",
+    "createdAt", "updatedAt"
+  ];
+}
+
+    function allowedRequestKeys() {
+      return [
+        "ref", "label",
+
+        "amountTTC", "amountDue",
+        "invoiceRef", "invoiceNumber",
+        "issuedDate", "invoiceIssuedDate",
+        "dueDate", "invoiceDueDate",
+        "contractBasis",
+
+        "creditorName", "creditorEmail", "creditorAddress", "creditorZip", "creditorCity",
+
+        "debiteurType", "debiteurName", "debiteurEmail", "debiteurPhone",
+        "debiteurAddress", "debiteurZip", "debiteurCity",
+
+        "debtorName", "debtorEmail", "debtorPhone",
+        "debtorAddress", "debtorZip", "debtorCity",
+
+        "homeName", "objectLabel", "dossierSummary",
+
+        "status", "statusLabel", "step", "currentStep",
+        "nextAction", "nextActionAt",
+
+        "relance1SentAt", "relance2SentAt", "relance3SentAt",
+        "miseEnDemeureSentAt", "injunctionPreparedAt",
+
+        "injunctionPublished", "postOrderChoice",
+
+        "entitlementId", "entitlementUsed","entitlementPlan","offerType", "clientUid",
+        "lifecycleStatus", "paymentStatus",
+
+        "clientHasNewFiles", "clientLastUploadAt", "clientFilesUpdatedAt",
+        "clientStatus", "clientActionRequired",
+        "lastClientProofAt", "lastPublishedEventAt", "proofsCompletionStatus",
+
+        "priority", "closedAt", "archivedAt", "closureReason", "closureComment",
+
+        "createdAt", "updatedAt"
+      ];
+    }
+
+    function allowedRequestUpdateKeys() {
+      return [
+        "creditorName", "creditorEmail", "creditorAddress", "creditorZip", "creditorCity",
+
+        "debtorName", "debtorEmail", "debtorAddress", "debtorZip", "debtorCity",
+        "debiteurName", "debiteurEmail", "debiteurAddress", "debiteurZip", "debiteurCity",
+
+        "step", "statusLabel", "nextAction", "nextActionAt",
+
+        "relance1SentAt", "relance2SentAt", "relance3SentAt",
+        "miseEnDemeureSentAt", "injunctionPreparedAt",
+
+        "updatedAt"
+      ];
+    }
+
+    function allowedEventKeys() {
+      return [
+        "title", "description", "action", "type",
+        "createdAt", "updatedAt"
+      ];
+    }
+
+    function allowedFileKeys() {
+      return [
+        "name", "filename", "url", "path", "type", "mimeType",
+        "size", "uploadedAt", "createdAt", "updatedAt"
+      ];
+    }
+
+    function allowedEntitlementKeys() {
+      return [
+        "type", "status", "grantedCaseCount", "usedCaseCount",
+        "validFrom", "validUntil", "sourcePaymentId", "source",
+        "stripeSessionId",
+    "stripeSubscriptionId",
+    "stripeCustomerId",
+        
+        
+        "createdAt", "updatedAt"
+      ];
+    }
+
+    function allowedPaymentKeys() {
+      return [
+        "type", "status", "amount", "currency", "provider",
+        "stripeSessionId", "stripePaymentIntentId",
+         "stripeSubscriptionId",
+    "stripeCustomerId",
+    "paymentLinkId",
+        
+        
+        "createdAt", "updatedAt"
+      ];
+    }
+
+    match /users/{userId} {
+
+      allow read: if isOwner(userId) || isAdmin();
+
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(allowedUserKeys())
+        && request.resource.data.uid == request.auth.uid;
+
+      allow update: if (
+          isOwner(userId)
+          && request.resource.data.keys().hasOnly(allowedUserKeys())
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.email == resource.data.email
+        )
+        || isAdmin();
+
+      allow delete: if isAdmin();
+
+      match /requests/{requestId} {
+
+        allow read: if isOwner(userId) || isAdmin();
+
+        allow create: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(allowedRequestKeys());
+
+        allow update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(allowedRequestKeys())
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(allowedRequestUpdateKeys());
+
+        allow delete: if isOwner(userId) || isAdmin();
+
+        match /events/{eventId} {
+
+          allow read: if isOwner(userId) || isAdmin();
+
+          allow create: if isOwner(userId)
+            && request.resource.data.keys().hasOnly(allowedEventKeys());
+
+          allow update, delete: if isOwner(userId) || isAdmin();
+
+          match /proofs/{proofId} {
+            allow read: if isOwner(userId) || isAdmin();
+            allow create, update, delete: if isOwner(userId) || isAdmin();
+          }
+        }
+
+        match /documents/{documentId} {
+          allow read, create, update, delete: if isOwner(userId) || isAdmin();
+        }
+
+        match /files/{fileId} {
+          allow read, create, update, delete: if isOwner(userId) || isAdmin();
+        }
+
+        match /messages/{messageId} {
+          allow read, create, update, delete: if isOwner(userId) || isAdmin();
+        }
+      }
+
+      match /entitlements/{entitlementId} {
+
+        allow read: if isOwner(userId) || isAdmin();
+
+        allow create, update: if (
+            isOwner(userId)
+            && request.resource.data.keys().hasOnly(allowedEntitlementKeys())
+          )
+          || isAdmin();
+
+        allow delete: if isAdmin();
+      }
+
+      match /payments/{paymentId} {
+
+        allow read: if isOwner(userId) || isAdmin();
+
+        allow create, update: if (
+            isOwner(userId)
+            && request.resource.data.keys().hasOnly(allowedPaymentKeys())
+          )
+          || isAdmin();
+
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
