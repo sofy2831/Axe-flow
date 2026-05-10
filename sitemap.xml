@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/facture-impayee.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/client-ne-paie-pas.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/mise-en-demeure-impaye.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/injonction-de-payer.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/relance-facture-impayee.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/cgv.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/mentions-legales.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/confidentialite.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/support.html</loc>
+  </url>
+
+</urlset>
