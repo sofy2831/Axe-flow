@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Relance facture impayée : quand relancer et quoi écrire ? — Axe Flow</title>
+  <meta name="description" content="Relance facture impayée : relance simple, relance ferme, dernier rappel, délai, erreurs à éviter et suite vers la mise en demeure." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Relance facture impayée : quand relancer et quoi écrire ?" />
+  <meta property="og:description" content="Méthode claire pour relancer une facture impayée : premier rappel, relance ferme, dernier rappel et passage à la mise en demeure." />
+  <meta property="og:url" content="https://flow.axe-dossier.fr/relance-facture-impayee.html" />
+  <meta property="og:site_name" content="Axe Flow" />
+  <meta property="og:image" content="https://flow.axe-dossier.fr/images/axe-flow-cover.png" />
+
+  <link rel="canonical" href="https://flow.axe-dossier.fr/relance-facture-impayee.html" />
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg2:#0b3145;
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,.76);
+      --soft:rgba(244,247,251,.58);
+      --line:rgba(255,255,255,.10);
+      --card:rgba(255,255,255,.055);
+      --accent:#ff7f1f;
+      --accent2:#ff9b4a;
+      --success:#3dd08f;
+      --danger:#ff6b6b;
+      --warning:#ffb347;
+      --shadow:0 24px 80px rgba(0,0,0,.28);
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left,rgba(61,208,143,.08),transparent 30%),
+        radial-gradient(circle at top right,rgba(255,127,31,.08),transparent 28%),
+        linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+      line-height:1.65;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .container{width:min(var(--max),calc(100% - 32px));margin:0 auto}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,.68);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .topbar-inner{
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,.04);
+      flex:0 0 auto;
+    }
+
+    .brand-title{display:block;font-weight:900}
+    .brand-sub{display:block;color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+    .nav-link{color:var(--muted);font-weight:700;font-size:.93rem}
+    .nav-link:hover{color:#fff}
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:48px;
+      padding:0 20px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:850;
+      font-size:.95rem;
+      transition:.22s ease;
+      cursor:pointer;
+      white-space:nowrap;
+      text-align:center;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,.22);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border-color:rgba(255,255,255,.14);
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .page{padding:40px 0 52px}
+
+    .hero{
+      padding:34px;
+      border-radius:32px;
+      background:
+        radial-gradient(circle at top left,rgba(255,127,31,.16),transparent 27%),
+        radial-gradient(circle at bottom right,rgba(61,208,143,.12),transparent 28%),
+        linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.045));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:850;
+      font-size:.86rem;
+      margin-bottom:16px;
+    }
+
+    .eyebrow::before{
+      content:"";
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,.12);
+    }
+
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(2.25rem,4.6vw,4rem);
+      line-height:1.03;
+      letter-spacing:-.05em;
+      max-width:15ch;
+    }
+
+    .lead{
+      margin:0 0 22px;
+      color:var(--muted);
+      font-size:1.06rem;
+      max-width:78ch;
+    }
+
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+
+    .note{
+      margin-top:18px;
+      padding:15px 17px;
+      border-radius:18px;
+      background:rgba(255,127,31,.10);
+      border:1px solid rgba(255,127,31,.20);
+      color:#fff2e8;
+      font-size:.94rem;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .toc,.content,.cta-card{
+      border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.09);
+      box-shadow:var(--shadow);
+    }
+
+    .toc{
+      position:sticky;
+      top:96px;
+      padding:18px;
+    }
+
+    .toc strong{display:block;margin-bottom:10px}
+    .toc a{
+      display:block;
+      padding:9px 10px;
+      border-radius:13px;
+      color:var(--muted);
+      font-size:.9rem;
+      font-weight:700;
+    }
+    .toc a:hover{background:rgba(255,255,255,.06);color:#fff}
+
+    .content{padding:30px}
+
+    .content h2{
+      margin:34px 0 12px;
+      font-size:clamp(1.45rem,2.5vw,2.1rem);
+      line-height:1.16;
+      letter-spacing:-.035em;
+    }
+
+    .content h2:first-child{margin-top:0}
+    .content h3{margin:22px 0 8px;font-size:1.1rem}
+    .content p{margin:0 0 14px;color:var(--muted)}
+    .content strong{color:#fff}
+    .content ul,.content ol{margin:8px 0 18px;padding-left:22px;color:var(--muted)}
+    .content li{margin:7px 0}
+    .content a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+
+    .steps{
+      display:grid;
+      gap:12px;
+      margin:18px 0;
+    }
+
+    .step{
+      display:grid;
+      grid-template-columns:46px 1fr;
+      gap:14px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+    }
+
+    .step-num{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,127,31,.14);
+      border:1px solid rgba(255,127,31,.24);
+      color:var(--accent2);
+      font-weight:900;
+    }
+
+    .step strong{display:block;margin-bottom:4px}
+    .step span{display:block;color:var(--muted);font-size:.94rem}
+
+    .warning-box,.success-box,.soft-box,.danger-box{
+      padding:17px 18px;
+      border-radius:18px;
+      margin:18px 0;
+    }
+
+    .warning-box{
+      background:rgba(255,179,71,.12);
+      border:1px solid rgba(255,179,71,.24);
+      color:#ffe7c2;
+    }
+
+    .danger-box{
+      background:rgba(255,107,107,.11);
+      border:1px solid rgba(255,107,107,.23);
+      color:#ffdede;
+    }
+
+    .success-box{
+      background:rgba(61,208,143,.11);
+      border:1px solid rgba(61,208,143,.22);
+      color:#dcffef;
+    }
+
+    .soft-box{
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+      color:var(--muted);
+    }
+
+    .example{
+      white-space:pre-wrap;
+      padding:18px;
+      border-radius:18px;
+      background:rgba(7,30,43,.55);
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      font-size:.94rem;
+      line-height:1.55;
+      margin:14px 0 18px;
+    }
+
+    .faq{
+      display:grid;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    details{
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+      overflow:hidden;
+    }
+
+    summary{
+      cursor:pointer;
+      padding:16px 18px;
+      font-weight:850;
+      color:#fff;
+    }
+
+    details p{
+      padding:0 18px 16px;
+      margin:0;
+    }
+
+    .cta-card{
+      margin-top:20px;
+      padding:24px;
+      background:
+        radial-gradient(circle at top left,rgba(255,127,31,.16),transparent 28%),
+        linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
+    }
+
+    .cta-card h2{margin:0 0 10px}
+    .cta-card p{margin:0 0 18px;color:var(--muted)}
+
+    .internal-links{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .internal-link{
+      padding:15px;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+      color:var(--muted);
+      font-weight:750;
+    }
+
+    .internal-link:hover{background:rgba(255,255,255,.075);color:#fff}
+
+    footer{padding:28px 0 38px}
+
+    .footer-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+      color:var(--soft);
+      font-size:.9rem;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top:22px;
+    }
+
+    .footer-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .footer-links a{color:var(--muted)}
+    .footer-links a:hover{color:#fff}
+
+    @media(max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .toc{position:relative;top:auto}
+      .internal-links{grid-template-columns:1fr}
+    }
+
+    @media(max-width:760px){
+      .topbar-inner{flex-direction:column;align-items:flex-start;padding:14px 0}
+      .nav{justify-content:flex-start}
+      h1{max-width:none}
+      .hero,.content{padding:22px 18px}
+    }
+
+    @media(max-width:560px){
+      .container{width:min(var(--max),calc(100% - 20px))}
+      .hero-actions{flex-direction:column}
+      .btn{width:100%}
+      .step{grid-template-columns:1fr}
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"Quand relancer une facture impayée ?",
+        "acceptedAnswer":{"@type":"Answer","text":"Il est conseillé de relancer dès que la facture est échue, avec un premier rappel simple, puis une relance ferme si le client ne répond pas ou ne paie pas."}
+      },
+      {
+        "@type":"Question",
+        "name":"Combien de relances envoyer avant une mise en demeure ?",
+        "acceptedAnswer":{"@type":"Answer","text":"Il n’existe pas de nombre obligatoire. Une méthode cohérente consiste à envoyer une relance simple, une relance ferme puis un dernier rappel avant mise en demeure."}
+      },
+      {
+        "@type":"Question",
+        "name":"Une relance par email suffit-elle ?",
+        "acceptedAnswer":{"@type":"Answer","text":"Pour les premières relances, l’email peut suffire et permet de garder une trace. Pour une mise en demeure, la lettre recommandée avec accusé de réception est fortement recommandée."}
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div>
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Relance facture impayée</span>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <a class="nav-link" href="index.html">Accueil</a>
+        <a class="nav-link" href="facture-impayee.html">Facture impayée</a>
+        <a class="nav-link" href="mise-en-demeure-impaye.html">Mise en demeure</a>
+        <a class="nav-link" href="support.html">Support</a>
+        <a class="btn btn-secondary" href="connexion.html">Connexion</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">Relance client</div>
+        <h1>Relance facture impayée : quand relancer et quoi écrire ?</h1>
+        <p class="lead">
+          Une facture impayée ne se règle pas toujours avec un simple rappel. La relance doit suivre une progression claire : relance simple, relance ferme, dernier rappel, puis mise en demeure si le client ne paie toujours pas.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+          <a class="btn btn-secondary" href="#methode">Voir la méthode</a>
+        </div>
+        <div class="note">
+          <strong>Le bon réflexe :</strong> chaque relance doit laisser une trace écrite. Un appel peut aider, mais un dossier solide se construit avec des preuves.
+        </div>
+      </section>
+
+      <section class="layout">
+        <aside class="toc" aria-label="Sommaire">
+          <strong>Sommaire</strong>
+          <a href="#quand">1. Quand relancer</a>
+          <a href="#methode">2. Méthode en 3 relances</a>
+          <a href="#exemples">3. Exemples</a>
+          <a href="#erreurs">4. Erreurs à éviter</a>
+          <a href="#suite">5. Après les relances</a>
+          <a href="#faq">6. FAQ</a>
+        </aside>
+
+        <article class="content">
+          <h2 id="quand">1. Quand relancer une facture impayée ?</h2>
+          <p>
+            Vous pouvez relancer dès que la facture est échue. Pas besoin d’attendre des semaines. Une relance rapide montre que vous suivez votre trésorerie et que le dossier ne va pas dormir.
+          </p>
+          <p>
+            Avant de relancer, vérifiez la facture : montant, date d’émission, date d’échéance, coordonnées du client et éventuels échanges sur le règlement.
+          </p>
+
+          <div class="soft-box">
+            <strong>Simple :</strong> si la date d’échéance est dépassée et que vous n’avez pas reçu le paiement, vous pouvez relancer.
+          </div>
+
+          <h2 id="methode">2. La méthode en 3 relances</h2>
+          <p>
+            Le but n’est pas d’envoyer dix emails inutiles. Le but est de créer une progression crédible et lisible.
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">01</div>
+              <div>
+                <strong>Relance simple</strong>
+                <span>Ton courtois, rappel de la facture, montant dû et demande de régularisation.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">02</div>
+              <div>
+                <strong>Relance ferme</strong>
+                <span>Ton plus direct, rappel de la première relance et délai court pour payer.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">03</div>
+              <div>
+                <strong>Dernier rappel avant mise en demeure</strong>
+                <span>Annonce claire : à défaut de règlement, le dossier passera à la mise en demeure.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="warning-box">
+            <strong>Pas trop mou, pas trop violent :</strong> une bonne relance reste professionnelle. Elle fixe un cadre sans basculer dans la menace théâtrale.
+          </div>
+
+          <h2 id="exemples">3. Exemples de relances pour facture impayée</h2>
+
+          <h3>Relance simple</h3>
+          <div class="example">Objet : Relance de paiement — Facture [numéro]
+
+Bonjour,
+
+Sauf erreur de notre part, la facture [numéro] d’un montant de [montant] €, arrivée à échéance le [date], reste à ce jour impayée.
+
+Nous vous remercions de procéder au règlement dans les meilleurs délais ou de nous indiquer votre date de paiement.
+
+Cordialement,</div>
+
+          <h3>Relance ferme</h3>
+          <div class="example">Objet : Deuxième relance — Facture [numéro]
+
+Bonjour,
+
+Malgré notre précédent rappel, la facture [numéro] d’un montant de [montant] € demeure impayée.
+
+Nous vous demandons de régulariser la situation sous [délai] jours.
+
+À défaut de règlement, nous serons contraints d’engager une mise en demeure.
+
+Cordialement,</div>
+
+          <h3>Dernier rappel avant mise en demeure</h3>
+          <div class="example">Objet : Dernier rappel avant mise en demeure — Facture [numéro]
+
+Bonjour,
+
+À ce jour, la facture [numéro] d’un montant de [montant] € reste impayée malgré nos précédentes relances.
+
+Sans règlement sous [délai] jours, nous adresserons une mise en demeure formelle et envisagerons les suites nécessaires.
+
+Cordialement,</div>
+
+          <h2 id="erreurs">4. Les erreurs à éviter</h2>
+          <ul>
+            <li><strong>Relancer uniquement par téléphone</strong> sans trace écrite.</li>
+            <li><strong>Ne pas rappeler le numéro de facture</strong> ou le montant dû.</li>
+            <li><strong>Changer de ton à chaque email</strong> sans progression logique.</li>
+            <li><strong>Envoyer trop de relances</strong> sans jamais passer à la mise en demeure.</li>
+            <li><strong>Ne pas conserver les preuves</strong> des échanges avec le client.</li>
+          </ul>
+
+          <div class="danger-box">
+            <strong>Le piège :</strong> relancer pendant des mois en espérant que le client se réveille. À un moment, il faut formaliser.
+          </div>
+
+          <h2 id="suite">5. Que faire si les relances ne fonctionnent pas ?</h2>
+          <p>
+            Si le client ne paie toujours pas après plusieurs relances, l’étape logique est la <strong>mise en demeure</strong>. Elle formalise votre demande et prépare la suite du dossier.
+          </p>
+          <p>
+            Si la mise en demeure reste sans effet, vous pouvez ensuite préparer une <strong>injonction de payer</strong>, à condition que la créance soit claire, chiffrée, échue et suffisamment prouvée.
+          </p>
+
+          <div class="success-box">
+            <strong>Axe Flow :</strong> le tableau de bord permet de générer les relances, dater les étapes, préparer la mise en demeure et structurer le dossier pour l’injonction.
+          </div>
+
+          <h2 id="faq">6. FAQ — relance facture impayée</h2>
+
+          <div class="faq">
+            <details>
+              <summary>Combien de relances faut-il envoyer ?</summary>
+              <p>Il n’y a pas d’obligation stricte. Une progression raisonnable : relance simple, relance ferme, dernier rappel, puis mise en demeure.</p>
+            </details>
+
+            <details>
+              <summary>Peut-on relancer par email ?</summary>
+              <p>Oui. L’email permet de garder une trace. Pour la mise en demeure, la LRAR est fortement recommandée.</p>
+            </details>
+
+            <details>
+              <summary>Que faire si le client promet de payer mais ne paie pas ?</summary>
+              <p>Demandez une date précise par écrit. Si la date passe sans paiement, passez à la relance ferme ou à la mise en demeure selon l’avancement du dossier.</p>
+            </details>
+
+            <details>
+              <summary>Faut-il rester poli dans une relance ?</summary>
+              <p>Oui. Le ton doit rester professionnel. La fermeté vient du cadre, des délais et de la continuité, pas de l’agressivité.</p>
+            </details>
+
+            <details>
+              <summary>Quand passer à la mise en demeure ?</summary>
+              <p>Lorsque les relances restent sans effet ou que le client ne répond plus clairement. La mise en demeure formalise l’étape avant contentieux.</p>
+            </details>
+          </div>
+
+          <div class="cta-card">
+            <h2>Arrêtez les relances improvisées.</h2>
+            <p>
+              Ouvrez un dossier Axe Flow, générez vos relances, suivez l’historique et préparez la mise en demeure si le client ne règle toujours pas.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+              <a class="btn btn-secondary" href="mise-en-demeure-impaye.html">Lire : mise en demeure</a>
+            </div>
+          </div>
+
+          <h2>À lire aussi</h2>
+          <div class="internal-links">
+            <a class="internal-link" href="facture-impayee.html">Facture impayée : que faire ?</a>
+            <a class="internal-link" href="client-ne-paie-pas.html">Client qui ne paie pas</a>
+            <a class="internal-link" href="injonction-de-payer.html">Préparer une injonction</a>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>© Axe Flow — Suivi des impayés, de la relance à l’injonction</div>
+      <nav class="footer-links" aria-label="Liens utiles">
+        <a href="index.html">Accueil</a>
+        <a href="connexion.html">Connexion</a>
+        <a href="cgv.html">CGV</a>
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="confidentialite.html">Confidentialité</a>
+        <a href="support.html">Support</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
