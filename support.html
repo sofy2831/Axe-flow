@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Support — Axe Flow</title>
+  <meta name="description" content="Support Axe Flow : aide, assistance technique, problème de paiement, création de dossier et contact." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg2:#0b3145;
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,.76);
+      --soft:rgba(244,247,251,.58);
+      --line:rgba(255,255,255,.10);
+      --card:rgba(255,255,255,.055);
+      --accent:#ff7f1f;
+      --accent2:#ff9b4a;
+      --danger:#ff6b6b;
+      --success:#3dd08f;
+      --shadow:0 24px 80px rgba(0,0,0,.28);
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61,208,143,.08), transparent 30%),
+        radial-gradient(circle at top right, rgba(255,127,31,.08), transparent 26%),
+        linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+      line-height:1.65;
+    }
+
+    a{color:inherit;text-decoration:none}
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,.68);
+      border-bottom:1px solid var(--line);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:var(--shadow);
+    }
+
+    .brand-title{
+      display:block;
+      font-weight:900;
+    }
+
+    .brand-sub{
+      display:block;
+      color:var(--soft);
+      font-size:.86rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:800;
+      font-size:.92rem;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,.22);
+    }
+
+    .page{
+      padding:38px 0 50px;
+    }
+
+    .hero{
+      padding:32px;
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+      background:
+        radial-gradient(circle at top left, rgba(255,127,31,.14), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:800;
+      font-size:.86rem;
+      margin-bottom:14px;
+    }
+
+    .eyebrow::before{
+      content:"";
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,.12);
+    }
+
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2rem,4vw,3.2rem);
+      line-height:1.04;
+      letter-spacing:-.045em;
+    }
+
+    .lead{
+      color:var(--muted);
+      margin:0;
+      max-width:72ch;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+    }
+
+    .card{
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      padding:26px;
+    }
+
+    .card h2{
+      margin:0 0 12px;
+      font-size:1.2rem;
+    }
+
+    .card p{
+      color:var(--muted);
+      margin:0 0 12px;
+    }
+
+    .faq{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .faq-item{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .faq-item strong{
+      display:block;
+      margin-bottom:8px;
+      color:#fff;
+    }
+
+    .notice{
+      margin-top:16px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,107,107,.10);
+      border:1px solid rgba(255,107,107,.18);
+      color:#ffdede;
+    }
+
+    .contact-box{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(61,208,143,.10);
+      border:1px solid rgba(61,208,143,.18);
+      margin-top:12px;
+    }
+
+    .contact-box strong{
+      display:block;
+      margin-bottom:8px;
+    }
+
+    .footer{
+      margin-top:26px;
+      padding-top:22px;
+      border-top:1px solid rgba(255,255,255,.08);
+      color:var(--soft);
+      font-size:.88rem;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .footer-links{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .footer-links a:hover{
+      color:#fff;
+    }
+
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .topbar-inner{
+        flex-direction:column;
+        align-items:flex-start;
+        padding:14px 0;
+      }
+    }
+
+    @media(max-width:560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .hero,.card{
+        padding:20px 18px;
+      }
+
+      .btn{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="index.html" class="brand">
+      <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+      <div>
+        <span class="brand-title">Axe Flow</span>
+        <span class="brand-sub">Support utilisateur</span>
+      </div>
+    </a>
+
+    <a class="btn btn-primary" href="connexion.html">
+      Accéder à mon espace
+    </a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="container">
+
+    <section class="hero">
+      <div class="eyebrow">Assistance</div>
+      <h1>Support Axe Flow</h1>
+      <p class="lead">
+        Une question, un problème technique ou un paiement qui ne s’active pas ? Le support Axe Flow est disponible pour vous aider.
+      </p>
+    </section>
+
+    <section class="grid">
+
+      <article class="card">
+        <h2>Contact support</h2>
+
+        <p>
+          Pour toute question liée à un dossier, un accès, un paiement ou un dysfonctionnement technique :
+        </p>
+
+        <div class="contact-box">
+          <strong>Email support</strong>
+          <a href="mailto:contact@axe-dossier.fr">
+            contact@axe-dossier.fr
+          </a>
+        </div>
+
+        <p style="margin-top:16px">
+          <strong>Délai de réponse indicatif :</strong><br>
+          sous 48h ouvrées maximum.
+        </p>
+
+        <div class="notice">
+          Pour accélérer le traitement d’un incident, indiquez :
+          email du compte, capture écran du problème, description précise du bug et appareil utilisé.
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Questions fréquentes</h2>
+
+        <div class="faq">
+
+          <div class="faq-item">
+            <strong>Je n’arrive pas à créer un dossier</strong>
+            Vérifiez qu’un crédit dossier actif est disponible dans votre tableau de bord.
+          </div>
+
+          <div class="faq-item">
+            <strong>Mon paiement est confirmé mais rien n’apparaît</strong>
+            Déconnectez-vous puis reconnectez-vous à votre compte. Si le problème persiste, contactez le support.
+          </div>
+
+          <div class="faq-item">
+            <strong>Je me suis trompé dans un dossier</strong>
+            Utilisez le bouton « Modifier le dossier » depuis votre tableau de bord.
+          </div>
+
+          <div class="faq-item">
+            <strong>Je souhaite supprimer mon compte</strong>
+            Envoyez une demande à contact@axe-dossier.fr.
+          </div>
+
+          <div class="faq-item">
+            <strong>Je rencontre un bug technique</strong>
+            Envoyez une capture écran et expliquez précisément ce qui se passe.
+          </div>
+
+        </div>
+      </article>
+
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h2>Information importante</h2>
+      <p>
+        Axe Flow est un outil d’assistance documentaire, de structuration et de suivi du recouvrement.
+      </p>
+
+      <p>
+        Le support fourni ne constitue pas un conseil juridique individualisé ni une consultation d’avocat.
+      </p>
+    </section>
+
+    <footer class="footer">
+      <span>© 2026 Axe Flow — Support utilisateur</span>
+
+      <nav class="footer-links">
+        <a href="cgv.html">CGV</a>
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="confidentialite.html">Confidentialité</a>
+      </nav>
+    </footer>
+
+  </div>
+</main>
+
+</body>
+</html>
