@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Politique de confidentialité — Axe Flow</title>
+  <meta name="description" content="Politique de confidentialité Axe Flow : données collectées, finalités, conservation, prestataires, droits RGPD et contact." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;--bg2:#0b3145;--text:#f4f7fb;--muted:rgba(244,247,251,.76);
+      --soft:rgba(244,247,251,.58);--line:rgba(255,255,255,.10);--card:rgba(255,255,255,.055);
+      --accent:#ff7f1f;--accent2:#ff9b4a;--shadow:0 24px 80px rgba(0,0,0,.28);--max:1040px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);
+      background:radial-gradient(circle at top left,rgba(61,208,143,.08),transparent 30%),
+      radial-gradient(circle at top right,rgba(255,127,31,.08),transparent 26%),
+      linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+      line-height:1.65;
+    }
+    a{color:inherit;text-decoration:none}
+    .container{width:min(var(--max),calc(100% - 32px));margin:0 auto}
+    .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(6,20,29,.68);border-bottom:1px solid var(--line)}
+    .topbar-inner{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-logo{width:54px;height:54px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);background:rgba(255,255,255,.04);flex:0 0 auto}
+    .brand-title{display:block;font-weight:900;letter-spacing:.01em}
+    .brand-sub{display:block;color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .topnav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .nav-link{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;color:var(--muted);border:1px solid transparent;font-size:.92rem;font-weight:700}
+    .nav-link:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);color:#fff}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 17px;border-radius:999px;border:1px solid transparent;font-weight:800;font-size:.92rem;text-align:center;line-height:1.2}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 18px 40px rgba(255,127,31,.22)}
+    .page{padding:38px 0 48px}
+    .hero{padding:30px;border-radius:30px;background:radial-gradient(circle at top left,rgba(255,127,31,.14),transparent 25%),linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);margin-bottom:20px}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;min-height:38px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted);font-weight:800;font-size:.86rem;margin-bottom:14px}
+    .eyebrow::before{content:"";width:9px;height:9px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 6px rgba(255,127,31,.12)}
+    h1{margin:0 0 12px;font-size:clamp(2.1rem,4vw,3.3rem);line-height:1.04;letter-spacing:-.045em}
+    .lead{margin:0;color:var(--muted);max-width:78ch;font-size:1rem}
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
+    .toc,.legal-card{border-radius:26px;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow)}
+    .toc{position:sticky;top:98px;padding:18px}
+    .toc strong{display:block;margin-bottom:10px;font-size:.95rem}
+    .toc a{display:block;padding:9px 10px;border-radius:13px;color:var(--muted);font-size:.9rem;font-weight:650}
+    .toc a:hover{background:rgba(255,255,255,.06);color:#fff}
+    .legal-card{padding:28px}
+    .legal-card h2{margin:30px 0 10px;font-size:1.25rem;line-height:1.25;letter-spacing:-.02em}
+    .legal-card h2:first-child{margin-top:0}
+    .legal-card p{margin:0 0 12px;color:var(--muted)}
+    .legal-card ul{margin:8px 0 16px;padding-left:20px;color:var(--muted)}
+    .legal-card li{margin:6px 0}
+    .legal-card strong{color:#fff}
+    .legal-card a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+    .notice{padding:16px 18px;border-radius:18px;background:rgba(255,127,31,.10);border:1px solid rgba(255,127,31,.22);color:#ffe5cc;margin:18px 0}
+    .soft-box{padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);margin:16px 0}
+    .data-table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid rgba(255,255,255,.10);margin:14px 0 18px}
+    .data-table th,.data-table td{padding:14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);color:var(--muted);vertical-align:top}
+    .data-table th{color:#fff;background:rgba(255,255,255,.06);font-size:.92rem}
+    .data-table tr:last-child td{border-bottom:none}
+    .footer{margin-top:28px;padding:24px 0;border-top:1px solid rgba(255,255,255,.08);color:var(--soft);font-size:.88rem}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+    .footer-links{display:flex;gap:12px;flex-wrap:wrap}
+    .footer-links a{color:var(--muted)}
+    .footer-links a:hover{color:#fff}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.toc{position:relative;top:auto}.topbar-inner{flex-direction:column;align-items:flex-start;padding:14px 0}.topnav{width:100%}}
+    @media(max-width:560px){.container{width:min(var(--max),calc(100% - 20px))}.hero,.legal-card{padding:20px 18px}.btn,.nav-link{width:100%}.data-table{font-size:.9rem}.data-table th,.data-table td{padding:11px}}
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div>
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Politique de confidentialité</span>
+        </div>
+      </a>
+
+      <nav class="topnav" aria-label="Navigation principale">
+        <a class="nav-link" href="index.html">Accueil</a>
+        <a class="nav-link" href="connexion.html">Connexion</a>
+        <a class="btn btn-primary" href="support.html">Support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">Données personnelles</div>
+        <h1>Politique de confidentialité</h1>
+        <p class="lead">
+          Cette politique explique comment Axe Flow collecte, utilise, conserve et protège les données personnelles nécessaires au fonctionnement du service.
+        </p>
+      </section>
+
+      <section class="layout">
+        <aside class="toc" aria-label="Sommaire">
+          <strong>Sommaire</strong>
+          <a href="#responsable">1. Responsable</a>
+          <a href="#donnees">2. Données collectées</a>
+          <a href="#finalites">3. Finalités</a>
+          <a href="#base-legale">4. Base légale</a>
+          <a href="#prestataires">5. Prestataires</a>
+          <a href="#conservation">6. Conservation</a>
+          <a href="#droits">7. Droits utilisateur</a>
+          <a href="#securite">8. Sécurité</a>
+          <a href="#cookies">9. Cookies</a>
+          <a href="#contact">10. Contact</a>
+        </aside>
+
+        <article class="legal-card">
+          <h2 id="responsable">1. Responsable du traitement</h2>
+          <p>
+            Le responsable du traitement des données est <strong>Sophie Dumas</strong>, entreprise individuelle, éditrice du service Axe Flow.
+          </p>
+          <p>
+            Adresse professionnelle : <strong>24 hameau de Danis — 09700 Saverdun</strong><br>
+            Contact : <a href="mailto:contact@axe-dossier.fr">contact@axe-dossier.fr</a>
+          </p>
+
+          <h2 id="donnees">2. Données collectées</h2>
+          <p>
+            Axe Flow collecte uniquement les données nécessaires au fonctionnement du service, à la gestion des comptes, au paiement, au suivi des dossiers et au support.
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Catégorie</th>
+                <th>Données concernées</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Compte utilisateur</strong></td>
+                <td>Email, identifiant utilisateur, statut du compte, droits d’accès, historique de création du compte.</td>
+              </tr>
+              <tr>
+                <td><strong>Dossiers d’impayés</strong></td>
+                <td>Nom du créancier, coordonnées, nom du débiteur, coordonnées, montant réclamé, facture, dates, commentaires, étapes du dossier.</td>
+              </tr>
+              <tr>
+                <td><strong>Documents et pièces</strong></td>
+                <td>Pièces justificatives éventuellement déposées par l’utilisateur, fichiers associés au dossier, métadonnées techniques.</td>
+              </tr>
+              <tr>
+                <td><strong>Paiement</strong></td>
+                <td>Statut du paiement, offre choisie, identifiant Stripe, montant, date. Les coordonnées bancaires complètes ne sont pas conservées par Axe Flow.</td>
+              </tr>
+              <tr>
+                <td><strong>Support</strong></td>
+                <td>Messages transmis par email, demandes d’assistance, informations nécessaires au traitement d’un incident.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="finalites">3. Finalités du traitement</h2>
+          <p>Les données sont utilisées pour :</p>
+          <ul>
+            <li>créer et gérer le compte utilisateur ;</li>
+            <li>permettre l’accès au tableau de bord Axe Flow ;</li>
+            <li>créer, suivre et organiser les dossiers d’impayés ;</li>
+            <li>générer les relances, mises en demeure et documents associés ;</li>
+            <li>gérer les paiements, crédits dossiers et abonnements ;</li>
+            <li>assurer le support utilisateur ;</li>
+            <li>sécuriser le service et corriger les anomalies techniques ;</li>
+            <li>respecter les obligations légales, comptables et fiscales applicables.</li>
+          </ul>
+
+          <h2 id="base-legale">4. Base légale</h2>
+          <p>
+            Les traitements reposent principalement sur l’exécution du contrat conclu avec l’utilisateur, l’intérêt légitime d’Axe Flow à assurer le bon fonctionnement et la sécurité du service, ainsi que le respect des obligations légales, comptables et fiscales.
+          </p>
+
+          <h2 id="prestataires">5. Prestataires et sous-traitants</h2>
+          <p>
+            Pour fonctionner, Axe Flow utilise certains prestataires techniques :
+          </p>
+          <ul>
+            <li><strong>Firebase / Google Cloud</strong> : hébergement, authentification, base de données, stockage et fonctions cloud ;</li>
+            <li><strong>Stripe</strong> : paiement sécurisé, gestion des paiements et abonnements ;</li>
+            <li><strong>OVHcloud</strong> : gestion du nom de domaine / DNS selon configuration du site.</li>
+          </ul>
+          <p>
+            Ces prestataires peuvent traiter certaines données pour le compte d’Axe Flow, dans la limite nécessaire à leurs services.
+          </p>
+
+          <h2 id="conservation">6. Durée de conservation</h2>
+          <p>
+            Les données sont conservées pendant la durée nécessaire à l’utilisation du service, au suivi des dossiers, au support et au respect des obligations légales.
+          </p>
+          <p>
+            Les données liées aux paiements et à la facturation peuvent être conservées pendant la durée légale applicable aux obligations comptables et fiscales.
+          </p>
+          <p>
+            Les données de dossier peuvent être supprimées à la demande de l’utilisateur, sous réserve des obligations légales ou de la nécessité de conserver certains éléments en cas de litige.
+          </p>
+
+          <h2 id="droits">7. Droits de l’utilisateur</h2>
+          <p>
+            Conformément à la réglementation applicable, l’utilisateur peut demander :
+          </p>
+          <ul>
+            <li>l’accès à ses données personnelles ;</li>
+            <li>la rectification de données inexactes ;</li>
+            <li>la suppression de certaines données ;</li>
+            <li>la limitation d’un traitement ;</li>
+            <li>l’opposition à certains traitements ;</li>
+            <li>la portabilité des données lorsque cela est applicable.</li>
+          </ul>
+          <p>
+            Toute demande peut être envoyée à : <a href="mailto:contact@axe-dossier.fr">contact@axe-dossier.fr</a>.
+          </p>
+
+          <div class="notice">
+            <strong>Important :</strong> une demande de suppression peut entraîner l’impossibilité d’accéder à certains dossiers, documents ou historiques du service.
+          </div>
+
+          <h2 id="securite">8. Sécurité</h2>
+          <p>
+            Axe Flow met en œuvre des mesures raisonnables pour protéger les données : authentification utilisateur, règles d’accès Firestore, hébergement sécurisé, limitation des accès et séparation des données par utilisateur.
+          </p>
+          <p>
+            Aucun système informatique ne pouvant être garanti comme totalement invulnérable, l’utilisateur doit également protéger ses identifiants et éviter de partager son accès à des tiers.
+          </p>
+
+          <h2 id="cookies">9. Cookies et traceurs</h2>
+          <p>
+            Axe Flow peut utiliser des cookies ou technologies similaires strictement nécessaires au fonctionnement du service, notamment pour l’authentification, la sécurité et la session utilisateur.
+          </p>
+          <p>
+            Si des outils de mesure d’audience ou de suivi marketing sont ajoutés ultérieurement, la présente politique pourra être mise à jour et, si nécessaire, un bandeau de consentement sera mis en place.
+          </p>
+
+          <h2 id="reclamation">10. Réclamation</h2>
+          <p>
+            En cas de difficulté concernant le traitement de ses données, l’utilisateur peut contacter Axe Flow à l’adresse indiquée ci-dessous.
+          </p>
+          <p>
+            L’utilisateur peut également saisir la CNIL si nécessaire.
+          </p>
+
+          <h2 id="contact">11. Contact</h2>
+          <p>
+            Pour toute question relative aux données personnelles :
+            <a href="mailto:contact@axe-dossier.fr">contact@axe-dossier.fr</a>.
+          </p>
+
+          <div class="soft-box">
+            <p><strong>Dernière mise à jour :</strong> 10 mai 2026</p>
+            <p><strong>Service concerné :</strong> Axe Flow — https://flow.axe-dossier.fr</p>
+          </div>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-inner">
+          <span>© 2026 Axe Flow — Tous droits réservés.</span>
+          <nav class="footer-links" aria-label="Liens légaux">
+            <a href="mentions-legales.html">Mentions légales</a>
+            <a href="confidentialite.html">Confidentialité</a>
+            <a href="cgv.html">CGV</a>
+            <a href="support.html">Support</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>
