@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Mise en demeure facture impayée : quand et comment l’envoyer ? | Axe Flow</title>
+<meta name="description" content="Quand envoyer une mise en demeure pour facture impayée ? LRAR, délai, erreurs à éviter, suite après absence de paiement. Guide simple et concret." />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://flow.axe-dossier.fr/mise-en-demeure-impaye.html" />
+
+<meta property="og:title" content="Mise en demeure facture impayée : quand et comment l’envoyer ?" />
+<meta property="og:description" content="Guide clair : quand envoyer une mise en demeure, quoi écrire, délai à laisser et quoi faire si le débiteur ne paie toujours pas." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://flow.axe-dossier.fr/mise-en-demeure-impaye.html" />
+<meta property="og:image" content="https://flow.axe-dossier.fr/images/axe-flow-cover.png" />
+
+<link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--bg:#071e2b;--bg2:#0b3145;--text:#f4f7fb;
+--muted:rgba(244,247,251,.76);
+--soft:rgba(244,247,251,.58);
+--line:rgba(255,255,255,.10);
+--accent:#ff7f1f;
+--accent2:#ff9b4a;
+--card:rgba(255,255,255,.05);
+--shadow:0 24px 80px rgba(0,0,0,.28);
+--max:1120px;
+}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Inter,sans-serif;
+color:var(--text);
+background:
+radial-gradient(circle at top left,rgba(61,208,143,.08),transparent 30%),
+radial-gradient(circle at top right,rgba(255,127,31,.08),transparent 28%),
+linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+line-height:1.65;
+}
+a{text-decoration:none;color:inherit}
+.container{width:min(var(--max),calc(100% - 32px));margin:auto}
+.topbar{
+position:sticky;top:0;z-index:50;
+background:rgba(6,20,29,.68);
+backdrop-filter:blur(14px);
+border-bottom:1px solid rgba(255,255,255,.08)
+}
+.topbar-inner{
+display:flex;justify-content:space-between;
+align-items:center;min-height:76px;gap:20px
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{
+width:54px;height:54px;border-radius:16px;
+border:1px solid rgba(255,255,255,.12)
+}
+.brand-title{font-weight:900}
+.brand-sub{display:block;color:var(--soft);font-size:.85rem}
+
+.nav{display:flex;gap:12px;flex-wrap:wrap}
+.nav-link{color:var(--muted);font-weight:700}
+.nav-link:hover{color:#fff}
+
+.btn{
+display:inline-flex;align-items:center;justify-content:center;
+min-height:50px;padding:0 22px;border-radius:999px;
+font-weight:800;transition:.2s;
+}
+.btn-primary{
+background:linear-gradient(135deg,var(--accent),var(--accent2));
+color:#fff;
+}
+.btn-secondary{
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.12);
+color:#fff;
+}
+
+.hero,.card{
+background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
+border:1px solid rgba(255,255,255,.10);
+border-radius:28px;
+box-shadow:var(--shadow)
+}
+
+.hero{
+padding:34px;margin:42px 0 22px
+}
+
+.eyebrow{
+display:inline-flex;
+padding:10px 14px;
+border-radius:999px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.10);
+font-size:.86rem;
+font-weight:800;
+margin-bottom:18px
+}
+
+h1{
+font-size:clamp(2.3rem,5vw,4rem);
+line-height:1.02;
+letter-spacing:-.05em;
+margin:0 0 16px;
+max-width:13ch
+}
+
+.lead{
+font-size:1.05rem;
+color:var(--muted);
+max-width:70ch
+}
+
+.content{
+padding:30px
+}
+
+.content h2{
+font-size:clamp(1.5rem,3vw,2.1rem);
+margin-top:38px;
+margin-bottom:12px
+}
+
+.content p,.content li{
+color:var(--muted)
+}
+
+.box{
+padding:18px;
+border-radius:18px;
+margin:18px 0;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.09)
+}
+
+.warning{
+background:rgba(255,127,31,.11)
+}
+
+.danger{
+background:rgba(255,107,107,.11)
+}
+
+.timeline{
+display:grid;
+gap:12px;
+margin-top:18px
+}
+
+.step{
+display:grid;
+grid-template-columns:50px 1fr;
+gap:14px;
+padding:18px;
+border-radius:18px;
+background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.08)
+}
+
+.num{
+width:42px;height:42px;
+display:grid;place-items:center;
+border-radius:14px;
+background:rgba(255,127,31,.14);
+font-weight:900
+}
+
+.footer{
+padding:30px 0
+}
+
+.footer-inner{
+display:flex;
+justify-content:space-between;
+flex-wrap:wrap;
+gap:12px;
+padding-top:20px;
+border-top:1px solid rgba(255,255,255,.08);
+color:var(--soft)
+}
+
+.links{display:flex;gap:16px;flex-wrap:wrap}
+
+@media(max-width:760px){
+.topbar-inner{flex-direction:column;align-items:flex-start;padding:14px 0}
+.hero,.content{padding:22px}
+h1{max-width:none}
+}
+</style>
+
+<script type="application/ld+json">
+{
+"@context":"https://schema.org",
+"@type":"FAQPage",
+"mainEntity":[
+{
+"@type":"Question",
+"name":"Quand envoyer une mise en demeure ?",
+"acceptedAnswer":{
+"@type":"Answer",
+"text":"Après une ou plusieurs relances restées sans effet. La mise en demeure formalise la demande de paiement."
+}
+},
+{
+"@type":"Question",
+"name":"Faut-il envoyer une mise en demeure en LRAR ?",
+"acceptedAnswer":{
+"@type":"Answer",
+"text":"La lettre recommandée avec accusé de réception est fortement recommandée car elle constitue une preuve d’envoi."
+}
+}
+]
+}
+</script>
+
+</head>
+<body>
+
+<header class="topbar">
+<div class="container topbar-inner">
+<a href="index.html" class="brand">
+<img src="images/axe-flow-cover.png" alt="Axe Flow">
+<div>
+<div class="brand-title">Axe Flow</div>
+<span class="brand-sub">Mise en demeure impayé</span>
+</div>
+</a>
+
+<nav class="nav">
+<a class="nav-link" href="index.html">Accueil</a>
+<a class="nav-link" href="facture-impayee.html">Facture impayée</a>
+<a class="nav-link" href="client-ne-paie-pas.html">Client ne paie pas</a>
+<a class="btn btn-secondary" href="connexion.html">Connexion</a>
+</nav>
+</div>
+</header>
+
+<main class="container">
+
+<section class="hero">
+<div class="eyebrow">Facture impayée</div>
+
+<h1>Mise en demeure pour facture impayée : quand et comment l’envoyer ?</h1>
+
+<p class="lead">
+Quand les relances ne suffisent plus, la mise en demeure devient une étape logique. Elle formalise votre demande de paiement, fixe un délai clair au débiteur et prépare la suite si la situation reste bloquée.
+</p>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+<a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+<a class="btn btn-secondary" href="#guide">Voir les étapes</a>
+</div>
+
+<div class="box warning">
+<strong>À retenir :</strong> une mise en demeure n’est pas une menace vide. C’est un courrier structuré qui montre que le dossier avance et que vous formalisez votre demande.
+</div>
+</section>
+
+<section class="card content">
+
+<h2 id="guide">Quand faut-il envoyer une mise en demeure ?</h2>
+
+<p>
+La mise en demeure intervient généralement <strong>après une ou plusieurs relances restées sans effet</strong>. Si votre client promet de payer mais ne règle jamais, ou ne répond plus, il devient utile de formaliser les choses.
+</p>
+
+<div class="timeline">
+
+<div class="step">
+<div class="num">1</div>
+<div>
+<strong>Relance simple</strong>
+<p>Premier rappel courtois avec montant, facture et date d’échéance.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="num">2</div>
+<div>
+<strong>Relance ferme</strong>
+<p>Le ton devient plus direct, avec demande claire de régularisation.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="num">3</div>
+<div>
+<strong>Mise en demeure</strong>
+<p>Courrier formalisé avec délai précis avant éventuelle procédure.</p>
+</div>
+</div>
+
+</div>
+
+<h2>Que doit contenir une mise en demeure ?</h2>
+
+<ul>
+<li>Vos coordonnées et celles du débiteur</li>
+<li>La référence de la facture</li>
+<li>Le montant exact dû</li>
+<li>La date d’échéance dépassée</li>
+<li>Un délai clair pour payer</li>
+<li>Les suites envisagées en cas d’absence de règlement</li>
+</ul>
+
+<div class="box">
+<strong>Conseil simple :</strong> restez factuel. Une bonne mise en demeure est claire, datée et précise. Trop d’émotion ou de menace inutile affaiblit le message.
+</div>
+
+<h2>Mail ou lettre recommandée ?</h2>
+
+<p>
+Un email peut aider à documenter les échanges, mais pour une mise en demeure, <strong>la lettre recommandée avec accusé de réception (LRAR)</strong> est fortement recommandée.
+</p>
+
+<div class="box warning">
+La LRAR crée une preuve d’envoi utile si le dossier évolue ensuite vers une injonction de payer.
+</div>
+
+<h2>Quel délai laisser au débiteur ?</h2>
+
+<p>
+Il n’existe pas de délai universel, mais beaucoup de créanciers laissent quelques jours à quelques semaines selon le contexte. Le plus important est d’être cohérent et explicite.
+</p>
+
+<h2>Que faire si le débiteur ne paie toujours pas ?</h2>
+
+<p>
+Si la mise en demeure reste sans effet, vous pouvez préparer un dossier plus structuré : pièces justificatives, historique des relances, facture et éventuellement <strong>une injonction de payer</strong>.
+</p>
+
+<div class="box danger">
+<strong>Erreur fréquente :</strong> envoyer une mise en demeure puis attendre des mois sans agir. La force d’un dossier vient aussi de la continuité.
+</div>
+
+<h2>Pourquoi utiliser Axe Flow ?</h2>
+
+<p>
+Axe Flow aide à structurer l’impayé : relances, historique, mise en demeure et préparation du dossier d’injonction. Le but est d’éviter les oublis et les démarches improvisées.
+</p>
+
+<div class="box">
+<h3 style="margin-top:0">Votre facture reste impayée ?</h3>
+<p>Créez un dossier structuré, gardez vos preuves et avancez étape par étape.</p>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+<a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+<a class="btn btn-secondary" href="client-ne-paie-pas.html">Lire : client ne paie pas</a>
+</div>
+</div>
+
+</section>
+
+</main>
+
+<footer class="footer">
+<div class="container footer-inner">
+<div>© Axe Flow</div>
+
+<div class="links">
+<a href="cgv.html">CGV</a>
+<a href="mentions-legales.html">Mentions légales</a>
+<a href="confidentialite.html">Confidentialité</a>
+<a href="support.html">Support</a>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
