@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Injonction de payer : procédure, étapes et dossier à préparer — Axe Flow</title>
+  <meta name="description" content="Injonction de payer : quand l’utiliser, quelles pièces préparer, quel tribunal saisir, signification, opposition et certificat de non-opposition." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Injonction de payer : procédure, étapes et dossier à préparer" />
+  <meta property="og:description" content="Guide clair pour comprendre l’injonction de payer : conditions, pièces, tribunal compétent, ordonnance, signification et certificat de non-opposition." />
+  <meta property="og:url" content="https://flow.axe-dossier.fr/injonction-de-payer.html" />
+  <meta property="og:site_name" content="Axe Flow" />
+  <meta property="og:image" content="https://flow.axe-dossier.fr/images/axe-flow-cover.png" />
+
+  <link rel="canonical" href="https://flow.axe-dossier.fr/injonction-de-payer.html" />
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg2:#0b3145;
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,.76);
+      --soft:rgba(244,247,251,.58);
+      --line:rgba(255,255,255,.10);
+      --card:rgba(255,255,255,.055);
+      --accent:#ff7f1f;
+      --accent2:#ff9b4a;
+      --success:#3dd08f;
+      --danger:#ff6b6b;
+      --warning:#ffb347;
+      --shadow:0 24px 80px rgba(0,0,0,.28);
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left,rgba(61,208,143,.08),transparent 30%),
+        radial-gradient(circle at top right,rgba(255,127,31,.08),transparent 28%),
+        linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+      line-height:1.65;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .container{width:min(var(--max),calc(100% - 32px));margin:0 auto}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,.68);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .topbar-inner{
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,.04);
+      flex:0 0 auto;
+    }
+
+    .brand-title{display:block;font-weight:900}
+    .brand-sub{display:block;color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+    .nav-link{color:var(--muted);font-weight:700;font-size:.93rem}
+    .nav-link:hover{color:#fff}
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:48px;
+      padding:0 20px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:850;
+      font-size:.95rem;
+      transition:.22s ease;
+      cursor:pointer;
+      white-space:nowrap;
+      text-align:center;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,.22);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border-color:rgba(255,255,255,.14);
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+
+    .page{padding:40px 0 52px}
+
+    .hero{
+      padding:34px;
+      border-radius:32px;
+      background:
+        radial-gradient(circle at top left,rgba(255,127,31,.16),transparent 27%),
+        radial-gradient(circle at bottom right,rgba(61,208,143,.12),transparent 28%),
+        linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.045));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:850;
+      font-size:.86rem;
+      margin-bottom:16px;
+    }
+
+    .eyebrow::before{
+      content:"";
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,.12);
+    }
+
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(2.25rem,4.6vw,4rem);
+      line-height:1.03;
+      letter-spacing:-.05em;
+      max-width:15ch;
+    }
+
+    .lead{
+      margin:0 0 22px;
+      color:var(--muted);
+      font-size:1.06rem;
+      max-width:78ch;
+    }
+
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+
+    .note{
+      margin-top:18px;
+      padding:15px 17px;
+      border-radius:18px;
+      background:rgba(255,127,31,.10);
+      border:1px solid rgba(255,127,31,.20);
+      color:#fff2e8;
+      font-size:.94rem;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .toc,.content,.cta-card{
+      border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.09);
+      box-shadow:var(--shadow);
+    }
+
+    .toc{
+      position:sticky;
+      top:96px;
+      padding:18px;
+    }
+
+    .toc strong{display:block;margin-bottom:10px}
+    .toc a{
+      display:block;
+      padding:9px 10px;
+      border-radius:13px;
+      color:var(--muted);
+      font-size:.9rem;
+      font-weight:700;
+    }
+    .toc a:hover{background:rgba(255,255,255,.06);color:#fff}
+
+    .content{
+      padding:30px;
+    }
+
+    .content h2{
+      margin:34px 0 12px;
+      font-size:clamp(1.45rem,2.5vw,2.1rem);
+      line-height:1.16;
+      letter-spacing:-.035em;
+    }
+
+    .content h2:first-child{margin-top:0}
+    .content h3{margin:22px 0 8px;font-size:1.1rem}
+    .content p{margin:0 0 14px;color:var(--muted)}
+    .content strong{color:#fff}
+    .content ul,.content ol{margin:8px 0 18px;padding-left:22px;color:var(--muted)}
+    .content li{margin:7px 0}
+    .content a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+
+    .steps{
+      display:grid;
+      gap:12px;
+      margin:18px 0;
+    }
+
+    .step{
+      display:grid;
+      grid-template-columns:46px 1fr;
+      gap:14px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+    }
+
+    .step-num{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,127,31,.14);
+      border:1px solid rgba(255,127,31,.24);
+      color:var(--accent2);
+      font-weight:900;
+    }
+
+    .step strong{display:block;margin-bottom:4px}
+    .step span{display:block;color:var(--muted);font-size:.94rem}
+
+    .warning-box,.success-box,.soft-box,.danger-box{
+      padding:17px 18px;
+      border-radius:18px;
+      margin:18px 0;
+    }
+
+    .warning-box{
+      background:rgba(255,179,71,.12);
+      border:1px solid rgba(255,179,71,.24);
+      color:#ffe7c2;
+    }
+
+    .danger-box{
+      background:rgba(255,107,107,.11);
+      border:1px solid rgba(255,107,107,.23);
+      color:#ffdede;
+    }
+
+    .success-box{
+      background:rgba(61,208,143,.11);
+      border:1px solid rgba(61,208,143,.22);
+      color:#dcffef;
+    }
+
+    .soft-box{
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+      color:var(--muted);
+    }
+
+    .two-cols{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin:18px 0;
+    }
+
+    .mini-card{
+      padding:17px;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+    }
+
+    .mini-card strong{display:block;margin-bottom:6px}
+    .mini-card p{margin:0;font-size:.94rem}
+
+    .faq{
+      display:grid;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    details{
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+      overflow:hidden;
+    }
+
+    summary{
+      cursor:pointer;
+      padding:16px 18px;
+      font-weight:850;
+      color:#fff;
+    }
+
+    details p{
+      padding:0 18px 16px;
+      margin:0;
+    }
+
+    .cta-card{
+      margin-top:20px;
+      padding:24px;
+      background:
+        radial-gradient(circle at top left,rgba(255,127,31,.16),transparent 28%),
+        linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
+    }
+
+    .cta-card h2{margin:0 0 10px}
+    .cta-card p{margin:0 0 18px;color:var(--muted)}
+
+    .internal-links{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .internal-link{
+      padding:15px;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+      color:var(--muted);
+      font-weight:750;
+    }
+
+    .internal-link:hover{background:rgba(255,255,255,.075);color:#fff}
+
+    footer{padding:28px 0 38px}
+
+    .footer-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+      color:var(--soft);
+      font-size:.9rem;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top:22px;
+    }
+
+    .footer-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .footer-links a{color:var(--muted)}
+    .footer-links a:hover{color:#fff}
+
+    @media(max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .toc{position:relative;top:auto}
+      .internal-links,.two-cols{grid-template-columns:1fr}
+    }
+
+    @media(max-width:760px){
+      .topbar-inner{flex-direction:column;align-items:flex-start;padding:14px 0}
+      .nav{justify-content:flex-start}
+      h1{max-width:none}
+      .hero,.content{padding:22px 18px}
+    }
+
+    @media(max-width:560px){
+      .container{width:min(var(--max),calc(100% - 20px))}
+      .hero-actions{flex-direction:column}
+      .btn{width:100%}
+      .step{grid-template-columns:1fr}
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"Quand utiliser une injonction de payer ?",
+        "acceptedAnswer":{"@type":"Answer","text":"L’injonction de payer est adaptée lorsque la créance est certaine, liquide et exigible, avec des pièces suffisantes pour justifier la dette."}
+      },
+      {
+        "@type":"Question",
+        "name":"Faut-il un avocat pour une injonction de payer ?",
+        "acceptedAnswer":{"@type":"Answer","text":"Pas toujours. Pour une créance claire et non sérieusement contestée, la procédure peut être préparée sans avocat. En cas de contestation ou de dossier complexe, un avis juridique est conseillé."}
+      },
+      {
+        "@type":"Question",
+        "name":"Que faire après une ordonnance d’injonction de payer ?",
+        "acceptedAnswer":{"@type":"Answer","text":"L’ordonnance doit être signifiée par commissaire de justice. Le débiteur dispose ensuite d’un délai d’opposition. Si aucune opposition n’est formée, il faut demander le certificat de non-opposition."}
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div>
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Injonction de payer</span>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <a class="nav-link" href="index.html">Accueil</a>
+        <a class="nav-link" href="facture-impayee.html">Facture impayée</a>
+        <a class="nav-link" href="mise-en-demeure-impaye.html">Mise en demeure</a>
+        <a class="nav-link" href="support.html">Support</a>
+        <a class="btn btn-secondary" href="connexion.html">Connexion</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">Procédure impayé</div>
+        <h1>Injonction de payer : procédure, étapes et dossier à préparer</h1>
+        <p class="lead">
+          L’injonction de payer peut permettre de réclamer une facture impayée sans audience immédiate, à condition d’avoir un dossier clair. Facture, contrat, relances, mise en demeure, bordereau des pièces : c’est la qualité du dossier qui fait la différence.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+          <a class="btn btn-secondary" href="#conditions">Voir les conditions</a>
+        </div>
+        <div class="note">
+          <strong>Important :</strong> l’injonction de payer n’est pas magique. Si la dette est sérieusement contestée, mal prouvée ou juridiquement fragile, une autre procédure peut être plus adaptée.
+        </div>
+      </section>
+
+      <section class="layout">
+        <aside class="toc" aria-label="Sommaire">
+          <strong>Sommaire</strong>
+          <a href="#definition">1. Définition</a>
+          <a href="#conditions">2. Conditions</a>
+          <a href="#pieces">3. Pièces utiles</a>
+          <a href="#tribunal">4. Tribunal compétent</a>
+          <a href="#procedure">5. Étapes</a>
+          <a href="#apres">6. Après ordonnance</a>
+          <a href="#faq">7. FAQ</a>
+        </aside>
+
+        <article class="content">
+          <h2 id="definition">1. Qu’est-ce qu’une injonction de payer ?</h2>
+          <p>
+            L’injonction de payer est une procédure destinée à obtenir une décision obligeant le débiteur à régler une somme due. Elle est souvent utilisée pour des <strong>factures impayées</strong>, lorsque la créance est suffisamment claire et justifiée.
+          </p>
+          <p>
+            Elle peut être intéressante parce qu’elle permet de présenter un dossier écrit au tribunal, sans nécessairement engager tout de suite une procédure contradictoire classique.
+          </p>
+
+          <div class="soft-box">
+            <strong>En clair :</strong> vous demandez au juge de reconnaître que le débiteur doit payer, sur la base des pièces que vous fournissez.
+          </div>
+
+          <h2 id="conditions">2. Quand l’injonction de payer est-elle adaptée ?</h2>
+          <p>
+            Pour que l’injonction de payer soit pertinente, la créance doit être généralement :
+          </p>
+
+          <ul>
+            <li><strong>Certaine :</strong> la dette existe et repose sur un élément identifiable.</li>
+            <li><strong>Liquide :</strong> le montant est déterminé ou facilement calculable.</li>
+            <li><strong>Exigible :</strong> la date de paiement est dépassée.</li>
+            <li><strong>Justifiée :</strong> vous avez des pièces cohérentes pour démontrer la créance.</li>
+          </ul>
+
+          <div class="danger-box">
+            <strong>À éviter :</strong> utiliser l’injonction si le client conteste sérieusement la prestation, le montant, la livraison ou l’existence de la dette. Dans ce cas, le dossier peut basculer vers une voie plus contradictoire.
+          </div>
+
+          <h2 id="pieces">3. Les pièces à préparer pour une injonction de payer</h2>
+          <p>
+            Le tribunal ne se contente pas d’une affirmation. Il faut produire un dossier propre, lisible, avec des pièces numérotées.
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">01</div>
+              <div>
+                <strong>Facture impayée</strong>
+                <span>La facture doit être identifiable : numéro, date, montant, débiteur, échéance.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">02</div>
+              <div>
+                <strong>Devis, contrat ou bon de commande</strong>
+                <span>Tout document qui établit l’accord entre les parties.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">03</div>
+              <div>
+                <strong>Preuve d’exécution</strong>
+                <span>Livraison, prestation réalisée, échanges, validation client, comptes rendus.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">04</div>
+              <div>
+                <strong>Relances et mise en demeure</strong>
+                <span>Historique des démarches amiables et preuve d’envoi de la mise en demeure.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">05</div>
+              <div>
+                <strong>Bordereau des pièces</strong>
+                <span>Liste structurée des documents joints au dossier.</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 id="tribunal">4. Quel tribunal pour une injonction de payer ?</h2>
+          <p>
+            Le tribunal dépend notamment de la qualité du débiteur.
+          </p>
+
+          <div class="two-cols">
+            <div class="mini-card">
+              <strong>Débiteur professionnel / société</strong>
+              <p>Le tribunal de commerce est souvent concerné. La recherche peut se faire via Infogreffe en partant du nom de l’entreprise.</p>
+            </div>
+
+            <div class="mini-card">
+              <strong>Débiteur particulier</strong>
+              <p>Le tribunal judiciaire peut être compétent selon le domicile du débiteur et la nature du dossier.</p>
+            </div>
+          </div>
+
+          <div class="warning-box">
+            <strong>Point pratique :</strong> si vous saisissez le mauvais tribunal ou si le dossier est incomplet, vous perdez du temps. L’intérêt d’un tableau de bord est justement de ne pas improviser.
+          </div>
+
+          <h2 id="procedure">5. Les grandes étapes de la procédure</h2>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div>
+                <strong>Préparer le dossier</strong>
+                <span>Rassembler facture, contrat, preuves, relances, mise en demeure et bordereau.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">2</div>
+              <div>
+                <strong>Remplir la requête</strong>
+                <span>Utiliser le formulaire adapté, renseigner les parties, le montant et le fondement de la demande.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">3</div>
+              <div>
+                <strong>Envoyer ou déposer le dossier</strong>
+                <span>Transmettre le dossier complet au tribunal compétent, avec toutes les pièces utiles.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">4</div>
+              <div>
+                <strong>Attendre la décision</strong>
+                <span>Le juge peut accepter, rejeter totalement ou partiellement la demande.</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 id="apres">6. Que faire après l’ordonnance ?</h2>
+          <p>
+            Si le juge rend une ordonnance d’injonction de payer, il ne suffit pas de la garder dans un dossier. Il faut ensuite la <strong>faire signifier au débiteur par commissaire de justice</strong>.
+          </p>
+          <p>
+            Après signification, le débiteur dispose d’un délai pour former opposition. Si aucune opposition n’est formée, il faut demander un <strong>certificat de non-opposition</strong> auprès du greffe compétent.
+          </p>
+
+          <div class="success-box">
+            <strong>Suite logique :</strong> ordonnance signifiée + absence d’opposition + certificat = dossier prêt pour l’exécution forcée par commissaire de justice si le débiteur ne paie toujours pas.
+          </div>
+
+          <h2>7. Pourquoi utiliser Axe Flow pour préparer l’injonction ?</h2>
+          <p>
+            Axe Flow permet de structurer le dossier avant d’arriver au tribunal : relances, mise en demeure, pièces, bordereau, vérification du type de débiteur et étapes après ordonnance.
+          </p>
+          <p>
+            L’objectif n’est pas de remplacer un professionnel du droit dans les dossiers complexes. L’objectif est d’éviter le dossier brouillon : pièces dispersées, relances non datées, mauvais tribunal, oubli de la signification ou du certificat de non-opposition.
+          </p>
+
+          <h2 id="faq">8. FAQ — injonction de payer</h2>
+
+          <div class="faq">
+            <details>
+              <summary>Quand utiliser une injonction de payer ?</summary>
+              <p>Quand la créance est claire, chiffrée, échue et suffisamment prouvée. C’est souvent le cas d’une facture impayée bien documentée.</p>
+            </details>
+
+            <details>
+              <summary>Faut-il envoyer une mise en demeure avant ?</summary>
+              <p>Elle est fortement recommandée. Elle montre que vous avez tenté une résolution amiable et elle constitue une pièce utile du dossier.</p>
+            </details>
+
+            <details>
+              <summary>Faut-il un avocat ?</summary>
+              <p>Pas toujours. Mais si le dossier est contesté, complexe ou juridiquement fragile, un avis professionnel est préférable.</p>
+            </details>
+
+            <details>
+              <summary>Que se passe-t-il si le débiteur fait opposition ?</summary>
+              <p>Le dossier devient contradictoire. Le tribunal peut alors convoquer les parties pour examiner le litige.</p>
+            </details>
+
+            <details>
+              <summary>Le certificat de non-opposition est-il important ?</summary>
+              <p>Oui. Après le délai d’opposition, il permet de constater qu’aucune opposition n’a été formée et de poursuivre l’exécution.</p>
+            </details>
+
+            <details>
+              <summary>Que faire si le juge rejette la demande ?</summary>
+              <p>Il faut analyser le motif : pièces insuffisantes, mauvaise voie, créance contestable, mauvais tribunal. Une autre procédure peut être nécessaire.</p>
+            </details>
+          </div>
+
+          <div class="cta-card">
+            <h2>Préparez votre injonction avec un dossier propre.</h2>
+            <p>
+              Axe Flow vous aide à organiser vos relances, votre mise en demeure, vos pièces et les étapes de la procédure d’injonction.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+              <a class="btn btn-secondary" href="mise-en-demeure-impaye.html">Lire : mise en demeure</a>
+            </div>
+          </div>
+
+          <h2>À lire aussi</h2>
+          <div class="internal-links">
+            <a class="internal-link" href="facture-impayee.html">Facture impayée : les étapes</a>
+            <a class="internal-link" href="client-ne-paie-pas.html">Client qui ne paie pas</a>
+            <a class="internal-link" href="tribunal-competent-impaye.html">Quel tribunal compétent ?</a>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>© Axe Flow — Suivi des impayés, de la relance à l’injonction</div>
+      <nav class="footer-links" aria-label="Liens utiles">
+        <a href="index.html">Accueil</a>
+        <a href="connexion.html">Connexion</a>
+        <a href="cgv.html">CGV</a>
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="confidentialite.html">Confidentialité</a>
+        <a href="support.html">Support</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
