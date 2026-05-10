@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Mentions légales — Axe Flow</title>
+  <meta name="description" content="Mentions légales du site Axe Flow, outil de gestion et de suivi des dossiers d’impayés." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b3145" />
+
+  <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#071e2b;
+      --bg2:#0b3145;
+      --text:#f4f7fb;
+      --muted:rgba(244,247,251,.76);
+      --soft:rgba(244,247,251,.58);
+      --line:rgba(255,255,255,.10);
+      --card:rgba(255,255,255,.055);
+      --accent:#ff7f1f;
+      --accent2:#ff9b4a;
+      --shadow:0 24px 80px rgba(0,0,0,.28);
+      --max:1040px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left,rgba(61,208,143,.08),transparent 30%),
+        radial-gradient(circle at top right,rgba(255,127,31,.08),transparent 26%),
+        linear-gradient(180deg,#081b27 0%,#0a2d40 45%,#081b27 100%);
+      line-height:1.65;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .container{width:min(var(--max),calc(100% - 32px));margin:0 auto}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(14px);
+      background:rgba(6,20,29,.68);
+      border-bottom:1px solid var(--line);
+    }
+
+    .topbar-inner{
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-logo{
+      width:54px;
+      height:54px;
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:var(--shadow);
+      background:rgba(255,255,255,.04);
+      flex:0 0 auto;
+    }
+
+    .brand-title{display:block;font-weight:900;letter-spacing:.01em}
+    .brand-sub{display:block;color:var(--soft);font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .topnav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .nav-link{
+      display:inline-flex;
+      align-items:center;
+      min-height:40px;
+      padding:0 14px;
+      border-radius:999px;
+      color:var(--muted);
+      border:1px solid transparent;
+      font-size:.92rem;
+      font-weight:700;
+    }
+    .nav-link:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);color:#fff}
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:44px;
+      padding:0 17px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:800;
+      font-size:.92rem;
+      cursor:pointer;
+      text-align:center;
+      line-height:1.2;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      box-shadow:0 18px 40px rgba(255,127,31,.22);
+    }
+
+    .page{padding:38px 0 48px}
+
+    .hero{
+      padding:30px;
+      border-radius:30px;
+      background:
+        radial-gradient(circle at top left,rgba(255,127,31,.14),transparent 25%),
+        linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:800;
+      font-size:.86rem;
+      margin-bottom:14px;
+    }
+
+    .eyebrow::before{
+      content:"";
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(255,127,31,.12);
+    }
+
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2.1rem,4vw,3.3rem);
+      line-height:1.04;
+      letter-spacing:-.045em;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      max-width:78ch;
+      font-size:1rem;
+    }
+
+    .legal-card{
+      padding:30px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .legal-card h2{
+      margin:30px 0 10px;
+      font-size:1.25rem;
+      line-height:1.25;
+      letter-spacing:-.02em;
+    }
+    .legal-card h2:first-child{margin-top:0}
+
+    .legal-card p{margin:0 0 12px;color:var(--muted)}
+    .legal-card ul{margin:8px 0 16px;padding-left:20px;color:var(--muted)}
+    .legal-card li{margin:6px 0}
+    .legal-card strong{color:#fff}
+    .legal-card a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+
+    .info-box{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin:18px 0;
+    }
+
+    .info-item{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.09);
+    }
+
+    .info-label{
+      display:block;
+      color:var(--soft);
+      font-size:.82rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:6px;
+    }
+
+    .info-value{
+      color:#fff;
+      font-weight:700;
+      overflow-wrap:anywhere;
+    }
+
+    .notice{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,127,31,.10);
+      border:1px solid rgba(255,127,31,.22);
+      color:#ffe5cc;
+      margin:18px 0;
+    }
+
+    .footer{
+      margin-top:28px;
+      padding:24px 0;
+      border-top:1px solid rgba(255,255,255,.08);
+      color:var(--soft);
+      font-size:.88rem;
+    }
+
+    .footer-inner{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .footer-links{display:flex;gap:12px;flex-wrap:wrap}
+    .footer-links a{color:var(--muted)}
+    .footer-links a:hover{color:#fff}
+
+    @media(max-width:760px){
+      .topbar-inner{flex-direction:column;align-items:flex-start;padding:14px 0}
+      .topnav{width:100%}
+      .info-box{grid-template-columns:1fr}
+    }
+
+    @media(max-width:560px){
+      .container{width:min(var(--max),calc(100% - 20px))}
+      .hero,.legal-card{padding:20px 18px}
+      .btn,.nav-link{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="brand">
+        <img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" />
+        <div>
+          <span class="brand-title">Axe Flow</span>
+          <span class="brand-sub">Mentions légales</span>
+        </div>
+      </a>
+
+      <nav class="topnav" aria-label="Navigation principale">
+        <a class="nav-link" href="index.html">Accueil</a>
+        <a class="nav-link" href="connexion.html">Connexion</a>
+        <a class="btn btn-primary" href="support.html">Support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <section class="hero">
+        <div class="eyebrow">Informations légales</div>
+        <h1>Mentions légales</h1>
+        <p class="lead">
+          Cette page présente les informations légales relatives à l’édition, à la publication et à l’hébergement du site Axe Flow.
+        </p>
+      </section>
+
+      <article class="legal-card">
+        <h2>1. Éditeur du site</h2>
+
+        <div class="info-box">
+          <div class="info-item">
+            <span class="info-label">Nom / raison sociale</span>
+            <span class="info-value">Sophie Dumas</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Statut</span>
+            <span class="info-value">Entreprise individuelle</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">SIRET</span>
+            <span class="info-value">413 442 328 00022</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Répertoire des métiers</span>
+            <span class="info-value">RM 413442328RM031</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Adresse professionnelle</span>
+            <span class="info-value">24 hameau de Danis — 09700 Saverdun</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Contact</span>
+            <span class="info-value"><a href="mailto:contact@axe-dossier.fr">contact@axe-dossier.fr</a></span>
+          </div>
+        </div>
+
+        <h2>2. Directeur de la publication</h2>
+        <p>
+          La directrice de la publication est <strong>Sophie Dumas</strong>.
+        </p>
+
+        <h2>3. Site concerné</h2>
+        <p>
+          Les présentes mentions légales concernent le site <strong>Axe Flow</strong>, accessible à l’adresse :
+          <strong>https://flow.axe-dossier.fr</strong>.
+        </p>
+
+        <h2>4. Hébergement</h2>
+        <p>
+          Le site est hébergé via les services <strong>Firebase Hosting</strong> et <strong>Google Cloud Platform</strong>.
+        </p>
+        <p>
+          Hébergeur : <strong>Google Cloud / Firebase</strong><br>
+          Google Cloud France / Google Ireland Limited<br>
+          Gordon House, Barrow Street, Dublin 4, Irlande
+        </p>
+
+        <h2>5. Activité du site</h2>
+        <p>
+          Axe Flow est un outil numérique d’aide à la structuration, au suivi et à la préparation documentaire de dossiers d’impayés.
+        </p>
+        <p>
+          Le service permet notamment de gérer un dossier d’impayé, de préparer des relances, une mise en demeure et des éléments utiles à une procédure d’injonction de payer.
+        </p>
+
+        <div class="notice">
+          <strong>Précision importante :</strong> Axe Flow n’est pas un cabinet d’avocat, une étude de commissaire de justice ou un service juridictionnel. Les contenus fournis constituent une aide documentaire et organisationnelle, et ne remplacent pas une consultation juridique personnalisée.
+        </div>
+
+        <h2>6. Propriété intellectuelle</h2>
+        <p>
+          Les contenus présents sur le site Axe Flow, notamment les textes, interfaces, modèles, éléments graphiques, structures de pages et fonctionnalités, sont protégés par le droit de la propriété intellectuelle.
+        </p>
+        <p>
+          Toute reproduction, extraction, adaptation, diffusion ou réutilisation non autorisée, totale ou partielle, est interdite sans accord écrit préalable.
+        </p>
+
+        <h2>7. Responsabilité</h2>
+        <p>
+          L’éditeur s’efforce de fournir des informations exactes et à jour. Toutefois, il ne peut garantir l’absence totale d’erreur, d’omission ou d’interruption du service.
+        </p>
+        <p>
+          L’utilisateur demeure seul responsable des informations saisies, des pièces transmises, des courriers envoyés et des démarches engagées à partir du service.
+        </p>
+
+        <h2>8. Données personnelles</h2>
+        <p>
+          Les informations relatives au traitement des données personnelles sont détaillées dans la page
+          <a href="confidentialite.html">Politique de confidentialité</a>.
+        </p>
+
+        <h2>9. Conditions générales de vente</h2>
+        <p>
+          Les conditions applicables aux offres payantes Axe Flow sont disponibles sur la page
+          <a href="cgv.html">Conditions générales de vente</a>.
+        </p>
+
+        <h2>10. Contact</h2>
+        <p>
+          Pour toute demande relative au site, au service ou aux présentes mentions légales, vous pouvez écrire à :
+          <a href="mailto:contact@axe-dossier.fr">contact@axe-dossier.fr</a>.
+        </p>
+
+        <p style="margin-top:24px;color:rgba(244,247,251,.58)">
+          Dernière mise à jour : 10 mai 2026.
+        </p>
+      </article>
+
+      <footer class="footer">
+        <div class="footer-inner">
+          <span>© 2026 Axe Flow — Tous droits réservés.</span>
+          <nav class="footer-links" aria-label="Liens légaux">
+            <a href="mentions-legales.html">Mentions légales</a>
+            <a href="confidentialite.html">Confidentialité</a>
+            <a href="cgv.html">CGV</a>
+            <a href="support.html">Support</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>
