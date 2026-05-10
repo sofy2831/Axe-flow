@@ -37,7 +37,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObjec
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
-const STRIPE_DOSSIER_49="https://buy.stripe.com/test_9B6eVcgr8eQH191chh7Vm01",STRIPE_ABONNEMENT_89="https://buy.stripe.com/test_aFa3cu7UC23V1914OP7Vm02",STRIPE_DOSSIER_SUP_19="https://buy.stripe.com/test_6oU9AS3EmgYP04X0yz7Vm03";
+const STRIPE_DOSSIER_49="https://buy.stripe.com/7sY9AS4Iq0ZR3h95ST7Vm00",STRIPE_ABONNEMENT_89="https://buy.stripe.com/9B6eVcgr8eQH191chh7Vm01",STRIPE_DOSSIER_SUP_19="https://buy.stripe.com/aFa3cu7UC23V1914OP7Vm02";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="";
 const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryAmount","summaryDebtor","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","editDossierModal","closeEditDossier","editDossierForm","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","printInjunctionBtn","printInjunctionBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning"];
 const E={};ids.forEach(id=>E[id]=$(id));
@@ -79,12 +79,14 @@ function debtorBlock(d=currentDossier){return`${debtorName(d)}\n${debtorAddress(
 /* CORRECTION 1 — monthly_89 reconnu comme abonnement */
 function getPlanLabel(u={}){
   const p=u.planType||u.plan||u.entitlement||"none";
+  if(u.role==="superadmin"||p==="superadmin")return"Accès actif";
   if(p==="monthly_89"||p==="subscription_89"||p==="pro_89")return"Plan : Pro 89 €";
   if(p==="extra_19")return"Plan : dossier sup. 19 €";
   if(p==="one_shot_49")return"Plan : dossier 49 €";
   return"Offre non active";
 }
 function getStatusLabel(u={}){const s=u.accountStatus||"active";return s==="unpaid"?"Paiement requis":s==="paused"?"Suspendu":"Actif"}
+function isSuperAdmin(){return currentUserData.role==="superadmin"||currentUserData.plan==="superadmin"||currentUserData.planType==="superadmin"||currentUserData.entitlement==="superadmin"}
 function entitlementValue(){return String(currentUserData.entitlement||currentUserData.planType||currentUserData.plan||"")}
 function activeEntitlementId(){return clean(currentUserData.entitlementId)||clean(currentUserData.currentEntitlementId)||clean(currentUserData.activeEntitlementId)||""}
 function isSubscriptionValue(v){return v==="monthly_89"||v==="subscription_89"||v==="pro_89"}
@@ -125,6 +127,7 @@ function entitlementIsActive(ent={}){
   return !until||until>Date.now();
 }
 function availableEntitlements(){
+  if(isSuperAdmin())return [{id:"superadmin_free_access",type:"superadmin",granted:9999,used:0,source:"superadmin"}];
   const real=currentEntitlements
     .filter(entitlementIsActive)
     .map(e=>({...e,type:entitlementType(e),granted:entitlementGranted(e),used:entitlementUsed(e),source:"entitlementDoc"}))
@@ -151,7 +154,7 @@ function availableEntitlements(){
   return [];
 }
 function activeAvailableEntitlement(){return availableEntitlements()[0]||null}
-function isPaymentPaid(){return !!activeAvailableEntitlement()||currentUserData.paymentStatus==="paid"||currentUserData.entitlementStatus==="active"||currentUserData.subscriptionStatus==="active"}
+function isPaymentPaid(){return isSuperAdmin()||!!activeAvailableEntitlement()||currentUserData.paymentStatus==="paid"||currentUserData.entitlementStatus==="active"||currentUserData.subscriptionStatus==="active"}
 function subscriptionQuota(){
   const sub=currentEntitlements.find(e=>entitlementType(e)==="monthly_89"&&entitlementIsActive(e));
   return entitlementGranted(sub||{type:"monthly_89",grantedCaseCount:currentUserData.monthlyQuota||3});
@@ -161,8 +164,9 @@ function subscriptionUsed(){
   if(sub)return entitlementUsed(sub);
   return dossiers.filter(d=>normalizeEntitlementType(d.entitlementUsed)==="monthly_89").length;
 }
-function canOpenCreateModal(){return !!activeAvailableEntitlement()}
+function canOpenCreateModal(){return isSuperAdmin()||!!activeAvailableEntitlement()}
 function redirectToCorrectPayment(){
+  if(isSuperAdmin()){openCreateDossierModal();return}
   if(isSubscriptionPlan()&&availableEntitlements().length===0){window.location.href=STRIPE_DOSSIER_SUP_19;return}
   window.location.href=STRIPE_DOSSIER_49;
 }
@@ -220,6 +224,16 @@ function renderSummary(){if(!currentDossier){[E.summaryRef,E.summaryAmount,E.sum
 function renderActions(){document.querySelectorAll(".action-card").forEach(card=>{const step=Number(card.dataset.step),cur=currentDossier?getStep(currentDossier):0;card.classList.remove("done","current","locked");if(!currentDossier)card.classList.add("locked");else if(step<=cur)card.classList.add("done");else if(step===cur+1)card.classList.add("current");else card.classList.add("locked");const btn=card.querySelector("button");if(btn)btn.disabled=!currentDossier||step>cur+1||(step===5&&cur<4)})}
 async function renderTimeline(){E.timeline.innerHTML="";if(!currentUser||!currentDossier){E.timeline.innerHTML=`<div class="empty-state">Sélectionnez un dossier.</div>`;return}const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events")),events=[];snap.forEach(s=>events.push({id:s.id,...s.data()}));events.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));if(!events.length)E.timeline.innerHTML=`<div class="empty-state">Aucune action enregistrée.</div>`;else events.forEach(ev=>{const date=ev.createdAt?.toDate?.()?ev.createdAt.toDate().toLocaleDateString("fr-FR"):todayFR(),item=document.createElement("div");item.className="timeline-item";item.innerHTML=`<div class="timeline-main"><span class="timeline-meta">${esc(date)}</span><strong>${esc(ev.title||"Action")}</strong><span>${esc(ev.description||"")}</span></div>`;E.timeline.appendChild(item)});if(currentDossier.nextAction){const planned=document.createElement("div"),date=fmtDateFR(currentDossier.nextActionAt);planned.className="timeline-item planned";planned.innerHTML=`<div class="timeline-main"><span class="timeline-meta">À venir</span><strong>${esc(nextActionLabel(currentDossier.nextAction))}</strong><span>${date!=="—"?`Préparer le ${esc(date)}`:"À préparer dès que possible"}</span></div>`;E.timeline.prepend(planned)}}
 function renderAddButton(){
+  if(isSuperAdmin()){
+    E.addDossierBtn.textContent="Créer un dossier";
+    E.subscribeBtn.disabled=true;
+    E.subscribeBtn.classList.add("is-disabled");
+    E.subscribeBtn.textContent="Accès activé";
+    return;
+  }
+  E.subscribeBtn.disabled=false;
+  E.subscribeBtn.classList.remove("is-disabled");
+  E.subscribeBtn.textContent="Passer en abonnement — 89 €/mois";
   const available=availableEntitlements();
   const ent=available[0];
   if(ent){
@@ -245,7 +259,7 @@ async function loadDossiers(uid){const snap=await getDocs(collection(db,"users",
 E.addDossierBtn.addEventListener("click",()=>{
   if(canOpenCreateModal()){openCreateDossierModal();return}
   redirectToCorrectPayment();
-});E.subscribeBtn.addEventListener("click",()=>{window.location.href=STRIPE_ABONNEMENT_89});
+});E.subscribeBtn.addEventListener("click",()=>{if(isSuperAdmin()){openCreateDossierModal();return}window.location.href=STRIPE_ABONNEMENT_89});
 E.closeCreateDossier.addEventListener("click",()=>E.createDossierModal.classList.remove("open"));
 E.createDossierModal.addEventListener("click",e=>{if(e.target===E.createDossierModal)E.createDossierModal.classList.remove("open")});
 E.closeEditDossier.addEventListener("click",closeEditDossierModal);
