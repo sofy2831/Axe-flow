@@ -37,7 +37,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObjec
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
-const STRIPE_DOSSIER_49="https://buy.stripe.com/7sY9AS4Iq0ZR3h95ST7Vm00",STRIPE_ABONNEMENT_89="https://buy.stripe.com/9B6eVcgr8eQH191chh7Vm01",STRIPE_DOSSIER_SUP_19="https://buy.stripe.com/aFa3cu7UC23V1914OP7Vm02";
+const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="";
 const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryAmount","summaryDebtor","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","editDossierModal","closeEditDossier","editDossierForm","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","printInjunctionBtn","printInjunctionBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning"];
 const E={};ids.forEach(id=>E[id]=$(id));
@@ -165,10 +165,58 @@ function subscriptionUsed(){
   return dossiers.filter(d=>normalizeEntitlementType(d.entitlementUsed)==="monthly_89").length;
 }
 function canOpenCreateModal(){return isSuperAdmin()||!!activeAvailableEntitlement()}
-function redirectToCorrectPayment(){
+async function redirectStripeCheckout(offerType){
+  if(isSuperAdmin()){
+    openCreateDossierModal();
+    return;
+  }
+  if(!currentUser){
+    alert("Connexion requise avant paiement.");
+    location.href="connexion.html";
+    return;
+  }
+
+  const previousAddText=E.addDossierBtn?.textContent||"";
+  const previousSubText=E.subscribeBtn?.textContent||"";
+
+  try{
+    if(E.addDossierBtn)E.addDossierBtn.disabled=true;
+    if(E.subscribeBtn)E.subscribeBtn.disabled=true;
+    if(E.addDossierBtn)E.addDossierBtn.textContent="Ouverture Stripe...";
+    if(E.subscribeBtn)E.subscribeBtn.textContent="Ouverture Stripe...";
+
+    const response=await fetch(CREATE_CHECKOUT_SESSION_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        uid:currentUser.uid,
+        email:currentUser.email||currentUserData.email||"",
+        offerType
+      })
+    });
+
+    const data=await response.json().catch(()=>({}));
+
+    if(!response.ok||!data.url){
+      throw new Error(data.error||"Session Stripe impossible");
+    }
+
+    window.location.href=data.url;
+  }catch(err){
+    console.error(err);
+    alert("Impossible d’ouvrir le paiement Stripe. Réessayez dans quelques instants.");
+    if(E.addDossierBtn){E.addDossierBtn.disabled=false;E.addDossierBtn.textContent=previousAddText||"Dossier — 49 €";}
+    if(E.subscribeBtn){E.subscribeBtn.disabled=false;E.subscribeBtn.textContent=previousSubText||"Passer en abonnement — 89 €/mois";}
+  }
+}
+
+async function redirectToCorrectPayment(){
   if(isSuperAdmin()){openCreateDossierModal();return}
-  if(isSubscriptionPlan()&&availableEntitlements().length===0){window.location.href=STRIPE_DOSSIER_SUP_19;return}
-  window.location.href=STRIPE_DOSSIER_49;
+  if(isSubscriptionPlan()&&availableEntitlements().length===0){
+    await redirectStripeCheckout("extra_19");
+    return;
+  }
+  await redirectStripeCheckout("one_shot_49");
 }
 function sentDateField(a){return a==="relance1"?"relance1SentAt":a==="relance2"?"relance2SentAt":a==="relance3"?"relance3SentAt":a==="med"?"miseEnDemeureSentAt":a==="injunction"?"injunctionPreparedAt":"sentAt"}
 function actionTitle(a){return a==="relance1"?"Relance 1":a==="relance2"?"Relance 2":a==="relance3"?"Relance 3":a==="med"?"Mise en demeure":a==="injunction"?"Injonction de payer":"Document"}
@@ -256,10 +304,10 @@ async function loadEntitlements(uid){
 }
 async function loadDossiers(uid){const snap=await getDocs(collection(db,"users",uid,"requests"));dossiers=[];snap.forEach(s=>dossiers.push({id:s.id,...s.data()}));dossiers.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));currentDossier=currentDossier?(dossiers.find(d=>d.id===currentDossier.id)||dossiers[0]||null):(dossiers[0]||null);await renderAll()}
 
-E.addDossierBtn.addEventListener("click",()=>{
+E.addDossierBtn.addEventListener("click",async()=>{
   if(canOpenCreateModal()){openCreateDossierModal();return}
-  redirectToCorrectPayment();
-});E.subscribeBtn.addEventListener("click",()=>{if(isSuperAdmin()){openCreateDossierModal();return}window.location.href=STRIPE_ABONNEMENT_89});
+  await redirectToCorrectPayment();
+});E.subscribeBtn.addEventListener("click",async()=>{if(isSuperAdmin()){openCreateDossierModal();return}await redirectStripeCheckout("monthly_89")});
 E.closeCreateDossier.addEventListener("click",()=>E.createDossierModal.classList.remove("open"));
 E.createDossierModal.addEventListener("click",e=>{if(e.target===E.createDossierModal)E.createDossierModal.classList.remove("open")});
 E.closeEditDossier.addEventListener("click",closeEditDossierModal);
@@ -267,11 +315,11 @@ E.editDossierModal.addEventListener("click",e=>{if(e.target===E.editDossierModal
 E.createDossierForm.addEventListener("submit",async e=>{
   e.preventDefault();
   if(!currentUser)return;
-  if(!canOpenCreateModal()){alert("Paiement requis avant création du dossier.");redirectToCorrectPayment();return}
+  if(!canOpenCreateModal()){alert("Paiement requis avant création du dossier.");await redirectToCorrectPayment();return}
   const amount=Number(String($("amountTTCInput").value||"").replace(",","."));
   if(!Number.isFinite(amount)||amount<=0){alert("Montant invalide.");return}
   const entitlement=activeAvailableEntitlement();
-  if(!entitlement){alert("Aucun crédit dossier disponible. Paiement requis.");redirectToCorrectPayment();return}
+  if(!entitlement){alert("Aucun crédit dossier disponible. Paiement requis.");await redirectToCorrectPayment();return}
   const entId=entitlement.id||activeEntitlementId()||`${entitlement.type}_${Date.now()}`;
   const entUsed=entitlement.type||entitlementValue()||entId;
   const createdRequestRef=await addDoc(collection(db,"users",currentUser.uid,"requests"),{
