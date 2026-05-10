@@ -3,30 +3,32 @@
 
   <url>
     <loc>https://flow.axe-dossier.fr/</loc>
+    <lastmod>2026-05-10</lastmod>
   </url>
 
   <url>
-  <loc>https://flow.axe-dossier.fr/connexion.html</loc>
-</url>
-  
-  <url>
     <loc>https://flow.axe-dossier.fr/facture-impayee.html</loc>
+    <lastmod>2026-05-10</lastmod>
   </url>
 
   <url>
     <loc>https://flow.axe-dossier.fr/client-ne-paie-pas.html</loc>
+    <lastmod>2026-05-10</lastmod>
   </url>
 
   <url>
     <loc>https://flow.axe-dossier.fr/mise-en-demeure-impaye.html</loc>
+    <lastmod>2026-05-10</lastmod>
   </url>
 
   <url>
     <loc>https://flow.axe-dossier.fr/injonction-de-payer.html</loc>
+    <lastmod>2026-05-10</lastmod>
   </url>
 
   <url>
     <loc>https://flow.axe-dossier.fr/relance-facture-impayee.html</loc>
+    <lastmod>2026-05-10</lastmod>
   </url>
 
   <url>
@@ -43,6 +45,10 @@
 
   <url>
     <loc>https://flow.axe-dossier.fr/support.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/connexion.html</loc>
   </url>
 
 </urlset>
