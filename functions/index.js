@@ -365,15 +365,11 @@ exports.stripeWebhook = onRequest(
       }
 
       if (event.type === "invoice.paid") {
-        // Prévu pour la V2 abonnement.
-        // À activer quand les abonnements live auront des métadonnées uid/offerType garanties.
         console.log("invoice.paid reçu mais non traité pour le moment");
         return res.status(200).send("invoice.paid ignoré");
       }
 
       if (event.type === "customer.subscription.deleted") {
-        // Prévu pour la V2 abonnement.
-        // À activer quand on stockera stripeSubscriptionId -> uid de façon systématique.
         console.log("customer.subscription.deleted reçu mais non traité pour le moment");
         return res.status(200).send("subscription.deleted ignoré");
       }
@@ -391,7 +387,4 @@ exports.stripeWebhook = onRequest(
     }
   }
 );
-'''
-path = Path('/mnt/data/functions-index-stripe-webhook-live.js')
-path.write_text(code, encoding='utf-8')
-print(path)
+
