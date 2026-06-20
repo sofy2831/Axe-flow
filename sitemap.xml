@@ -83,4 +83,21 @@
     <loc>https://flow.axe-dossier.fr/connexion.html</loc>
   </url>
 
+  <url>
+    <loc>https://flow.axe-dossier.fr/injonction-de-payer-sans-avocat.html</loc>
+  </url>
+
+  <url>
+    <loc>https://flow.axe-dossier.fr/dossier-injonction-de-payer.html</loc>
+  </url>
+  
+<url>
+  <loc>https://flow.axe-dossier.fr/bordereau-pieces-injonction-de-payer.html</loc>
+</url>
+  
+<url>
+  <loc>https://flow.axe-dossier.fr/tribunal-competent-injonction-de-payer.html</loc>
+</url>
+  
+
 </urlset>
