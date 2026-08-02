@@ -470,7 +470,7 @@ safeSetText(
 safeSetText(
   form,
   "claim_interest_contractual_basis_4",
-  `Détail du calcul facture par facture dans le décompte joint`
+  `Voir décompte joint`
 );
 
 /* On laisse vides les champs relatifs aux intérêts au taux légal. */
@@ -488,7 +488,7 @@ if (professional && debtCalc.recoveryFees > 0) {
   safeSetText(
     form,
     "claim_additional_costs",
-    "Indemnités forfaitaires de recouvrement"
+    "Indemnité forfaitaire"
   );
 
   safeSetText(
@@ -508,7 +508,7 @@ if (professional && debtCalc.recoveryFees > 0) {
   safeSetText(
     form,
     "claim_additional_costs_basis_2",
-    "Article L.441-10 et article D.441-5 du Code de commerce"
+    "Art. L.441-10 et D.441-5 C. com."
   );
 } else {
   /*
@@ -534,9 +534,7 @@ safeSetText(form, "claim_penalty_basis_2", "");
  * Le Cerfa ne possède pas de champ interne spécifique "total".
  * On l'indique donc clairement dans le fondement de la créance.
  */
-const totalBreakdown = professional
-  ? `Principal ${amountForCerfa(debtCalc.principal)} EUR + intérêts ${amountForCerfa(debtCalc.interests)} EUR + indemnités ${amountForCerfa(debtCalc.recoveryFees)} EUR = total ${amountForCerfa(debtCalc.total)} EUR`
-  : `Principal ${amountForCerfa(debtCalc.principal)} EUR + intérêts ${amountForCerfa(debtCalc.interests)} EUR = total ${amountForCerfa(debtCalc.total)} EUR`;
+const totalBreakdown = `Total réclamé : ${amountForCerfa(debtCalc.total)} EUR`;
 
 safeSetText(
   form,
