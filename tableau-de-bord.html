@@ -347,7 +347,212 @@ console.log(
 );
 
 const email = splitEmail(creditorEmail(currentDossier));
-const debtorEmailParts = splitEmail(debtorEmail(currentDossier));safeSetText(form,"claimant_last_name",creditorName(currentDossier));safeSetText(form,"claimant_first_names",creditorName(currentDossier));safeSetText(form,"claimant_address",creditorAddress(currentDossier));safeSetText(form,"claimant_zip",creditorZip(currentDossier));safeSetText(form,"claimant_city",creditorCity(currentDossier));safeSetText(form,"claimant_country","France");safeSetText(form,"claimant_email",email.left);safeSetText(form,"claimant_email_2",email.right);safeSetText(form,"claimant_phone",creditorPhone(currentDossier));safeSetText(form,"claimant_company_name",creditorName(currentDossier));safeSetText(form,"claimant_company_address",creditorAddress(currentDossier));safeSetText(form,"claimant_company_zip",creditorZip(currentDossier));safeSetText(form,"claimant_company_city",creditorCity(currentDossier));safeSetText(form,"claimant_company_email",email.left);safeSetText(form,"claimant_company_email_2",email.right);if(isProfessionalDebtor(currentDossier)){safeSetText(form,"debtor1_company_name",debtorName(currentDossier));safeSetText(form,"debtor1_company_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_company_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_company_city",debtorCity(currentDossier));safeSetText(form,"debtor1_company_email",debtorEmailParts.left);safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right)}else{safeSetText(form,"debtor1_last_name",debtorName(currentDossier));safeSetText(form,"debtor1_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_city",debtorCity(currentDossier));safeSetText(form,"debtor1_country","France");safeSetText(form,"debtor1_email",debtorEmailParts.left);safeSetText(form,"debtor1_email_2",debtorEmailParts.right)}const courtName=clean(prompt("Nom du tribunal compétent à reporter page 4 du Cerfa :", "")),courtAddress=clean(prompt("Adresse du tribunal compétent à reporter page 4 du Cerfa :", ""));safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);const debtCalc=lateFeeBreakdown(currentDossier);safeSetText(form,"claim_principal_amount_1",amountForCerfa(debtCalc.principal));safeSetText(form,"claim_principal_amount_2",amountForCerfa(debtCalc.principal));safeSetFirstText(form,["claim_interest_amount_1","claim_interest_amount","interest_amount_1","interest_amount"],amountForCerfa(debtCalc.interests));if(isProfessionalDebtor(currentDossier))safeSetFirstText(form,["claim_other_amount_1","claim_accessory_amount_1","claim_costs_amount_1","other_amount_1"],amountForCerfa(debtCalc.recoveryFees));safeSetFirstText(form,["claim_total_amount_1","claim_total_amount","total_claim_amount_1","total_claim_amount"],amountForCerfa(debtCalc.total));safeSetText(form,"claim_principal_basis_1",`Factures : ${normalizeInvoices(currentDossier).map(x=>x.ref).join(", ")}`);safeSetText(form,"claim_principal_basis_2",`${contractBasis(currentDossier)} — intérêts ${amountForCerfa(debtCalc.interests)} EUR arrêtés au ${todayFR()}${isProfessionalDebtor(currentDossier)?` — indemnités forfaitaires ${amountForCerfa(debtCalc.recoveryFees)} EUR`:""}`);safeSetText(form,"claim_principal_basis_3",`Principal ${amountForCerfa(debtCalc.principal)} EUR — total réclamé ${amountForCerfa(debtCalc.total)} EUR — voir décompte joint`);safeSetText(form,"supporting_documents_1",pieceList(currentDossier).slice(0,5).join(" ; "));safeSetText(form,"supporting_documents_2",pieceList(currentDossier).slice(5).join(" ; "));safeSetText(form,"claim_date",todayFR());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-cerfa-12946-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Générer Cerfa prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Générer Cerfa prérempli"}}
+const debtorEmailParts = splitEmail(debtorEmail(currentDossier));safeSetText(form,"claimant_last_name",creditorName(currentDossier));safeSetText(form,"claimant_first_names",creditorName(currentDossier));safeSetText(form,"claimant_address",creditorAddress(currentDossier));safeSetText(form,"claimant_zip",creditorZip(currentDossier));safeSetText(form,"claimant_city",creditorCity(currentDossier));safeSetText(form,"claimant_country","France");safeSetText(form,"claimant_email",email.left);safeSetText(form,"claimant_email_2",email.right);safeSetText(form,"claimant_phone",creditorPhone(currentDossier));safeSetText(form,"claimant_company_name",creditorName(currentDossier));safeSetText(form,"claimant_company_address",creditorAddress(currentDossier));safeSetText(form,"claimant_company_zip",creditorZip(currentDossier));safeSetText(form,"claimant_company_city",creditorCity(currentDossier));safeSetText(form,"claimant_company_email",email.left);safeSetText(form,"claimant_company_email_2",email.right);if(isProfessionalDebtor(currentDossier)){safeSetText(form,"debtor1_company_name",debtorName(currentDossier));safeSetText(form,"debtor1_company_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_company_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_company_city",debtorCity(currentDossier));safeSetText(form,"debtor1_company_email",debtorEmailParts.left);safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right)}else{safeSetText(form,"debtor1_last_name",debtorName(currentDossier));safeSetText(form,"debtor1_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_city",debtorCity(currentDossier));safeSetText(form,"debtor1_country","France");safeSetText(form,"debtor1_email",debtorEmailParts.left);safeSetText(form,"debtor1_email_2",debtorEmailParts.right)}const courtName=clean(prompt("Nom du tribunal compétent à reporter page 4 du Cerfa :", "")),courtAddress=clean(prompt("Adresse du tribunal compétent à reporter page 4 du Cerfa :", ""));safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);const debtCalc = lateFeeBreakdown(currentDossier);
+const invoices = normalizeInvoices(currentDossier);
+const professional = isProfessionalDebtor(currentDossier);
+
+/* =========================
+   PRINCIPAL
+========================= */
+
+safeSetText(
+  form,
+  "claim_principal",
+  invoices.length > 1
+    ? `${invoices.length} factures impayées`
+    : `Facture impayée ${invoices[0]?.ref || ""}`
+);
+
+safeSetText(
+  form,
+  "claim_principal_amount_1",
+  amountForCerfa(debtCalc.principal)
+);
+
+/*
+ * Ne pas remplir le principal une seconde fois.
+ * C'était la cause des deux lignes identiques à 500 €.
+ */
+safeSetText(form, "claim_principal_amount_2", "");
+
+safeSetText(
+  form,
+  "claim_principal_basis_1",
+  `Factures : ${invoices.map(invoice => invoice.ref).join(", ")}`
+);
+
+safeSetText(
+  form,
+  "claim_principal_basis_2",
+  contractBasis(currentDossier)
+);
+
+safeSetText(
+  form,
+  "claim_principal_basis_3",
+  `Principal : ${amountForCerfa(debtCalc.principal)} EUR`
+);
+
+/* =========================
+   INTÉRÊTS CONTRACTUELS
+========================= */
+
+/*
+ * Les factures prévoient un taux de pénalités.
+ * On coche donc "intérêts au taux contractuel",
+ * et non "intérêts au taux légal".
+ */
+safeCheck(form, "claim_interest_legal_enabled", false);
+safeCheck(form, "claim_interest_contractual_enabled", true);
+
+safeSetText(
+  form,
+  "claim_interest_contractual_rate",
+  `${Number(debtCalc.ratePercent || currentDossier.lateRatePercent || 0)
+    .toFixed(2)
+    .replace(".", ",")} %`
+);
+
+safeSetText(
+  form,
+  "claim_interest_contractual_amount",
+  amountForCerfa(debtCalc.interests)
+);
+
+/*
+ * Plusieurs factures peuvent avoir des échéances différentes.
+ * Il ne faut donc pas inscrire une seule date de départ trompeuse.
+ */
+safeSetText(
+  form,
+  "claim_interest_legal_start_date",
+  invoices.length === 1
+    ? formatDateForCerfaDayAfter(invoices[0].dueDate)
+    : "Voir décompte joint"
+);
+
+safeSetText(
+  form,
+  "claim_interest_contractual_basis",
+  `Pénalités arrêtées au ${todayFR()}`
+);
+
+safeSetText(
+  form,
+  "claim_interest_contractual_basis_2",
+  invoices
+    .slice(0, 2)
+    .map(invoice =>
+      `${invoice.ref} : échéance ${fmtDateFR(invoice.dueDate)}`
+    )
+    .join(" ; ")
+);
+
+safeSetText(
+  form,
+  "claim_interest_contractual_basis_3",
+  invoices
+    .slice(2, 4)
+    .map(invoice =>
+      `${invoice.ref} : échéance ${fmtDateFR(invoice.dueDate)}`
+    )
+    .join(" ; ")
+);
+
+safeSetText(
+  form,
+  "claim_interest_contractual_basis_4",
+  `Détail du calcul facture par facture dans le décompte joint`
+);
+
+/* On laisse vides les champs relatifs aux intérêts au taux légal. */
+safeSetText(form, "claim_interest_legal_amount", "");
+safeSetText(form, "claim_interest_legal_basis_1", "");
+safeSetText(form, "claim_interest_legal_basis_2", "");
+safeSetText(form, "claim_interest_legal_basis_3", "");
+safeSetText(form, "claim_interest_legal_basis_4", "");
+
+/* =========================
+   FRAIS ACCESSOIRES
+========================= */
+
+if (professional && debtCalc.recoveryFees > 0) {
+  safeSetText(
+    form,
+    "claim_additional_costs",
+    "Indemnités forfaitaires de recouvrement"
+  );
+
+  safeSetText(
+    form,
+    "claim_additional_costs_amount_1",
+    amountForCerfa(debtCalc.recoveryFees)
+  );
+
+  safeSetText(form, "claim_additional_costs_amount_2", "");
+
+  safeSetText(
+    form,
+    "claim_additional_costs_basis_1",
+    `${invoices.length} facture${invoices.length > 1 ? "s" : ""} × 40 EUR`
+  );
+
+  safeSetText(
+    form,
+    "claim_additional_costs_basis_2",
+    "Article L.441-10 et article D.441-5 du Code de commerce"
+  );
+} else {
+  /*
+   * Particulier : aucune indemnité forfaitaire de 40 €.
+   */
+  safeSetText(form, "claim_additional_costs", "");
+  safeSetText(form, "claim_additional_costs_amount_1", "");
+  safeSetText(form, "claim_additional_costs_amount_2", "");
+  safeSetText(form, "claim_additional_costs_basis_1", "");
+  safeSetText(form, "claim_additional_costs_basis_2", "");
+}
+
+/* Aucune clause pénale distincte dans ce dossier. */
+safeSetText(form, "claim_penalty_amount", "");
+safeSetText(form, "claim_penalty_basis_1", "");
+safeSetText(form, "claim_penalty_basis_2", "");
+
+/* =========================
+   TOTAL RÉCLAMÉ
+========================= */
+
+/*
+ * Le Cerfa ne possède pas de champ interne spécifique "total".
+ * On l'indique donc clairement dans le fondement de la créance.
+ */
+const totalBreakdown = professional
+  ? `Principal ${amountForCerfa(debtCalc.principal)} EUR + intérêts ${amountForCerfa(debtCalc.interests)} EUR + indemnités ${amountForCerfa(debtCalc.recoveryFees)} EUR = total ${amountForCerfa(debtCalc.total)} EUR`
+  : `Principal ${amountForCerfa(debtCalc.principal)} EUR + intérêts ${amountForCerfa(debtCalc.interests)} EUR = total ${amountForCerfa(debtCalc.total)} EUR`;
+
+safeSetText(
+  form,
+  "claim_principal_basis_3",
+  totalBreakdown
+);
+
+/* =========================
+   PIÈCES JUSTIFICATIVES
+========================= */
+
+const pieces = pieceList(currentDossier);
+
+safeSetText(
+  form,
+  "supporting_documents_1",
+  pieces.slice(0, 5).join(" ; ")
+);
+
+safeSetText(
+  form,
+  "supporting_documents_2",
+  pieces.slice(5).join(" ; ")
+);safeSetText(form,"claim_date",todayFR());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-cerfa-12946-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Générer Cerfa prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Générer Cerfa prérempli"}}
 function debtStatementHtml(d=currentDossier){const calc=lateFeeBreakdown(d),rows=calc.rows.map(x=>`<tr><td>${escapeHtml(x.ref)}</td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Décompte actualisé</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#111;font-size:11pt}h1{font-size:18pt;margin:0 0 6mm}.meta{margin-bottom:8mm}table{width:100%;border-collapse:collapse;margin:8mm 0}th,td{border:1px solid #aaa;padding:7px;text-align:left}th{background:#eee}.totals{margin-left:auto;width:70%}.totals td:first-child{font-weight:700}.grand{font-weight:700;font-size:13pt}</style></head><body><h1>Décompte actualisé de la créance</h1><div class="meta">Dossier : ${escapeHtml(d?.ref||"—")}<br>Créancier : ${escapeHtml(creditorName(d))}<br>Débiteur : ${escapeHtml(debtorName(d))}<br>Arrêté au : ${escapeHtml(calc.asOf.toLocaleDateString("fr-FR"))}</div><table><thead><tr><th>Facture</th><th>Échéance</th><th>Principal</th><th>Jours</th><th>Intérêts</th>${isProfessionalDebtor(d)?"<th>Indemnité</th>":""}</tr></thead><tbody>${rows}</tbody></table><table class="totals"><tr><td>Principal</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>Total réclamé</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table><p>Les pénalités de retard continuent à courir jusqu’au complet paiement.</p></body></html>`}
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
 async function renderInjunctionFiles(){if(!currentUser||!currentDossier||!E.injunctionFilesList)return;E.injunctionFilesList.innerHTML="";try{const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files")),files=[];snap.forEach(s=>{const f=s.data()||{};if(f.type==="injunction_piece")files.push({id:s.id,...f})});files.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));if(!files.length){E.injunctionFilesList.innerHTML=`<div class="upload-status">Aucune pièce déposée pour ce dossier.</div>`;return}files.forEach(f=>{const item=document.createElement("div");item.className="uploaded-file-item";const name=esc(f.name||f.filename||"Pièce jointe"),url=esc(f.url||"#"),size=f.size?`<span class="uploaded-file-meta">${Math.ceil(Number(f.size||0)/1024)} Ko</span>`:"",path=esc(f.path||"");item.innerHTML=`<span title="${name}">${name}</span>${size}<div class="uploaded-file-actions"><a href="${url}" target="_blank" rel="noopener">Voir</a><button class="mini-delete-file-btn" type="button" data-delete-file="${esc(f.id)}" data-delete-path="${path}">Supprimer</button></div>`;E.injunctionFilesList.appendChild(item)})}catch(err){console.error(err);E.injunctionFilesList.innerHTML=`<div class="upload-status">Impossible de charger les pièces du dossier.</div>`}}
