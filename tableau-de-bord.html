@@ -331,20 +331,28 @@ function safeCheck(form,name,shouldCheck=true){try{const field=form.getCheckBox(
 function splitEmail(email){const parts=String(email||"").split("@");return{left:parts[0]||"",right:parts[1]||""}}
 function infogreffeSearchUrl(d=currentDossier){return `${INFOGREFFE_SEARCH_URL}?q=${encodeURIComponent(debtorName(d))}`}
 function syncDebtorGuidance(){if(!currentDossier)return;const pro=isProfessionalDebtor(currentDossier),url=infogreffeSearchUrl(currentDossier);E.proTribunalSearchBtn.href=url;E.nonOppositionInfogreffeBtn.href=url;E.privateTribunalSearchBtn.href=JUSTICE_ANNUAIRE_URL;E.nonOppositionPrivateBtn.href=JUSTICE_ANNUAIRE_URL;E.professionalPathCard.classList.toggle("active",pro);E.privatePathCard.classList.toggle("active",!pro);E.professionalPathCard.classList.toggle("muted",!pro);E.privatePathCard.classList.toggle("muted",pro);if(E.pathWarning)E.pathWarning.textContent=""}
+
+function formatDateForCerfaDayAfter(value){
+  if(!value)return "";
+  let date;
+  if(value?.toDate){
+    date=value.toDate();
+  }else if(/^\d{4}-\d{2}-\d{2}$/.test(String(value))){
+    const [year,month,day]=String(value).split("-").map(Number);
+    date=new Date(year,month-1,day);
+  }else{
+    date=new Date(value);
+  }
+  if(Number.isNaN(date.getTime()))return "";
+  date.setDate(date.getDate()+1);
+  return date.toLocaleDateString("fr-FR");
+}
+
 async function generateCerfaPrefilled(){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const response=await fetch(CERFA_FILLABLE_URL,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${CERFA_FILLABLE_URL}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
 
 const form = pdfDoc.getForm();
-
-/* TEMPORAIRE — affichage des vrais noms internes des champs du Cerfa */
-const cerfaFieldList = form.getFields().map(field =>
-  `${field.getName()} | ${field.constructor.name}`
-);
-
-console.log(
-  "=== VRAIS CHAMPS CERFA ===\n" + cerfaFieldList.join("\n")
-);
 
 const email = splitEmail(creditorEmail(currentDossier));
 const debtorEmailParts = splitEmail(debtorEmail(currentDossier));safeSetText(form,"claimant_last_name",creditorName(currentDossier));safeSetText(form,"claimant_first_names",creditorName(currentDossier));safeSetText(form,"claimant_address",creditorAddress(currentDossier));safeSetText(form,"claimant_zip",creditorZip(currentDossier));safeSetText(form,"claimant_city",creditorCity(currentDossier));safeSetText(form,"claimant_country","France");safeSetText(form,"claimant_email",email.left);safeSetText(form,"claimant_email_2",email.right);safeSetText(form,"claimant_phone",creditorPhone(currentDossier));safeSetText(form,"claimant_company_name",creditorName(currentDossier));safeSetText(form,"claimant_company_address",creditorAddress(currentDossier));safeSetText(form,"claimant_company_zip",creditorZip(currentDossier));safeSetText(form,"claimant_company_city",creditorCity(currentDossier));safeSetText(form,"claimant_company_email",email.left);safeSetText(form,"claimant_company_email_2",email.right);if(isProfessionalDebtor(currentDossier)){safeSetText(form,"debtor1_company_name",debtorName(currentDossier));safeSetText(form,"debtor1_company_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_company_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_company_city",debtorCity(currentDossier));safeSetText(form,"debtor1_company_email",debtorEmailParts.left);safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right)}else{safeSetText(form,"debtor1_last_name",debtorName(currentDossier));safeSetText(form,"debtor1_address",debtorAddress(currentDossier));safeSetText(form,"debtor1_zip",debtorZip(currentDossier));safeSetText(form,"debtor1_city",debtorCity(currentDossier));safeSetText(form,"debtor1_country","France");safeSetText(form,"debtor1_email",debtorEmailParts.left);safeSetText(form,"debtor1_email_2",debtorEmailParts.right)}const courtName=clean(prompt("Nom du tribunal compétent à reporter page 4 du Cerfa :", "")),courtAddress=clean(prompt("Adresse du tribunal compétent à reporter page 4 du Cerfa :", ""));safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);const debtCalc = lateFeeBreakdown(currentDossier);
@@ -360,7 +368,7 @@ safeSetText(
   "claim_principal",
   invoices.length > 1
     ? `${invoices.length} factures impayées`
-    : `Facture impayée ${invoices[0]?.ref || ""}`
+    : `Facture impayée${invoices[0]?.ref ? ` ${invoices[0].ref}` : ""}`
 );
 
 safeSetText(
@@ -408,7 +416,7 @@ safeCheck(form, "claim_interest_contractual_enabled", true);
 safeSetText(
   form,
   "claim_interest_contractual_rate",
-  `${Number(debtCalc.ratePercent || currentDossier.lateRatePercent || 0)
+  `${Number(debtCalc.annualRate || currentDossier.lateRatePercent || 0)
     .toFixed(2)
     .replace(".", ",")} %`
 );
