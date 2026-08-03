@@ -403,8 +403,12 @@ const form = pdfDoc.getForm();
 
 const email=splitEmail(creditorEmail(currentDossier));
 const debtorEmailParts=splitEmail(debtorEmail(currentDossier));
-const claimantType=creditorLegalType(currentDossier);
-let claimantGender=creditorGender(currentDossier);
+const claimantTypeAnswer=clean(prompt(
+  "Statut du créancier pour le Cerfa : tapez EI pour une personne physique / micro-entreprise, ou SOCIETE pour une personne morale.",
+  "EI"
+)).toLowerCase();
+const claimantType=claimantTypeAnswer.startsWith("s")?"company":"individual";
+let claimantGender="";
 if(claimantType==="individual"&&!claimantGender){
   const answer=clean(prompt("Civilité du créancier pour le Cerfa : Madame ou Monsieur ?", "Madame")).toLowerCase();
   claimantGender=answer.startsWith("m")&&answer!=="madame"?"male":"female";
@@ -462,7 +466,7 @@ if(isProfessionalDebtor(currentDossier)){
   safeSetText(form,"debtor1_company_email",debtorEmailParts.left);
   safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right);
 }else{
-  let privateGender=debtorGender(currentDossier);
+  let privateGender="";
   if(!privateGender){
     const answer=clean(prompt("Civilité du débiteur particulier : Madame ou Monsieur ?", "Monsieur")).toLowerCase();
     privateGender=answer.startsWith("mad")?"female":"male";
@@ -695,31 +699,58 @@ function openInjunctionModal(){if(!currentDossier){alert("Sélectionnez un dossi
 function closeInjunction(){E.injunctionModal.classList.remove("open")}
 function openEditDossierModal(d=currentDossier){if(!d){alert("Sélectionnez un dossier.");return}currentDossier=d;$("editDossierRef").value=d.ref||"";fillInvoiceRows(E.editInvoiceRows,normalizeInvoices(d));E.editLateRateInput.value=Number(d.lateRatePercent??8.25);$("editContractBasisInput").value=contractBasis(d);$("editCreditorLegalTypeInput").value=creditorLegalType(d);$("editCreditorGenderInput").value=creditorGender(d);$("editDebiteurTypeInput").value=debtorType(d);$("editDebtorGenderInput").value=debtorGender(d);$("editDebtorNameInput").value=debtorName(d)==="Madame, Monsieur"?"":debtorName(d);$("editDebtorEmailInput").value=debtorEmail(d);$("editDebtorAddressInput").value=debtorAddress(d);$("editDebtorZipInput").value=debtorZip(d);$("editDebtorCityInput").value=debtorCity(d);E.editDossierModal.classList.add("open")}
 function closeEditDossierModal(){E.editDossierModal.classList.remove("open")}
-async function markStep(action){if(!currentUser||!currentDossier)return;const step=stepForAction(action),label=`${actionTitle(action)} envoyée`,sentField=sentDateField(action),next=nextActionInfo(action),patch={step:Math.max(step,getStep(currentDossier)),statusLabel:label,updatedAt:serverTimestamp(),[sentField]:serverTimestamp()};let desc=`Date d’envoi : ${todayFR()}`;if(next){patch.nextAction=next.code;if(next.days>0){patch.nextActionAt=plusDays(next.days);desc+=`\nProchaine action : ${next.label} le ${dateAfterDaysFR(next.days)}`}else desc+=`\nProchaine action : ${next.label}`}await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:label,description:desc,action,createdAt:serverTimestamp()});await loadDossiers(currentUser.uid)}
-function renderDossiers(){E.dossierList.innerHTML="";E.dossierSub.textContent=`${dossiers.length} dossier(s)`;if(!dossiers.length){E.dossierList.innerHTML=`<div class="empty-state">Aucun dossier pour le moment.</div>`;return}dossiers.forEach(d=>{const active=currentDossier&&currentDossier.id===d.id,el=document.createElement("div");el.className=`dossier-card ${active?"active":""}`;el.innerHTML=`<div><strong>${esc(d.ref||"Dossier")}</strong><span>${esc(debtorName(d))}</span><span>${esc(debtorTypeLabel(d))}</span><span>${formatCurrency(principalAmount(d))}</span></div><div class="dossier-actions"><span class="badge neutral">${esc(d.statusLabel||"Créé")}</span><button class="btn btn-secondary" type="button" data-edit-dossier="${esc(d.id)}">Modifier</button></div>`;el.addEventListener("click",ev=>{if(ev.target.closest("[data-edit-dossier]"))return;currentDossier=d;renderAll()});el.querySelector("[data-edit-dossier]").addEventListener("click",ev=>{ev.stopPropagation();currentDossier=d;renderAll();openEditDossierModal(d)});E.dossierList.appendChild(el)})}
-function renderSummary(){if(!currentDossier){[E.summaryRef,E.summaryAmount,E.summaryDebtor,E.debtorNameView,E.debtorTypeView,E.debtorAddressView,E.debtorCityView,E.debtorEmailView].forEach(x=>x.textContent="—");[E.creditorNameEdit,E.creditorEmailEdit,E.creditorAddressEdit,E.creditorZipEdit,E.creditorCityEdit].forEach(x=>x.value="");return}E.summaryRef.textContent=currentDossier.ref||"—";E.summaryAmount.textContent=formatCurrency(principalAmount(currentDossier));E.summaryDebtor.textContent=debtorName(currentDossier);E.creditorNameEdit.value=creditorName(currentDossier);E.creditorEmailEdit.value=creditorEmail(currentDossier);E.creditorAddressEdit.value=creditorAddress(currentDossier);E.creditorZipEdit.value=creditorZip(currentDossier);E.creditorCityEdit.value=creditorCity(currentDossier);E.debtorNameView.textContent=debtorName(currentDossier);E.debtorTypeView.textContent=debtorTypeLabel(currentDossier);E.debtorAddressView.textContent=debtorAddress(currentDossier)||"Adresse à compléter";E.debtorCityView.textContent=[debtorZip(currentDossier),debtorCity(currentDossier)].filter(Boolean).join(" ")||"Code postal / ville à compléter";E.debtorEmailView.textContent=debtorEmail(currentDossier)||"Email à compléter"}
-function renderActions(){document.querySelectorAll(".action-card").forEach(card=>{const step=Number(card.dataset.step),cur=currentDossier?getStep(currentDossier):0;card.classList.remove("done","current","locked");if(!currentDossier)card.classList.add("locked");else if(step<=cur)card.classList.add("done");else if(step===cur+1)card.classList.add("current");else card.classList.add("locked");const btn=card.querySelector("button");if(btn)btn.disabled=!currentDossier||step>cur+1||(step===5&&cur<4)})}
-async function renderTimeline(){E.timeline.innerHTML="";if(!currentUser||!currentDossier){E.timeline.innerHTML=`<div class="empty-state">Sélectionnez un dossier.</div>`;return}const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events")),events=[];snap.forEach(s=>events.push({id:s.id,...s.data()}));events.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));if(!events.length)E.timeline.innerHTML=`<div class="empty-state">Aucune action enregistrée.</div>`;else events.forEach(ev=>{const date=ev.createdAt?.toDate?.()?ev.createdAt.toDate().toLocaleDateString("fr-FR"):todayFR(),item=document.createElement("div");item.className="timeline-item";item.innerHTML=`<div class="timeline-main"><span class="timeline-meta">${esc(date)}</span><strong>${esc(ev.title||"Action")}</strong><span>${esc(ev.description||"")}</span></div>`;E.timeline.appendChild(item)});if(currentDossier.nextAction){const planned=document.createElement("div"),date=fmtDateFR(currentDossier.nextActionAt);planned.className="timeline-item planned";planned.innerHTML=`<div class="timeline-main"><span class="timeline-meta">À venir</span><strong>${esc(nextActionLabel(currentDossier.nextAction))}</strong><span>${date!=="—"?`Préparer le ${esc(date)}`:"À préparer dès que possible"}</span></div>`;E.timeline.prepend(planned)}}
-function renderAddButton(){
-  if(isSuperAdmin()){
-    E.addDossierBtn.textContent="Créer un dossier";
-    E.subscribeBtn.disabled=true;
-    E.subscribeBtn.classList.add("is-disabled");
-    E.subscribeBtn.textContent="Accès activé";
-    return;
+async function markStep(action){
+  if(!currentUser||!currentDossier)return;
+  const step=stepForAction(action);
+  const label=`${actionTitle(action)} envoyée`;
+  const sentField=sentDateField(action);
+  const next=nextActionInfo(action);
+  const patch={
+    step:Math.max(step,getStep(currentDossier)),
+    statusLabel:label,
+    updatedAt:serverTimestamp(),
+    [sentField]:serverTimestamp()
+  };
+
+  let desc=`Date d’envoi : ${todayFR()}`;
+  if(next){
+    patch.nextAction=next.code;
+    if(next.days>0){
+      patch.nextActionAt=plusDays(next.days);
+      desc+=`\nProchaine action : ${next.label} le ${dateAfterDaysFR(next.days)}`;
+    }else{
+      desc+=`\nProchaine action : ${next.label}`;
+    }
   }
-  E.subscribeBtn.disabled=false;
-  E.subscribeBtn.classList.remove("is-disabled");
-  E.subscribeBtn.textContent="Passer en abonnement — 89 €/mois";
-  const available=availableEntitlements();
-  const ent=available[0];
-  if(ent){
-    if(ent.type==="monthly_89")E.addDossierBtn.textContent=`Créer un dossier inclus (${ent.granted-ent.used} restant${ent.granted-ent.used>1?"s":""})`;
-    else if(ent.type==="extra_19")E.addDossierBtn.textContent="Créer le dossier supplémentaire";
-    else E.addDossierBtn.textContent="Créer mon nouveau dossier";
-    return;
+
+  await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+
+  const eventsRef=collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events");
+  const existingSnap=await getDocs(eventsRef);
+  let existingEvent=null;
+  existingSnap.forEach(s=>{
+    const data=s.data()||{};
+    if(data.action===action&&!existingEvent)existingEvent={id:s.id,...data};
+  });
+
+  if(existingEvent){
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id,"events",existingEvent.id),{
+      title:label,
+      description:desc,
+      action,
+      updatedAt:serverTimestamp(),
+      createdAt:serverTimestamp()
+    });
+  }else{
+    await addDoc(eventsRef,{
+      title:label,
+      description:desc,
+      action,
+      createdAt:serverTimestamp()
+    });
   }
-  E.addDossierBtn.textContent=isSubscriptionPlan()?"Dossier supplémentaire — 19 €":"Dossier — 49 €";
+
+  await loadDossiers(currentUser.uid);
 }
 async function renderAll(){renderDossiers();renderSummary();renderActions();renderAddButton();await renderTimeline()}
 async function loadUserData(uid){try{const s=await getDoc(doc(db,"users",uid));currentUserData=s.exists()?(s.data()||{}):{}}catch{currentUserData={}}}
@@ -756,7 +787,7 @@ E.createDossierForm.addEventListener("submit",async e=>{
   const entId=entitlement.id||activeEntitlementId()||`${entitlement.type}_${Date.now()}`;
   const entUsed=entitlement.type||entitlementValue()||entId;
   const createdRequestRef=await addDoc(collection(db,"users",currentUser.uid,"requests"),{
-    ref:clean($("dossierRef").value)||generateRef(),amountTTC:amount,invoices,invoiceRef:invoices[0].ref,issuedDate:invoices[0].issuedDate,dueDate:invoices[0].dueDate,lateRatePercent:Number(E.lateRateInput.value||8.25),contractBasis:clean($("contractBasisInput").value)||"Facture de prestation impayée",creditorName:clean($("creditorNameInput").value),creditorEmail:clean($("creditorEmailInput").value),creditorAddress:clean($("creditorAddressInput").value),creditorZip:clean($("creditorZipInput").value),creditorCity:clean($("creditorCityInput").value),creditorLegalType:clean($("creditorLegalTypeInput").value)||"individual",creditorGender:clean($("creditorGenderInput").value),debtorGender:clean($("debtorGenderInput").value),debiteurType:clean($("debiteurTypeInput").value)||"professional_company",debtorName:clean($("debtorNameInput").value),debiteurName:clean($("debtorNameInput").value),debtorEmail:clean($("debtorEmailInput").value),debiteurEmail:clean($("debtorEmailInput").value),debtorAddress:clean($("debtorAddressInput").value),debtorZip:clean($("debtorZipInput").value),debtorCity:clean($("debtorCityInput").value),step:0,status:"new",statusLabel:"Dossier créé",currentStep:"new",nextAction:"RELANCE_1",clientUid:currentUser.uid,lifecycleStatus:"open",paymentStatus:"paid",
+    ref:clean($("dossierRef").value)||generateRef(),amountTTC:amount,invoices,invoiceRef:invoices[0].ref,issuedDate:invoices[0].issuedDate,dueDate:invoices[0].dueDate,lateRatePercent:Number(E.lateRateInput.value||8.25),contractBasis:clean($("contractBasisInput").value)||"Facture de prestation impayée",creditorName:clean($("creditorNameInput").value),creditorEmail:clean($("creditorEmailInput").value),creditorAddress:clean($("creditorAddressInput").value),creditorZip:clean($("creditorZipInput").value),creditorCity:clean($("creditorCityInput").value),debiteurType:clean($("debiteurTypeInput").value)||"professional_company",debtorName:clean($("debtorNameInput").value),debiteurName:clean($("debtorNameInput").value),debtorEmail:clean($("debtorEmailInput").value),debiteurEmail:clean($("debtorEmailInput").value),debtorAddress:clean($("debtorAddressInput").value),debtorZip:clean($("debtorZipInput").value),debtorCity:clean($("debtorCityInput").value),step:0,status:"new",statusLabel:"Dossier créé",currentStep:"new",nextAction:"RELANCE_1",clientUid:currentUser.uid,lifecycleStatus:"open",paymentStatus:"paid",
     entitlementId:entId,
     entitlementUsed:entUsed,
     offerType:entUsed,
@@ -771,7 +802,7 @@ E.createDossierForm.addEventListener("submit",async e=>{
   }
   E.createDossierForm.reset();fillInvoiceRows(E.invoiceRows,[{}]);E.lateRateInput.value="8.25";E.createDossierModal.classList.remove("open");await loadDossiers(currentUser.uid);
 });
-E.editDossierForm.addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const invoices=collectInvoices(E.editInvoiceRows);if(!invoices.length){alert("Ajoutez au moins une facture complète.");return}const amount=Number(invoices.reduce((t,x)=>t+x.amount,0).toFixed(2));const patch={amountTTC:amount,invoices,invoiceRef:invoices[0].ref,issuedDate:invoices[0].issuedDate,dueDate:invoices[0].dueDate,lateRatePercent:Number(E.editLateRateInput.value||8.25),contractBasis:clean($("editContractBasisInput").value)||"Facture de prestation impayée",creditorLegalType:clean($("editCreditorLegalTypeInput").value)||"individual",creditorGender:clean($("editCreditorGenderInput").value),debtorGender:clean($("editDebtorGenderInput").value),debiteurType:clean($("editDebiteurTypeInput").value)||"professional_company",debtorName:clean($("editDebtorNameInput").value),debiteurName:clean($("editDebtorNameInput").value),debtorEmail:clean($("editDebtorEmailInput").value),debiteurEmail:clean($("editDebtorEmailInput").value),debtorAddress:clean($("editDebtorAddressInput").value),debiteurAddress:clean($("editDebtorAddressInput").value),debtorZip:clean($("editDebtorZipInput").value),debiteurZip:clean($("editDebtorZipInput").value),debtorCity:clean($("editDebtorCityInput").value),debiteurCity:clean($("editDebtorCityInput").value),updatedAt:serverTimestamp()};try{E.saveDossierEditBtn.disabled=true;E.saveDossierEditBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveDossierEditBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications";closeEditDossierModal()},700)}catch(err){console.error(err);alert("Erreur Firestore : autorisez les champs invoices, lateRatePercent, creditorLegalType, creditorGender et debtorGender dans les règles de mise à jour.");E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications"}});
+E.editDossierForm.addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const invoices=collectInvoices(E.editInvoiceRows);if(!invoices.length){alert("Ajoutez au moins une facture complète.");return}const amount=Number(invoices.reduce((t,x)=>t+x.amount,0).toFixed(2));const patch={amountTTC:amount,invoices,invoiceRef:invoices[0].ref,issuedDate:invoices[0].issuedDate,dueDate:invoices[0].dueDate,lateRatePercent:Number(E.editLateRateInput.value||8.25),contractBasis:clean($("editContractBasisInput").value)||"Facture de prestation impayée",debiteurType:clean($("editDebiteurTypeInput").value)||"professional_company",debtorName:clean($("editDebtorNameInput").value),debiteurName:clean($("editDebtorNameInput").value),debtorEmail:clean($("editDebtorEmailInput").value),debiteurEmail:clean($("editDebtorEmailInput").value),debtorAddress:clean($("editDebtorAddressInput").value),debiteurAddress:clean($("editDebtorAddressInput").value),debtorZip:clean($("editDebtorZipInput").value),debiteurZip:clean($("editDebtorZipInput").value),debtorCity:clean($("editDebtorCityInput").value),debiteurCity:clean($("editDebtorCityInput").value),updatedAt:serverTimestamp()};try{E.saveDossierEditBtn.disabled=true;E.saveDossierEditBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveDossierEditBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications";closeEditDossierModal()},700)}catch(err){console.error(err);alert("Erreur Firestore lors de la mise à jour du dossier.");E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications"}});
 document.addEventListener("click",ev=>{const btn=ev.target.closest("[data-action]");if(!btn||btn.disabled)return;openTextModal(btn.dataset.action)});
 E.closeModal.addEventListener("click",closeTextModal);
 E.modalText.addEventListener("click",e=>{if(e.target===E.modalText)closeTextModal()});
@@ -806,7 +837,26 @@ if(E.injunctionFilesList){E.injunctionFilesList.addEventListener("click",e=>{con
 E.markInjunctionBtn.addEventListener("click",async()=>{try{E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement...";await markStep("injunction");E.markInjunctionBtn.textContent="Envoyé ✔";setTimeout(()=>{E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée";closeInjunction()},700)}catch(err){console.error(err);alert("Erreur : l’injonction n’a pas été enregistrée dans l’historique.");E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée"}});
 E.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
 E.saveCreditorBtn.addEventListener("click",async()=>{if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const patch={creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value),updatedAt:serverTimestamp()};try{E.saveCreditorBtn.disabled=true;E.saveCreditorBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveCreditorBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"},1200)}catch(err){console.error(err);alert("Erreur Firestore : le créancier n’a pas été enregistré.");E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"}});
-onAuthStateChanged(auth,async user=>{if(!user){location.href="connexion.html";return}currentUser=user;E.userEmail.textContent=user.email||"Client Axe Flow";await loadUserData(user.uid);await loadEntitlements(user.uid);E.statusBadge.textContent=getStatusLabel(currentUserData);E.statusBadge.className=currentUserData.accountStatus==="unpaid"?"status-pill danger":"status-pill success";E.planBadge.textContent=getPlanLabel(currentUserData);E.planBadge.className="status-pill neutral";await loadDossiers(user.uid)});
+onAuthStateChanged(auth,async user=>{
+  if(!user){
+    location.href="connexion.html";
+    return;
+  }
+  try{
+    currentUser=user;
+    E.userEmail.textContent=user.email||"Client Axe Flow";
+    await loadUserData(user.uid);
+    await loadEntitlements(user.uid);
+    E.statusBadge.textContent=getStatusLabel(currentUserData);
+    E.statusBadge.className=currentUserData.accountStatus==="unpaid"?"status-pill danger":"status-pill success";
+    E.planBadge.textContent=getPlanLabel(currentUserData);
+    E.planBadge.className="status-pill neutral";
+    await loadDossiers(user.uid);
+  }catch(error){
+    console.error("Initialisation du tableau de bord impossible :",error);
+    alert("Connexion réussie, mais le tableau de bord n’a pas pu charger les dossiers. Vérifiez les règles Firestore.");
+  }
+});
 </script>
 </body>
 </html>
