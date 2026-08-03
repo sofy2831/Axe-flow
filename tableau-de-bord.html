@@ -383,6 +383,81 @@ Signature du requérant :
 ${creditorName(d)}`;
 }
 
+
+
+/* Fonctions restaurées après suppression accidentelle */
+function sanitizePdfText(value){return String(value||"").replace(/[\u202F\u00A0]/g," ").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,"-").replace(/€/g,"EUR")}
+
+function professionalLetterHtml(body,d=currentDossier){const cb=bodyWithoutSubject(body),subject=extractSubject(body,actionTitle(currentAction));return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${escapeHtml(subject)}</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,Helvetica,sans-serif;color:#111;font-size:12.5pt;line-height:1.5}.top{display:grid;grid-template-columns:1fr 1fr;gap:35mm;margin-bottom:18mm}.sender,.recipient{white-space:pre-line}.recipient{padding-top:22mm}.date{margin-top:14mm}.subject{margin:18mm 0 10mm;font-weight:700}.body{white-space:pre-line}</style></head><body><main><section class="top"><div class="sender">${escapeHtml(creditorBlock(d))}</div><div class="recipient">À l’attention de :\n${escapeHtml(debtorBlock(d))}\n\n<div class="date">Fait le ${escapeHtml(todayFR())}</div></div></section><section class="subject">Objet : ${escapeHtml(subject)}</section><section class="body">${escapeHtml(cb)}</section></main></body></html>`}
+
+function openProfessionalLetter(body,d=currentDossier){const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow,doc=w.document;doc.open();doc.write(professionalLetterHtml(body,d));doc.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
+
+function extractSubject(b,f="Courrier"){const m=String(b||"").match(/^Objet\s*:\s*(.+?)\n/i);return m?m[1].trim():f}
+
+function bodyWithoutSubject(b){return String(b||"").replace(/^Objet\s*:\s*(.+?)\n\n/i,"").trim()}
+
+function buildText(a,d){return a==="relance1"?relance1Text(d):a==="relance2"?relance2Text(d):a==="relance3"?relance3Text(d):a==="med"?medText(d):a==="injunction"?injunctionRequestText(d):""}
+
+function summaryInjunctionText(d=currentDossier){const calc=lateFeeBreakdown(d);return`Référence : ${d?.ref||"—"}\nCréancier : ${creditorName(d)}\nDébiteur : ${debtorName(d)}\nType débiteur : ${debtorTypeLabel(d)}\n\nMontant principal : ${formatCurrency(calc.principal)}\nPénalités de retard arrêtées au ${calc.asOf.toLocaleDateString("fr-FR")} : ${formatCurrency(calc.interests)}${isProfessionalDebtor(d)?`\nIndemnités forfaitaires de recouvrement : ${formatCurrency(calc.recoveryFees)}`:""}\nTOTAL DE LA CRÉANCE : ${formatCurrency(calc.total)}\n\nFactures : ${normalizeInvoices(d).map(x=>`${x.ref} (${formatCurrency(x.amount)}, échéance ${fmtDateFR(x.dueDate)})`).join(" ; ")}\nTaux annuel appliqué : ${calc.annualRate.toLocaleString("fr-FR")}%\nFondement : ${contractBasis(d)}\nDernière étape : ${d?.statusLabel||"Dossier créé"}`}
+
+function legalCheckText(){const disputed=$("checkDebtDisputed")?.checked,weak=$("checkEvidenceWeak")?.checked,checked=["checkDebtCertain","checkDebtLiquid","checkDebtDue","checkNoSeriousDispute","checkFormalNotice"].filter(id=>$(id)?.checked).length;if(disputed)return"Alerte rouge : dette contestée. Injonction déconseillée. Orientation recommandée : référé, assignation ou avis d’avocat selon le dossier.";if(weak)return"Dossier fragile : pièces insuffisantes ou incohérentes. Compléter les justificatifs avant toute injonction.";if(checked===5)return"Feu vert prudent : créance claire, relances/MED présentes et dossier a priori exploitable pour une injonction de payer.";if(checked>=3)return"Vérification partielle : compléter les points manquants avant dépôt. Ne pas déposer si la dette est sérieusement contestée.";return"Alerte : dossier insuffisant pour une injonction propre. Revoir les pièces ou envisager une autre voie."}
+
+function syncLegalStatus(){const t=legalCheckText();E.legalStatus.classList.remove("good","bad","warn");if(t.includes("Feu vert")){E.legalStatus.classList.add("good");E.legalStatus.innerHTML=`<strong>Feu vert prudent</strong> ${t}`}else if(t.includes("partielle")){E.legalStatus.classList.add("warn");E.legalStatus.innerHTML=`<strong>Dossier à compléter</strong> ${t}`}else{E.legalStatus.classList.add("bad");E.legalStatus.innerHTML=`<strong>Injonction déconseillée / dossier fragile</strong> ${t}`}}
+
+function pieceList(d=currentDossier){const inv=normalizeInvoices(d);const pieces=inv.map((x,i)=>`Pièce ${i+1} - Facture impayée ${x.ref}`);let n=pieces.length+1;pieces.push(`Pièce ${n++} - Devis, contrat, bon de commande ou fondement contractuel`);pieces.push(`Pièce ${n++} - Preuve d’exécution de la prestation ou de livraison`);pieces.push(`Pièce ${n++} - Relances adressées au débiteur`);pieces.push(`Pièce ${n++} - Mise en demeure`);pieces.push(`Pièce ${n++} - Justificatif d’envoi de la mise en demeure`);pieces.push(`Pièce ${n++} - Décompte actualisé de la créance`);pieces.push(`Pièce ${n++} - Échanges utiles avec le débiteur`);return pieces}
+
+function bordereauText(d=currentDossier){return pieceList(d).join("\n")}
+
+function infogreffeSearchUrl(d=currentDossier){return `${INFOGREFFE_SEARCH_URL}?q=${encodeURIComponent(debtorName(d))}`}
+
+function syncDebtorGuidance(){if(!currentDossier)return;const pro=isProfessionalDebtor(currentDossier),url=infogreffeSearchUrl(currentDossier);E.proTribunalSearchBtn.href=url;E.nonOppositionInfogreffeBtn.href=url;E.privateTribunalSearchBtn.href=JUSTICE_ANNUAIRE_URL;E.nonOppositionPrivateBtn.href=JUSTICE_ANNUAIRE_URL;E.professionalPathCard.classList.toggle("active",pro);E.privatePathCard.classList.toggle("active",!pro);E.professionalPathCard.classList.toggle("muted",!pro);E.privatePathCard.classList.toggle("muted",pro);if(E.pathWarning)E.pathWarning.textContent=""}
+
+function splitEmail(email){const parts=String(email||"").split("@");return{left:parts[0]||"",right:parts[1]||""}}
+
+function safeSetText(form,name,value){try{form.getTextField(name).setText(sanitizePdfText(value));return true}catch(e){console.warn("Champ texte introuvable :",name);return false}}
+
+function safeSetFirstText(form,names,value){for(const name of names){try{form.getTextField(name).setText(sanitizePdfText(value));return name}catch(e){}}console.warn("Aucun champ Cerfa trouvé parmi :",names);return ""}
+
+function safeCheck(form,name,shouldCheck=true){try{const field=form.getCheckBox(name);shouldCheck?field.check():field.uncheck();return true}catch(e){console.warn("Case introuvable :",name);return false}}
+
+function formatDateForCerfaDayAfter(value){
+  if(!value)return "";
+  let date;
+  if(value?.toDate){
+    date=value.toDate();
+  }else if(/^\d{4}-\d{2}-\d{2}$/.test(String(value))){
+    const [year,month,day]=String(value).split("-").map(Number);
+    date=new Date(year,month-1,day);
+  }else{
+    date=new Date(value);
+  }
+  if(Number.isNaN(date.getTime()))return "";
+  date.setDate(date.getDate()+1);
+  return date.toLocaleDateString("fr-FR");
+}
+
+function renderAddButton(){
+  if(isSuperAdmin()){
+    E.addDossierBtn.textContent="Créer un dossier";
+    E.subscribeBtn.disabled=true;
+    E.subscribeBtn.classList.add("is-disabled");
+    E.subscribeBtn.textContent="Accès activé";
+    return;
+  }
+  E.subscribeBtn.disabled=false;
+  E.subscribeBtn.classList.remove("is-disabled");
+  E.subscribeBtn.textContent="Passer en abonnement — 89 €/mois";
+  const available=availableEntitlements();
+  const ent=available[0];
+  if(ent){
+    if(ent.type==="monthly_89")E.addDossierBtn.textContent=`Créer un dossier inclus (${ent.granted-ent.used} restant${ent.granted-ent.used>1?"s":""})`;
+    else if(ent.type==="extra_19")E.addDossierBtn.textContent="Créer le dossier supplémentaire";
+    else E.addDossierBtn.textContent="Créer mon nouveau dossier";
+    return;
+  }
+  E.addDossierBtn.textContent=isSubscriptionPlan()?"Dossier supplémentaire — 19 €":"Dossier — 49 €";
+}
+
 async function generateCerfaPrefilled(){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const response=await fetch(CERFA_FILLABLE_URL,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${CERFA_FILLABLE_URL}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
@@ -800,7 +875,26 @@ if(E.injunctionFilesList){E.injunctionFilesList.addEventListener("click",e=>{con
 E.markInjunctionBtn.addEventListener("click",async()=>{try{E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement...";await markStep("injunction");E.markInjunctionBtn.textContent="Envoyé ✔";setTimeout(()=>{E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée";closeInjunction()},700)}catch(err){console.error(err);alert("Erreur : l’injonction n’a pas été enregistrée dans l’historique.");E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée"}});
 E.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
 E.saveCreditorBtn.addEventListener("click",async()=>{if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const patch={creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value),updatedAt:serverTimestamp()};try{E.saveCreditorBtn.disabled=true;E.saveCreditorBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveCreditorBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"},1200)}catch(err){console.error(err);alert("Erreur Firestore : le créancier n’a pas été enregistré.");E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"}});
-onAuthStateChanged(auth,async user=>{if(!user){location.href="connexion.html";return}currentUser=user;E.userEmail.textContent=user.email||"Client Axe Flow";await loadUserData(user.uid);await loadEntitlements(user.uid);E.statusBadge.textContent=getStatusLabel(currentUserData);E.statusBadge.className=currentUserData.accountStatus==="unpaid"?"status-pill danger":"status-pill success";E.planBadge.textContent=getPlanLabel(currentUserData);E.planBadge.className="status-pill neutral";await loadDossiers(user.uid)});
+onAuthStateChanged(auth,async user=>{
+  if(!user){
+    location.href="connexion.html";
+    return;
+  }
+  try{
+    currentUser=user;
+    E.userEmail.textContent=user.email||"Client Axe Flow";
+    await loadUserData(user.uid);
+    await loadEntitlements(user.uid);
+    E.statusBadge.textContent=getStatusLabel(currentUserData);
+    E.statusBadge.className=currentUserData.accountStatus==="unpaid"?"status-pill danger":"status-pill success";
+    E.planBadge.textContent=getPlanLabel(currentUserData);
+    E.planBadge.className="status-pill neutral";
+    await loadDossiers(user.uid);
+  }catch(error){
+    console.error("Erreur de chargement Axe Flow :",error);
+    alert("Le tableau de bord est connecté, mais les données n’ont pas pu être chargées. Consultez la console.");
+  }
+});
 </script>
 </body>
 </html>
