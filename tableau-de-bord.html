@@ -314,6 +314,49 @@ function debtStatementText(d=currentDossier,asOf=new Date()){
   const rows=calc.rows.map((x,i)=>`${i+1}. ${x.ref} — échéance ${fmtDateFR(x.dueDate)} — principal ${formatCurrency(x.amount)} — ${x.days} jour(s) — intérêts ${formatCurrency(x.interests)}${isProfessionalDebtor(d)?` — indemnité forfaitaire ${formatCurrency(x.recoveryFee)}`:""}`).join("\n");
   return`DÉCOMPTE ACTUALISÉ DE LA CRÉANCE\nArrêté au ${date}\n\n${rows}\n\nPrincipal : ${formatCurrency(calc.principal)}\nPénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an) : ${formatCurrency(calc.interests)}${isProfessionalDebtor(d)?`\nIndemnités forfaitaires de recouvrement : ${formatCurrency(calc.recoveryFees)}`:""}\nTOTAL RÉCLAMÉ : ${formatCurrency(calc.total)}\n\nLes pénalités de retard continuent à courir jusqu’au complet paiement.`;
 }
+function tribunalPresidentBlock(d,currentCourtName=""){
+  const raw=clean(currentCourtName);
+  const courtType=isProfessionalDebtor(d)?"Tribunal de commerce":"Tribunal judiciaire";
+  let city=raw;
+
+  city=city
+    .replace(/^monsieur\s+le\s+président\s+(du|de la)\s+/i,"")
+    .replace(/^tribunal\s+de\s+commerce\s+de\s+/i,"")
+    .replace(/^tribunal\s+judiciaire\s+de\s+/i,"")
+    .replace(/^tribunal\s+de\s+commerce\s+/i,"")
+    .replace(/^tribunal\s+judiciaire\s+/i,"")
+    .trim();
+
+  if(!city)city="ville à compléter";
+  city=city.charAt(0).toUpperCase()+city.slice(1);
+
+  return`Monsieur le Président
+du ${courtType} de ${city}`;
+}
+
+function injunctionAttachmentsText(d=currentDossier){
+  const uploaded=Array.isArray(d?.uploadedFiles)?d.uploadedFiles:[];
+  const uploadedNames=uploaded
+    .map(file=>clean(file?.name||file?.fileName||file?.originalName))
+    .filter(Boolean);
+
+  const base=[
+    "Bordereau des pièces justificatives",
+    "Cerfa n°12946*02 prérempli",
+    "Décompte actualisé de la créance",
+    "Facture(s) impayée(s)",
+    "Contrat / devis / bon de commande, si applicable",
+    "Relances",
+    "Mise en demeure et justificatif d’envoi"
+  ];
+
+  const extra=uploadedNames.length
+    ? uploadedNames.map(name=>`Fichier téléversé : ${name}`)
+    : ["Justificatifs complémentaires"];
+
+  return[...base,...extra].map((label,index)=>`${index+1}. ${label}`).join("\n");
+}
+
 function injunctionRequestText(d,currentCourtName="",currentCourtAddress=""){
   const calc=lateFeeBreakdown(d);
   const invoices=normalizeInvoices(d);
@@ -333,11 +376,16 @@ function injunctionRequestText(d,currentCourtName="",currentCourtAddress=""){
     `${i+1}. Facture ${x.ref} : ${x.days} jour(s) de retard, intérêts arrêtés au ${todayFR()} : ${formatCurrency(x.interests)}${pro?`, indemnité forfaitaire : ${formatCurrency(x.recoveryFee)}`:""}.`
   ).join("\n");
 
-  const courtBlock=[clean(currentCourtName)||"Tribunal compétent à compléter",clean(currentCourtAddress)].filter(Boolean).join("\n");
+  const courtBlock=[
+    tribunalPresidentBlock(d,currentCourtName),
+    clean(currentCourtAddress)
+  ].filter(Boolean).join("\n");
 
-  return`REQUÊTE EN INJONCTION DE PAYER
+  return`Objet : Requête en injonction de payer
 
-À l’attention de :
+REQUÊTE EN INJONCTION DE PAYER
+Articles 1405 et suivants du Code de procédure civile
+
 ${courtBlock}
 
 REQUÉRANT
@@ -349,7 +397,7 @@ ${debtorBlock(d)}
 Courriel : ${debtorEmail(d)||"Non renseigné"}
 Qualité : ${debtorTypeLabel(d)}
 
-OBJET
+OBJET DE LA DEMANDE
 Requête en injonction de payer portant sur la somme totale de ${formatCurrency(calc.total)}.
 
 EXPOSÉ DES FAITS
@@ -389,13 +437,188 @@ Fait le ${todayFR()}
 
 Signature du requérant :
 
-${creditorName(d)}`;
+${creditorName(d)}
+
+PIÈCES JOINTES
+
+${injunctionAttachmentsText(d)}`;
 }
 
 
 
 /* Fonctions restaurées après suppression accidentelle */
 function sanitizePdfText(value){return String(value||"").replace(/[\u202F\u00A0]/g," ").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,"-").replace(/€/g,"EUR")}
+
+
+function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""){
+  const calc=lateFeeBreakdown(d);
+  const invoices=normalizeInvoices(d);
+  const pro=isProfessionalDebtor(d);
+  const reference=clean(d?.ref)||"—";
+  const courtTitle=tribunalPresidentBlock(d,currentCourtName);
+  const courtAddress=clean(currentCourtAddress);
+  const relances=[
+    d?.relance1SentAt?`Première relance adressée le ${fmtDateFR(d.relance1SentAt)}`:"",
+    d?.relance2SentAt?`Deuxième relance adressée le ${fmtDateFR(d.relance2SentAt)}`:"",
+    d?.relance3SentAt?`Dernière relance adressée le ${fmtDateFR(d.relance3SentAt)}`:"",
+    d?.miseEnDemeureSentAt?`Mise en demeure adressée le ${fmtDateFR(d.miseEnDemeureSentAt)}`:""
+  ].filter(Boolean);
+
+  const invoiceHtml=invoices.map((x,i)=>
+    `<li>Facture ${escapeHtml(x.ref)}, émise le ${escapeHtml(fmtDateFR(x.issuedDate))}, échue le ${escapeHtml(fmtDateFR(x.dueDate))}, d’un montant de ${escapeHtml(formatCurrency(x.amount))}.</li>`
+  ).join("");
+
+  const interestHtml=calc.rows.map(x=>
+    `<li>Facture ${escapeHtml(x.ref)} : ${x.days} jour(s) de retard, intérêts arrêtés au ${escapeHtml(todayFR())} : ${escapeHtml(formatCurrency(x.interests))}${pro?`, indemnité forfaitaire : ${escapeHtml(formatCurrency(x.recoveryFee))}`:""}.</li>`
+  ).join("");
+
+  const relanceHtml=relances.length
+    ? `<p><strong>Démarches amiables effectuées :</strong></p><ul>${relances.map(item=>`<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+    : "";
+
+  const attachments=injunctionAttachmentsText(d)
+    .split("\n")
+    .map(line=>line.replace(/^\d+\.\s*/,""))
+    .filter(Boolean)
+    .map(label=>`<li>${escapeHtml(label)}</li>`)
+    .join("");
+
+  const footer=page=>`<footer>
+    <span>Requête en injonction de payer — Réf. Axe Flow : ${escapeHtml(reference)}</span>
+    <strong>Page ${page} / 3</strong>
+  </footer>`;
+
+  return`<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Requête en injonction de payer — ${escapeHtml(reference)}</title>
+<style>
+  @page{size:A4;margin:0}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11.3pt;line-height:1.42}
+  .print-page{position:relative;width:210mm;height:297mm;padding:16mm 18mm 20mm;page-break-after:always;overflow:hidden}
+  .print-page:last-child{page-break-after:auto}
+  .letter-head{display:grid;grid-template-columns:1fr 1fr;gap:28mm;margin-bottom:15mm}
+  .sender,.recipient{white-space:pre-line}
+  .recipient{padding-top:18mm}
+  .date{margin-top:12mm}
+  .subject{margin:0 0 10mm;font-weight:700}
+  h1{font-size:15pt;text-align:center;margin:0 0 2mm}
+  .legal-subtitle{text-align:center;font-size:10.5pt;margin-bottom:12mm}
+  h2{font-size:11.5pt;margin:7mm 0 3mm;letter-spacing:.01em}
+  p{margin:0 0 4mm}
+  ul,ol{margin:0 0 4mm;padding-left:7mm}
+  li{margin-bottom:2mm}
+  .identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:14mm}
+  .identity-block{white-space:pre-line}
+  .amount-box{border:1px solid #bbb;padding:4mm 5mm;margin:5mm 0}
+  .total{font-weight:700}
+  .signature{margin-top:10mm}
+  .attachments{columns:1;margin-top:4mm}
+  footer{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:1px solid #999;padding-top:3mm;display:flex;justify-content:space-between;gap:10mm;font-size:9pt;color:#444}
+  footer strong{white-space:nowrap}
+</style>
+</head>
+<body>
+
+<section class="print-page">
+  <div class="letter-head">
+    <div class="sender">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}</div>
+    <div class="recipient">${escapeHtml(courtTitle).replace(/\n/g,"<br>")}${courtAddress?`<br><br>${escapeHtml(courtAddress).replace(/\n/g,"<br>")}`:""}
+      <div class="date">Fait le ${escapeHtml(todayFR())}</div>
+    </div>
+  </div>
+
+  <div class="subject">Objet : Requête en injonction de payer</div>
+  <h1>REQUÊTE EN INJONCTION DE PAYER</h1>
+  <div class="legal-subtitle">Articles 1405 et suivants du Code de procédure civile</div>
+
+  <div class="identity-grid">
+    <div>
+      <h2>REQUÉRANT</h2>
+      <div class="identity-block">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}<br>Courriel : ${escapeHtml(creditorEmail(d)||"À compléter")}</div>
+    </div>
+    <div>
+      <h2>DÉBITEUR</h2>
+      <div class="identity-block">${escapeHtml(debtorBlock(d)).replace(/\n/g,"<br>")}<br>Courriel : ${escapeHtml(debtorEmail(d)||"Non renseigné")}<br>Qualité : ${escapeHtml(debtorTypeLabel(d))}</div>
+    </div>
+  </div>
+
+  <h2>OBJET DE LA DEMANDE</h2>
+  <p>Requête en injonction de payer portant sur la somme totale de <strong>${escapeHtml(formatCurrency(calc.total))}</strong>.</p>
+
+  ${footer(1)}
+</section>
+
+<section class="print-page">
+  <h2>EXPOSÉ DES FAITS</h2>
+  <p>Le requérant a fourni au débiteur les prestations ou biens correspondant à la créance suivante :</p>
+  <ol>${invoiceHtml}</ol>
+  <p>Malgré l’arrivée à échéance des factures, aucun règlement intégral n’est intervenu.</p>
+  ${relanceHtml}
+  <p>La créance est certaine, liquide et exigible. Elle est fondée sur : ${escapeHtml(contractBasis(d))}.</p>
+
+  <h2>DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${escapeHtml(todayFR())}</h2>
+  <div class="amount-box">
+    <p>Principal : <strong>${escapeHtml(formatCurrency(calc.principal))}</strong></p>
+    <p>Pénalités de retard au taux annuel de ${escapeHtml(String(calc.annualRate).replace(".",","))} % : <strong>${escapeHtml(formatCurrency(calc.interests))}</strong></p>
+    ${pro?`<p>Indemnités forfaitaires de recouvrement : <strong>${escapeHtml(formatCurrency(calc.recoveryFees))}</strong></p>`:""}
+    <p class="total">TOTAL RÉCLAMÉ : ${escapeHtml(formatCurrency(calc.total))}</p>
+  </div>
+
+  <p><strong>Détail :</strong></p>
+  <ol>${interestHtml}</ol>
+
+  <h2>FONDEMENTS DE LA DEMANDE</h2>
+  <p>La présente requête est formée selon la procédure d’injonction de payer. Les sommes réclamées résultent de factures échues demeurées impayées malgré les démarches amiables entreprises.${pro?" Les pénalités de retard et les indemnités forfaitaires de recouvrement sont demandées conformément aux stipulations contractuelles et aux dispositions applicables entre professionnels.":""}</p>
+
+  ${footer(2)}
+</section>
+
+<section class="print-page">
+  <h2>PAR CES MOTIFS</h2>
+  <p>Il est demandé au juge de :</p>
+  <ol>
+    <li>Enjoindre au débiteur de payer au requérant la somme principale de ${escapeHtml(formatCurrency(calc.principal))} ;</li>
+    <li>Ajouter les pénalités de retard arrêtées au ${escapeHtml(todayFR())}, soit ${escapeHtml(formatCurrency(calc.interests))}, avec poursuite de leur calcul jusqu’au complet paiement ;</li>
+    ${pro?`<li>Ajouter les indemnités forfaitaires de recouvrement, soit ${escapeHtml(formatCurrency(calc.recoveryFees))} ;</li>`:""}
+    <li>Mettre à la charge du débiteur les frais de la procédure selon décision du juge.</li>
+  </ol>
+
+  <p>Le requérant certifie exacts les renseignements contenus dans la présente demande et joint les pièces justificatives mentionnées au bordereau.</p>
+
+  <div class="signature">
+    <p>Fait le ${escapeHtml(todayFR())}</p>
+    <p>Signature du requérant :</p>
+    <p><strong>${escapeHtml(creditorName(d))}</strong></p>
+  </div>
+
+  <h2>PIÈCES JOINTES</h2>
+  <ol class="attachments">${attachments}</ol>
+
+  ${footer(3)}
+</section>
+
+</body>
+</html>`;
+}
+
+function openInjunctionRequestPrint(d,currentCourtName="",currentCourtAddress=""){
+  const iframe=document.createElement("iframe");
+  iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";
+  document.body.appendChild(iframe);
+  const w=iframe.contentWindow;
+  const doc=w.document;
+  doc.open();
+  doc.write(injunctionRequestPrintHtml(d,currentCourtName,currentCourtAddress));
+  doc.close();
+  setTimeout(()=>{
+    w.focus();
+    w.print();
+    setTimeout(()=>iframe.remove(),1200);
+  },400);
+}
 
 function professionalLetterHtml(body,d=currentDossier){const cb=bodyWithoutSubject(body),subject=extractSubject(body,actionTitle(currentAction));return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${escapeHtml(subject)}</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,Helvetica,sans-serif;color:#111;font-size:12.5pt;line-height:1.5}.top{display:grid;grid-template-columns:1fr 1fr;gap:35mm;margin-bottom:18mm}.sender,.recipient{white-space:pre-line}.recipient{padding-top:22mm}.date{margin-top:14mm}.subject{margin:18mm 0 10mm;font-weight:700}.body{white-space:pre-line}</style></head><body><main><section class="top"><div class="sender">${escapeHtml(creditorBlock(d))}</div><div class="recipient">À l’attention de :\n${escapeHtml(debtorBlock(d))}\n\n<div class="date">Fait le ${escapeHtml(todayFR())}</div></div></section><section class="subject">Objet : ${escapeHtml(subject)}</section><section class="body">${escapeHtml(cb)}</section></main></body></html>`}
 
@@ -906,17 +1129,17 @@ E.injunctionModal.addEventListener("click",e=>{if(e.target===E.injunctionModal)c
 ["checkDebtCertain","checkDebtLiquid","checkDebtDue","checkNoSeriousDispute","checkFormalNotice","checkDebtDisputed","checkEvidenceWeak"].forEach(id=>$(id).addEventListener("change",syncLegalStatus));
 E.generateInjunctionRequestBtn?.addEventListener("click",()=>{
   if(!currentDossier)return;
-  const courtName=clean(prompt("Nom du tribunal compétent :", ""));
+  const courtName=clean(prompt("Ville ou nom du tribunal compétent :", ""));
   const courtAddress=clean(prompt("Adresse du tribunal compétent :", ""));
   currentAction="injunction";
-  openProfessionalLetter(injunctionRequestText(currentDossier,courtName,courtAddress),currentDossier);
+  openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
 });
 E.generateInjunctionRequestBtnPrivate?.addEventListener("click",()=>{
   if(!currentDossier)return;
-  const courtName=clean(prompt("Nom du tribunal compétent :", ""));
+  const courtName=clean(prompt("Ville ou nom du tribunal compétent :", ""));
   const courtAddress=clean(prompt("Adresse du tribunal compétent :", ""));
   currentAction="injunction";
-  openProfessionalLetter(injunctionRequestText(currentDossier,courtName,courtAddress),currentDossier);
+  openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
 });
 E.generateCerfaBtn?.addEventListener("click",generateCerfaPrefilled);
 E.printDebtStatementBtnPro?.addEventListener("click",printDebtStatement);
