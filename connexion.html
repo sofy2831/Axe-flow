@@ -313,17 +313,18 @@
     const userRef = doc(db, "users", user.uid);
     const snap = await getDoc(userRef);
 
+    // Utilisateur déjà connu : aucune réécriture de rôle, plan ou statut.
+    // Ces champs système restent sous contrôle Firestore / serveur.
     if (snap.exists()) {
       await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email || "",
-        role: snap.data().role || "client",
         updatedAt: serverTimestamp()
       }, { merge: true });
 
       return;
     }
 
+    // Première création du profil : rôle et statut imposés côté client,
+    // puis vérifiés strictement par les règles Firestore.
     await setDoc(userRef, {
       uid: user.uid,
       email: user.email || "",
