@@ -55,9 +55,22 @@ service cloud.firestore {
       ];
     }
 
+    // Champs autorisés lors de la création CLIENT.
+    // Aucun plan, entitlement, statut Stripe ou rôle admin
+    // ne peut être créé depuis le navigateur.
+    function allowedUserCreateKeys() {
+      return [
+        "uid",
+        "email",
+        "role",
+        "accountStatus",
+        "createdAt",
+        "updatedAt"
+      ];
+    }
+
     // Champs qu'un utilisateur peut modifier lui-même.
-    // IMPORTANT :
-    // aucun rôle, plan, entitlement ou statut de paiement ici.
+    // Aucun rôle, plan, entitlement ou statut de paiement ici.
     function allowedUserUpdateKeys() {
       return [
         "businessProfile",
@@ -358,19 +371,28 @@ service cloud.firestore {
 
       // ---------------------------------------------------------
       // Création du profil utilisateur
+      //
+      // La connexion Axe Flow crée uniquement :
+      // uid / email / role=client / accountStatus=active
+      // createdAt / updatedAt
       // ---------------------------------------------------------
 
       allow create: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(allowedUserKeys())
-        && request.resource.data.uid == request.auth.uid;
+        && request.resource.data.keys().hasOnly(allowedUserCreateKeys())
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role == "client"
+        && request.resource.data.accountStatus == "active";
 
 
       // ---------------------------------------------------------
       // Modification du profil
       //
-      // Le client peut uniquement modifier son profil métier.
+      // Le client peut uniquement modifier :
+      // businessProfile / displayName / updatedAt
+      //
       // Il ne peut PAS modifier :
-      // role / plan / entitlement / paymentStatus / quota etc.
+      // role / plan / entitlement / paymentStatus / quotas etc.
       // ---------------------------------------------------------
 
       allow update: if (
@@ -434,9 +456,17 @@ service cloud.firestore {
           allow update: if isAdmin();
 
 
-          // Conservé pour la fonction "Réinitialiser le suivi".
-          // Le tableau de bord protège désormais les paiements.
-          allow delete: if isOwner(userId) || isAdmin();
+          // Les événements ordinaires peuvent être supprimés
+          // par "Réinitialiser le suivi".
+          //
+          // Un paiement reçu du débiteur est en revanche
+          // protégé et ne peut pas être supprimé côté client.
+          allow delete: if isAdmin()
+            || (
+              isOwner(userId)
+              && resource.data.type != "payment"
+              && resource.data.action != "payment_received"
+            );
 
 
           // -----------------------------------------------------
@@ -493,7 +523,9 @@ service cloud.firestore {
       //
       // Lecture client autorisée.
       // Écriture navigateur client interdite.
-      // Cloud Functions Admin SDK reste autorisé côté serveur.
+      //
+      // Les Cloud Functions utilisant Firebase Admin SDK
+      // ne sont pas bloquées par les règles Firestore.
       // =========================================================
 
       match /entitlements/{entitlementId} {
@@ -507,7 +539,9 @@ service cloud.firestore {
       // =========================================================
       // PAIEMENTS STRIPE AXE FLOW
       //
-      // À ne pas confondre avec les règlements des débiteurs.
+      // Paiements du CLIENT envers Axe Flow.
+      // À ne pas confondre avec les règlements des débiteurs
+      // enregistrés dans les dossiers.
       // =========================================================
 
       match /payments/{paymentId} {
