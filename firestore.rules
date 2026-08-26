@@ -3,6 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // =========================================================
+    // FONCTIONS GÉNÉRALES
+    // =========================================================
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -14,205 +18,516 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["admin", "superadmin"];
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+          in ["admin", "superadmin"];
     }
 
+
+    // =========================================================
+    // USERS
+    // =========================================================
+
+    // Ensemble des champs autorisés dans un document user.
     function allowedUserKeys() {
-  return [
-    "uid", "email", "role",
-    "plan", "planType", "accountStatus", "subscriptionStatus",
-    "entitlement", "entitlementStatus", "paymentStatus",
-    "monthlyQuota", "monthlyUsed", "isTestAccount",
-    "businessProfile", "displayName",
-    "createdAt", "updatedAt"
-  ];
-}
-
-    function allowedRequestKeys() {
       return [
-        "ref", "label",
+        "uid",
+        "email",
+        "role",
 
-        "amountTTC", "amountDue",
-        "invoiceRef", "invoiceNumber",
-        "issuedDate", "invoiceIssuedDate",
-        "dueDate", "invoiceDueDate",
-        "contractBasis",
+        "plan",
+        "planType",
+        "accountStatus",
+        "subscriptionStatus",
 
-        "creditorName", "creditorEmail", "creditorAddress", "creditorZip", "creditorCity",
+        "entitlement",
+        "entitlementStatus",
+        "paymentStatus",
 
-        "debiteurType", "debiteurName", "debiteurEmail", "debiteurPhone",
-        "debiteurAddress", "debiteurZip", "debiteurCity",
+        "monthlyQuota",
+        "monthlyUsed",
+        "isTestAccount",
 
-        "debtorName", "debtorEmail", "debtorPhone",
-        "debtorAddress", "debtorZip", "debtorCity",
+        "businessProfile",
+        "displayName",
 
-        "homeName", "objectLabel", "dossierSummary",
-
-        "status", "statusLabel", "step", "currentStep",
-        "nextAction", "nextActionAt",
-
-        "relance1SentAt", "relance2SentAt", "relance3SentAt",
-        "miseEnDemeureSentAt", "injunctionPreparedAt",
-
-        "injunctionPublished", "postOrderChoice",
-
-        "entitlementId", "entitlementUsed","entitlementPlan","offerType", "clientUid",
-        "lifecycleStatus", "paymentStatus",
-
-        "clientHasNewFiles", "clientLastUploadAt", "clientFilesUpdatedAt",
-        "clientStatus", "clientActionRequired",
-        "lastClientProofAt", "lastPublishedEventAt", "proofsCompletionStatus",
-
-        "priority", "closedAt", "archivedAt", "closureReason", "closureComment",
-
-        "createdAt", "updatedAt"
+        "createdAt",
+        "updatedAt"
       ];
     }
 
+    // Champs qu'un utilisateur peut modifier lui-même.
+    // IMPORTANT :
+    // aucun rôle, plan, entitlement ou statut de paiement ici.
+    function allowedUserUpdateKeys() {
+      return [
+        "businessProfile",
+        "displayName",
+        "updatedAt"
+      ];
+    }
+
+
+    // =========================================================
+    // DOSSIERS / REQUESTS
+    // =========================================================
+
+    function allowedRequestKeys() {
+      return [
+        "ref",
+        "label",
+
+        // Ancienne compatibilité montant / facture
+        "amountTTC",
+        "amountDue",
+        "invoiceRef",
+        "invoiceNumber",
+        "issuedDate",
+        "invoiceIssuedDate",
+        "dueDate",
+        "invoiceDueDate",
+
+        "contractBasis",
+
+        // Factures détaillées
+        "invoices",
+        "lateRatePercent",
+
+        // Paiements reçus du débiteur
+        "payments",
+        "totalPayments",
+        "principalBalance",
+
+        // Créancier
+        "creditorName",
+        "creditorEmail",
+        "creditorAddress",
+        "creditorZip",
+        "creditorCity",
+
+        // Débiteur - ancienne compatibilité
+        "debiteurType",
+        "debiteurName",
+        "debiteurEmail",
+        "debiteurPhone",
+        "debiteurAddress",
+        "debiteurZip",
+        "debiteurCity",
+
+        // Débiteur
+        "debtorName",
+        "debtorEmail",
+        "debtorPhone",
+        "debtorAddress",
+        "debtorZip",
+        "debtorCity",
+
+        // Dossier
+        "homeName",
+        "objectLabel",
+        "dossierSummary",
+
+        // Workflow
+        "status",
+        "statusLabel",
+        "step",
+        "currentStep",
+        "nextAction",
+        "nextActionAt",
+
+        // Étapes envoyées
+        "relance1SentAt",
+        "relance2SentAt",
+        "relance3SentAt",
+        "miseEnDemeureSentAt",
+        "injunctionPreparedAt",
+
+        // Injonction
+        "injunctionPublished",
+        "postOrderChoice",
+
+        // Droit d'utilisation Axe Flow
+        "entitlementId",
+        "entitlementUsed",
+        "entitlementPlan",
+        "offerType",
+        "clientUid",
+
+        // Cycle de vie
+        "lifecycleStatus",
+        "paymentStatus",
+
+        // Échanges / fichiers
+        "clientHasNewFiles",
+        "clientLastUploadAt",
+        "clientFilesUpdatedAt",
+        "clientStatus",
+        "clientActionRequired",
+        "lastClientProofAt",
+        "lastPublishedEventAt",
+        "proofsCompletionStatus",
+
+        // Administration dossier
+        "priority",
+        "closedAt",
+        "archivedAt",
+        "closureReason",
+        "closureComment",
+
+        "createdAt",
+        "updatedAt"
+      ];
+    }
+
+
     function allowedRequestUpdateKeys() {
       return [
-        "creditorName", "creditorEmail", "creditorAddress", "creditorZip", "creditorCity",
 
-        "debtorName", "debtorEmail", "debtorAddress", "debtorZip", "debtorCity",
-        "debiteurName", "debiteurEmail", "debiteurAddress", "debiteurZip", "debiteurCity",
+        // Créancier
+        "creditorName",
+        "creditorEmail",
+        "creditorAddress",
+        "creditorZip",
+        "creditorCity",
 
-        "step", "statusLabel", "nextAction", "nextActionAt",
+        // Débiteur
+        "debtorName",
+        "debtorEmail",
+        "debtorAddress",
+        "debtorZip",
+        "debtorCity",
 
-        "relance1SentAt", "relance2SentAt", "relance3SentAt",
-        "miseEnDemeureSentAt", "injunctionPreparedAt",
+        // Compatibilité anciens champs débiteur
+        "debiteurName",
+        "debiteurEmail",
+        "debiteurAddress",
+        "debiteurZip",
+        "debiteurCity",
+        "debiteurType",
+
+        // Factures
+        "amountTTC",
+        "amountDue",
+        "invoiceRef",
+        "invoiceNumber",
+        "issuedDate",
+        "invoiceIssuedDate",
+        "dueDate",
+        "invoiceDueDate",
+        "contractBasis",
+        "invoices",
+        "lateRatePercent",
+
+        // Paiements reçus du débiteur
+        "payments",
+        "totalPayments",
+        "principalBalance",
+
+        // Workflow
+        "step",
+        "currentStep",
+        "status",
+        "statusLabel",
+        "lifecycleStatus",
+        "nextAction",
+        "nextActionAt",
+
+        // Étapes
+        "relance1SentAt",
+        "relance2SentAt",
+        "relance3SentAt",
+        "miseEnDemeureSentAt",
+        "injunctionPreparedAt",
+
+        // Injonction
+        "injunctionPublished",
+        "postOrderChoice",
+
+        // Clôture
+        "closedAt",
+        "closureReason",
+        "closureComment",
 
         "updatedAt"
       ];
     }
 
+
+    // =========================================================
+    // HISTORIQUE / EVENTS
+    // =========================================================
+
     function allowedEventKeys() {
       return [
-        "title", "description", "action", "type",
-        "createdAt", "updatedAt"
+        "title",
+        "description",
+        "action",
+        "type",
+
+        // Événement paiement débiteur
+        "amount",
+        "effectiveDate",
+        "method",
+        "reference",
+        "balanceAfter",
+
+        "createdAt",
+        "updatedAt"
       ];
     }
+
+
+    // =========================================================
+    // FICHIERS
+    // =========================================================
 
     function allowedFileKeys() {
       return [
-        "name", "filename", "url", "path", "type", "mimeType",
-        "size", "uploadedAt", "createdAt", "updatedAt"
+        "name",
+        "filename",
+        "url",
+        "path",
+        "type",
+        "mimeType",
+        "size",
+        "uploadedAt",
+        "createdAt",
+        "updatedAt"
       ];
     }
+
+
+    // =========================================================
+    // ENTITLEMENTS AXE FLOW
+    // =========================================================
 
     function allowedEntitlementKeys() {
       return [
-        "type", "status", "grantedCaseCount", "usedCaseCount",
-        "validFrom", "validUntil", "sourcePaymentId", "source",
+        "type",
+        "status",
+        "grantedCaseCount",
+        "usedCaseCount",
+
+        "validFrom",
+        "validUntil",
+
+        "sourcePaymentId",
+        "source",
+
         "stripeSessionId",
-    "stripeSubscriptionId",
-    "stripeCustomerId",
-        
-        
-        "createdAt", "updatedAt"
+        "stripeSubscriptionId",
+        "stripeCustomerId",
+
+        "createdAt",
+        "updatedAt"
       ];
     }
 
+
+    // =========================================================
+    // PAIEMENTS STRIPE AXE FLOW
+    // =========================================================
+
     function allowedPaymentKeys() {
       return [
-        "type", "status", "amount", "currency", "provider",
-        "stripeSessionId", "stripePaymentIntentId",
-         "stripeSubscriptionId",
-    "stripeCustomerId",
-    "paymentLinkId",
-        
-        
-        "createdAt", "updatedAt"
+        "type",
+        "status",
+        "amount",
+        "currency",
+        "provider",
+
+        "stripeSessionId",
+        "stripePaymentIntentId",
+        "stripeSubscriptionId",
+        "stripeCustomerId",
+        "paymentLinkId",
+
+        "createdAt",
+        "updatedAt"
       ];
     }
+
+
+    // =========================================================
+    // USERS
+    // =========================================================
 
     match /users/{userId} {
 
       allow read: if isOwner(userId) || isAdmin();
 
+
+      // ---------------------------------------------------------
+      // Création du profil utilisateur
+      // ---------------------------------------------------------
+
       allow create: if isOwner(userId)
         && request.resource.data.keys().hasOnly(allowedUserKeys())
         && request.resource.data.uid == request.auth.uid;
 
+
+      // ---------------------------------------------------------
+      // Modification du profil
+      //
+      // Le client peut uniquement modifier son profil métier.
+      // Il ne peut PAS modifier :
+      // role / plan / entitlement / paymentStatus / quota etc.
+      // ---------------------------------------------------------
+
       allow update: if (
           isOwner(userId)
+
           && request.resource.data.keys().hasOnly(allowedUserKeys())
+
           && request.resource.data.uid == resource.data.uid
+
           && request.resource.data.email == resource.data.email
+
+          && request.resource.data
+            .diff(resource.data)
+            .changedKeys()
+            .hasOnly(allowedUserUpdateKeys())
         )
         || isAdmin();
 
+
       allow delete: if isAdmin();
+
+
+      // =========================================================
+      // DOSSIERS
+      // =========================================================
 
       match /requests/{requestId} {
 
         allow read: if isOwner(userId) || isAdmin();
 
+
         allow create: if isOwner(userId)
           && request.resource.data.keys().hasOnly(allowedRequestKeys());
 
+
         allow update: if isOwner(userId)
           && request.resource.data.keys().hasOnly(allowedRequestKeys())
-          && request.resource.data.diff(resource.data).changedKeys().hasOnly(allowedRequestUpdateKeys());
+          && request.resource.data
+            .diff(resource.data)
+            .changedKeys()
+            .hasOnly(allowedRequestUpdateKeys());
+
 
         allow delete: if isOwner(userId) || isAdmin();
+
+
+        // =======================================================
+        // HISTORIQUE DU DOSSIER
+        // =======================================================
 
         match /events/{eventId} {
 
           allow read: if isOwner(userId) || isAdmin();
 
+
           allow create: if isOwner(userId)
             && request.resource.data.keys().hasOnly(allowedEventKeys());
 
-          allow update, delete: if isOwner(userId) || isAdmin();
+
+          // L'historique existant n'est pas modifiable par le client.
+          allow update: if isAdmin();
+
+
+          // Conservé pour la fonction "Réinitialiser le suivi".
+          // Le tableau de bord protège désormais les paiements.
+          allow delete: if isOwner(userId) || isAdmin();
+
+
+          // -----------------------------------------------------
+          // Justificatifs associés à un événement
+          // -----------------------------------------------------
 
           match /proofs/{proofId} {
+
             allow read: if isOwner(userId) || isAdmin();
-            allow create, update, delete: if isOwner(userId) || isAdmin();
+
+            allow create, update, delete:
+              if isOwner(userId) || isAdmin();
           }
         }
 
+
+        // =======================================================
+        // DOCUMENTS DU DOSSIER
+        // =======================================================
+
         match /documents/{documentId} {
-          allow read, create, update, delete: if isOwner(userId) || isAdmin();
+
+          allow read, create, update, delete:
+            if isOwner(userId) || isAdmin();
         }
+
+
+        // =======================================================
+        // FICHIERS DU DOSSIER
+        // =======================================================
 
         match /files/{fileId} {
-          allow read, create, update, delete: if isOwner(userId) || isAdmin();
+
+          allow read, create, update, delete:
+            if isOwner(userId) || isAdmin();
         }
 
+
+        // =======================================================
+        // MESSAGES DU DOSSIER
+        // =======================================================
+
         match /messages/{messageId} {
-          allow read, create, update, delete: if isOwner(userId) || isAdmin();
+
+          allow read, create, update, delete:
+            if isOwner(userId) || isAdmin();
         }
-      }
+
+      } // FIN requests
+
+
+      // =========================================================
+      // ENTITLEMENTS AXE FLOW
+      //
+      // Lecture client autorisée.
+      // Écriture navigateur client interdite.
+      // Cloud Functions Admin SDK reste autorisé côté serveur.
+      // =========================================================
 
       match /entitlements/{entitlementId} {
 
         allow read: if isOwner(userId) || isAdmin();
 
-        allow create, update: if (
-            isOwner(userId)
-            && request.resource.data.keys().hasOnly(allowedEntitlementKeys())
-          )
-          || isAdmin();
-
-        allow delete: if isAdmin();
+        allow create, update, delete: if isAdmin();
       }
+
+
+      // =========================================================
+      // PAIEMENTS STRIPE AXE FLOW
+      //
+      // À ne pas confondre avec les règlements des débiteurs.
+      // =========================================================
 
       match /payments/{paymentId} {
 
         allow read: if isOwner(userId) || isAdmin();
 
-        allow create, update: if (
-            isOwner(userId)
-            && request.resource.data.keys().hasOnly(allowedPaymentKeys())
-          )
-          || isAdmin();
-
-        allow delete: if isAdmin();
+        allow create, update, delete: if isAdmin();
       }
-    }
+
+    } // FIN users/{userId}
+
+
+    // =========================================================
+    // ESPACE ADMIN
+    // =========================================================
 
     match /admin/{document=**} {
+
       allow read, write: if isAdmin();
     }
-  }
-}
+
+  } // FIN database
+} // FIN firestore
