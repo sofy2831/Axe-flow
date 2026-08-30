@@ -1161,8 +1161,8 @@ async function resetDossierTracking(){
   if(!currentUser||!currentDossier)return;
   const ok=confirm(
     "Réinitialiser tout le suivi de ce dossier ?\n\n" +
-    "Les dates de relance, de mise en demeure, d’injonction et la prochaine action seront effacées. " +
-    "Les factures et les coordonnées resteront conservées."
+    "Les relances, la mise en demeure, l’injonction ET les paiements enregistrés seront effacés. " +
+    "Le solde sera remis au montant initial. Les factures et les coordonnées resteront conservées."
   );
   if(!ok)return;
 
@@ -1170,14 +1170,21 @@ async function resetDossierTracking(){
   const eventsRef=collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events");
   const eventsSnap=await getDocs(eventsRef);
 
-  await Promise.all(eventsSnap.docs.filter(eventDoc=>(eventDoc.data()?.type!=="payment"&&eventDoc.data()?.action!=="payment_received")).map(eventDoc=>deleteDoc(eventDoc.ref)));
+  // Réinitialisation de TEST : supprimer aussi les événements de paiement.
+  await Promise.all(eventsSnap.docs.map(eventDoc=>deleteDoc(eventDoc.ref)));
+
+  const initialPrincipal=principalAmount(currentDossier);
 
   await updateDoc(requestRef,{
     step:0,
-    status:principalBalance(currentDossier)<=0?"paid_closed":"new",
-    statusLabel:principalBalance(currentDossier)<=0?"Payé / clôturé":"Dossier créé",
-    currentStep:principalBalance(currentDossier)<=0?"paid":"new",
-    nextAction:principalBalance(currentDossier)<=0?deleteField():"RELANCE_1",
+    status:"new",
+    statusLabel:"Dossier créé",
+    currentStep:"new",
+    nextAction:"RELANCE_1",
+    lifecycleStatus:"open",
+    payments:[],
+    totalPayments:0,
+    principalBalance:initialPrincipal,
     nextActionAt:deleteField(),
     relance1SentAt:deleteField(),
     relance2SentAt:deleteField(),
