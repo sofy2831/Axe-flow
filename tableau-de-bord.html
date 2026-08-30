@@ -769,7 +769,7 @@ function renderAddButton(){
   E.addDossierBtn.textContent=isSubscriptionPlan()?"Dossier supplémentaire — 19 €":"Dossier — 49 €";
 }
 
-function signatureImgHtml(){return signatureDataUrl?`<img src="${signatureDataUrl}" alt="Signature du requérant" style="display:block;max-width:80mm;max-height:30mm;object-fit:contain;margin-top:2mm">`:""}
+function signatureImgHtml(){return signatureDataUrl?`<img src="${signatureDataUrl}" alt="Signature du requérant" style="display:block;max-width:105mm;max-height:38mm;object-fit:contain;margin-top:2mm">`:""}
 function openSignatureModal(target,courtName="",courtAddress=""){pendingSignedDocument=target||"";pendingCourtName=courtName;pendingCourtAddress=courtAddress;const modal=$("signatureModal"),canvas=$("signatureCanvas");if(!modal||!canvas)return;modal.classList.add("open");prepareSignatureCanvas();}
 function closeSignatureModal(clearPending=true){$("signatureModal")?.classList.remove("open");if(clearPending){pendingSignedDocument="";pendingCourtName="";pendingCourtAddress="";}}
 function prepareSignatureCanvas(){const canvas=$("signatureCanvas"),ctx=canvas?.getContext("2d");if(!canvas||!ctx)return;ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle="#111";ctx.lineWidth=4;ctx.lineCap="round";ctx.lineJoin="round";canvas.dataset.hasInk="0";if(signatureDataUrl){const img=new Image();img.onload=()=>{ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);const r=Math.min((canvas.width-80)/img.width,(canvas.height-50)/img.height);const w=img.width*r,h=img.height*r;ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h);canvas.dataset.hasInk="1"};img.src=signatureDataUrl}}
