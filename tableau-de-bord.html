@@ -221,6 +221,29 @@
 .brand-sub{font-weight:500!important}
 #companyProfileBtn,#topNewDossierBtn,#logoutBtn{letter-spacing:0;font-size:.9rem}
 
+
+/* ===== V10 — Nouveau dossier Professionnel / Particulier ===== */
+#createDossierModal .modal{width:min(980px,calc(100vw - 28px));background:#101a31!important;border:1px solid rgba(255,255,255,.10);border-radius:18px!important}
+#createDossierModal .modal-inner{padding:24px}
+#createDossierModal .modal-head{margin-bottom:10px}
+#createDossierModal .create-section{padding-top:16px;margin-top:16px;border-top:1px solid rgba(255,255,255,.10)}
+#createDossierModal .create-section:first-of-type{padding-top:0;margin-top:0;border-top:0}
+#createDossierModal .segmented-debtor{display:flex;gap:8px}
+#createDossierModal .debtor-type-btn{min-width:110px;min-height:38px;border-radius:9px!important;font-weight:600!important;background:#202c42;border:1px solid rgba(255,255,255,.06);color:#f4f7fb}
+#createDossierModal .debtor-type-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+#createDossierModal .create-debtor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#createDossierModal .field input,#createDossierModal .field select{background:#202c42;border:1px solid rgba(255,255,255,.12);border-radius:9px;min-height:42px}
+#createDossierModal .invoice-row{grid-template-columns:minmax(115px,1fr) minmax(118px,.9fr) minmax(118px,.9fr) minmax(125px,.9fr) minmax(110px,.7fr) auto}
+#createDossierModal.private-mode .invoice-row{grid-template-columns:minmax(115px,1fr) minmax(118px,.9fr) minmax(118px,.9fr) minmax(125px,.9fr) minmax(140px,.9fr) auto}
+#createDossierModal .private-penalty-note{align-self:end;padding:0 4px 10px;color:var(--soft);font-size:.76rem;line-height:1.3}
+#createDossierModal .create-footer{margin-top:18px}
+#createDossierModal .create-footer .btn{border-radius:9px!important}
+@media(max-width:760px){
+  #createDossierModal .create-debtor-grid,
+  #createDossierModal .invoice-row,
+  #createDossierModal.private-mode .invoice-row{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -301,7 +324,7 @@
       <div class="create-section-title">Débiteur</div>
       <div class="create-debtor-grid">
         <div class="field"><label id="debtorNameLabel">Raison sociale *</label><input type="text" id="debtorNameInput" required /></div>
-        <div class="field"><label>Contact</label><input type="text" id="debtorContactInput" /></div>
+        <div class="field" id="debtorContactField"><label>Contact</label><input type="text" id="debtorContactInput" /></div>
         <div class="field"><label>Email *</label><input type="email" id="debtorEmailInput" required /></div>
         <div class="field"><label>Téléphone</label><input type="tel" id="debtorPhoneInput" /></div>
         <div class="field" id="debtorSiretField"><label>SIRET</label><input type="text" id="debtorSiretInput" inputmode="numeric" /></div>
@@ -315,7 +338,7 @@
       <div class="invoice-editor">
         <div class="invoice-editor-head"><div><strong>Factures (<span id="createInvoiceCount">1</span>)</strong></div><button class="btn btn-secondary" id="addInvoiceRowBtn" type="button">＋ Ajouter une facture</button></div>
         <div class="invoice-rows" id="invoiceRows"></div>
-        <div class="rate-note">Chaque facture peut avoir un taux annuel différent.</div>
+        <div class="rate-note" id="createInvoiceRateNote">Chaque facture peut avoir un taux annuel différent. Reprenez le taux indiqué sur votre facture ou vos CGV.</div>
       </div>
     </div>
 
@@ -398,7 +421,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="";
-const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn"];
+const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn"];
 const E={};ids.forEach(id=>E[id]=$(id));
 const clean=s=>String(s||"").trim(),esc=s=>String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"),escapeHtml=esc;
 function formatCurrency(v){return Number(v||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -459,7 +482,13 @@ function lateFeeBreakdown(d=currentDossier,asOf=new Date()){
   const recoveryFees=Number(rows.reduce((t,x)=>t+x.recoveryFee,0).toFixed(2));
   return{annualRate,rows,initialPrincipal:principalAmount(d),payments:totalPayments(d),principal,interests,recoveryFees,total:Number((principal+interests+recoveryFees).toFixed(2)),asOf};
 }
-function invoiceRowHtml(inv={}){return`<div class="invoice-row"><div class="field"><label>N° facture</label><input type="text" data-invoice-ref value="${esc(inv.ref||"")}" required></div><div class="field"><label>Date émission</label><input type="date" data-invoice-issued value="${esc(inv.issuedDate||"")}"></div><div class="field"><label>Date échéance</label><input type="date" data-invoice-due value="${esc(inv.dueDate||"")}" required></div><div class="field"><label>Montant TTC (€)</label><input type="number" step="0.01" min="0.01" data-invoice-amount value="${inv.amount||""}" required></div><div class="field"><label>Taux annuel %</label><input type="number" step="0.01" min="0" data-invoice-rate value="${Number(inv.lateRatePercent??8.25)}" required></div><button class="btn btn-danger invoice-remove" type="button" title="Supprimer">×</button></div>`}
+function invoiceRowHtml(inv={}){
+  const isPrivate=clean($("debiteurTypeInput")?.value)==="private";
+  const rateCell=isPrivate
+    ? `<div class="private-penalty-note">Aucune pénalité B2B applicable</div><input type="hidden" data-invoice-rate value="0">`
+    : `<div class="field"><label>Taux annuel % *</label><input type="number" step="0.01" min="0" data-invoice-rate value="${Number(inv.lateRatePercent??8.25)}" required></div>`;
+  return`<div class="invoice-row"><div class="field"><label>N° facture *</label><input type="text" data-invoice-ref value="${esc(inv.ref||"")}" required></div><div class="field"><label>Émission</label><input type="date" data-invoice-issued value="${esc(inv.issuedDate||"")}"></div><div class="field"><label>Échéance</label><input type="date" data-invoice-due value="${esc(inv.dueDate||"")}" required></div><div class="field"><label>Montant TTC (€) *</label><input type="number" step="0.01" min="0.01" data-invoice-amount value="${inv.amount||""}" required></div>${rateCell}<button class="btn btn-danger invoice-remove" type="button" title="Supprimer">×</button></div>`}
+
 function addInvoiceRow(container,inv={}){container.insertAdjacentHTML("beforeend",invoiceRowHtml(inv));const row=container.lastElementChild;row.querySelector(".invoice-remove").addEventListener("click",()=>{if(container.children.length>1)row.remove();else alert("Le dossier doit contenir au moins une facture.")})}
 function collectInvoices(container){return [...container.querySelectorAll(".invoice-row")].map(r=>({ref:clean(r.querySelector("[data-invoice-ref]").value),issuedDate:clean(r.querySelector("[data-invoice-issued]").value),dueDate:clean(r.querySelector("[data-invoice-due]").value),amount:Number(String(r.querySelector("[data-invoice-amount]").value||"").replace(",",".")),lateRatePercent:Number(String(r.querySelector("[data-invoice-rate]")?.value||"8.25").replace(",","."))})).filter(x=>x.ref&&x.dueDate&&Number.isFinite(x.amount)&&x.amount>0&&Number.isFinite(x.lateRatePercent)&&x.lateRatePercent>=0)}
 function fillInvoiceRows(container,invoices){container.innerHTML="";(invoices.length?invoices:[{}]).forEach(inv=>addInvoiceRow(container,inv))}
@@ -1579,15 +1608,53 @@ Référence : ${reference}`:""}
 Solde principal après paiement : ${formatCurrency(after)}`,action:"payment_received",type:"payment",amount:Number(amount.toFixed(2)),effectiveDate:date,method,reference,balanceAfter:after,createdAt:serverTimestamp()});closePaymentModal();await loadDossiers(currentUser.uid)}catch(err){console.error(err);alert("Impossible d’enregistrer le paiement. Vérifiez les règles Firestore pour les champs payments, totalPayments et principalBalance.")}finally{E.savePaymentBtn.disabled=false;E.savePaymentBtn.textContent="Enregistrer le paiement"}}
 function setCreateDebtorType(type){
   const isPrivate=type==="private";
-  const select=$("debiteurTypeInput"),pro=$("debtorTypeProfessionalBtn"),priv=$("debtorTypePrivateBtn"),siretField=$("debtorSiretField"),nameLabel=$("debtorNameLabel");
+  const modal=E.createDossierModal;
+  const select=$("debiteurTypeInput"),pro=$("debtorTypeProfessionalBtn"),priv=$("debtorTypePrivateBtn");
+  const siretField=$("debtorSiretField"),contactField=$("debtorContactField"),nameLabel=$("debtorNameLabel"),rateNote=$("createInvoiceRateNote");
   if(select)select.value=isPrivate?"private":"professional_company";
-  pro?.classList.toggle("active",!isPrivate);priv?.classList.toggle("active",isPrivate);
+  pro?.classList.toggle("active",!isPrivate);
+  priv?.classList.toggle("active",isPrivate);
+  modal?.classList.toggle("private-mode",isPrivate);
+
+  if(nameLabel)nameLabel.textContent=isPrivate?"Nom complet *":"Raison sociale *";
+  if(contactField)contactField.style.display=isPrivate?"none":"flex";
   if(siretField)siretField.style.display=isPrivate?"none":"flex";
-  if(nameLabel)nameLabel.textContent=isPrivate?"Nom / prénom *":"Raison sociale *";
-  if(isPrivate && $("debtorSiretInput"))$("debtorSiretInput").value="";
+
+  if(isPrivate){
+    if($("debtorContactInput"))$("debtorContactInput").value="";
+    if($("debtorSiretInput"))$("debtorSiretInput").value="";
+    if(rateNote)rateNote.textContent="Pour un particulier, les pénalités forfaitaires B2B ne s’appliquent pas.";
+  }else{
+    if(rateNote)rateNote.textContent="Chaque facture peut avoir un taux annuel différent. Reprenez le taux indiqué sur votre facture ou vos CGV.";
+  }
+
+  // Conserve les lignes déjà saisies puis les réaffiche selon le type choisi.
+  if(E.invoiceRows){
+    let rows=[];
+    try{rows=collectInvoices(E.invoiceRows)}catch{}
+    if(!rows.length){
+      rows=[{ref:"",issuedDate:"",dueDate:"",amount:"",lateRatePercent:isPrivate?0:8.25}];
+    }else{
+      rows=rows.map(r=>({...r,lateRatePercent:isPrivate?0:Number(r.lateRatePercent??8.25)}));
+    }
+    fillInvoiceRows(E.invoiceRows,rows);
+    updateCreateInvoiceCount();
+  }
 }
+
 function updateCreateInvoiceCount(){const host=E.invoiceRows;if(!host)return;const n=host.querySelectorAll(".invoice-row").length;const c=$("createInvoiceCount");if(c)c.textContent=String(Math.max(1,n));}
-function openCreateDossierModal(){if(E.invoiceRows&&!E.invoiceRows.querySelector(".invoice-row"))fillInvoiceRows(E.invoiceRows,[{lateRatePercent:8.25}]);$("dossierRef").value=generateRef();$("creditorNameInput").value=creditorName();$("creditorEmailInput").value=creditorEmail();$("creditorAddressInput").value=creditorAddress();$("creditorZipInput").value=creditorZip();$("creditorCityInput").value=creditorCity();$("debiteurTypeInput").value="professional_company";setCreateDebtorType("professional_company");updateCreateInvoiceCount();E.createDossierModal.classList.add("open")}
+function openCreateDossierModal(){
+  $("dossierRef").value=generateRef();
+  $("creditorNameInput").value=creditorName();
+  $("creditorEmailInput").value=creditorEmail();
+  $("creditorAddressInput").value=creditorAddress();
+  $("creditorZipInput").value=creditorZip();
+  $("creditorCityInput").value=creditorCity();
+  fillInvoiceRows(E.invoiceRows,[{ref:"",issuedDate:"",dueDate:"",amount:"",lateRatePercent:8.25}]);
+  setCreateDebtorType("professional_company");
+  updateCreateInvoiceCount();
+  E.createDossierModal.classList.add("open");
+}
 
 let pendingRelanceAction=null;
 function openRelanceActionModal(action="relance1"){
@@ -2044,6 +2111,8 @@ E.addDossierBtn.addEventListener("click",async()=>{
   if(canOpenCreateModal()){openCreateDossierModal();return}
   await redirectToCorrectPayment();
 });E.subscribeBtn.addEventListener("click",async()=>{if(isSuperAdmin()){openCreateDossierModal();return}await redirectStripeCheckout("monthly_89")});
+E.debtorTypeProfessionalBtn?.addEventListener("click",()=>setCreateDebtorType("professional_company"));
+E.debtorTypePrivateBtn?.addEventListener("click",()=>setCreateDebtorType("private"));
 E.closeCreateDossier.addEventListener("click",()=>E.createDossierModal.classList.remove("open"));
 E.createDossierModal.addEventListener("click",e=>{if(e.target===E.createDossierModal)E.createDossierModal.classList.remove("open")});
 E.closeEditDossier.addEventListener("click",closeEditDossierModal);
@@ -2143,7 +2212,8 @@ E.createDossierForm.addEventListener("submit",async e=>{
     }
 
     E.createDossierForm.reset();
-    fillInvoiceRows(E.invoiceRows,[{}]);
+    fillInvoiceRows(E.invoiceRows,[{lateRatePercent:8.25}]);
+    setCreateDebtorType("professional_company");
     
     E.createDossierModal.classList.remove("open");
     await loadDossiers(currentUser.uid);
@@ -2160,7 +2230,7 @@ E.createDossierForm.addEventListener("submit",async e=>{
   }
 });
 E.resetDossierTrackingBtn?.addEventListener("click",resetDossierTracking);
-E.editDossierForm.addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const invoices=collectInvoices(E.editInvoiceRows);if(!invoices.length){alert("Ajoutez au moins une facture complète.");return}const amount=Number(invoices.reduce((t,x)=>t+x.amount,0).toFixed(2));const existingPaid=totalPayments(currentDossier);if(amount+0.001<existingPaid){alert(`Le montant total des factures (${formatCurrency(amount)}) ne peut pas être inférieur aux paiements déjà enregistrés (${formatCurrency(existingPaid)}).`);return}const editedBalance=Number(Math.max(0,amount-existingPaid).toFixed(2));const patch={amountTTC:amount,principalBalance:editedBalance,totalPayments:existingPaid,invoices,invoiceRef:invoices[0].ref,issuedDate:invoices[0].issuedDate,dueDate:invoices[0].dueDate,lateRatePercent:Number(E.editLateRateInput.value||8.25),contractBasis:clean($("editContractBasisInput").value)||"Facture de prestation impayée",debiteurType:clean($("editDebiteurTypeInput").value)||"professional_company",debtorName:clean($("editDebtorNameInput").value),debiteurName:clean($("editDebtorNameInput").value),debtorEmail:clean($("editDebtorEmailInput").value),debiteurEmail:clean($("editDebtorEmailInput").value),debtorAddress:clean($("editDebtorAddressInput").value),debiteurAddress:clean($("editDebtorAddressInput").value),debtorZip:clean($("editDebtorZipInput").value),debiteurZip:clean($("editDebtorZipInput").value),debtorCity:clean($("editDebtorCityInput").value),debiteurCity:clean($("editDebtorCityInput").value),updatedAt:serverTimestamp()};try{E.saveDossierEditBtn.disabled=true;E.saveDossierEditBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveDossierEditBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications";closeEditDossierModal()},700)}catch(err){console.error(err);alert("Erreur Firestore : autorisez les champs invoices et lateRatePercent dans les règles de mise à jour.");E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications"}});
+E.editDossierForm.addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const invoices=collectInvoices(E.editInvoiceRows);if(!invoices.length){alert("Ajoutez au moins une facture complète.");return}const amount=Number(invoices.reduce((t,x)=>t+x.amount,0).toFixed(2));const existingPaid=totalPayments(currentDossier);if(amount+0.001<existingPaid){alert(`Le montant total des factures (${formatCurrency(amount)}) ne peut pas être inférieur aux paiements déjà enregistrés (${formatCurrency(existingPaid)}).`);return}const editedBalance=Number(Math.max(0,amount-existingPaid).toFixed(2));const patch={amountTTC:amount,principalBalance:editedBalance,totalPayments:existingPaid,invoices,invoiceRef:invoices[0].ref,issuedDate:invoices[0].issuedDate,dueDate:invoices[0].dueDate,lateRatePercent:Number(invoices[0]?.lateRatePercent??8.25),contractBasis:clean($("editContractBasisInput").value)||"Facture de prestation impayée",debiteurType:clean($("editDebiteurTypeInput").value)||"professional_company",debtorName:clean($("editDebtorNameInput").value),debiteurName:clean($("editDebtorNameInput").value),debtorEmail:clean($("editDebtorEmailInput").value),debiteurEmail:clean($("editDebtorEmailInput").value),debtorAddress:clean($("editDebtorAddressInput").value),debiteurAddress:clean($("editDebtorAddressInput").value),debtorZip:clean($("editDebtorZipInput").value),debiteurZip:clean($("editDebtorZipInput").value),debtorCity:clean($("editDebtorCityInput").value),debiteurCity:clean($("editDebtorCityInput").value),updatedAt:serverTimestamp()};try{E.saveDossierEditBtn.disabled=true;E.saveDossierEditBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveDossierEditBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications";closeEditDossierModal()},700)}catch(err){console.error(err);alert("Erreur Firestore : autorisez les champs invoices et lateRatePercent dans les règles de mise à jour.");E.saveDossierEditBtn.disabled=false;E.saveDossierEditBtn.textContent="Enregistrer les modifications"}});
 document.addEventListener("click",ev=>{const btn=ev.target.closest("[data-action]");if(!btn||btn.disabled)return;openTextModal(btn.dataset.action)});
 E.closeModal.addEventListener("click",closeTextModal);
 E.modalText.addEventListener("click",e=>{if(e.target===E.modalText)closeTextModal()});
