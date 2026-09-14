@@ -1183,11 +1183,6 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
 </section>
 
 
-<div id="successToast" class="success-toast" role="status" aria-live="polite">
-  <span class="success-toast-icon">✓</span>
-  <span id="successToastText">Action enregistrée</span>
-</div>
-
 </body>
 </html>`;
 }
@@ -1899,7 +1894,7 @@ function showSuccessToast(message){
   E.successToastText.textContent=message;
   E.successToast.classList.add("show");
   clearTimeout(successToastTimer);
-  successToastTimer=setTimeout(()=>E.successToast.classList.remove("show"),2800);
+  successToastTimer=setTimeout(()=>E.successToast.classList.remove("show"),3400);
 }
 
 let pendingRelanceAction=null;
@@ -2619,5 +2614,9 @@ onAuthStateChanged(auth,async user=>{
   }
 });
 </script>
+<div id="successToast" class="success-toast" role="status" aria-live="polite">
+  <span class="success-toast-icon">✓</span>
+  <span id="successToastText">Action enregistrée</span>
+</div>
 </body>
 </html>
