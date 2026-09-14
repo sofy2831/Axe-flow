@@ -49,11 +49,81 @@
     @media(max-width:860px){.invoice-row{grid-template-columns:1fr}.topbar-inner{flex-direction:column;align-items:flex-start;padding:14px 0}.summary-grid,.form-grid,.actions-grid,.identity-grid,.letter-header,.pro-grid,.pro-grid.three,.debtor-path-grid{grid-template-columns:1fr}.final-step{grid-template-columns:1fr}.btn{width:100%}.dossier-card{flex-direction:column}.dossier-actions{align-items:stretch}.hero{display:none}.page{padding-top:16px}}
   
     .signature-pad-wrap{display:grid;gap:12px}.signature-pad{width:100%;height:220px;background:#fff;border:2px dashed rgba(255,127,31,.55);border-radius:18px;touch-action:none;cursor:crosshair}.signature-preview{min-height:90px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:14px;padding:10px}.signature-preview img{max-width:100%;max-height:100px;object-fit:contain}.signature-choice{display:flex;gap:10px;flex-wrap:wrap}.signature-choice .btn{flex:1 1 220px}
+
+/* ===== Refonte tableau de bord V1 — inspiration concours Emergent, couleurs Axe Flow conservées ===== */
+.overview-dashboard{margin-bottom:18px}
+.overview-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.overview-kpi{position:relative;overflow:hidden;padding:20px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.038));border:1px solid rgba(255,255,255,.09);box-shadow:0 18px 48px rgba(0,0,0,.18)}
+.overview-kpi:after{content:"";position:absolute;right:-24px;top:-24px;width:92px;height:92px;border-radius:50%;background:rgba(255,127,31,.07)}
+.overview-kpi:nth-child(2):after{background:rgba(61,208,143,.08)}
+.overview-kpi:nth-child(3):after{background:rgba(255,179,71,.08)}
+.overview-kpi:nth-child(4):after{background:rgba(137,103,255,.08)}
+.overview-kpi-label{font-size:.73rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);font-weight:800}
+.overview-kpi-value{margin-top:8px;font-size:clamp(1.45rem,2.2vw,2rem);line-height:1;font-weight:850;color:#fff;font-variant-numeric:tabular-nums}
+.overview-kpi-sub{margin-top:8px;color:var(--muted);font-size:.78rem}
+.overview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;flex-wrap:wrap}
+.overview-filters{display:flex;gap:6px;flex-wrap:wrap;padding:5px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.overview-filter{border:0;background:transparent;color:var(--muted);font-weight:750;font-size:.82rem;padding:8px 12px;border-radius:10px;cursor:pointer}
+.overview-filter:hover{color:#fff;background:rgba(255,255,255,.05)}
+.overview-filter.active{color:#fff;background:rgba(255,127,31,.14);box-shadow:inset 0 0 0 1px rgba(255,127,31,.22)}
+.overview-new-btn{min-height:42px}
+.overview-table-wrap{overflow:auto;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);box-shadow:0 18px 48px rgba(0,0,0,.16)}
+.overview-table{width:100%;border-collapse:collapse;min-width:940px}
+.overview-table th{padding:13px 14px;text-align:left;font-size:.71rem;text-transform:uppercase;letter-spacing:.055em;color:var(--soft);font-weight:800;border-bottom:1px solid var(--line);background:rgba(4,16,24,.28)}
+.overview-table td{padding:15px 14px;border-bottom:1px solid rgba(255,255,255,.065);vertical-align:middle;font-size:.88rem}
+.overview-table tbody tr{cursor:pointer;transition:background .16s ease}
+.overview-table tbody tr:hover{background:rgba(255,255,255,.045)}
+.overview-table tbody tr:last-child td{border-bottom:0}
+.ov-ref{font-size:.76rem;font-weight:850;color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.ov-sub{display:block;margin-top:3px;color:var(--soft);font-size:.72rem}
+.ov-debtor{font-weight:780;color:#fff}.ov-type{display:inline-flex;margin-top:5px;padding:2px 6px;border-radius:5px;font-size:.62rem;font-weight:850;background:rgba(61,208,143,.12);color:#aef5d0;border:1px solid rgba(61,208,143,.13)}
+.ov-type.part{background:rgba(137,103,255,.12);color:#d8cfff;border-color:rgba(137,103,255,.18)}
+.ov-money{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}.ov-money small{display:block;color:var(--soft);font-weight:600;margin-top:3px}
+.ov-delay{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:8px;background:rgba(255,179,71,.12);color:#ffd18a;font-weight:780;font-size:.76rem}.ov-delay.high{background:rgba(255,107,107,.14);color:#ffb0b0}
+.ov-stage{display:inline-flex;padding:4px 9px;border-radius:8px;font-size:.72rem;font-weight:820;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.ov-stage.relance{background:rgba(48,171,220,.12);color:#86d8ff;border-color:rgba(48,171,220,.20)}
+.ov-stage.med{background:rgba(255,107,107,.12);color:#ffb5b5;border-color:rgba(255,107,107,.20)}
+.ov-stage.inj{background:rgba(137,103,255,.13);color:#d7caff;border-color:rgba(137,103,255,.22)}
+.ov-stage.closed{background:rgba(61,208,143,.12);color:#b9f7d8;border-color:rgba(61,208,143,.20)}
+.ov-next{max-width:210px;color:var(--muted);font-size:.78rem;line-height:1.35}.ov-next strong{display:block;color:#fff;font-weight:650}.ov-next-date{display:block;margin-top:3px;color:var(--accent);font-size:.71rem;font-weight:750}
+.ov-progress{display:flex;gap:4px;margin-top:7px;width:118px}.ov-progress i{height:5px;flex:1;border-radius:99px;background:rgba(255,255,255,.12)}.ov-progress i.done{background:rgba(61,208,143,.7)}.ov-progress i.current{background:var(--accent)}
+.overview-empty{padding:28px;text-align:center;color:var(--muted)}
+.details-divider{display:flex;align-items:center;gap:12px;margin:24px 0 14px;color:var(--muted);font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.details-divider:before,.details-divider:after{content:"";height:1px;background:var(--line);flex:1}
+@media(max-width:980px){.overview-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.overview-kpis{grid-template-columns:1fr}.overview-toolbar{align-items:stretch}.overview-new-btn{width:100%}}
+
 </style>
 </head>
 <body>
 <header class="topbar"><div class="container topbar-inner"><a href="index.html" class="brand"><img class="brand-logo" src="images/axe-flow-cover.png" alt="Axe Flow" /><div><span class="brand-title">Axe Flow</span><span class="brand-sub">Tableau de bord client</span></div></a><div class="top-actions"><div class="user-chip"><span class="user-email" id="userEmail">—</span><span class="status-pill success" id="statusBadge">Actif</span><span class="status-pill neutral" id="planBadge">Offre —</span></div><button class="btn btn-secondary" id="logoutBtn" type="button">Déconnexion</button></div></div></header>
-<main class="page"><div class="container"><section class="hero"><div class="eyebrow">Recouvrement automatisé</div><h1>Tableau de bord</h1><p>Suivez vos impayés et déclenchez chaque étape : relance, mise en demeure, injonction.</p></section><section class="dashboard-grid"><div class="panel panel-dossiers"><div class="panel-inner"><div class="panel-head"><div><h2 class="panel-title">Vos dossiers</h2><div class="panel-sub" id="dossierSub">Sélectionnez un dossier ou créez un nouveau dossier.</div></div></div><div class="offer-box"><strong>Besoin d’un nouveau recouvrement ?</strong><span>Depuis le tableau de bord : achetez un nouveau dossier ponctuel à 49 €, ou passez en abonnement à 89 €/mois avec 3 dossiers inclus, puis 19 € par dossier supplémentaire.</span><div class="offer-actions"><button class="btn btn-primary" id="addDossierBtn" type="button">Dossier — 49 €</button><button class="btn btn-secondary" id="subscribeBtn" type="button">Passer en abonnement — 89 €/mois</button></div></div><div class="dossier-list" id="dossierList"></div></div></div><div class="panel panel-summary"><div class="panel-inner"><h2 class="panel-title">Synthèse</h2><div class="summary-grid"><div class="summary-card"><div class="summary-label">Référence</div><div class="summary-value" id="summaryRef">—</div></div><div class="summary-card"><div class="summary-label">Montant initial</div><div class="summary-value" id="summaryInitialAmount">—</div></div><div class="summary-card"><div class="summary-label">Paiements reçus</div><div class="summary-value" id="summaryPayments">—</div></div><div class="summary-card balance-due" id="summaryBalanceCard"><div class="summary-label">Solde restant dû</div><div class="summary-value" id="summaryAmount">—</div></div><div class="summary-card"><div class="summary-label">Débiteur</div><div class="summary-value" id="summaryDebtor">—</div></div></div><div class="payment-summary-actions"><button class="btn btn-primary" id="recordPaymentBtn" type="button">Enregistrer un paiement reçu</button></div><div class="identity-grid"><div class="identity-card"><h3>Vous / Créancier</h3><div class="field"><label>Nom / société</label><input type="text" id="creditorNameEdit" /></div><div class="field"><label>Email</label><input type="email" id="creditorEmailEdit" /></div><div class="field"><label>Adresse</label><input type="text" id="creditorAddressEdit" /></div><div class="form-grid" style="margin:0"><div class="field"><label>Code postal</label><input type="text" id="creditorZipEdit" /></div><div class="field"><label>Ville</label><input type="text" id="creditorCityEdit" /></div></div><button class="btn btn-secondary" id="saveCreditorBtn" type="button" style="margin-top:12px;width:100%">Enregistrer créancier</button></div><div class="identity-card"><h3>Votre client / Débiteur</h3><div class="identity-line"><strong id="debtorNameView">—</strong></div><div class="identity-line" id="debtorTypeView">—</div><div class="identity-line" id="debtorAddressView">—</div><div class="identity-line" id="debtorCityView">—</div><div class="identity-line" id="debtorEmailView">—</div></div></div></div></div><div class="panel panel-actions"><div class="panel-inner"><div class="panel-head"><div><h2 class="panel-title">Actions</h2><div class="panel-sub">Générez les courriers et marquez chaque étape comme envoyée.</div></div></div><div class="actions-grid"><div class="action-card" data-step="1"><h3>Relance 1</h3><p>Relance simple</p><button class="btn" type="button" data-action="relance1">Ouvrir</button></div><div class="action-card" data-step="2"><h3>Relance 2</h3><p>Relance ferme</p><button class="btn" type="button" data-action="relance2">Ouvrir</button></div><div class="action-card" data-step="3"><h3>Relance 3</h3><p>Dernier rappel</p><button class="btn" type="button" data-action="relance3">Ouvrir</button></div><div class="action-card" data-step="4"><h3>Mise en demeure</h3><p>Avant contentieux • LRAR + mail</p><button class="btn" type="button" data-action="med">Ouvrir</button></div><div class="action-card" data-step="5"><h3>Injonction</h3><p>Dossier tribunal</p><button class="btn" type="button" data-action="injunction">Ouvrir</button></div><div class="action-card" id="closureActionCard" data-step="0" style="display:none"><h3>Clôturer le recouvrement</h3><p>Paiement intégral reçu — confirmer la clôture au débiteur</p><button class="btn btn-primary" type="button" data-action="closure">Ouvrir le courrier</button></div><div class="action-card" id="courtClosureActionCard" data-step="0" style="display:none"><h3>Prévenir le tribunal</h3><p>Paiement intégral reçu après dépôt de l’injonction</p><button class="btn btn-primary" type="button" data-action="court_closure">Ouvrir le courrier</button></div><div class="action-card" id="debtorClosureActionCard" data-step="0" style="display:none"><h3>Confirmer la clôture au débiteur</h3><p>Informer le débiteur que la créance est soldée</p><button class="btn btn-primary" type="button" data-action="debtor_closure">Ouvrir le courrier</button></div></div></div></div><div class="panel panel-timeline"><div class="panel-inner"><h2 class="panel-title">Historique</h2><div class="timeline" id="timeline"><div class="empty-state">Aucune action</div></div></div></div></section><footer class="dashboard-footer">
+<main class="page"><div class="container">
+<section class="overview-dashboard" id="overviewDashboard">
+  <div class="overview-kpis">
+    <article class="overview-kpi"><div class="overview-kpi-label">Créances totales</div><div class="overview-kpi-value" id="ovTotalClaims">0,00 €</div><div class="overview-kpi-sub" id="ovTotalClaimsSub">0 dossier</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-label">Total encaissé</div><div class="overview-kpi-value" id="ovCollected">0,00 €</div><div class="overview-kpi-sub" id="ovCollectedSub">Taux 0 %</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-label">Total à régler</div><div class="overview-kpi-value" id="ovOutstanding">0,00 €</div><div class="overview-kpi-sub" id="ovOutstandingSub">0 en contentieux</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-label">DSO moyen</div><div class="overview-kpi-value" id="ovDso">0j</div><div class="overview-kpi-sub" id="ovDsoSub">0 clôturé</div></article>
+  </div>
+  <div class="overview-toolbar">
+    <div class="overview-filters" id="overviewFilters">
+      <button class="overview-filter active" type="button" data-ov-filter="all">Tous <span id="ovCountAll">(0)</span></button>
+      <button class="overview-filter" type="button" data-ov-filter="open">En cours <span id="ovCountOpen">(0)</span></button>
+      <button class="overview-filter" type="button" data-ov-filter="amicable">Amiable <span id="ovCountAmicable">(0)</span></button>
+      <button class="overview-filter" type="button" data-ov-filter="med">M.E.D. <span id="ovCountMed">(0)</span></button>
+      <button class="overview-filter" type="button" data-ov-filter="injunction">Injonction <span id="ovCountInjunction">(0)</span></button>
+      <button class="overview-filter" type="button" data-ov-filter="closed">Clôturés <span id="ovCountClosed">(0)</span></button>
+    </div>
+    <button class="btn btn-primary overview-new-btn" id="overviewNewDossierBtn" type="button">+ Nouveau dossier</button>
+  </div>
+  <div class="overview-table-wrap">
+    <table class="overview-table">
+      <thead><tr><th>Dossier</th><th>Débiteur</th><th>Facture</th><th style="text-align:right">Solde / total</th><th>Retard</th><th>Étape</th><th>Prochaine action</th></tr></thead>
+      <tbody id="overviewRows"></tbody>
+    </table>
+    <div class="overview-empty" id="overviewEmpty" style="display:none">Aucun dossier dans cette catégorie.</div>
+  </div>
+</section>
+<div class="details-divider">Détail du dossier sélectionné</div><section class="hero"><div class="eyebrow">Recouvrement automatisé</div><h1>Tableau de bord</h1><p>Suivez vos impayés et déclenchez chaque étape : relance, mise en demeure, injonction.</p></section><section class="dashboard-grid"><div class="panel panel-dossiers"><div class="panel-inner"><div class="panel-head"><div><h2 class="panel-title">Vos dossiers</h2><div class="panel-sub" id="dossierSub">Sélectionnez un dossier ou créez un nouveau dossier.</div></div></div><div class="offer-box"><strong>Besoin d’un nouveau recouvrement ?</strong><span>Depuis le tableau de bord : achetez un nouveau dossier ponctuel à 49 €, ou passez en abonnement à 89 €/mois avec 3 dossiers inclus, puis 19 € par dossier supplémentaire.</span><div class="offer-actions"><button class="btn btn-primary" id="addDossierBtn" type="button">Dossier — 49 €</button><button class="btn btn-secondary" id="subscribeBtn" type="button">Passer en abonnement — 89 €/mois</button></div></div><div class="dossier-list" id="dossierList"></div></div></div><div class="panel panel-summary"><div class="panel-inner"><h2 class="panel-title">Synthèse</h2><div class="summary-grid"><div class="summary-card"><div class="summary-label">Référence</div><div class="summary-value" id="summaryRef">—</div></div><div class="summary-card"><div class="summary-label">Montant initial</div><div class="summary-value" id="summaryInitialAmount">—</div></div><div class="summary-card"><div class="summary-label">Paiements reçus</div><div class="summary-value" id="summaryPayments">—</div></div><div class="summary-card balance-due" id="summaryBalanceCard"><div class="summary-label">Solde restant dû</div><div class="summary-value" id="summaryAmount">—</div></div><div class="summary-card"><div class="summary-label">Débiteur</div><div class="summary-value" id="summaryDebtor">—</div></div></div><div class="payment-summary-actions"><button class="btn btn-primary" id="recordPaymentBtn" type="button">Enregistrer un paiement reçu</button></div><div class="identity-grid"><div class="identity-card"><h3>Vous / Créancier</h3><div class="field"><label>Nom / société</label><input type="text" id="creditorNameEdit" /></div><div class="field"><label>Email</label><input type="email" id="creditorEmailEdit" /></div><div class="field"><label>Adresse</label><input type="text" id="creditorAddressEdit" /></div><div class="form-grid" style="margin:0"><div class="field"><label>Code postal</label><input type="text" id="creditorZipEdit" /></div><div class="field"><label>Ville</label><input type="text" id="creditorCityEdit" /></div></div><button class="btn btn-secondary" id="saveCreditorBtn" type="button" style="margin-top:12px;width:100%">Enregistrer créancier</button></div><div class="identity-card"><h3>Votre client / Débiteur</h3><div class="identity-line"><strong id="debtorNameView">—</strong></div><div class="identity-line" id="debtorTypeView">—</div><div class="identity-line" id="debtorAddressView">—</div><div class="identity-line" id="debtorCityView">—</div><div class="identity-line" id="debtorEmailView">—</div></div></div></div></div><div class="panel panel-actions"><div class="panel-inner"><div class="panel-head"><div><h2 class="panel-title">Actions</h2><div class="panel-sub">Générez les courriers et marquez chaque étape comme envoyée.</div></div></div><div class="actions-grid"><div class="action-card" data-step="1"><h3>Relance 1</h3><p>Relance simple</p><button class="btn" type="button" data-action="relance1">Ouvrir</button></div><div class="action-card" data-step="2"><h3>Relance 2</h3><p>Relance ferme</p><button class="btn" type="button" data-action="relance2">Ouvrir</button></div><div class="action-card" data-step="3"><h3>Relance 3</h3><p>Dernier rappel</p><button class="btn" type="button" data-action="relance3">Ouvrir</button></div><div class="action-card" data-step="4"><h3>Mise en demeure</h3><p>Avant contentieux • LRAR + mail</p><button class="btn" type="button" data-action="med">Ouvrir</button></div><div class="action-card" data-step="5"><h3>Injonction</h3><p>Dossier tribunal</p><button class="btn" type="button" data-action="injunction">Ouvrir</button></div><div class="action-card" id="closureActionCard" data-step="0" style="display:none"><h3>Clôturer le recouvrement</h3><p>Paiement intégral reçu — confirmer la clôture au débiteur</p><button class="btn btn-primary" type="button" data-action="closure">Ouvrir le courrier</button></div><div class="action-card" id="courtClosureActionCard" data-step="0" style="display:none"><h3>Prévenir le tribunal</h3><p>Paiement intégral reçu après dépôt de l’injonction</p><button class="btn btn-primary" type="button" data-action="court_closure">Ouvrir le courrier</button></div><div class="action-card" id="debtorClosureActionCard" data-step="0" style="display:none"><h3>Confirmer la clôture au débiteur</h3><p>Informer le débiteur que la créance est soldée</p><button class="btn btn-primary" type="button" data-action="debtor_closure">Ouvrir le courrier</button></div></div></div></div><div class="panel panel-timeline"><div class="panel-inner"><h2 class="panel-title">Historique</h2><div class="timeline" id="timeline"><div class="empty-state">Aucune action</div></div></div></div></section><footer class="dashboard-footer">
   <div class="dashboard-footer-inner">
     <div>© Axe Flow — Espace client</div>
     <div class="dashboard-footer-links">
@@ -1221,6 +1291,58 @@ async function markStep(action){
     return;
   }
   const step=stepForAction(action),label=`${actionTitle(action)} envoyée`,sentField=sentDateField(action),next=nextActionInfo(action),patch={step:Math.max(step,getStep(currentDossier)),statusLabel:label,updatedAt:serverTimestamp(),[sentField]:serverTimestamp()};if(action==="injunction"){patch.injunctionPublished=true;patch.currentStep="injunction_filed";}let desc=`Date d’envoi : ${todayFR()}`;if(next){patch.nextAction=next.code;if(next.days>0){patch.nextActionAt=plusDays(next.days);desc+=`\nProchaine action : ${next.label} le ${dateAfterDaysFR(next.days)}`}else desc+=`\nProchaine action : ${next.label}`}await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:label,description:desc,action,createdAt:serverTimestamp()});await loadDossiers(currentUser.uid)}
+let overviewFilter="all";
+function dossierStageInfo(d){
+  const step=getStep(d), paid=principalBalance(d)<=0, closed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
+  if(closed)return{key:"closed",label:"Réglé",cls:"closed",stage:6};
+  if(step>=5||d?.injunctionPublished)return{key:"injunction",label:"Injonction",cls:"inj",stage:5};
+  if(step===4)return{key:"med",label:"Mise en demeure",cls:"med",stage:4};
+  if(step===3)return{key:"amicable",label:"Relance 3",cls:"relance",stage:3};
+  if(step===2)return{key:"amicable",label:"Relance 2",cls:"relance",stage:2};
+  if(step===1)return{key:"amicable",label:"Relance 1",cls:"relance",stage:1};
+  if(paid)return{key:"closed",label:"Réglé",cls:"closed",stage:0};
+  return{key:"open",label:"Échu",cls:"",stage:0};
+}
+function dossierDelayDays(d){
+  const inv=normalizeInvoices(d);if(!inv.length)return 0;
+  const vals=inv.map(x=>{const raw=x.dueDate;if(!raw)return 0;const dt=/^\d{4}-\d{2}-\d{2}$/.test(String(raw))?new Date(`${raw}T12:00:00`):new Date(raw);return isNaN(dt)?0:Math.max(0,Math.floor((Date.now()-dt.getTime())/86400000));});
+  return Math.max(0,...vals);
+}
+function dossierNextAction(d){
+  if(d?.status==="paid_closed"||d?.lifecycleStatus==="closed")return{label:"Aucune action — dossier clôturé",date:""};
+  if(principalBalance(d)<=0 && (d?.injunctionPublished||getStep(d)>=5))return{label:"Finaliser la procédure judiciaire",date:""};
+  const step=getStep(d);
+  const labels={0:"Lancer la Relance 1 (Courtoise)",1:"Envoyer la Relance 2 (Ferme)",2:"Envoyer la Relance 3 (Ultime)",3:"Préparer la Mise en demeure",4:"Préparer l’injonction de payer",5:"Suivi de la procédure judiciaire"};
+  let date="";const raw=d?.nextActionAt||d?.prochaineActionAt||d?.next_action_at;if(raw)date=fmtDateFR(raw);
+  return{label:clean(d?.nextActionLabel)||clean(d?.prochaineAction)||labels[step]||"Ouvrir le dossier",date};
+}
+function renderOverview(){
+  const rowHost=document.getElementById("overviewRows");if(!rowHost)return;
+  const total=dossiers.reduce((s,d)=>s+principalAmount(d),0), collected=dossiers.reduce((s,d)=>s+totalPayments(d),0), outstanding=dossiers.reduce((s,d)=>s+Math.max(0,principalBalance(d)),0);
+  const closed=dossiers.filter(d=>d?.status==="paid_closed"||d?.lifecycleStatus==="closed").length;
+  const contentieux=dossiers.filter(d=>{const s=dossierStageInfo(d);return s.key==="med"||s.key==="injunction"}).length;
+  const open=dossiers.filter(d=>!(d?.status==="paid_closed"||d?.lifecycleStatus==="closed"));
+  const dso=open.length?Math.round(open.reduce((s,d)=>s+dossierDelayDays(d),0)/open.length):0;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set("ovTotalClaims",formatCurrency(total));set("ovTotalClaimsSub",`${dossiers.length} dossier(s)`);
+  set("ovCollected",formatCurrency(collected));set("ovCollectedSub",`Taux ${total>0?(collected/total*100).toFixed(1):"0,0"} %`);
+  set("ovOutstanding",formatCurrency(outstanding));set("ovOutstandingSub",`${contentieux} en contentieux`);
+  set("ovDso",`${dso}j`);set("ovDsoSub",`${closed} clôturé(s)`);
+  const counts={all:dossiers.length,open:open.length,amicable:0,med:0,injunction:0,closed};
+  dossiers.forEach(d=>{const k=dossierStageInfo(d).key;if(k==="amicable")counts.amicable++;if(k==="med")counts.med++;if(k==="injunction")counts.injunction++;});
+  set("ovCountAll",`(${counts.all})`);set("ovCountOpen",`(${counts.open})`);set("ovCountAmicable",`(${counts.amicable})`);set("ovCountMed",`(${counts.med})`);set("ovCountInjunction",`(${counts.injunction})`);set("ovCountClosed",`(${counts.closed})`);
+  const visible=dossiers.filter(d=>{const s=dossierStageInfo(d);if(overviewFilter==="all")return true;if(overviewFilter==="open")return s.key!=="closed";return s.key===overviewFilter;});
+  rowHost.innerHTML="";document.getElementById("overviewEmpty").style.display=visible.length?"none":"block";
+  visible.forEach(d=>{const s=dossierStageInfo(d),delay=dossierDelayDays(d),next=dossierNextAction(d),inv=normalizeInvoices(d),tr=document.createElement("tr");
+    const invRef=inv.length===1?inv[0].ref:(inv.length?`${inv.length} factures`:"—"), due=inv.length===1?fmtDateFR(inv[0].dueDate):"Voir détail";
+    tr.innerHTML=`<td><span class="ov-ref">${esc(d.ref||"Dossier")}</span><span class="ov-sub">${inv.length} facture(s)</span></td><td><span class="ov-debtor">${esc(debtorName(d))}</span><span class="ov-type ${isProfessionalDebtor(d)?"":"part"}">${isProfessionalDebtor(d)?"PRO":"PART."}</span><span class="ov-sub">${esc(debtorCity(d)||"")}</span></td><td><strong>${esc(invRef)}</strong><span class="ov-sub">Éch. ${esc(due)}</span></td><td class="ov-money">${formatCurrency(Math.max(0,principalBalance(d)))}<small>/ ${formatCurrency(principalAmount(d))}</small></td><td><span class="ov-delay ${delay>60?"high":""}">◷ ${delay}j</span></td><td><span class="ov-stage ${s.cls}">${esc(s.label)}</span><div class="ov-progress">${[1,2,3,4,5].map(i=>`<i class="${i<=s.stage?"done":""}"></i>`).join("")}</div></td><td><div class="ov-next"><strong>${esc(next.label)}</strong>${next.date?`<span class="ov-next-date">${esc(next.date)}</span>`:""}</div></td>`;
+    tr.addEventListener("click",()=>{currentDossier=d;renderAll();document.querySelector(".details-divider")?.scrollIntoView({behavior:"smooth",block:"start"});});rowHost.appendChild(tr);
+  });
+}
+function initOverviewControls(){
+  document.querySelectorAll("[data-ov-filter]").forEach(btn=>btn.addEventListener("click",()=>{overviewFilter=btn.dataset.ovFilter||"all";document.querySelectorAll("[data-ov-filter]").forEach(x=>x.classList.toggle("active",x===btn));renderOverview();}));
+  document.getElementById("overviewNewDossierBtn")?.addEventListener("click",()=>E.addDossierBtn?.click());
+}
 function renderDossiers(){E.dossierList.innerHTML="";E.dossierSub.textContent=`${dossiers.length} dossier(s)`;if(!dossiers.length){E.dossierList.innerHTML=`<div class="empty-state">Aucun dossier pour le moment.</div>`;return}dossiers.forEach(d=>{const active=currentDossier&&currentDossier.id===d.id,el=document.createElement("div");el.className=`dossier-card ${active?"active":""}`;el.innerHTML=`<div><strong>${esc(d.ref||"Dossier")}</strong><span>${esc(debtorName(d))}</span><span>${esc(debtorTypeLabel(d))}</span><span>Solde : ${formatCurrency(principalBalance(d))}</span></div><div class="dossier-actions"><span class="badge neutral">${esc(d.statusLabel||"Créé")}</span><button class="btn btn-secondary" type="button" data-edit-dossier="${esc(d.id)}">Modifier</button></div>`;el.addEventListener("click",ev=>{if(ev.target.closest("[data-edit-dossier]"))return;currentDossier=d;renderAll()});el.querySelector("[data-edit-dossier]").addEventListener("click",ev=>{ev.stopPropagation();currentDossier=d;renderAll();openEditDossierModal(d)});E.dossierList.appendChild(el)})}
 function renderSummary(){
   if(!currentDossier){[E.summaryRef,E.summaryInitialAmount,E.summaryPayments,E.summaryAmount,E.summaryDebtor,E.debtorNameView,E.debtorTypeView,E.debtorAddressView,E.debtorCityView,E.debtorEmailView].forEach(x=>x.textContent="—");[E.creditorNameEdit,E.creditorEmailEdit,E.creditorAddressEdit,E.creditorZipEdit,E.creditorCityEdit].forEach(x=>x.value="");E.recordPaymentBtn.disabled=true;E.summaryBalanceCard?.classList.remove("balance-paid");return}
@@ -1374,7 +1496,7 @@ async function renderTimeline(){
     E.timeline.prepend(planned);
   }
 }
-async function renderAll(){renderDossiers();renderSummary();renderActions();renderAddButton();await renderTimeline()}
+async function renderAll(){renderOverview();renderDossiers();renderSummary();renderActions();renderAddButton();await renderTimeline()}
 async function loadUserData(uid){try{const s=await getDoc(doc(db,"users",uid));currentUserData=s.exists()?(s.data()||{}):{}}catch{currentUserData={}}}
 async function loadEntitlements(uid){
   currentEntitlements=[];
@@ -1542,6 +1664,7 @@ if(E.injunctionFilesList){E.injunctionFilesList.addEventListener("click",e=>{con
 E.markInjunctionBtn.addEventListener("click",async()=>{try{E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement...";await markStep("injunction");E.markInjunctionBtn.textContent="Envoyé ✔";setTimeout(()=>{E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée";closeInjunction()},700)}catch(err){console.error(err);alert("Erreur : l’injonction n’a pas été enregistrée dans l’historique.");E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée"}});
 E.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
 E.saveCreditorBtn.addEventListener("click",async()=>{if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const patch={creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value),updatedAt:serverTimestamp()};try{E.saveCreditorBtn.disabled=true;E.saveCreditorBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveCreditorBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"},1200)}catch(err){console.error(err);alert("Erreur Firestore : le créancier n’a pas été enregistré.");E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"}});
+initOverviewControls();
 onAuthStateChanged(auth,async user=>{
   if(!user){
     location.href="connexion.html";
