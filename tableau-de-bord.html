@@ -321,6 +321,41 @@
   .letter-preview-toolbar{align-items:flex-start}
 }
 
+
+/* ===== V16 — confirmation action ===== */
+.success-toast{
+  position:fixed;
+  top:18px;
+  right:18px;
+  z-index:260;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  padding:10px 15px;
+  border-radius:9px;
+  border:1px solid rgba(61,208,143,.34);
+  background:#0d5b3d;
+  color:#dcffed;
+  box-shadow:0 18px 46px rgba(0,0,0,.30);
+  font-size:.82rem;
+  font-weight:650;
+  opacity:0;
+  transform:translateY(-10px);
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.success-toast.show{opacity:1;transform:translateY(0)}
+.success-toast-icon{
+  width:19px;height:19px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#63e6a8;
+  color:#07442e;
+  font-size:.78rem;
+  font-weight:900;
+}
+
 </style>
 </head>
 <body>
@@ -517,7 +552,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="";
-const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn"];
+const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText"];
 const E={};ids.forEach(id=>E[id]=$(id));
 const clean=s=>String(s||"").trim(),esc=s=>String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"),escapeHtml=esc;
 function formatCurrency(v){return Number(v||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -1147,6 +1182,12 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   ${footer(3)}
 </section>
 
+
+<div id="successToast" class="success-toast" role="status" aria-live="polite">
+  <span class="success-toast-icon">✓</span>
+  <span id="successToastText">Action enregistrée</span>
+</div>
+
 </body>
 </html>`;
 }
@@ -1190,7 +1231,8 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     companyAddress,
     [companyZip,companyCity].filter(Boolean).join(" "),
     companySiret?`SIRET : ${companySiret}`:"",
-    [companyEmail?`Email : ${companyEmail}`:"",companyPhone?`Tél. : ${companyPhone}`:""].filter(Boolean).join(" — ")
+    companyEmail?`Email : ${companyEmail}`:"",
+    companyPhone?`Tél. : ${companyPhone}`:""
   ].filter(Boolean);
 
   const invoices=normalizeInvoices(d);
@@ -1203,7 +1245,12 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     ? `<div class="invoice-list"><strong>Factures concernées :</strong><ul>${invoices.map(inv=>`<li>${escapeHtml(inv.ref||"Facture")} — échéance ${escapeHtml(fmtDateFR(inv.dueDate)||"—")} — ${escapeHtml(formatCurrency(inv.amount||0))}</li>`).join("")}</ul></div>`
     : "";
 
-  const title=isR1?"PREMIÈRE RELANCE — COURTOISE":actionTitle(currentAction).toUpperCase();
+  const letterTitles={
+    relance1:"PREMIÈRE RELANCE — COURTOISE",
+    relance2:"DEUXIÈME RELANCE — FERME",
+    relance3:"TROISIÈME RELANCE — ULTIME"
+  };
+  const title=letterTitles[currentAction]||actionTitle(currentAction).toUpperCase();
 
   const intro=isR1
     ? (invoices.length>1
@@ -1845,6 +1892,16 @@ function openCreateDossierModal(){
   E.createDossierModal.classList.add("open");
 }
 
+
+let successToastTimer=null;
+function showSuccessToast(message){
+  if(!E.successToast||!E.successToastText)return;
+  E.successToastText.textContent=message;
+  E.successToast.classList.add("show");
+  clearTimeout(successToastTimer);
+  successToastTimer=setTimeout(()=>E.successToast.classList.remove("show"),2800);
+}
+
 let pendingRelanceAction=null;
 function openRelanceActionModal(action="relance1"){
   if(!currentDossier)return;
@@ -1855,6 +1912,7 @@ function openRelanceActionModal(action="relance1"){
   const today=isoToday();E.relanceActionDate.value=today;E.relanceActionDateLabel.textContent=today;
   E.relanceActionAmount.textContent=formatCurrency(principalBalance(currentDossier));
   E.relanceActionChannel.value="Email";E.relanceActionNote.value="";
+  if(E.previewRelanceActionBtn)E.previewRelanceActionBtn.textContent=`⇩ Prévisualiser à la date ${today}`;
   E.relanceActionModal.classList.add("open");
 }
 function closeRelanceActionModal(){E.relanceActionModal.classList.remove("open");pendingRelanceAction=null}
@@ -1879,12 +1937,18 @@ async function validateRelanceAction(){
     if(currentUser&&currentDossier?.id&&(note||channel||date)){
       await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:`${actionTitle(action)} — détails d'action`,description:`Date : ${fmtDateFR(date)}\nCanal : ${channel}${note?`\nNote : ${note}`:""}`,action:`${action}_details`,effectiveDate:date,channel,note,createdAt:serverTimestamp()});
     }
+    const toastLabels={
+      relance1:"Relance 1 (Courtoise) enregistrée",
+      relance2:"Relance 2 (Ferme) enregistrée",
+      relance3:"Relance 3 (Ultime) enregistrée"
+    };
     closeRelanceActionModal();
+    showSuccessToast(toastLabels[action]||`${actionTitle(action)} enregistrée`);
   }catch(err){console.error(err);alert("Impossible d’enregistrer l’action.");}
   finally{E.validateRelanceActionBtn.disabled=false;E.validateRelanceActionBtn.textContent="Valider et enregistrer"}
 }
 
-function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(action==="relance1"){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
+function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(["relance1","relance2","relance3"].includes(action)){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
   E.modalDebtorBox.textContent="Tribunal / Greffe :\nCoordonnées à compléter dans votre messagerie ou lors de l’impression.";
   E.mailBtn.href=makeMailto("",actionTitle(action)+" – "+(currentDossier.ref||"Dossier"),currentText);
 }else{
@@ -2327,7 +2391,10 @@ E.paymentModal.addEventListener("click",e=>{if(e.target===E.paymentModal)closePa
 E.closeRelanceActionModal?.addEventListener("click",closeRelanceActionModal);
 E.cancelRelanceActionBtn?.addEventListener("click",closeRelanceActionModal);
 E.relanceActionModal?.addEventListener("click",e=>{if(e.target===E.relanceActionModal)closeRelanceActionModal()});
-E.relanceActionDate?.addEventListener("input",()=>{E.relanceActionDateLabel.textContent=E.relanceActionDate.value||"—"});
+E.relanceActionDate?.addEventListener("input",()=>{
+  E.relanceActionDateLabel.textContent=E.relanceActionDate.value||"—";
+  if(E.previewRelanceActionBtn)E.previewRelanceActionBtn.textContent=`⇩ Prévisualiser à la date ${E.relanceActionDate.value||"—"}`;
+});
 E.previewRelanceActionBtn?.addEventListener("click",previewRelanceAction);
 
 E.closeLetterPreviewModal?.addEventListener("click",closeLetterPreview);
