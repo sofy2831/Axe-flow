@@ -130,6 +130,8 @@ service cloud.firestore {
         "debtorName",
         "debtorEmail",
         "debtorPhone",
+        "debtorContact",
+        "debtorSiret",
         "debtorAddress",
         "debtorZip",
         "debtorCity",
@@ -205,6 +207,9 @@ service cloud.firestore {
         // Débiteur
         "debtorName",
         "debtorEmail",
+        "debtorPhone",
+        "debtorContact",
+        "debtorSiret",
         "debtorAddress",
         "debtorZip",
         "debtorCity",
@@ -212,6 +217,7 @@ service cloud.firestore {
         // Compatibilité anciens champs débiteur
         "debiteurName",
         "debiteurEmail",
+        "debiteurPhone",
         "debiteurAddress",
         "debiteurZip",
         "debiteurCity",
@@ -282,6 +288,10 @@ service cloud.firestore {
         "method",
         "reference",
         "balanceAfter",
+
+        // Détails d'action amiable
+        "channel",
+        "note",
 
         "createdAt",
         "updatedAt"
@@ -532,7 +542,22 @@ service cloud.firestore {
 
         allow read: if isOwner(userId) || isAdmin();
 
-        allow create, update, delete: if isAdmin();
+        // Création et suppression restent réservées au serveur/admin.
+        allow create, delete: if isAdmin();
+
+        // Le client peut uniquement consommer UNE place de son entitlement.
+        // Aucun autre champ (type, quota, statut, Stripe, dates...) ne peut être modifié.
+        allow update: if isAdmin()
+          || (
+            isOwner(userId)
+            && request.resource.data.keys().hasOnly(allowedEntitlementKeys())
+            && request.resource.data
+              .diff(resource.data)
+              .changedKeys()
+              .hasOnly(["usedCaseCount", "updatedAt"])
+            && request.resource.data.usedCaseCount == resource.data.usedCaseCount + 1
+            && request.resource.data.usedCaseCount <= resource.data.grantedCaseCount
+          );
       }
 
 
