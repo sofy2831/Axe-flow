@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1171,46 +1172,95 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   const recipient=clean(recipientOverride)||debtorBlock(d);
   const dateLabel=effectiveDate?fmtDateFR(effectiveDate):todayFR();
   const isR1=currentAction==="relance1";
-  const principal=principalAmount(d),paid=totalPayments(d),remaining=principalBalance(d),calc=lateFeeBreakdown(d,effectiveDate?new Date(`${effectiveDate}T12:00:00`):new Date());
+  const principal=principalAmount(d),paid=totalPayments(d),remaining=principalBalance(d),
+        calc=lateFeeBreakdown(d,effectiveDate?new Date(`${effectiveDate}T12:00:00`):new Date());
+
+  const profile=currentUserData?.businessProfile||{};
+  const companyName=clean(profile.companyName)||clean(profile.raisonSociale)||creditorName(d)||"";
+  const companyAddress=clean(profile.address)||creditorAddress(d)||"";
+  const companyZip=clean(profile.zip)||clean(profile.postalCode)||creditorZip(d)||"";
+  const companyCity=clean(profile.city)||creditorCity(d)||"";
+  const companySiret=clean(profile.siret)||"";
+  const companyEmail=clean(profile.email)||creditorEmail(d)||"";
+  const companyPhone=clean(profile.phone)||"";
+  const representative=clean(profile.representative)||"";
+
+  const senderLines=[
+    companyName,
+    companyAddress,
+    [companyZip,companyCity].filter(Boolean).join(" "),
+    companySiret?`SIRET : ${companySiret}`:"",
+    [companyEmail?`Email : ${companyEmail}`:"",companyPhone?`Tél. : ${companyPhone}`:""].filter(Boolean).join(" — ")
+  ].filter(Boolean);
+
+  const invoices=normalizeInvoices(d);
+  const invoiceRefs=invoices.map(x=>clean(x.ref)).filter(Boolean);
+  const refsText=invoiceRefs.length>1
+    ? invoiceRefs.slice(0,-1).join(", ")+" et "+invoiceRefs[invoiceRefs.length-1]
+    : (invoiceRefs[0]||invoiceNumber(d));
+
+  const invoiceRowsHtml=invoices.length>1
+    ? `<div class="invoice-list"><strong>Factures concernées :</strong><ul>${invoices.map(inv=>`<li>${escapeHtml(inv.ref||"Facture")} — échéance ${escapeHtml(fmtDateFR(inv.dueDate)||"—")} — ${escapeHtml(formatCurrency(inv.amount||0))}</li>`).join("")}</ul></div>`
+    : "";
+
   const title=isR1?"PREMIÈRE RELANCE — COURTOISE":actionTitle(currentAction).toUpperCase();
-  const invoice=overviewPrimaryInvoice(d)||normalizeInvoices(d)[0];
-  const invoiceRef=invoice?.ref||invoiceNumber(d);
+
   const intro=isR1
-    ? `Madame, Monsieur,<br><br>Sauf erreur de notre part, la facture n°${escapeHtml(invoiceRef)} d’un montant restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong> demeure impayée à ce jour.<br><br>Nous vous invitons à procéder à son règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.`
+    ? (invoices.length>1
+        ? `Madame, Monsieur,<br><br>Sauf erreur de notre part, les factures n°${escapeHtml(refsText)}, pour un principal restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong>, demeurent impayées à ce jour.<br><br>Nous vous invitons à procéder à leur règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.${invoiceRowsHtml}`
+        : `Madame, Monsieur,<br><br>Sauf erreur de notre part, la facture n°${escapeHtml(refsText)} d’un montant restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong> demeure impayée à ce jour.<br><br>Nous vous invitons à procéder à son règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.`)
     : escapeHtml(bodyWithoutSubject(body)).replace(/\n/g,"<br>");
-  const signature=signatureDataUrl?`<img src="${signatureDataUrl}" style="display:block;max-width:145px;max-height:58px;object-fit:contain;margin-top:8px">`:"";
+
+  const signature=signatureDataUrl?`<img src="${signatureDataUrl}" style="display:block;max-width:130px;max-height:50px;object-fit:contain;margin-top:6px">`:"";
+
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${escapeHtml(subject)}</title><style>
-  @page{size:A4;margin:18mm}
+  @page{size:A4;margin:12mm}
   *{box-sizing:border-box}
   html,body{margin:0;background:#fff}
-  body{font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:10.5pt;line-height:1.43}
-  .page{width:100%;max-width:180mm;margin:0 auto;padding:16mm 14mm 12mm}
-  .head{display:grid;grid-template-columns:1fr 1fr;gap:24mm;min-height:41mm}
-  .sender{font-size:9.3pt;line-height:1.38}
-  .sender strong{font-size:9.6pt}
-  .recipient{text-align:right;font-size:9.3pt;line-height:1.38;padding-top:11mm}
-  .recipient strong{font-size:9.6pt}
-  .date{text-align:right;margin-top:2mm;font-size:9.3pt}
-  .meta{margin:9mm 0 6mm;font-weight:700}
-  .meta div{margin:2.2mm 0}
-  .title{font-size:15.5pt;font-weight:800;letter-spacing:.01em;margin:6mm 0 3mm;color:#172033}
-  .body{font-size:10.4pt}
-  .recap{width:100%;border-collapse:collapse;margin:6mm 0 5mm}
-  .recap th,.recap td{border:1px solid #d4d9e2;padding:6px 8px}
-  .recap th{background:#0d1830;color:#fff;text-align:left;font-size:10pt}
+  body{font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:10pt;line-height:1.36}
+  .page{width:100%;max-width:186mm;margin:0 auto;padding:10mm 11mm 7mm}
+  .head{display:grid;grid-template-columns:1fr 1fr;gap:18mm;min-height:32mm}
+  .sender{font-size:9pt;line-height:1.32}
+  .sender strong{font-size:9.4pt}
+  .recipient{text-align:right;font-size:9pt;line-height:1.32;padding-top:7mm}
+  .recipient strong{font-size:9.4pt}
+  .date{text-align:right;margin-top:1mm;font-size:9pt}
+  .meta{margin:6mm 0 4mm;font-weight:700}
+  .meta div{margin:1.6mm 0}
+  .title{font-size:14.5pt;font-weight:800;letter-spacing:.01em;margin:4.5mm 0 2.5mm;color:#172033}
+  .body{font-size:10pt}
+  .invoice-list{margin:4mm 0 0;padding:3mm 4mm;background:#f7f8fb;border:1px solid #dde2ea;border-radius:4px}
+  .invoice-list ul{margin:2mm 0 0 5mm;padding:0}
+  .invoice-list li{margin:1mm 0}
+  .recap{width:100%;border-collapse:collapse;margin:4.5mm 0 4mm;page-break-inside:avoid}
+  .recap th,.recap td{border:1px solid #d4d9e2;padding:5px 7px}
+  .recap th{background:#0d1830;color:#fff;text-align:left;font-size:9.6pt}
   .recap th:last-child,.recap td:last-child{text-align:right}
   .recap td:last-child{font-variant-numeric:tabular-nums}
-  .recap .total td{background:#ff7416;color:#fff;font-weight:800;font-size:11.2pt;border-color:#ff7416}
-  .closing{margin-top:4.5mm}
-  .sign{margin-top:8mm}
-  .sign strong{display:block;margin-bottom:4mm}
-  .foot{text-align:center;color:#718096;font-style:italic;font-size:8.2pt;margin-top:11mm}
+  .recap .total td{background:#ff7416;color:#fff;font-weight:800;font-size:10.8pt;border-color:#ff7416}
+  .closing{margin-top:3mm}
+  .sign{margin-top:5mm;page-break-inside:avoid}
+  .sign strong{display:block;margin-bottom:2mm}
+  .foot{text-align:center;color:#718096;font-style:italic;font-size:7.8pt;margin-top:6mm;page-break-inside:avoid}
+  @media print{
+    body{font-size:9.5pt;line-height:1.30}
+    .page{max-width:none;padding:7mm 8mm 4mm}
+    .head{min-height:27mm}
+    .recipient{padding-top:5mm}
+    .meta{margin:4.5mm 0 3.5mm}
+    .title{margin:3.5mm 0 2mm;font-size:13.8pt}
+    .invoice-list{margin-top:3mm;padding:2.4mm 3.5mm}
+    .recap{margin:3.5mm 0 3mm}
+    .recap th,.recap td{padding:4px 6px}
+    .sign{margin-top:4mm}
+    .foot{margin-top:4mm}
+  }
   </style></head><body><div class="page">
   <div class="head">
-    <div class="sender">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}</div>
+    <div class="sender"><strong>${escapeHtml(companyName)}</strong>${senderLines.slice(1).length?`<br>${senderLines.slice(1).map(escapeHtml).join("<br>")}`:""}</div>
     <div class="recipient">${escapeHtml(recipient).replace(/\n/g,"<br>")}</div>
   </div>
-  <div class="date">Fait à ${escapeHtml(creditorCity(d)||"—")}, le ${escapeHtml(dateLabel)}</div>
+  <div class="date">Fait à ${escapeHtml(creditorCity(d)||companyCity||"—")}, le ${escapeHtml(dateLabel)}</div>
   <div class="meta">
     <div>Objet : ${escapeHtml(subject)}</div>
     <div>Réf. dossier : ${escapeHtml(d?.ref||"—")}</div>
@@ -1224,7 +1274,7 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     <tr class="total"><td>TOTAL À RÉGLER</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr>
   </tbody></table>`:""}
   <div class="closing">Nous vous prions d’agréer, Madame, Monsieur, l’expression de nos salutations distinguées.</div>
-  <div class="sign"><strong>${escapeHtml(creditorName(d))}</strong>${escapeHtml(clean(currentUserData?.businessProfile?.representative)||"").replace(/\n/g,"<br>")}${signature}</div>
+  <div class="sign"><strong>${escapeHtml(companyName)}</strong>${representative?escapeHtml(representative):""}${signature}</div>
   <div class="foot">Document généré via Axe Flow — ${escapeHtml(d?.ref||"—")} — ${escapeHtml(dateLabel)}</div>
   </div></body></html>`;
 }
