@@ -203,6 +203,24 @@
 .overview-table .ov-ref,.overview-table .ov-next-date{font-weight:500!important}
 .overview-table .ov-ref{letter-spacing:0}
 
+
+/* V9 — interface unique : l'ancien panneau inférieur n'est plus affiché */
+.details-divider,.hero,.dashboard-grid{display:none!important}
+
+
+.overview-kpi-icon{position:absolute;right:16px;top:16px;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:1rem;border:1px solid rgba(255,255,255,.08);z-index:2}
+.kpi-blue{background:rgba(0,169,255,.14);color:#4bc8ff}
+.kpi-green{background:rgba(61,208,143,.14);color:#55e6a5}
+.kpi-orange{background:rgba(255,127,31,.14);color:#ff9b4a}
+.kpi-purple{background:rgba(137,103,255,.14);color:#b8a4ff}
+
+
+/* Bandeau supérieur allégé */
+.top-actions .btn,.user-chip,.user-email,.status-pill{font-weight:500!important}
+.brand-title{font-weight:700!important}
+.brand-sub{font-weight:500!important}
+#companyProfileBtn,#topNewDossierBtn,#logoutBtn{letter-spacing:0;font-size:.9rem}
+
 </style>
 </head>
 <body>
@@ -210,10 +228,10 @@
 <main class="page"><div class="container">
 <section class="overview-dashboard" id="overviewDashboard">
   <div class="overview-kpis">
-    <article class="overview-kpi"><div class="overview-kpi-label">Créances totales</div><div class="overview-kpi-value" id="ovTotalClaims">0,00 €</div><div class="overview-kpi-sub" id="ovTotalClaimsSub">0 dossier</div></article>
-    <article class="overview-kpi"><div class="overview-kpi-label">Total encaissé</div><div class="overview-kpi-value" id="ovCollected">0,00 €</div><div class="overview-kpi-sub" id="ovCollectedSub">Taux 0 %</div></article>
-    <article class="overview-kpi"><div class="overview-kpi-label">Total à régler</div><div class="overview-kpi-value" id="ovOutstanding">0,00 €</div><div class="overview-kpi-sub" id="ovOutstandingSub">0 en contentieux</div></article>
-    <article class="overview-kpi"><div class="overview-kpi-label">DSO moyen</div><div class="overview-kpi-value" id="ovDso">0j</div><div class="overview-kpi-sub" id="ovDsoSub">0 clôturé</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-icon kpi-blue">▣</div><div class="overview-kpi-label">Créances totales</div><div class="overview-kpi-value" id="ovTotalClaims">0,00 €</div><div class="overview-kpi-sub" id="ovTotalClaimsSub">0 dossier</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-icon kpi-green">↗</div><div class="overview-kpi-label">Total encaissé</div><div class="overview-kpi-value" id="ovCollected">0,00 €</div><div class="overview-kpi-sub" id="ovCollectedSub">Taux 0 %</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-icon kpi-orange">▤</div><div class="overview-kpi-label">Total à régler</div><div class="overview-kpi-value" id="ovOutstanding">0,00 €</div><div class="overview-kpi-sub" id="ovOutstandingSub">0 en contentieux</div></article>
+    <article class="overview-kpi"><div class="overview-kpi-icon kpi-purple">◷</div><div class="overview-kpi-label">DSO moyen</div><div class="overview-kpi-value" id="ovDso">0j</div><div class="overview-kpi-sub" id="ovDsoSub">0 clôturé</div></article>
   </div>
   <div class="overview-toolbar">
     <div class="overview-filters" id="overviewFilters">
