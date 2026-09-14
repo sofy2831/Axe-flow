@@ -896,9 +896,55 @@ Cordialement,
 ${creditorName(d)}`;
 }
 
-function relance1Text(d){return`Objet : Relance de paiement – Facture ${invoiceNumber(d)}\n\n${debtorName(d)},\n\nSauf erreur de notre part, la facture ${invoiceNumber(d)} émise le ${issuedDate(d)}${introHome(d)} présente à ce jour un solde restant dû de ${dueAmount(d)}${echeancePart(d)}.\n\nNous vous remercions de procéder au règlement dans les plus brefs délais, ou de nous indiquer votre date de paiement.\nSi vous avez déjà effectué le paiement, nous vous prions de ne pas tenir compte de ce courrier.\n\nCordialement,\nService Comptabilité`}
-function relance2Text(d){const r1=fmtDateFR(d?.relance1SentAt),r1p=r1!=="—"?` du ${r1}`:"";return`Objet : 2ème relance – Facture ${invoiceNumber(d)}\n\n${debtorName(d)},\n\nMalgré notre première relance${r1p}, nous constatons que la facture ${invoiceNumber(d)} émise le ${issuedDate(d)}${introHome(d)} n’est toujours pas réglée. Le solde restant dû est de ${dueAmount(d)}${echeancePart(d)}.\n\nMerci de régulariser sous ${RELANCE_GAP_DAYS} jours à compter de la réception de ce message.\nÀ défaut, nous serons contraints d’envisager des démarches de recouvrement.\n\nCordialement,\nService Comptabilité`}
-function relance3Text(d){return`Objet : 3ème relance avant mise en demeure – Facture ${invoiceNumber(d)}\n\n${debtorName(d)},\n\nÀ ce jour, la facture ${invoiceNumber(d)} émise le ${issuedDate(d)}${introHome(d)} demeure impayée. Le solde restant dû est de ${dueAmount(d)}${echeancePart(d)}.\n\nNous vous remercions de bien vouloir procéder au règlement sous ${RELANCE_GAP_DAYS} jours à compter de la réception de ce message.\nÀ défaut, nous engagerons une mise en demeure, puis une procédure de recouvrement.\n\nCordialement,\nService Comptabilité`}
+function relance1Text(d){
+  const invoices=normalizeInvoices(d),refs=invoices.map(x=>clean(x.ref)).filter(Boolean);
+  const refsText=refs.length>1?refs.slice(0,-1).join(", ")+" et "+refs[refs.length-1]:(refs[0]||invoiceNumber(d));
+  const plural=invoices.length>1,remaining=dueAmount(d);
+  return`Objet : Relance de paiement — ${plural?`Factures ${refsText}`:`Facture ${refsText}`}
+
+${debtorName(d)},
+
+Sauf erreur de notre part, ${plural?`les factures ${refsText}, d’un montant total restant dû de ${remaining}, demeurent impayées à ce jour.`:`la facture ${refsText}, d’un montant restant dû de ${remaining}, demeure impayée à ce jour.`}
+
+Nous vous remercions de procéder au règlement dans les plus brefs délais, ou de nous indiquer votre date de paiement.
+Si vous avez déjà effectué le paiement, nous vous prions de ne pas tenir compte de ce courrier.
+
+Cordialement,
+Service Comptabilité`}
+function relance2Text(d){
+  const invoices=normalizeInvoices(d),refs=invoices.map(x=>clean(x.ref)).filter(Boolean);
+  const refsText=refs.length>1?refs.slice(0,-1).join(", ")+" et "+refs[refs.length-1]:(refs[0]||invoiceNumber(d));
+  const plural=invoices.length>1,remaining=dueAmount(d);
+  const r1=fmtDateFR(d?.relance1SentAt),r1p=r1!=="—"?` du ${r1}`:"";
+  return`Objet : Deuxième relance de paiement — ${plural?`Factures ${refsText}`:`Facture ${refsText}`}
+
+${debtorName(d)},
+
+Malgré notre première relance${r1p}, ${plural?`les factures ${refsText} demeurent impayées.`:`la facture ${refsText} demeure impayée.`}
+Le montant total restant dû est de ${remaining}.
+
+Nous vous remercions de régulariser la situation dans les plus brefs délais.
+À défaut, nous poursuivrons les démarches de recouvrement.
+
+Cordialement,
+Service Comptabilité`}
+function relance3Text(d){
+  const invoices=normalizeInvoices(d),refs=invoices.map(x=>clean(x.ref)).filter(Boolean);
+  const refsText=refs.length>1?refs.slice(0,-1).join(", ")+" et "+refs[refs.length-1]:(refs[0]||invoiceNumber(d));
+  const plural=invoices.length>1,remaining=dueAmount(d);
+  const r2=fmtDateFR(d?.relance2SentAt),r2p=r2!=="—"?`, dont la dernière en date du ${r2}`:"";
+  return`Objet : Troisième relance de paiement — ${plural?`Factures ${refsText}`:`Facture ${refsText}`}
+
+${debtorName(d)},
+
+Malgré nos précédentes relances${r2p}, ${plural?`les factures ${refsText} restent impayées.`:`la facture ${refsText} reste impayée.`}
+Le montant total restant dû est de ${remaining}.
+
+Nous vous demandons de procéder au règlement sans délai.
+À défaut, une mise en demeure pourra être engagée.
+
+Cordialement,
+Service Comptabilité`}
 function medText(d){
   const calc=lateFeeBreakdown(d),pro=isProfessionalDebtor(d),plural=calc.rows.length>1?"Factures":"Facture";
   const detail=calc.rows.map(x=>`- ${x.ref} – échéance ${fmtDateFR(x.dueDate)} – principal ${formatCurrency(x.amount)} – intérêts ${formatCurrency(x.interests)}`).join("\n");
