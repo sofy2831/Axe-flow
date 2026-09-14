@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -274,6 +273,53 @@
   background:rgba(255,255,255,.08);
 }
 
+
+/* ===== V14 — Prévisualisation courrier dans Axe Flow ===== */
+#letterPreviewModal{z-index:180;background:rgba(2,10,15,.82)}
+#letterPreviewModal .letter-preview-shell{
+  width:min(1080px,calc(100vw - 28px));
+  max-height:94vh;
+  overflow:hidden;
+  border-radius:18px;
+  background:#0f1930;
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 30px 100px rgba(0,0,0,.55);
+}
+.letter-preview-toolbar{
+  min-height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:12px 16px;
+  border-bottom:1px solid rgba(255,255,255,.09);
+  background:#101a31;
+}
+.letter-preview-toolbar strong{display:block;font-size:1rem}
+.letter-preview-toolbar span{display:block;margin-top:2px;color:var(--muted);font-size:.78rem}
+.letter-preview-actions{display:flex;align-items:center;gap:8px}
+.letter-preview-actions .btn{min-height:38px;border-radius:10px}
+.letter-preview-stage{
+  height:min(82vh,920px);
+  overflow:auto;
+  padding:24px;
+  background:#dfe3e8;
+}
+#letterPreviewFrame{
+  display:block;
+  width:min(794px,100%);
+  min-height:1123px;
+  margin:0 auto;
+  border:0;
+  background:#fff;
+  box-shadow:0 16px 46px rgba(0,0,0,.20);
+}
+@media(max-width:760px){
+  .letter-preview-stage{padding:10px}
+  #letterPreviewFrame{min-height:900px}
+  .letter-preview-toolbar{align-items:flex-start}
+}
+
 </style>
 </head>
 <body>
@@ -413,6 +459,25 @@
   </div>
 </div></div></div>
 
+
+<div class="modal-backdrop" id="letterPreviewModal">
+  <div class="modal letter-preview-shell">
+    <div class="letter-preview-toolbar">
+      <div>
+        <strong>Prévisualisation du courrier</strong>
+        <span id="letterPreviewSub">Relance 1 — Courtoise</span>
+      </div>
+      <div class="letter-preview-actions">
+        <button class="btn btn-secondary" id="printLetterPreviewBtn" type="button">Imprimer / PDF</button>
+        <button class="close-btn" id="closeLetterPreviewModal" type="button">×</button>
+      </div>
+    </div>
+    <div class="letter-preview-stage">
+      <iframe id="letterPreviewFrame" title="Prévisualisation du courrier"></iframe>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modalText"><div class="modal"><div class="modal-inner"><div class="modal-head"><div><h2 id="modalTitle">Document</h2><div class="panel-sub" id="modalSub">—</div></div><button class="close-btn" id="closeModal" type="button">×</button></div><div class="letter-header"><div class="note-box soft" id="modalCreditorBox">Créancier : —</div><div class="note-box soft" id="modalDebtorBox">Débiteur : —</div></div><div class="note-box warning" id="medSendBox" style="display:none;margin-bottom:14px"><strong>Mise en demeure : LRAR fortement recommandée.</strong><br>Envoi conseillé : <strong>lettre recommandée avec accusé de réception</strong> via La Poste + copie simple par mail.<div style="margin-top:10px"><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div></div><div class="text-preview" id="textContent"></div><div class="modal-actions"><button class="btn btn-secondary" id="shareBtn" type="button" style="display:none">Partager</button><a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a><button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button><button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button></div></div></div></div>
 <div class="modal-backdrop" id="injunctionModal"><div class="modal"><div class="modal-inner"><div class="modal-head"><div><h2>Injonction de payer — dossier complet</h2><div class="panel-sub">Contrôle juridique, Cerfa, bordereau, dépôt tribunal, certificat puis exécution.</div></div><button class="close-btn" id="closeInjunctionModal" type="button">×</button></div><div class="note-box warning"><strong>Point de vigilance.</strong><br>L’injonction de payer est adaptée uniquement si la créance est certaine, liquide, exigible et suffisamment justifiée. En cas de contestation sérieuse du débiteur ou de pièces insuffisantes, il est recommandé d’éviter le dépôt automatique et d’orienter le dossier vers une procédure contradictoire adaptée : référé, assignation ou avis d’un professionnel du droit.</div><div class="pro-grid"><div class="pro-card"><h3>1. Vérification juridique</h3><div class="check-list"><label class="check-line"><input type="checkbox" id="checkDebtCertain"> Créance certaine : facture/contrat/prestation identifiable.</label><label class="check-line"><input type="checkbox" id="checkDebtLiquid"> Créance liquide : montant chiffré et justifiable.</label><label class="check-line"><input type="checkbox" id="checkDebtDue"> Créance exigible : échéance dépassée.</label><label class="check-line"><input type="checkbox" id="checkNoSeriousDispute"> Absence de contestation sérieuse connue.</label><label class="check-line"><input type="checkbox" id="checkFormalNotice"> Mise en demeure envoyée / preuve d’envoi disponible.</label><label class="check-line"><input type="checkbox" id="checkDebtDisputed"> Dette contestée par le débiteur.</label><label class="check-line"><input type="checkbox" id="checkEvidenceWeak"> Pièces faibles ou dossier incomplet.</label></div><div class="note-box legal-status warn" id="legalStatus"><strong>Analyse à compléter</strong> Coche les points de contrôle avant utilisation.</div></div><div class="pro-card"><h3>2. Synthèse dossier</h3><div class="text-preview" id="injunctionSummary" style="margin-top:0"></div></div></div><div class="pro-grid"><div class="pro-card"><h3>3. Bordereau des pièces</h3><div class="text-preview" id="injunctionBordereau" style="margin-top:0"></div></div></div><div class="pro-card" style="margin-top:14px"><h3>4. Parcours selon le débiteur</h3><div class="debtor-path-grid"><div class="path-card" id="professionalPathCard"><span class="path-tag">Débiteur professionnel</span><h3>Tribunal de commerce</h3><div class="path-steps"><div class="path-step"><strong>1. Rechercher le tribunal compétent</strong><small>Recherche l’entreprise sur Infogreffe, puis ouvre la fiche. Dans « Informations complémentaires », récupère le greffe du tribunal de commerce compétent.</small><a class="btn btn-secondary" id="proTribunalSearchBtn" href="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee" target="_blank" rel="noopener">Rechercher sur Infogreffe</a></div><div class="path-step"><strong>2. Générer la requête en injonction de payer</strong><small>La requête reprend automatiquement les faits, les factures, les intérêts, les frais accessoires et la demande adressée au juge.</small><button class="btn btn-secondary" id="generateInjunctionRequestBtn" type="button">Générer / PDF requête</button></div><div class="path-step"><strong>3. Générer les documents officiels</strong><button class="btn btn-secondary" id="generateCerfaBtn" type="button">Cerfa officiel prérempli</button><button class="btn btn-secondary" id="printDebtStatementBtnPro" type="button">Décompte actualisé de la créance</button></div><div class="path-step"><strong>4. Préparer les pièces justificatives</strong><button class="btn btn-secondary" id="uploadInjunctionFilesBtnPro" type="button">Uploader les pièces</button></div><div class="path-step"><strong>5. Envoyer votre dossier au tribunal</strong><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div><div class="path-step"><strong>6. Après l’ordonnance : demander le certificat de non-opposition</strong><small>Après signification et délai d’opposition d’un mois : Infogreffe → fiche entreprise → Documents → Certificat de non-opposition à injonction de payer. Document payant côté greffe/Infogreffe.</small><a class="btn btn-secondary" id="nonOppositionInfogreffeBtn" href="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee" target="_blank" rel="noopener">Commander le certificat</a></div><div class="path-step"><strong>7. Après certificat : exécution forcée par commissaire de justice</strong><small>Avec l’ordonnance signifiée et le certificat, transmettre le dossier au commissaire de justice pour mesures d’exécution.</small></div></div></div><div class="path-card" id="privatePathCard"><span class="path-tag">Débiteur particulier</span><h3>Tribunal judiciaire</h3><div class="path-steps"><div class="path-step"><strong>1. Rechercher le tribunal compétent</strong><small>Pour un débiteur particulier, recherchez le tribunal judiciaire compétent selon le domicile du débiteur et la nature du dossier.</small><a class="btn btn-secondary" id="privateTribunalSearchBtn" href="https://www.justice.fr/recherche/annuaires" target="_blank" rel="noopener">Rechercher sur justice.fr</a></div><div class="path-step"><strong>2. Générer la requête en injonction de payer</strong><small>La requête reprend automatiquement les faits, les factures, les intérêts, les frais accessoires et la demande adressée au juge.</small><button class="btn btn-secondary" id="generateInjunctionRequestBtnPrivate" type="button">Générer / PDF requête</button></div><div class="path-step"><strong>3. Générer les documents officiels</strong><button class="btn btn-secondary" id="generateCerfaBtnPrivate" type="button">Cerfa officiel prérempli</button><button class="btn btn-secondary" id="printDebtStatementBtnPrivate" type="button">Décompte actualisé de la créance</button></div><div class="path-step"><strong>4. Préparer les pièces justificatives</strong><button class="btn btn-secondary" id="uploadInjunctionFilesBtnPrivate" type="button">Uploader les pièces</button></div><div class="path-step"><strong>5. Envoyer votre dossier au tribunal</strong><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div><div class="path-step"><strong>6. Après l’ordonnance : demander le certificat de non-opposition</strong><small>Après signification et délai d’opposition d’un mois, contacter le greffe du tribunal judiciaire. Joindre l’ordonnance, la preuve de signification et la référence du dossier.</small><a class="btn btn-secondary" id="nonOppositionPrivateBtn" href="https://www.justice.fr/recherche/annuaires" target="_blank" rel="noopener">Demande auprès du tribunal</a></div><div class="path-step"><strong>7. Après certificat : exécution forcée par commissaire de justice</strong><small>Transmettre ordonnance, preuve de signification, certificat de non-opposition et décompte actualisé au commissaire de justice.</small></div></div></div></div><input id="injunctionFilesInput" type="file" multiple style="display:none"><div class="upload-status" id="injunctionUploadStatus">Aucun fichier ajouté pour le moment.</div><div class="uploaded-files-list" id="injunctionFilesList"></div><div class="path-warning" id="pathWarning" style="display:none"></div></div><div class="modal-actions"><button class="btn btn-danger" id="markInjunctionBtn" type="button">Marquer l’injonction comme envoyée</button></div></div></div></div>
 
@@ -451,7 +516,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="";
-const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn"];
+const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn"];
 const E={};ids.forEach(id=>E[id]=$(id));
 const clean=s=>String(s||"").trim(),esc=s=>String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"),escapeHtml=esc;
 function formatCurrency(v){return Number(v||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -1108,16 +1173,48 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   const isR1=currentAction==="relance1";
   const principal=principalAmount(d),paid=totalPayments(d),remaining=principalBalance(d),calc=lateFeeBreakdown(d,effectiveDate?new Date(`${effectiveDate}T12:00:00`):new Date());
   const title=isR1?"PREMIÈRE RELANCE — COURTOISE":actionTitle(currentAction).toUpperCase();
+  const invoice=overviewPrimaryInvoice(d)||normalizeInvoices(d)[0];
+  const invoiceRef=invoice?.ref||invoiceNumber(d);
   const intro=isR1
-    ? `Madame, Monsieur,<br><br>Sauf erreur de notre part, votre facture n°${escapeHtml(invoiceNumber(d))} d'un principal restant de <strong>${escapeHtml(formatCurrency(remaining))}</strong>, demeure impayée à ce jour.<br><br>Nous vous invitons à procéder au règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.`
+    ? `Madame, Monsieur,<br><br>Sauf erreur de notre part, la facture n°${escapeHtml(invoiceRef)} d’un montant restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong> demeure impayée à ce jour.<br><br>Nous vous invitons à procéder à son règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.`
     : escapeHtml(bodyWithoutSubject(body)).replace(/\n/g,"<br>");
-  const signature=signatureDataUrl?`<img src="${signatureDataUrl}" style="display:block;max-width:150px;max-height:60px;object-fit:contain;margin-top:8px">`:"";
+  const signature=signatureDataUrl?`<img src="${signatureDataUrl}" style="display:block;max-width:145px;max-height:58px;object-fit:contain;margin-top:8px">`:"";
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${escapeHtml(subject)}</title><style>
-  @page{size:A4;margin:18mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:10.8pt;line-height:1.45;margin:0}.page{max-width:180mm;margin:auto;padding:6mm 0}.head{display:grid;grid-template-columns:1fr 1fr;gap:18mm}.sender{font-size:9.5pt}.recipient{text-align:right;font-size:9.5pt;padding-top:18mm}.date{text-align:right;margin-top:10mm;font-size:9.5pt}.meta{margin:8mm 0 7mm;font-weight:700}.meta div{margin:2mm 0}.title{font-size:16pt;font-weight:800;margin:6mm 0 3mm}.body{font-size:10.6pt}.recap{width:100%;border-collapse:collapse;margin:6mm 0}.recap th,.recap td{border:1px solid #d5d9e0;padding:6px 8px}.recap th{background:#0d1830;color:#fff;text-align:left}.recap th:last-child,.recap td:last-child{text-align:right}.recap .total td{background:#ff7416;color:#fff;font-weight:800;font-size:11.5pt}.closing{margin-top:5mm}.sign{margin-top:8mm}.sign strong{display:block;margin-bottom:4mm}.foot{text-align:center;color:#748099;font-style:italic;font-size:8.5pt;margin-top:12mm}
+  @page{size:A4;margin:18mm}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff}
+  body{font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:10.5pt;line-height:1.43}
+  .page{width:100%;max-width:180mm;margin:0 auto;padding:16mm 14mm 12mm}
+  .head{display:grid;grid-template-columns:1fr 1fr;gap:24mm;min-height:41mm}
+  .sender{font-size:9.3pt;line-height:1.38}
+  .sender strong{font-size:9.6pt}
+  .recipient{text-align:right;font-size:9.3pt;line-height:1.38;padding-top:11mm}
+  .recipient strong{font-size:9.6pt}
+  .date{text-align:right;margin-top:2mm;font-size:9.3pt}
+  .meta{margin:9mm 0 6mm;font-weight:700}
+  .meta div{margin:2.2mm 0}
+  .title{font-size:15.5pt;font-weight:800;letter-spacing:.01em;margin:6mm 0 3mm;color:#172033}
+  .body{font-size:10.4pt}
+  .recap{width:100%;border-collapse:collapse;margin:6mm 0 5mm}
+  .recap th,.recap td{border:1px solid #d4d9e2;padding:6px 8px}
+  .recap th{background:#0d1830;color:#fff;text-align:left;font-size:10pt}
+  .recap th:last-child,.recap td:last-child{text-align:right}
+  .recap td:last-child{font-variant-numeric:tabular-nums}
+  .recap .total td{background:#ff7416;color:#fff;font-weight:800;font-size:11.2pt;border-color:#ff7416}
+  .closing{margin-top:4.5mm}
+  .sign{margin-top:8mm}
+  .sign strong{display:block;margin-bottom:4mm}
+  .foot{text-align:center;color:#718096;font-style:italic;font-size:8.2pt;margin-top:11mm}
   </style></head><body><div class="page">
-  <div class="head"><div class="sender">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}</div><div class="recipient">${escapeHtml(recipient).replace(/\n/g,"<br>")}</div></div>
+  <div class="head">
+    <div class="sender">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}</div>
+    <div class="recipient">${escapeHtml(recipient).replace(/\n/g,"<br>")}</div>
+  </div>
   <div class="date">Fait à ${escapeHtml(creditorCity(d)||"—")}, le ${escapeHtml(dateLabel)}</div>
-  <div class="meta"><div>Objet : ${escapeHtml(subject)}</div><div>Réf. dossier : ${escapeHtml(d?.ref||"—")}</div></div>
+  <div class="meta">
+    <div>Objet : ${escapeHtml(subject)}</div>
+    <div>Réf. dossier : ${escapeHtml(d?.ref||"—")}</div>
+  </div>
   <div class="title">${escapeHtml(title)}</div>
   <div class="body">${intro}</div>
   ${isR1?`<table class="recap"><thead><tr><th>Récapitulatif</th><th>Montant</th></tr></thead><tbody>
@@ -1126,17 +1223,29 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     <tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(remaining))}</td></tr>
     <tr class="total"><td>TOTAL À RÉGLER</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr>
   </tbody></table>`:""}
-  <div class="closing">Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</div>
+  <div class="closing">Nous vous prions d’agréer, Madame, Monsieur, l’expression de nos salutations distinguées.</div>
   <div class="sign"><strong>${escapeHtml(creditorName(d))}</strong>${escapeHtml(clean(currentUserData?.businessProfile?.representative)||"").replace(/\n/g,"<br>")}${signature}</div>
   <div class="foot">Document généré via Axe Flow — ${escapeHtml(d?.ref||"—")} — ${escapeHtml(dateLabel)}</div>
   </div></body></html>`;
 }
 
-
 function previewProfessionalLetter(body,d=currentDossier,effectiveDate=""){
-  const w=window.open("","_blank","width=900,height=1050,noopener");
-  if(!w){alert("Autorisez les fenêtres contextuelles pour afficher la prévisualisation.");return}
-  w.document.open();w.document.write(professionalLetterHtml(body,d,"",effectiveDate));w.document.close();w.focus();
+  if(!E.letterPreviewModal||!E.letterPreviewFrame)return;
+  const html=professionalLetterHtml(body,d,"",effectiveDate);
+  E.letterPreviewFrame.srcdoc=html;
+  E.letterPreviewSub.textContent=`${actionTitle(currentAction)} — ${d?.ref||"Dossier"}`;
+  E.letterPreviewModal.classList.add("open");
+}
+
+
+function closeLetterPreview(){
+  E.letterPreviewModal?.classList.remove("open");
+}
+function printLetterPreview(){
+  const frame=E.letterPreviewFrame;
+  if(!frame?.contentWindow)return;
+  frame.contentWindow.focus();
+  frame.contentWindow.print();
 }
 
 function openProfessionalLetter(body,d=currentDossier){let recipientOverride="";if(currentAction==="court_closure"){const courtCity=clean(prompt("Ville du tribunal :", ""));if(!courtCity)return;const courtAddress=clean(prompt("Adresse complète du tribunal :", ""));if(!courtAddress)return;recipientOverride=["Monsieur le Greffier",`TRIBUNAL DE ${courtCity.toUpperCase()}`,courtAddress,courtCity.toUpperCase()].join("\n");}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow,doc=w.document;doc.open();doc.write(professionalLetterHtml(body,d,recipientOverride));doc.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
@@ -2170,6 +2279,11 @@ E.cancelRelanceActionBtn?.addEventListener("click",closeRelanceActionModal);
 E.relanceActionModal?.addEventListener("click",e=>{if(e.target===E.relanceActionModal)closeRelanceActionModal()});
 E.relanceActionDate?.addEventListener("input",()=>{E.relanceActionDateLabel.textContent=E.relanceActionDate.value||"—"});
 E.previewRelanceActionBtn?.addEventListener("click",previewRelanceAction);
+
+E.closeLetterPreviewModal?.addEventListener("click",closeLetterPreview);
+E.letterPreviewModal?.addEventListener("click",e=>{if(e.target===E.letterPreviewModal)closeLetterPreview()});
+E.printLetterPreviewBtn?.addEventListener("click",printLetterPreview);
+
 E.validateRelanceActionBtn?.addEventListener("click",validateRelanceAction);
 E.fillFullPaymentBtn?.addEventListener("click",()=>{if(currentDossier){E.paymentAmountInput.value=principalBalance(currentDossier).toFixed(2);updatePaymentPreview()}});
 E.cancelPaymentBtn?.addEventListener("click",closePaymentModal);
