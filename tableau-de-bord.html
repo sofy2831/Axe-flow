@@ -356,6 +356,26 @@
   font-weight:900;
 }
 
+
+/* ===== V18 — Chronologie dossier ===== */
+#dossierDetailModal .detail-event{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  align-items:center;
+}
+#dossierDetailModal .detail-event-main{min-width:0}
+#dossierDetailModal .detail-event-view{
+  border:0;
+  background:transparent;
+  color:var(--accent);
+  font-weight:650;
+  font-size:.78rem;
+  cursor:pointer;
+  padding:6px 4px;
+}
+#dossierDetailModal .detail-event-view:hover{text-decoration:underline}
+
 </style>
 </head>
 <body>
@@ -775,6 +795,36 @@ async function redirectToCorrectPayment(){
 function sentDateField(a){return a==="relance1"?"relance1SentAt":a==="relance2"?"relance2SentAt":a==="relance3"?"relance3SentAt":a==="med"?"miseEnDemeureSentAt":a==="injunction"?"injunctionPreparedAt":"sentAt"}
 function actionTitle(a){return a==="relance1"?"Relance 1":a==="relance2"?"Relance 2":a==="relance3"?"Relance 3":a==="med"?"Mise en demeure":a==="injunction"?"Injonction de payer":a==="closure"||a==="debtor_closure"?"Confirmation de règlement intégral – clôture du dossier":a==="court_closure"?"Information au tribunal – règlement intégral et désistement":"Document"}
 function stepForAction(a){return a==="relance1"?1:a==="relance2"?2:a==="relance3"?3:a==="med"?4:a==="injunction"?5:0}
+
+function workflowDelays(){
+  const delays=currentUserData?.businessProfile?.recoveryDelays||{};
+  return{
+    r1AfterDue:Number(delays.r1AfterDue??3),
+    r1ToR2:Number(delays.r1ToR2??8),
+    r2ToR3:Number(delays.r2ToR3??8),
+    r3ToMed:Number(delays.r3ToMed??8)
+  };
+}
+function timestampFromIsoDate(value){
+  const d=parseLocalDate(value);
+  if(!d)return Timestamp.now();
+  d.setHours(12,0,0,0);
+  return Timestamp.fromDate(d);
+}
+function isoDatePlusDays(value,days){
+  const d=parseLocalDate(value);
+  if(!d)return "";
+  d.setDate(d.getDate()+Number(days||0));
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function relanceNextInfo(action,effectiveDate){
+  const delays=workflowDelays();
+  if(action==="relance1")return{code:"RELANCE_2",label:"Relance 2 à préparer",days:delays.r1ToR2,date:isoDatePlusDays(effectiveDate,delays.r1ToR2)};
+  if(action==="relance2")return{code:"RELANCE_3",label:"Relance 3 à préparer",days:delays.r2ToR3,date:isoDatePlusDays(effectiveDate,delays.r2ToR3)};
+  if(action==="relance3")return{code:"MED",label:"Mise en demeure à préparer",days:delays.r3ToMed,date:isoDatePlusDays(effectiveDate,delays.r3ToMed)};
+  return null;
+}
+
 function nextActionInfo(action){if(action==="relance1")return{code:"RELANCE_2",label:"Relance 2 à préparer",days:RELANCE_GAP_DAYS};if(action==="relance2")return{code:"RELANCE_3",label:"Relance 3 à préparer",days:RELANCE_GAP_DAYS};if(action==="relance3")return{code:"MED",label:"Mise en demeure à préparer",days:RELANCE_GAP_DAYS};if(action==="med")return{code:"INJONCTION",label:"Injonction à préparer",days:MED_DELAY_DAYS};if(action==="injunction")return{code:"SIGNIFICATION",label:"Signification à organiser",days:0};return null}
 function nextActionLabel(code){return code==="RELANCE_2"?"Relance 2 à préparer":code==="RELANCE_3"?"Relance 3 à préparer":code==="MED"?"Mise en demeure à préparer":code==="INJONCTION"?"Injonction à préparer":code==="SIGNIFICATION"?"Signification à organiser":"Prochaine action"}
 function courtClosureText(d){
@@ -1207,7 +1257,7 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   const subject=extractSubject(body,actionTitle(currentAction));
   const recipient=clean(recipientOverride)||debtorBlock(d);
   const dateLabel=effectiveDate?fmtDateFR(effectiveDate):todayFR();
-  const isR1=currentAction==="relance1";
+  const isRelance=["relance1","relance2","relance3"].includes(currentAction);
   const principal=principalAmount(d),paid=totalPayments(d),remaining=principalBalance(d),
         calc=lateFeeBreakdown(d,effectiveDate?new Date(`${effectiveDate}T12:00:00`):new Date());
 
@@ -1247,11 +1297,23 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   };
   const title=letterTitles[currentAction]||actionTitle(currentAction).toUpperCase();
 
-  const intro=isR1
-    ? (invoices.length>1
-        ? `Madame, Monsieur,<br><br>Sauf erreur de notre part, les factures n°${escapeHtml(refsText)}, pour un principal restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong>, demeurent impayées à ce jour.<br><br>Nous vous invitons à procéder à leur règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.${invoiceRowsHtml}`
-        : `Madame, Monsieur,<br><br>Sauf erreur de notre part, la facture n°${escapeHtml(refsText)} d’un montant restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong> demeure impayée à ce jour.<br><br>Nous vous invitons à procéder à son règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.`)
-    : escapeHtml(bodyWithoutSubject(body)).replace(/\n/g,"<br>");
+  const plural=invoices.length>1;
+  const previousDate=currentAction==="relance2"
+    ? fmtDateFR(d?.relance1SentAt)
+    : currentAction==="relance3"
+      ? fmtDateFR(d?.relance2SentAt)
+      : "—";
+
+  let intro="";
+  if(currentAction==="relance1"){
+    intro=`Madame, Monsieur,<br><br>Sauf erreur de notre part, ${plural?`les factures n°${escapeHtml(refsText)}, pour un principal restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong>, demeurent impayées`:`la facture n°${escapeHtml(refsText)} d’un montant restant dû de <strong>${escapeHtml(formatCurrency(remaining))}</strong> demeure impayée`} à ce jour.<br><br>Nous vous invitons à procéder ${plural?"à leur":"à son"} règlement dans les meilleurs délais. Si ce paiement est déjà intervenu, veuillez ne pas tenir compte de la présente.${invoiceRowsHtml}`;
+  }else if(currentAction==="relance2"){
+    intro=`Madame, Monsieur,<br><br>Malgré notre première relance${previousDate!=="—"?` du <strong>${escapeHtml(previousDate)}</strong>`:""}, nous constatons que ${plural?`les factures n°${escapeHtml(refsText)} demeurent impayées`:`la facture n°${escapeHtml(refsText)} demeure impayée`}. Le principal restant dû s’élève à <strong>${escapeHtml(formatCurrency(remaining))}</strong>.<br><br>Nous vous remercions de régulariser la situation dans les meilleurs délais. À défaut, nous poursuivrons les démarches de recouvrement.${invoiceRowsHtml}`;
+  }else if(currentAction==="relance3"){
+    intro=`Madame, Monsieur,<br><br>Malgré nos précédentes relances${previousDate!=="—"?`, dont la dernière en date du <strong>${escapeHtml(previousDate)}</strong>`:""}, ${plural?`les factures n°${escapeHtml(refsText)} restent impayées`:`la facture n°${escapeHtml(refsText)} reste impayée`}. Le principal restant dû s’élève à <strong>${escapeHtml(formatCurrency(remaining))}</strong>.<br><br>Nous vous demandons de procéder au règlement sans délai. À défaut, une mise en demeure pourra être engagée.${invoiceRowsHtml}`;
+  }else{
+    intro=escapeHtml(bodyWithoutSubject(body)).replace(/\n/g,"<br>");
+  }
 
   const signature=signatureDataUrl?`<img src="${signatureDataUrl}" style="display:block;max-width:130px;max-height:50px;object-fit:contain;margin-top:6px">`:"";
 
@@ -1309,7 +1371,7 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   </div>
   <div class="title">${escapeHtml(title)}</div>
   <div class="body">${intro}</div>
-  ${isR1?`<table class="recap"><thead><tr><th>Récapitulatif</th><th>Montant</th></tr></thead><tbody>
+  ${isRelance?`<table class="recap"><thead><tr><th>Récapitulatif</th><th>Montant</th></tr></thead><tbody>
     <tr><td>Principal initial</td><td>${escapeHtml(formatCurrency(principal))}</td></tr>
     <tr><td>Total réglé à ce jour</td><td>${escapeHtml(formatCurrency(paid))}</td></tr>
     <tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(remaining))}</td></tr>
@@ -1898,6 +1960,13 @@ function showSuccessToast(message){
 }
 
 let pendingRelanceAction=null;
+
+function syncRelanceValidationLabel(){
+  if(!E.validateRelanceActionBtn)return;
+  const channel=clean(E.relanceActionChannel?.value);
+  E.validateRelanceActionBtn.textContent=channel==="Email"?"Préparer l'email et enregistrer":"Valider et enregistrer";
+}
+
 function openRelanceActionModal(action="relance1"){
   if(!currentDossier)return;
   pendingRelanceAction=action;
@@ -1908,6 +1977,7 @@ function openRelanceActionModal(action="relance1"){
   E.relanceActionAmount.textContent=formatCurrency(principalBalance(currentDossier));
   E.relanceActionChannel.value="Email";E.relanceActionNote.value="";
   if(E.previewRelanceActionBtn)E.previewRelanceActionBtn.textContent=`⇩ Prévisualiser à la date ${today}`;
+  syncRelanceValidationLabel();
   E.relanceActionModal.classList.add("open");
 }
 function closeRelanceActionModal(){E.relanceActionModal.classList.remove("open");pendingRelanceAction=null}
@@ -1924,23 +1994,39 @@ function previewRelanceAction(){
 }
 async function validateRelanceAction(){
   if(!currentDossier||!pendingRelanceAction)return;
-  const action=pendingRelanceAction, date=E.relanceActionDate.value||isoToday(), channel=clean(E.relanceActionChannel.value), note=clean(E.relanceActionNote.value);
+  const action=pendingRelanceAction,
+        date=E.relanceActionDate.value||isoToday(),
+        channel=clean(E.relanceActionChannel.value),
+        note=clean(E.relanceActionNote.value);
   try{
-    E.validateRelanceActionBtn.disabled=true;E.validateRelanceActionBtn.textContent="Enregistrement...";
-    currentAction=action;currentText=buildText(action,currentDossier);
-    await markStep(action);
-    if(currentUser&&currentDossier?.id&&(note||channel||date)){
-      await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:`${actionTitle(action)} — détails d'action`,description:`Date : ${fmtDateFR(date)}\nCanal : ${channel}${note?`\nNote : ${note}`:""}`,action:`${action}_details`,effectiveDate:date,channel,note,createdAt:serverTimestamp()});
+    E.validateRelanceActionBtn.disabled=true;
+    E.validateRelanceActionBtn.textContent="Enregistrement...";
+    currentAction=action;
+    currentText=buildText(action,currentDossier);
+
+    await markStep(action,{effectiveDate:date,channel,note});
+
+    // Un navigateur ne peut pas certifier qu'un email a réellement été envoyé.
+    // Si Email est choisi, on ouvre la messagerie avec le contenu prérempli.
+    if(channel==="Email"){
+      const subject=`${actionTitle(action)} — ${currentDossier.ref||"Dossier"}`;
+      window.location.href=makeMailto(debtorEmail(currentDossier),subject,currentText);
     }
+
     const toastLabels={
-      relance1:"Relance 1 (Courtoise) enregistrée",
-      relance2:"Relance 2 (Ferme) enregistrée",
-      relance3:"Relance 3 (Ultime) enregistrée"
+      relance1:"Relance 1 (Courtoise) préparée",
+      relance2:"Relance 2 (Ferme) préparée",
+      relance3:"Relance 3 (Ultime) préparée"
     };
     closeRelanceActionModal();
-    showSuccessToast(toastLabels[action]||`${actionTitle(action)} enregistrée`);
-  }catch(err){console.error(err);alert("Impossible d’enregistrer l’action.");}
-  finally{E.validateRelanceActionBtn.disabled=false;E.validateRelanceActionBtn.textContent="Valider et enregistrer"}
+    showSuccessToast(toastLabels[action]||`${actionTitle(action)} préparée`);
+  }catch(err){
+    console.error(err);
+    alert("Impossible d’enregistrer l’action.");
+  }finally{
+    E.validateRelanceActionBtn.disabled=false;
+    E.validateRelanceActionBtn.textContent="Valider et enregistrer";
+  }
 }
 
 function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(["relance1","relance2","relance3"].includes(action)){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
@@ -1955,6 +2041,53 @@ function closeInjunction(){E.injunctionModal.classList.remove("open")}
 function openEditDossierModal(d=currentDossier){if(!d){alert("Sélectionnez un dossier.");return}currentDossier=d;$("editDossierRef").value=d.ref||"";fillInvoiceRows(E.editInvoiceRows,normalizeInvoices(d));E.editLateRateInput.value=Number(d.lateRatePercent??8.25);$("editContractBasisInput").value=contractBasis(d);$("editDebiteurTypeInput").value=debtorType(d);$("editDebtorNameInput").value=debtorName(d)==="Madame, Monsieur"?"":debtorName(d);$("editDebtorEmailInput").value=debtorEmail(d);$("editDebtorAddressInput").value=debtorAddress(d);$("editDebtorZipInput").value=debtorZip(d);$("editDebtorCityInput").value=debtorCity(d);E.editDossierModal.classList.add("open")}
 function closeEditDossierModal(){E.editDossierModal.classList.remove("open")}
 async function markStep(action){
+  // Relances amiables : la date choisie dans la modale est la date de référence.
+  if(["relance1","relance2","relance3"].includes(action)){
+    const options=arguments[1]||{};
+    const effectiveDate=clean(options.effectiveDate)||isoToday();
+    const channel=clean(options.channel)||"Courrier";
+    const note=clean(options.note);
+    const step=stepForAction(action);
+    const sentField=sentDateField(action);
+    const effectiveTimestamp=timestampFromIsoDate(effectiveDate);
+    const next=relanceNextInfo(action,effectiveDate);
+    const title=`${actionTitle(action)} préparée`;
+
+    const patch={
+      step:Math.max(step,getStep(currentDossier)),
+      statusLabel:title,
+      updatedAt:serverTimestamp(),
+      [sentField]:effectiveTimestamp
+    };
+
+    if(next){
+      patch.nextAction=next.code;
+      if(next.date)patch.nextActionAt=timestampFromIsoDate(next.date);
+    }
+
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+
+    const descriptionParts=[
+      `Date de préparation : ${fmtDateFR(effectiveDate)}`,
+      `Canal : ${channel}`
+    ];
+    if(note)descriptionParts.push(`Note : ${note}`);
+    if(next?.date)descriptionParts.push(`Prochaine action : ${next.label} le ${fmtDateFR(next.date)}`);
+
+    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
+      title,
+      description:descriptionParts.join("\n"),
+      action,
+      effectiveDate,
+      channel,
+      note,
+      createdAt:serverTimestamp()
+    });
+
+    await loadDossiers(currentUser.uid);
+    return;
+  }
+
   if(!currentUser||!currentDossier)return;
   if(action==="court_closure"||action==="debtor_closure"){
     const isCourt=action==="court_closure";
@@ -2163,13 +2296,21 @@ async function loadDetailTimeline(d){
     if(!events.length){
       const firstInv=overviewPrimaryInvoice(d)||normalizeInvoices(d)[0];
       if(firstInv){
-        E.detailTimeline.innerHTML=`<div class="detail-event"><time>${esc(fmtDateFR(firstInv.dueDate)||"—")}</time><strong>Facture échue</strong><div class="ov-sub">${esc(formatCurrency(principalAmount(d)))} en attente.</div></div>`;
+        E.detailTimeline.innerHTML=`<div class="detail-event"><div class="detail-event-main"><time>${esc(fmtDateFR(firstInv.dueDate)||"—")}</time><strong>Facture échue</strong><div class="ov-sub">${esc(formatCurrency(principalAmount(d)))} en attente.</div></div></div>`;
       }else{
         E.detailTimeline.innerHTML='<div class="empty-state">Aucune action enregistrée.</div>';
       }
       return
     }
-    E.detailTimeline.innerHTML=events.map(ev=>`<div class="detail-event"><time>${esc(fmtDateFR(ev.effectiveDate||ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>`).join("");
+    E.detailTimeline.innerHTML=events.map(ev=>{
+      const canView=["relance1","relance2","relance3"].includes(ev.action);
+      return`<div class="detail-event"><div class="detail-event-main"><time>${esc(fmtDateFR(ev.effectiveDate||ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>${canView?`<button class="detail-event-view" type="button" data-view-action="${esc(ev.action)}" data-view-date="${esc(ev.effectiveDate||"")}">↗ Voir</button>`:""}</div>`;
+    }).join("");
+    E.detailTimeline.querySelectorAll("[data-view-action]").forEach(btn=>btn.addEventListener("click",()=>{
+      currentAction=btn.dataset.viewAction;
+      currentText=buildText(currentAction,d);
+      previewProfessionalLetter(currentText,d,btn.dataset.viewDate||isoToday());
+    }));
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
 function openDossierDetailModal(d){
@@ -2328,7 +2469,15 @@ async function renderTimeline(){
   const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"));
   const all=[];
   snap.forEach(s=>all.push({id:s.id,...s.data()}));
-  all.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+  all.sort((a,b)=>{
+    const eventTime=x=>{
+      if(x?.effectiveDate){
+        const d=parseLocalDate(x.effectiveDate);if(d)return d.getTime();
+      }
+      return x?.createdAt?.toMillis?.()||0;
+    };
+    return eventTime(b)-eventTime(a);
+  });
 
   const unique=[];
   const seen=new Set();
@@ -2386,6 +2535,7 @@ E.paymentModal.addEventListener("click",e=>{if(e.target===E.paymentModal)closePa
 E.closeRelanceActionModal?.addEventListener("click",closeRelanceActionModal);
 E.cancelRelanceActionBtn?.addEventListener("click",closeRelanceActionModal);
 E.relanceActionModal?.addEventListener("click",e=>{if(e.target===E.relanceActionModal)closeRelanceActionModal()});
+E.relanceActionChannel?.addEventListener("change",syncRelanceValidationLabel);
 E.relanceActionDate?.addEventListener("input",()=>{
   E.relanceActionDateLabel.textContent=E.relanceActionDate.value||"—";
   if(E.previewRelanceActionBtn)E.previewRelanceActionBtn.textContent=`⇩ Prévisualiser à la date ${E.relanceActionDate.value||"—"}`;
