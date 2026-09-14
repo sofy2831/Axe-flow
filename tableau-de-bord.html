@@ -245,6 +245,35 @@
   #createDossierModal.private-mode .invoice-row{grid-template-columns:1fr}
 }
 
+
+/* ===== V13 — Détail dossier particulier ===== */
+#dossierDetailModal .detail-kpi.total strong{color:var(--accent)}
+#dossierDetailModal .btn-payment{
+  color:#72e6b2;
+  border-color:rgba(61,208,143,.34);
+  background:rgba(61,208,143,.08);
+}
+#dossierDetailModal .btn-payment:hover{background:rgba(61,208,143,.14)}
+#dossierDetailModal .action-tag{
+  display:inline-grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:7px;
+  margin-right:2px;
+  font-size:.78rem;
+  line-height:1;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.10);
+}
+#dossierDetailModal .btn-payment .action-tag{
+  background:rgba(61,208,143,.12);
+  border-color:rgba(61,208,143,.20);
+}
+#dossierDetailModal .btn-close-dossier .action-tag{
+  background:rgba(255,255,255,.08);
+}
+
 </style>
 </head>
 <body>
@@ -1784,7 +1813,7 @@ function dossierStageInfo(d){
   if(step===2)return{key:"amicable",label:"Relance 2",cls:"relance",stage:2};
   if(step===1)return{key:"amicable",label:"Relance 1",cls:"relance",stage:1};
   if(paid)return{key:"closed",label:"Réglé",cls:"closed",stage:0};
-  return{key:"open",label:"Échu",cls:"",stage:0};
+  return{key:"open",label:"Échue",cls:"",stage:0};
 }
 function dossierDelayDays(d){
   const inv=normalizeInvoices(d);if(!inv.length)return 0;
@@ -1904,9 +1933,25 @@ async function loadDetailTimeline(d){
   try{
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
     snap.forEach(s=>events.push({id:s.id,...s.data()}));
-    events.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
-    if(!events.length){E.detailTimeline.innerHTML='<div class="empty-state">Aucune action enregistrée.</div>';return}
-    E.detailTimeline.innerHTML=events.map(ev=>`<div class="detail-event"><time>${esc(fmtDateFR(ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>`).join("");
+    events.sort((a,b)=>{
+      const eventTime=x=>{
+        if(x?.effectiveDate){
+          const d=parseLocalDate(x.effectiveDate);if(d)return d.getTime();
+        }
+        return x?.createdAt?.toMillis?.()||0;
+      };
+      return eventTime(b)-eventTime(a);
+    });
+    if(!events.length){
+      const firstInv=overviewPrimaryInvoice(d)||normalizeInvoices(d)[0];
+      if(firstInv){
+        E.detailTimeline.innerHTML=`<div class="detail-event"><time>${esc(fmtDateFR(firstInv.dueDate)||"—")}</time><strong>Facture échue</strong><div class="ov-sub">${esc(formatCurrency(principalAmount(d)))} en attente.</div></div>`;
+      }else{
+        E.detailTimeline.innerHTML='<div class="empty-state">Aucune action enregistrée.</div>';
+      }
+      return
+    }
+    E.detailTimeline.innerHTML=events.map(ev=>`<div class="detail-event"><time>${esc(fmtDateFR(ev.effectiveDate||ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>`).join("");
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
 function openDossierDetailModal(d){
@@ -1930,16 +1975,20 @@ function openDossierDetailModal(d){
   if(principalBalance(d)>0){
     const actionMap={0:["relance1","Relance 1 (Courtoise)"],1:["relance2","Relance 2 (Ferme)"],2:["relance3","Relance 3 (Ultime)"],3:["med","Mise en demeure"],4:["injunction","Injonction"]};
     const a=actionMap[Math.min(step,4)];
-    if(a)actionHtml+=`<button class="btn btn-primary" type="button" data-detail-action="${a[0]}">⚡ ${a[1]}</button>`;
-    actionHtml+=`<button class="btn btn-secondary" type="button" id="detailRecordPaymentBtn">▣ Enregistrer un règlement</button>`;
-    if(step<5)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="closure">Clôturer</button>`;
+    if(a)actionHtml+=`<button class="btn btn-primary" type="button" data-detail-action="${a[0]}"><span class="action-tag">⚡</span>${a[1]}</button>`;
+    actionHtml+=`<button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button>`;
+    if(step<5)actionHtml+=`<button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button>`;
+    if(step>=5)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="debtor_notice"><span class="action-tag">✉</span>Prévenir le débiteur</button>`;
   }else{
     actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">Informer le débiteur</button>`;
     if(step>=5||d?.injunctionPublished)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="court_closure">Informer la juridiction</button>`;
   }
   E.detailActions.innerHTML=actionHtml;
   E.detailActions.querySelector("#detailRecordPaymentBtn")?.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();E.recordPaymentBtn?.click()});
-  E.detailActions.querySelectorAll("[data-detail-action]").forEach(btn=>btn.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();document.querySelector(`[data-action="${btn.dataset.detailAction}"]`)?.click()}));
+  E.detailActions.querySelectorAll("[data-detail-action]").forEach(btn=>btn.addEventListener("click",()=>{
+    if(btn.dataset.detailAction==="debtor_notice"){alert("Cette action sera raccordée au parcours Injonction lors de l’adaptation de cette étape.");return;}
+    E.dossierDetailModal.classList.remove("open");renderAll();document.querySelector(`[data-action="${btn.dataset.detailAction}"]`)?.click()
+  }));
   E.detailInvoices.innerHTML=normalizeInvoices(d).map(inv=>`<div class="detail-invoice"><div><strong>${esc(inv.ref)}</strong><small>Émission ${esc(fmtDateFR(inv.issuedDate))} • Échéance ${esc(fmtDateFR(inv.dueDate))} • Taux ${Number(inv.lateRatePercent??8.25).toLocaleString("fr-FR")}%</small></div><strong>${formatCurrency(inv.amount)}</strong></div>`).join("")||'<div class="empty-state">Aucune facture.</div>';
   E.dossierDetailModal.classList.add("open");
   loadDetailTimeline(d);
@@ -2179,7 +2228,7 @@ E.createDossierForm.addEventListener("submit",async e=>{
   }
 
   try{
-    await addDoc(collection(db,"users",currentUser.uid,"requests"),{
+    const createdRequestRef=await addDoc(collection(db,"users",currentUser.uid,"requests"),{
       ref:clean($("dossierRef").value)||generateRef(),
       amountTTC:amount,
       invoices,
@@ -2221,6 +2270,21 @@ E.createDossierForm.addEventListener("submit",async e=>{
       injunctionPublished:false,
       createdAt:serverTimestamp(),
       updatedAt:serverTimestamp()
+    });
+
+    // Historique initial : la créance entre dans Axe Flow comme facture échue.
+    const firstDueInvoice=invoices.slice().sort((a,b)=>{
+      const da=parseLocalDate(a.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
+      const db=parseLocalDate(b.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
+      return da-db;
+    })[0];
+    await addDoc(collection(db,"users",currentUser.uid,"requests",createdRequestRef.id,"events"),{
+      title:"Facture échue",
+      description:`${formatCurrency(amount)} en attente.${invoices.length>1?` ${invoices.length} factures dans le dossier.`:""}`,
+      action:"invoice_due",
+      type:"invoice_due",
+      effectiveDate:firstDueInvoice?.dueDate||isoToday(),
+      createdAt:serverTimestamp()
     });
 
     if(entitlement.source==="entitlementDoc"&&entitlement.id){
