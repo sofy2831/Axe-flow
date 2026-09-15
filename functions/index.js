@@ -443,7 +443,13 @@ exports.marketingStats=onRequest({cors:true},async(req,res)=>{
     if(!h.startsWith("Bearer "))return res.status(401).json({error:"Connexion requise"});
     const decoded=await admin.auth().verifyIdToken(h.slice(7));
     const us=await db.collection("users").doc(decoded.uid).get(),u=us.exists?us.data():{};
-    if(!(u.role==="admin"||u.isAdmin===true||decoded.admin===true))return res.status(403).json({error:"Accès administrateur requis"});
+    const isAdmin =
+      u.role === "admin" ||
+      u.isAdmin === true ||
+      u.plan === "superadmin" ||
+      u.planType === "superadmin" ||
+      decoded.admin === true;
+    if(!isAdmin)return res.status(403).json({error:"Accès administrateur requis"});
     const snap=await db.collection("marketingEvents").orderBy("createdAt","desc").limit(5000).get(),groups={};
     snap.forEach(d=>{const e=d.data(),k=`${e.source||"direct"}||${e.campaign||"sans-campagne"}`;if(!groups[k])groups[k]={source:e.source||"direct",campaign:e.campaign||"sans-campagne",demoViews:0,tariffClicks:0,signupClicks:0,lastActivity:0};if(e.type==="DEMO_VIEW")groups[k].demoViews++;if(e.type==="TARIFF_CLICK")groups[k].tariffClicks++;if(e.type==="SIGNUP_CLICK")groups[k].signupClicks++;const ms=e.createdAt?.toMillis?e.createdAt.toMillis():0;if(ms>groups[k].lastActivity)groups[k].lastActivity=ms;});
     return res.status(200).json({ok:true,rows:Object.values(groups).sort((a,b)=>b.lastActivity-a.lastActivity),totalEvents:snap.size});
