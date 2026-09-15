@@ -564,7 +564,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, getDoc, deleteDoc, deleteField, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, getDoc, deleteDoc, deleteField, serverTimestamp, Timestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
@@ -683,8 +683,9 @@ function entitlementGranted(ent={}){
   const t=entitlementType(ent);
   const n=Number(ent.grantedCaseCount||ent.monthlyQuota||0);
   if(n>0)return n;
-  if(t==="monthly_89")return Number(currentUserData.monthlyQuota||3);
-  if(t==="one_shot_49"||t==="extra_19")return 1;
+  if(t==="monthly_89")return Number(currentUserData.monthlyQuota||10);
+  if(t==="one_shot_49")return 3;
+  if(t==="extra_19")return 1;
   return 0;
 }
 function entitlementUsed(ent={}){
@@ -714,7 +715,7 @@ function availableEntitlements(){
 
   if((currentUserData.paymentStatus==="paid"||currentUserData.entitlementStatus==="active"||currentUserData.subscriptionStatus==="active")&&v){
     const id=activeEntitlementId()||`${v}_${paidAt||"fallback"}`;
-    let granted=v==="monthly_89"?Number(currentUserData.monthlyQuota||3):1;
+    let granted=v==="monthly_89"?Number(currentUserData.monthlyQuota||10):(v==="one_shot_49"?3:1);
     let used=dossiers.filter(d=>clean(d.entitlementId)===clean(id)).length;
 
     // Compat ancien fonctionnement : premier dossier ponctuel sans entitlement doc.
@@ -731,7 +732,7 @@ function activeAvailableEntitlement(){return availableEntitlements()[0]||null}
 function isPaymentPaid(){return isSuperAdmin()||!!activeAvailableEntitlement()||currentUserData.paymentStatus==="paid"||currentUserData.entitlementStatus==="active"||currentUserData.subscriptionStatus==="active"}
 function subscriptionQuota(){
   const sub=currentEntitlements.find(e=>entitlementType(e)==="monthly_89"&&entitlementIsActive(e));
-  return entitlementGranted(sub||{type:"monthly_89",grantedCaseCount:currentUserData.monthlyQuota||3});
+  return entitlementGranted(sub||{type:"monthly_89",grantedCaseCount:currentUserData.monthlyQuota||10});
 }
 function subscriptionUsed(){
   const sub=currentEntitlements.find(e=>entitlementType(e)==="monthly_89"&&entitlementIsActive(e));
@@ -739,6 +740,23 @@ function subscriptionUsed(){
   return dossiers.filter(d=>normalizeEntitlementType(d.entitlementUsed)==="monthly_89").length;
 }
 function canOpenCreateModal(){return isSuperAdmin()||!!activeAvailableEntitlement()}
+async function releaseActiveEntitlementSlot(dossier){
+  if(!currentUser||!dossier?.entitlementId)return;
+  const type=normalizeEntitlementType(dossier.entitlementUsed||dossier.offerType||"");
+  // Les 49 € sont 3 crédits consommables : une clôture ne recrédite pas.
+  // Pro 89 € et +19 € sont des capacités actives : une clôture libère une place.
+  if(type!=="monthly_89"&&type!=="extra_19")return;
+  const ref=doc(db,"users",currentUser.uid,"entitlements",dossier.entitlementId);
+  await runTransaction(db,async tx=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists())return;
+    const data=snap.data()||{};
+    const used=Math.max(0,Number(data.usedCaseCount||0));
+    if(used<=0)return;
+    tx.update(ref,{usedCaseCount:used-1,updatedAt:serverTimestamp()});
+  });
+  await loadEntitlements(currentUser.uid);
+}
 async function redirectStripeCheckout(offerType){
   if(isSuperAdmin()){
     openCreateDossierModal();
@@ -2162,6 +2180,7 @@ async function markStep(action){
     }
 
     await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+    if(patch.lifecycleStatus==="closed")await releaseActiveEntitlementSlot(currentDossier);
     await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
       title:isCourt?"Tribunal informé du règlement intégral":"Clôture confirmée au débiteur",
       description:isCourt
@@ -2189,6 +2208,7 @@ async function markStep(action){
       updatedAt:serverTimestamp()
     };
     await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+    if(patch.lifecycleStatus==="closed")await releaseActiveEntitlementSlot(currentDossier);
     await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
       title:"Confirmation de règlement / clôture envoyée",
       description:`Paiement intégral confirmé au débiteur le ${todayFR()}.\nDossier clôturé — solde principal : ${formatCurrency(principalBalance(currentDossier))}`,
