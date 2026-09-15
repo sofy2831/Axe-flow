@@ -545,7 +545,10 @@ service cloud.firestore {
         // Création et suppression restent réservées au serveur/admin.
         allow create, delete: if isAdmin();
 
-        // Le client peut uniquement consommer UNE place de son entitlement.
+        // Le client peut uniquement modifier le compteur de places.
+        // - création d'un dossier : +1, sans dépasser le quota ;
+        // - clôture Pro / dossier supplémentaire : -1 pour libérer une place ;
+        // - l'offre ponctuelle 49 € reste consommable : aucune décrémentation.
         // Aucun autre champ (type, quota, statut, Stripe, dates...) ne peut être modifié.
         allow update: if isAdmin()
           || (
@@ -555,8 +558,15 @@ service cloud.firestore {
               .diff(resource.data)
               .changedKeys()
               .hasOnly(["usedCaseCount", "updatedAt"])
-            && request.resource.data.usedCaseCount == resource.data.usedCaseCount + 1
+            && request.resource.data.usedCaseCount >= 0
             && request.resource.data.usedCaseCount <= resource.data.grantedCaseCount
+            && (
+              request.resource.data.usedCaseCount == resource.data.usedCaseCount + 1
+              || (
+                resource.data.type in ["monthly_89", "subscription_89", "pro_89", "extra_19"]
+                && request.resource.data.usedCaseCount == resource.data.usedCaseCount - 1
+              )
+            )
           );
       }
 
