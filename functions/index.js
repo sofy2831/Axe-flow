@@ -414,3 +414,39 @@ exports.stripeWebhook = onRequest(
   }
 );
 
+
+// ===== Prospection Axe Flow : suivi anonyme par campagne =====
+const MARKETING_EVENT_TYPES = new Set(["DEMO_VIEW","TARIFF_CLICK","SIGNUP_CLICK"]);
+function cleanMarketingValue(value,maxLen){return String(value||"").trim().toLowerCase().replace(/[^a-z0-9àâäéèêëîïôöùûüç._-]/gi,"-").replace(/-+/g,"-").slice(0,maxLen);}
+
+exports.trackMarketingEvent=onRequest({cors:true},async(req,res)=>{
+  try{
+    if(req.method!=="POST")return res.status(405).json({error:"Méthode non autorisée"});
+    const type=String(req.body?.type||"").toUpperCase();
+    if(!MARKETING_EVENT_TYPES.has(type))return res.status(400).json({error:"Événement invalide"});
+    const source=cleanMarketingValue(req.body?.source||"direct",60)||"direct";
+    const campaign=cleanMarketingValue(req.body?.campaign||"sans-campagne",80)||"sans-campagne";
+    const sessionId=cleanMarketingValue(req.body?.sessionId,100);
+    if(!sessionId)return res.status(400).json({error:"Session manquante"});
+    const docId=Buffer.from(`${campaign}__${source}__${sessionId}__${type}`).toString("base64url").slice(0,900);
+    const ref=db.collection("marketingEvents").doc(docId);
+    const existing=await ref.get();
+    if(!existing.exists)await ref.set({type,source,campaign,sessionId,dayKey:new Date().toISOString().slice(0,10),createdAt:admin.firestore.Timestamp.now()});
+    return res.status(200).json({ok:true});
+  }catch(error){console.error("trackMarketingEvent ERROR",error);return res.status(500).json({error:"Erreur de suivi"});}
+});
+
+exports.marketingStats=onRequest({cors:true},async(req,res)=>{
+  try{
+    if(req.method!=="GET")return res.status(405).json({error:"Méthode non autorisée"});
+    const h=req.headers.authorization||"";
+    if(!h.startsWith("Bearer "))return res.status(401).json({error:"Connexion requise"});
+    const decoded=await admin.auth().verifyIdToken(h.slice(7));
+    const us=await db.collection("users").doc(decoded.uid).get(),u=us.exists?us.data():{};
+    if(!(u.role==="admin"||u.isAdmin===true||decoded.admin===true))return res.status(403).json({error:"Accès administrateur requis"});
+    const snap=await db.collection("marketingEvents").orderBy("createdAt","desc").limit(5000).get(),groups={};
+    snap.forEach(d=>{const e=d.data(),k=`${e.source||"direct"}||${e.campaign||"sans-campagne"}`;if(!groups[k])groups[k]={source:e.source||"direct",campaign:e.campaign||"sans-campagne",demoViews:0,tariffClicks:0,signupClicks:0,lastActivity:0};if(e.type==="DEMO_VIEW")groups[k].demoViews++;if(e.type==="TARIFF_CLICK")groups[k].tariffClicks++;if(e.type==="SIGNUP_CLICK")groups[k].signupClicks++;const ms=e.createdAt?.toMillis?e.createdAt.toMillis():0;if(ms>groups[k].lastActivity)groups[k].lastActivity=ms;});
+    return res.status(200).json({ok:true,rows:Object.values(groups).sort((a,b)=>b.lastActivity-a.lastActivity),totalEvents:snap.size});
+  }catch(error){console.error("marketingStats ERROR",error);return res.status(500).json({error:"Impossible de charger les statistiques"});}
+});
+
