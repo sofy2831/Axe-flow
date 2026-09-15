@@ -78,6 +78,97 @@ a{color:inherit}.top{position:fixed;z-index:20;top:0;left:0;right:0;height:68px;
   }
 }
 
+
+/* ===== Version cinématique — captures réelles Axe Flow ===== */
+.slide:not(.final){
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255,106,50,.38), transparent 31%),
+    radial-gradient(circle at 8% 82%, rgba(242,75,36,.28), transparent 34%),
+    linear-gradient(135deg,#0d2636 0%,#103247 48%,#5b392f 100%) !important;
+}
+.slide:not(.final):after{
+  width:700px;height:700px;right:-220px;top:-120px;
+  background:radial-gradient(circle,rgba(255,132,75,.22),transparent 68%);
+}
+.slide:not(.final) .visual{
+  inset:82px 1.1vw 18px 1.1vw;
+  align-items:center;
+}
+.slide:not(.final) .frame{
+  width:min(91vw,1540px);
+  padding:8px;
+  background:#0b2130;
+  border:1px solid rgba(255,255,255,.34);
+  border-radius:26px;
+  box-shadow:0 35px 90px rgba(0,0,0,.42);
+  transform:perspective(1800px) rotateY(-2.2deg) rotateZ(-.45deg);
+  transform-origin:center;
+}
+.slide:not(.final):nth-child(even) .frame{
+  transform:perspective(1800px) rotateY(2.2deg) rotateZ(.45deg);
+}
+.slide:not(.final) .frame img{
+  max-height:84vh;
+  border-radius:17px;
+  background:#fff;
+}
+.slide:not(.final) .pair{
+  width:min(93vw,1580px);
+  grid-template-columns:1.15fr .85fr;
+  gap:12px;
+}
+.slide:not(.final) .pair .frame{
+  width:100%;
+}
+.slide:not(.final) .pair .frame img{
+  max-height:82vh;
+}
+.slide:not(.final) .pair .frame:last-child{
+  transform:perspective(1800px) rotateY(-2deg) rotateZ(.7deg) translateY(10px) scale(1.06);
+}
+.slide:not(.final) .frame.portrait{
+  max-width:none;
+  width:min(84vw,1380px);
+}
+.slide:not(.final) .copy{
+  width:min(450px,42vw);
+  padding:30px 30px;
+  background:rgba(255,250,246,.955);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:0 26px 80px rgba(0,0,0,.30);
+}
+.slide:not(.final):nth-child(odd) .copy{left:2.1vw;right:auto}
+.slide:not(.final):nth-child(even) .copy{left:2.1vw;right:auto}
+.slide:not(.final) .badge{
+  right:2.2vw;bottom:3.5%;
+  box-shadow:0 16px 36px rgba(0,0,0,.28);
+}
+.slide:not(.final) .num{color:rgba(255,255,255,.78)}
+.top{
+  background:rgba(255,250,246,.96);
+}
+.real-logo{
+  width:118px !important;height:50px !important;
+  object-fit:contain !important;object-position:left center !important;
+  border-radius:8px;
+}
+@media(max-width:900px){
+  .slide:not(.final){background:linear-gradient(155deg,#0d2636,#173a4d 62%,#684034)!important}
+  .slide:not(.final) .frame,
+  .slide:not(.final):nth-child(even) .frame,
+  .slide:not(.final) .pair .frame:last-child{
+    transform:none;
+  }
+  .slide:not(.final) .frame,
+  .slide:not(.final) .frame.portrait,
+  .slide:not(.final) .pair{width:100%}
+  .slide:not(.final) .copy,
+  .slide:not(.final):nth-child(odd) .copy,
+  .slide:not(.final):nth-child(even) .copy{
+    left:auto;right:auto;width:100%;
+  }
+}
+
 </style>
 </head>
 <body>
