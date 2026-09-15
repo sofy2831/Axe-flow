@@ -422,11 +422,17 @@ function cleanMarketingValue(value,maxLen){return String(value||"").trim().toLow
 exports.trackMarketingEvent=onRequest({cors:true},async(req,res)=>{
   try{
     if(req.method!=="POST")return res.status(405).json({error:"Méthode non autorisée"});
-    const type=String(req.body?.type||"").toUpperCase();
+    let payload=req.body||{};
+    if(Buffer.isBuffer(payload)){
+      try{payload=JSON.parse(payload.toString("utf8"));}catch(_){payload={};}
+    }else if(typeof payload==="string"){
+      try{payload=JSON.parse(payload);}catch(_){payload={};}
+    }
+    const type=String(payload?.type||"").toUpperCase();
     if(!MARKETING_EVENT_TYPES.has(type))return res.status(400).json({error:"Événement invalide"});
-    const source=cleanMarketingValue(req.body?.source||"direct",60)||"direct";
-    const campaign=cleanMarketingValue(req.body?.campaign||"sans-campagne",80)||"sans-campagne";
-    const sessionId=cleanMarketingValue(req.body?.sessionId,100);
+    const source=cleanMarketingValue(payload?.source||"direct",60)||"direct";
+    const campaign=cleanMarketingValue(payload?.campaign||"sans-campagne",80)||"sans-campagne";
+    const sessionId=cleanMarketingValue(payload?.sessionId,100);
     if(!sessionId)return res.status(400).json({error:"Session manquante"});
     const docId=Buffer.from(`${campaign}__${source}__${sessionId}__${type}`).toString("base64url").slice(0,900);
     const ref=db.collection("marketingEvents").doc(docId);
