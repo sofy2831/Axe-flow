@@ -22,8 +22,8 @@ const OFFERS = {
     mode: "payment",
     amount: 49,
     plan: "one_shot_49",
-    grantedCaseCount: 1,
-    name: "Axe Flow - Dossier ponctuel",
+    grantedCaseCount: 3,
+    name: "Axe Flow - 3 dossiers ponctuels",
     unitAmount: 4900,
   },
 
@@ -31,7 +31,7 @@ const OFFERS = {
     mode: "subscription",
     amount: 89,
     plan: "monthly_89",
-    grantedCaseCount: 3,
+    grantedCaseCount: 10,
     name: "Axe Flow - Offre Pro",
     unitAmount: 8900,
   },
@@ -183,9 +183,6 @@ async function createEntitlementFromCheckoutSession(session) {
       uid,
       email: email || "",
       role: "client",
-      plan: offer.plan,
-      planType: offer.plan,
-      entitlement: offerType,
       entitlementStatus: "active",
       paymentStatus: "paid",
       accountStatus: "active",
@@ -193,13 +190,25 @@ async function createEntitlementFromCheckoutSession(session) {
     };
 
     if (offerType === "monthly_89") {
+      userUpdate.plan = offer.plan;
+      userUpdate.planType = offer.plan;
+      userUpdate.entitlement = offerType;
       userUpdate.subscriptionStatus = "active";
-      userUpdate.monthlyQuota = 3;
+      userUpdate.monthlyQuota = 10;
       userUpdate.monthlyUsed = 0;
     }
 
-    if (offerType === "one_shot_49" || offerType === "extra_19") {
+    if (offerType === "one_shot_49") {
+      userUpdate.plan = offer.plan;
+      userUpdate.planType = offer.plan;
+      userUpdate.entitlement = offerType;
       userUpdate.subscriptionStatus = "none";
+    }
+
+    // Un dossier supplémentaire à 19 € ajoute une place active sans écraser
+    // le plan Pro ni désactiver l'abonnement existant.
+    if (offerType === "extra_19") {
+      // Le document entitlement créé ci-dessus porte la place supplémentaire.
     }
 
     tx.set(userRef, userUpdate, { merge: true });
@@ -370,8 +379,25 @@ exports.stripeWebhook = onRequest(
       }
 
       if (event.type === "customer.subscription.deleted") {
-        console.log("customer.subscription.deleted reçu mais non traité pour le moment");
-        return res.status(200).send("subscription.deleted ignoré");
+        const subscription = event.data.object;
+        const uid = String(subscription.metadata?.uid || "").trim();
+        if (uid) {
+          const userRef = db.collection("users").doc(uid);
+          const entSnap = await userRef.collection("entitlements")
+            .where("stripeSubscriptionId", "==", subscription.id).get();
+          const batch = db.batch();
+          batch.set(userRef, {
+            subscriptionStatus: "inactive",
+            entitlementStatus: "inactive",
+            updatedAt: admin.firestore.Timestamp.now()
+          }, { merge: true });
+          entSnap.forEach((docSnap) => batch.update(docSnap.ref, {
+            status: "inactive",
+            updatedAt: admin.firestore.Timestamp.now()
+          }));
+          await batch.commit();
+        }
+        return res.status(200).send("subscription.deleted traité");
       }
 
       return res.status(200).send("Event ignoré");
