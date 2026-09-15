@@ -169,16 +169,53 @@ a{color:inherit}.top{position:fixed;z-index:20;top:0;left:0;right:0;height:68px;
   }
 }
 
+
+/* ===== Vignettes validées 01 / 02 / 03 ===== */
+.slide.approved-art{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  padding:68px 0 0 !important;
+  background:#0d2636 !important;
+  overflow:hidden;
+}
+.slide.approved-art:after{display:none !important}
+.slide.approved-art .approved-art-img{
+  width:100%;
+  height:calc(100vh - 68px);
+  display:block;
+  object-fit:cover;
+  object-position:center;
+}
+.slide.approved-art .num{display:none}
+@media(max-width:900px){
+  .slide.approved-art{padding:60px 0 0 !important;min-height:100vh !important}
+  .slide.approved-art .approved-art-img{
+    height:calc(100vh - 60px);
+    object-fit:contain;
+    background:#0d2636;
+  }
+}
+
 </style>
 </head>
 <body>
 <header class="top"><div class="brand"><img src="images/axe-flow-cover.png" alt="Axe Flow" class="real-logo"><small>Du retard à la solution</small></div><nav class="progress" aria-label="Progression"><a href="#s1" aria-label="Écran 1"></a><a href="#s2" aria-label="Écran 2"></a><a href="#s3" aria-label="Écran 3"></a><a href="#s4" aria-label="Écran 4"></a><a href="#s5" aria-label="Écran 5"></a><a href="#s6" aria-label="Écran 6"></a><a href="#s7" aria-label="Écran 7"></a><a href="#s8" aria-label="Écran 8"></a></nav></header>
 
-<section class="slide" id="s1"><div class="visual"><div class="frame"><img src="images%20demo/tableau%20de%20bord.png" alt="Tableau de bord Axe Flow"></div><div class="badge">Une vue claire. Tout de suite.</div></div><div class="copy"><div class="eyebrow">01 — Tableau de bord</div><h1>Pilotez tous vos <em>impayés</em>.</h1><p>Montants à récupérer, dossiers actifs, échéances et prochaines actions : votre recouvrement est centralisé dans un seul tableau de bord.</p><div class="points"><div class="point"><span class="tick">✓</span>Visualisez immédiatement les dossiers prioritaires</div><div class="point"><span class="tick">✓</span>Suivez les montants restant à encaisser</div><div class="point"><span class="tick">✓</span>Accédez à chaque action en quelques clics</div></div></div><span class="num">01 / 08</span></section>
+<section class="slide approved-art" id="s1">
+  <img src="images%20demo/demo-slide-01.png" alt="Axe Flow — tableau de bord" class="approved-art-img">
+  <span class="num">01 / 08</span>
+</section>
 
-<section class="slide" id="s2"><div class="visual"><div class="pair"><div class="frame"><img src="images%20demo/nouv%20dossier%20pro.png" alt="Création d'un dossier professionnel"></div><div class="frame"><img src="images%20demo/nouv%20dossier%20part.png" alt="Création d'un dossier particulier"></div></div></div><div class="copy"><div class="eyebrow">02 — Nouveau dossier</div><h2>Créez un dossier en <em>quelques minutes</em>.</h2><p>Professionnel ou particulier : renseignez le débiteur, la facture et l'échéance. Axe Flow structure ensuite le dossier pour vous.</p><div class="points"><div class="point"><span class="tick">✓</span>Parcours adapté au type de débiteur</div><div class="point"><span class="tick">✓</span>Informations essentielles regroupées</div><div class="point"><span class="tick">✓</span>Dossier immédiatement exploitable</div></div></div><span class="num">02 / 08</span></section>
+<section class="slide approved-art" id="s2">
+  <img src="images%20demo/demo-slide-02.png" alt="Axe Flow — création d'un dossier" class="approved-art-img">
+  <span class="num">02 / 08</span>
+</section>
 
-<section class="slide" id="s3"><div class="visual"><div class="frame"><img src="images%20demo/dossier%20pro.png" alt="Fiche dossier Axe Flow"></div></div><div class="copy"><div class="eyebrow">03 — Dossier de créance</div><h2>Toute la créance au <em>même endroit</em>.</h2><p>Dette, coordonnées, historique, statut et actions disponibles restent rattachés au dossier. Plus besoin de reconstituer le fil dans des mails ou des fichiers dispersés.</p><div class="points"><div class="point"><span class="tick">✓</span>Historique lisible</div><div class="point"><span class="tick">✓</span>Montants et échéances centralisés</div><div class="point"><span class="tick">✓</span>Actions guidées selon l'avancement</div></div></div><span class="num">03 / 08</span></section>
+<section class="slide approved-art" id="s3">
+  <img src="images%20demo/demo-slide-03.png" alt="Axe Flow — dossier de créance" class="approved-art-img">
+  <span class="num">03 / 08</span>
+</section>
 
 <section class="slide" id="s4"><div class="visual"><div class="pair"><div class="frame"><img src="images%20demo/relance2.png" alt="Relance dans Axe Flow"></div><div class="frame"><img src="images%20demo/pdf%20relance2.png" alt="Courrier de relance généré"></div></div><div class="badge">Action → courrier prêt</div></div><div class="copy"><div class="eyebrow">04 — Relances</div><h2>Relancez sans repartir d'une <em>page blanche</em>.</h2><p>Axe Flow transforme les informations du dossier en documents de relance structurés. Vous gardez la maîtrise de l'action, le logiciel vous évite la ressaisie.</p><div class="points"><div class="point"><span class="tick">✓</span>Courriers générés depuis le dossier</div><div class="point"><span class="tick">✓</span>Données du débiteur reprises automatiquement</div><div class="point"><span class="tick">✓</span>Chaque étape reste tracée</div></div></div><span class="num">04 / 08</span></section>
 
