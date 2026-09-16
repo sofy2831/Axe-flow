@@ -186,6 +186,7 @@
 .action-snapshot-note{margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,127,31,.23);background:rgba(255,127,31,.06);color:#e5a979;font-size:.78rem}
 .action-modal-footer{align-items:center}
 .action-modal-footer #previewRelanceActionBtn{margin-right:auto}
+.med-post-box{display:none;margin-top:14px;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,179,71,.24);background:rgba(255,179,71,.08);color:#ffe7c2;font-size:.80rem;line-height:1.45}.med-post-box.show{display:block}.med-post-box .btn{margin-top:10px;min-height:36px;border-radius:9px}
 
 #paymentModal .modal{width:min(520px,calc(100vw - 28px));background:#101a31;border:1px solid rgba(255,255,255,.10);border-radius:18px}
 #paymentModal .modal-inner{padding:22px}
@@ -507,6 +508,7 @@
     <div class="field"><label>Canal</label><select id="relanceActionChannel"><option value="Email">Email</option><option value="Courrier">Courrier</option><option value="Téléphone">Téléphone</option></select></div>
     <div class="field full"><label>Note interne (optionnel)</label><textarea id="relanceActionNote" rows="3"></textarea></div>
   </div>
+  <div class="med-post-box" id="medPostBox"><strong>Mise en demeure : envoi LRAR recommandé.</strong><br>Vous pouvez préparer le courrier dans Axe Flow puis l’envoyer en recommandé avec accusé de réception.<br><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste — Lettre recommandée en ligne</a></div>
   <div class="action-snapshot-note">Axe Flow prépare le PDF à la date choisie. L'historique conservera un snapshot immuable.</div>
   <div class="modal-actions action-modal-footer">
     <button class="btn btn-secondary" id="previewRelanceActionBtn" type="button">⇩ Prévisualiser</button>
@@ -572,7 +574,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="";
-const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText"];
+const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
 const E={};ids.forEach(id=>E[id]=$(id));
 const clean=s=>String(s||"").trim(),esc=s=>String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"),escapeHtml=esc;
 function formatCurrency(v){return Number(v||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -1321,7 +1323,7 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   const subject=extractSubject(body,actionTitle(currentAction));
   const recipient=clean(recipientOverride)||debtorBlock(d);
   const dateLabel=effectiveDate?fmtDateFR(effectiveDate):todayFR();
-  const isRelance=["relance1","relance2","relance3"].includes(currentAction);
+  const isRelance=["relance1","relance2","relance3","med"].includes(currentAction);
   const principal=principalAmount(d),paid=totalPayments(d),remaining=principalBalance(d),
         calc=lateFeeBreakdown(d,effectiveDate?new Date(`${effectiveDate}T12:00:00`):new Date());
 
@@ -1357,7 +1359,8 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   const letterTitles={
     relance1:"PREMIÈRE RELANCE — COURTOISE",
     relance2:"DEUXIÈME RELANCE — FERME",
-    relance3:"TROISIÈME RELANCE — ULTIME"
+    relance3:"TROISIÈME RELANCE — ULTIME",
+    med:"MISE EN DEMEURE DE PAYER"
   };
   const title=letterTitles[currentAction]||actionTitle(currentAction).toUpperCase();
 
@@ -1375,6 +1378,9 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     intro=`Madame, Monsieur,<br><br>Malgré notre première relance${previousDate!=="—"?` du <strong>${escapeHtml(previousDate)}</strong>`:""}, nous constatons que ${plural?`les factures n°${escapeHtml(refsText)} demeurent impayées`:`la facture n°${escapeHtml(refsText)} demeure impayée`}. Le principal restant dû s’élève à <strong>${escapeHtml(formatCurrency(remaining))}</strong>.<br><br>Nous vous remercions de régulariser la situation dans les meilleurs délais. À défaut, nous poursuivrons les démarches de recouvrement.${invoiceRowsHtml}`;
   }else if(currentAction==="relance3"){
     intro=`Madame, Monsieur,<br><br>Malgré nos précédentes relances${previousDate!=="—"?`, dont la dernière en date du <strong>${escapeHtml(previousDate)}</strong>`:""}, ${plural?`les factures n°${escapeHtml(refsText)} restent impayées`:`la facture n°${escapeHtml(refsText)} reste impayée`}. Le principal restant dû s’élève à <strong>${escapeHtml(formatCurrency(remaining))}</strong>.<br><br>Nous vous demandons de procéder au règlement sans délai. À défaut, une mise en demeure pourra être engagée.${invoiceRowsHtml}`;
+  }else if(currentAction==="med"){
+    const detail=invoices.map(inv=>`${escapeHtml(inv.ref||"Facture")} — échéance ${escapeHtml(fmtDateFR(inv.dueDate)||"—")} — ${escapeHtml(formatCurrency(inv.amount||0))}`).join("<br>");
+    intro=`<strong>Lettre recommandée avec accusé de réception</strong><br><br>Madame, Monsieur,<br><br>Malgré nos précédentes relances, ${plural?`les factures n°${escapeHtml(refsText)} demeurent impayées`:`la facture n°${escapeHtml(refsText)} demeure impayée`}.<br><br>Par la présente, et conformément aux dispositions de l’article 1344 du Code civil, nous vous mettons en demeure de régler la somme totale de <strong>${escapeHtml(formatCurrency(calc.total))}</strong> dans un délai de <strong>${MED_DELAY_DAYS} jours</strong> à compter de la réception de la présente.<br><br>${plural?`<strong>Factures concernées :</strong><br>${detail}<br><br>`:""}À défaut de règlement dans ce délai, nous engagerons sans nouvelle relance toute procédure de recouvrement utile, notamment une procédure d’injonction de payer devant le tribunal compétent.`;
   }else{
     intro=escapeHtml(bodyWithoutSubject(body)).replace(/\n/g,"<br>");
   }
@@ -1430,6 +1436,7 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
   </div>
   <div class="date">Fait à ${escapeHtml(creditorCity(d)||companyCity||"—")}, le ${escapeHtml(dateLabel)}</div>
   <div class="meta">
+    ${currentAction==="med"?`<div>Lettre recommandée avec accusé de réception</div>`:""}
     <div>Objet : ${escapeHtml(subject)}</div>
     <div>Réf. dossier : ${escapeHtml(d?.ref||"—")}</div>
   </div>
@@ -2028,7 +2035,8 @@ let pendingRelanceAction=null;
 function syncRelanceValidationLabel(){
   if(!E.validateRelanceActionBtn)return;
   const channel=clean(E.relanceActionChannel?.value);
-  E.validateRelanceActionBtn.textContent=channel==="Email"?"Préparer l'email et enregistrer":"Valider et enregistrer";
+  if(pendingRelanceAction==="med") E.validateRelanceActionBtn.textContent="Valider et enregistrer";
+  else E.validateRelanceActionBtn.textContent=channel==="Email"?"Préparer l'email et enregistrer":"Valider et enregistrer";
 }
 
 function openRelanceActionModal(action="relance1"){
@@ -2039,12 +2047,13 @@ function openRelanceActionModal(action="relance1"){
   E.relanceActionSub.textContent=`Dossier ${currentDossier.ref||"—"} — ${debtorName(currentDossier)}`;
   const today=isoToday();E.relanceActionDate.value=today;E.relanceActionDateLabel.textContent=today;
   E.relanceActionAmount.textContent=formatCurrency(principalBalance(currentDossier));
-  E.relanceActionChannel.value="Email";E.relanceActionNote.value="";
+  E.relanceActionChannel.value=action==="med"?"Courrier":"Email";E.relanceActionNote.value="";
+  E.medPostBox?.classList.toggle("show",action==="med");
   if(E.previewRelanceActionBtn)E.previewRelanceActionBtn.textContent=`⇩ Prévisualiser à la date ${today}`;
   syncRelanceValidationLabel();
   E.relanceActionModal.classList.add("open");
 }
-function closeRelanceActionModal(){E.relanceActionModal.classList.remove("open");pendingRelanceAction=null}
+function closeRelanceActionModal(){E.relanceActionModal.classList.remove("open");E.medPostBox?.classList.remove("show");pendingRelanceAction=null}
 function relanceActionText(){
   const action=pendingRelanceAction||"relance1";
   currentAction=action;
@@ -2072,7 +2081,7 @@ async function validateRelanceAction(){
 
     // Un navigateur ne peut pas certifier qu'un email a réellement été envoyé.
     // Si Email est choisi, on ouvre la messagerie avec le contenu prérempli.
-    if(channel==="Email"){
+    if(channel==="Email" && action!=="med"){
       const subject=`${actionTitle(action)} — ${currentDossier.ref||"Dossier"}`;
       window.location.href=makeMailto(debtorEmail(currentDossier),subject,currentText);
     }
@@ -2080,7 +2089,8 @@ async function validateRelanceAction(){
     const toastLabels={
       relance1:"Relance 1 (Courtoise) préparée",
       relance2:"Relance 2 (Ferme) préparée",
-      relance3:"Relance 3 (Ultime) préparée"
+      relance3:"Relance 3 (Ultime) préparée",
+      med:"Mise en demeure préparée"
     };
     closeRelanceActionModal();
     showSuccessToast(toastLabels[action]||`${actionTitle(action)} préparée`);
@@ -2093,7 +2103,7 @@ async function validateRelanceAction(){
   }
 }
 
-function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(["relance1","relance2","relance3"].includes(action)){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
+function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(["relance1","relance2","relance3","med"].includes(action)){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
   E.modalDebtorBox.textContent="Tribunal / Greffe :\nCoordonnées à compléter dans votre messagerie ou lors de l’impression.";
   E.mailBtn.href=makeMailto("",actionTitle(action)+" – "+(currentDossier.ref||"Dossier"),currentText);
 }else{
@@ -2106,7 +2116,7 @@ function openEditDossierModal(d=currentDossier){if(!d){alert("Sélectionnez un d
 function closeEditDossierModal(){E.editDossierModal.classList.remove("open")}
 async function markStep(action){
   // Relances amiables : la date choisie dans la modale est la date de référence.
-  if(["relance1","relance2","relance3"].includes(action)){
+  if(["relance1","relance2","relance3","med"].includes(action)){
     const options=arguments[1]||{};
     const effectiveDate=clean(options.effectiveDate)||isoToday();
     const channel=clean(options.channel)||"Courrier";
@@ -2114,7 +2124,9 @@ async function markStep(action){
     const step=stepForAction(action);
     const sentField=sentDateField(action);
     const effectiveTimestamp=timestampFromIsoDate(effectiveDate);
-    const next=relanceNextInfo(action,effectiveDate);
+    const next=action==="med"
+      ? {code:"INJONCTION",label:"Injonction à préparer",days:MED_DELAY_DAYS,date:isoDatePlusDays(effectiveDate,MED_DELAY_DAYS)}
+      : relanceNextInfo(action,effectiveDate);
     const title=`${actionTitle(action)} préparée`;
 
     const patch={
