@@ -3012,13 +3012,13 @@ function generateInjunctionRequestFromModal(){
 E.generateInjunctionRequestBtn?.addEventListener("click",generateInjunctionRequestFromModal);
 E.generateInjunctionRequestBtnPrivate?.addEventListener("click",generateInjunctionRequestFromModal);
 
-E.saveInjunctionCourtBtn?.addEventListener("click",async()=>{
+$("saveInjunctionCourtBtn")?.addEventListener("click",async()=>{
   if(!currentUser||!currentDossier){alert("Aucun dossier sélectionné.");return}
   const court=injunctionCourtData();
   if(!court.name||!court.city||!court.zip||!court.address){
     alert("Renseignez le nom du tribunal, la ville, le code postal et l’adresse.");return;
   }
-  const saved=$("injunctionCourtSaved"),btn=E.saveInjunctionCourtBtn,oldText=btn.textContent;
+  const saved=$("injunctionCourtSaved"),btn=$("saveInjunctionCourtBtn"),oldText=$("saveInjunctionCourtBtn").textContent;
   try{
     btn.disabled=true;btn.textContent="Enregistrement...";
     const ref=doc(db,"users",currentUser.uid,"requests",currentDossier.id);
