@@ -377,6 +377,42 @@
 }
 #dossierDetailModal .detail-event-view:hover{text-decoration:underline}
 
+
+/* ===== V19 — Injonction de payer : mini-dossier judiciaire ===== */
+#injunctionModal .modal{width:min(1080px,calc(100vw - 28px));background:#101a31;border:1px solid rgba(255,255,255,.10);border-radius:18px}
+#injunctionModal .modal-inner{padding:22px}
+#injunctionModal .inj-headline{display:flex;align-items:center;gap:12px}
+#injunctionModal .inj-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:rgba(137,103,255,.16);color:#cfc4ff;border:1px solid rgba(137,103,255,.22)}
+#injunctionModal .inj-warning{margin:14px 0;padding:13px 15px;border-radius:12px;border:1px solid rgba(255,179,71,.25);background:rgba(255,179,71,.08);color:#ffe7c2;font-size:.80rem}
+#injunctionModal .inj-court{padding:15px;border-radius:14px;border:1px solid var(--line);background:rgba(4,12,30,.38);margin-top:14px}
+#injunctionModal .inj-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--accent);font-size:.88rem;font-weight:800;margin:0 0 12px}
+#injunctionModal .inj-court-grid{display:grid;grid-template-columns:1.4fr .8fr .55fr;gap:10px}
+#injunctionModal .inj-court-grid .wide{grid-column:1/-1}
+#injunctionModal .field{margin:0}
+#injunctionModal .field input{background:#202c42;border-color:rgba(255,255,255,.12);border-radius:9px;min-height:42px}
+#injunctionModal .inj-inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#injunctionModal .inj-inline-actions .btn{min-height:36px;border-radius:9px}
+#injunctionModal .inj-date-box{margin-top:14px;padding:14px;border:1px solid rgba(255,127,31,.30);border-radius:14px;background:rgba(255,127,31,.045)}
+#injunctionModal .inj-date-box .field{max-width:360px}
+#injunctionModal .inj-date-help{margin-top:7px;color:var(--soft);font-size:.76rem}
+#injunctionModal .inj-doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+#injunctionModal .inj-doc{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(4,12,30,.42)}
+#injunctionModal .inj-doc strong{display:block;font-size:.88rem;margin-bottom:5px}
+#injunctionModal .inj-doc small{display:block;color:var(--muted);font-size:.74rem;line-height:1.4;min-height:42px}
+#injunctionModal .inj-doc .btn{width:100%;margin-top:10px;min-height:38px;border-radius:9px}
+#injunctionModal .inj-pieces{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(4,12,30,.34)}
+#injunctionModal .inj-piece{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:10px 11px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:rgba(255,255,255,.025);margin-top:7px}
+#injunctionModal .inj-piece small{color:var(--soft)}
+#injunctionModal .inj-after{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+#injunctionModal .inj-after-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(4,12,30,.34)}
+#injunctionModal .inj-after-card strong{display:block;margin-bottom:5px}
+#injunctionModal .inj-after-card small{display:block;color:var(--muted);font-size:.76rem;line-height:1.45}
+#injunctionModal .inj-after-card .btn{width:100%;margin-top:10px;min-height:38px;border-radius:9px}
+#injunctionModal .inj-footer{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:16px}
+#injunctionModal .inj-footer .btn{border-radius:9px}
+#injunctionModal .inj-route-badge{display:inline-flex;align-items:center;padding:4px 9px;border-radius:999px;background:rgba(137,103,255,.13);border:1px solid rgba(137,103,255,.22);color:#d9d0ff;font-size:.72rem;font-weight:800}
+@media(max-width:820px){#injunctionModal .inj-court-grid,#injunctionModal .inj-doc-grid,#injunctionModal .inj-after{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -537,9 +573,69 @@
 </div>
 
 <div class="modal-backdrop" id="modalText"><div class="modal"><div class="modal-inner"><div class="modal-head"><div><h2 id="modalTitle">Document</h2><div class="panel-sub" id="modalSub">—</div></div><button class="close-btn" id="closeModal" type="button">×</button></div><div class="letter-header"><div class="note-box soft" id="modalCreditorBox">Créancier : —</div><div class="note-box soft" id="modalDebtorBox">Débiteur : —</div></div><div class="note-box warning" id="medSendBox" style="display:none;margin-bottom:14px"><strong>Mise en demeure : LRAR fortement recommandée.</strong><br>Envoi conseillé : <strong>lettre recommandée avec accusé de réception</strong> via La Poste + copie simple par mail.<div style="margin-top:10px"><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div></div><div class="text-preview" id="textContent"></div><div class="modal-actions"><button class="btn btn-secondary" id="shareBtn" type="button" style="display:none">Partager</button><a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a><button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button><button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button></div></div></div></div>
-<div class="modal-backdrop" id="injunctionModal"><div class="modal"><div class="modal-inner"><div class="modal-head"><div><h2>Injonction de payer — dossier complet</h2><div class="panel-sub">Contrôle juridique, Cerfa, bordereau, dépôt tribunal, certificat puis exécution.</div></div><button class="close-btn" id="closeInjunctionModal" type="button">×</button></div><div class="note-box warning"><strong>Point de vigilance.</strong><br>L’injonction de payer est adaptée uniquement si la créance est certaine, liquide, exigible et suffisamment justifiée. En cas de contestation sérieuse du débiteur ou de pièces insuffisantes, il est recommandé d’éviter le dépôt automatique et d’orienter le dossier vers une procédure contradictoire adaptée : référé, assignation ou avis d’un professionnel du droit.</div><div class="pro-grid"><div class="pro-card"><h3>1. Vérification juridique</h3><div class="check-list"><label class="check-line"><input type="checkbox" id="checkDebtCertain"> Créance certaine : facture/contrat/prestation identifiable.</label><label class="check-line"><input type="checkbox" id="checkDebtLiquid"> Créance liquide : montant chiffré et justifiable.</label><label class="check-line"><input type="checkbox" id="checkDebtDue"> Créance exigible : échéance dépassée.</label><label class="check-line"><input type="checkbox" id="checkNoSeriousDispute"> Absence de contestation sérieuse connue.</label><label class="check-line"><input type="checkbox" id="checkFormalNotice"> Mise en demeure envoyée / preuve d’envoi disponible.</label><label class="check-line"><input type="checkbox" id="checkDebtDisputed"> Dette contestée par le débiteur.</label><label class="check-line"><input type="checkbox" id="checkEvidenceWeak"> Pièces faibles ou dossier incomplet.</label></div><div class="note-box legal-status warn" id="legalStatus"><strong>Analyse à compléter</strong> Coche les points de contrôle avant utilisation.</div></div><div class="pro-card"><h3>2. Synthèse dossier</h3><div class="text-preview" id="injunctionSummary" style="margin-top:0"></div></div></div><div class="pro-grid"><div class="pro-card"><h3>3. Bordereau des pièces</h3><div class="text-preview" id="injunctionBordereau" style="margin-top:0"></div></div></div><div class="pro-card" style="margin-top:14px"><h3>4. Parcours selon le débiteur</h3><div class="debtor-path-grid"><div class="path-card" id="professionalPathCard"><span class="path-tag">Débiteur professionnel</span><h3>Tribunal de commerce</h3><div class="path-steps"><div class="path-step"><strong>1. Rechercher le tribunal compétent</strong><small>Recherche l’entreprise sur Infogreffe, puis ouvre la fiche. Dans « Informations complémentaires », récupère le greffe du tribunal de commerce compétent.</small><a class="btn btn-secondary" id="proTribunalSearchBtn" href="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee" target="_blank" rel="noopener">Rechercher sur Infogreffe</a></div><div class="path-step"><strong>2. Générer la requête en injonction de payer</strong><small>La requête reprend automatiquement les faits, les factures, les intérêts, les frais accessoires et la demande adressée au juge.</small><button class="btn btn-secondary" id="generateInjunctionRequestBtn" type="button">Générer / PDF requête</button></div><div class="path-step"><strong>3. Générer les documents officiels</strong><button class="btn btn-secondary" id="generateCerfaBtn" type="button">Cerfa officiel prérempli</button><button class="btn btn-secondary" id="printDebtStatementBtnPro" type="button">Décompte actualisé de la créance</button></div><div class="path-step"><strong>4. Préparer les pièces justificatives</strong><button class="btn btn-secondary" id="uploadInjunctionFilesBtnPro" type="button">Uploader les pièces</button></div><div class="path-step"><strong>5. Envoyer votre dossier au tribunal</strong><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div><div class="path-step"><strong>6. Après l’ordonnance : demander le certificat de non-opposition</strong><small>Après signification et délai d’opposition d’un mois : Infogreffe → fiche entreprise → Documents → Certificat de non-opposition à injonction de payer. Document payant côté greffe/Infogreffe.</small><a class="btn btn-secondary" id="nonOppositionInfogreffeBtn" href="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee" target="_blank" rel="noopener">Commander le certificat</a></div><div class="path-step"><strong>7. Après certificat : exécution forcée par commissaire de justice</strong><small>Avec l’ordonnance signifiée et le certificat, transmettre le dossier au commissaire de justice pour mesures d’exécution.</small></div></div></div><div class="path-card" id="privatePathCard"><span class="path-tag">Débiteur particulier</span><h3>Tribunal judiciaire</h3><div class="path-steps"><div class="path-step"><strong>1. Rechercher le tribunal compétent</strong><small>Pour un débiteur particulier, recherchez le tribunal judiciaire compétent selon le domicile du débiteur et la nature du dossier.</small><a class="btn btn-secondary" id="privateTribunalSearchBtn" href="https://www.justice.fr/recherche/annuaires" target="_blank" rel="noopener">Rechercher sur justice.fr</a></div><div class="path-step"><strong>2. Générer la requête en injonction de payer</strong><small>La requête reprend automatiquement les faits, les factures, les intérêts, les frais accessoires et la demande adressée au juge.</small><button class="btn btn-secondary" id="generateInjunctionRequestBtnPrivate" type="button">Générer / PDF requête</button></div><div class="path-step"><strong>3. Générer les documents officiels</strong><button class="btn btn-secondary" id="generateCerfaBtnPrivate" type="button">Cerfa officiel prérempli</button><button class="btn btn-secondary" id="printDebtStatementBtnPrivate" type="button">Décompte actualisé de la créance</button></div><div class="path-step"><strong>4. Préparer les pièces justificatives</strong><button class="btn btn-secondary" id="uploadInjunctionFilesBtnPrivate" type="button">Uploader les pièces</button></div><div class="path-step"><strong>5. Envoyer votre dossier au tribunal</strong><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div><div class="path-step"><strong>6. Après l’ordonnance : demander le certificat de non-opposition</strong><small>Après signification et délai d’opposition d’un mois, contacter le greffe du tribunal judiciaire. Joindre l’ordonnance, la preuve de signification et la référence du dossier.</small><a class="btn btn-secondary" id="nonOppositionPrivateBtn" href="https://www.justice.fr/recherche/annuaires" target="_blank" rel="noopener">Demande auprès du tribunal</a></div><div class="path-step"><strong>7. Après certificat : exécution forcée par commissaire de justice</strong><small>Transmettre ordonnance, preuve de signification, certificat de non-opposition et décompte actualisé au commissaire de justice.</small></div></div></div></div><input id="injunctionFilesInput" type="file" multiple style="display:none"><div class="upload-status" id="injunctionUploadStatus">Aucun fichier ajouté pour le moment.</div><div class="uploaded-files-list" id="injunctionFilesList"></div><div class="path-warning" id="pathWarning" style="display:none"></div></div><div class="modal-actions"><button class="btn btn-danger" id="markInjunctionBtn" type="button">Marquer l’injonction comme envoyée</button></div></div></div></div>
+<div class="modal-backdrop" id="injunctionModal"><div class="modal"><div class="modal-inner">
+  <div class="modal-head">
+    <div class="inj-headline"><div class="inj-icon">⚖</div><div><h2>Mini-dossier judiciaire — Injonction de payer</h2><div class="panel-sub" id="injunctionModalSub">Préparation du dossier judiciaire</div></div></div>
+    <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
+  </div>
 
+  <div class="inj-warning"><strong>Point de vigilance.</strong> L’injonction de payer suppose une créance certaine, liquide et exigible, suffisamment justifiée. En cas de contestation sérieuse ou de dossier incomplet, ne pas déposer automatiquement : la voie contradictoire peut être plus adaptée.</div>
 
+  <section class="inj-court">
+    <div class="inj-section-title"><span>Juridiction compétente</span><span class="inj-route-badge" id="injunctionRouteBadge">Tribunal judiciaire</span></div>
+    <div class="inj-court-grid">
+      <div class="field"><label>Nom du tribunal</label><input id="injunctionCourtName" type="text" placeholder="Tribunal judiciaire de …"></div>
+      <div class="field"><label>Ville</label><input id="injunctionCourtCity" type="text"></div>
+      <div class="field"><label>Code postal</label><input id="injunctionCourtZip" type="text"></div>
+      <div class="field wide"><label>Adresse</label><input id="injunctionCourtAddress" type="text"></div>
+    </div>
+    <div class="inj-inline-actions">
+      <a class="btn btn-secondary" id="injunctionCourtSearchBtn" href="https://www.justice.fr/recherche/annuaires" target="_blank" rel="noopener">↗ Rechercher le tribunal compétent</a>
+      <button class="btn btn-primary" id="saveInjunctionCourtBtn" type="button">Enregistrer la juridiction</button>
+    </div>
+  </section>
+
+  <section class="inj-date-box">
+    <div class="inj-section-title"><span>Date de l’injonction / date de préparation</span></div>
+    <div class="field"><label>Date proposée (modifiable)</label><input id="injunctionPreparationDate" type="date"></div>
+    <div class="inj-date-help" id="injunctionDateHelp">Cette date est utilisée pour la requête, la synthèse, le décompte et la chronologie. Elle ne signifie pas que le dossier a été déposé au tribunal.</div>
+  </section>
+
+  <div class="inj-doc-grid">
+    <article class="inj-doc"><strong>Requête en injonction</strong><small>PDF A4 Axe Flow avec créancier, débiteur, factures, démarches amiables et montant réclamé.</small><button class="btn btn-primary" id="generateInjunctionRequestBtnPrivate" type="button">⇩ Générer la requête PDF</button></article>
+    <article class="inj-doc"><strong id="cerfaInjunctionTitle">Cerfa n°12948*06 prérempli</strong><small id="cerfaInjunctionHelp">Formulaire officiel pour une demande devant le tribunal judiciaire.</small><button class="btn btn-primary" id="generateCerfaBtnPrivate" type="button">⇩ Générer le Cerfa</button></article>
+    <article class="inj-doc"><strong>Décompte actualisé</strong><small>Arrêté à la date de préparation, avec détail facture par facture et intérêts applicables.</small><button class="btn btn-primary" id="printDebtStatementBtnPrivate" type="button">⇩ Générer le décompte</button></article>
+  </div>
+
+  <section class="inj-pieces">
+    <div class="inj-section-title"><span>Pièces justificatives</span></div>
+    <div id="injunctionGeneratedPieces"></div>
+    <div class="inj-piece"><div><strong>Pièces complémentaires</strong><br><small>Preuve d’envoi, AR, contrat, devis, bon de commande, échanges ou autre justificatif.</small></div><button class="btn btn-secondary" id="uploadInjunctionFilesBtnPrivate" type="button">+ Ajouter une pièce</button></div>
+    <input id="injunctionFilesInput" type="file" multiple style="display:none">
+    <div class="upload-status" id="injunctionUploadStatus">Aucun fichier ajouté pour le moment.</div>
+    <div class="uploaded-files-list" id="injunctionFilesList"></div>
+  </section>
+
+  <div class="inj-inline-actions">
+    <a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">↗ La Poste — lettre recommandée en ligne</a>
+  </div>
+
+  <div class="inj-after">
+    <article class="inj-after-card"><strong>Après l’ordonnance</strong><small>Après signification de l’ordonnance et expiration du délai d’opposition, préparer la demande de certificat de non-opposition auprès de la juridiction compétente.</small><button class="btn btn-secondary" id="generateNonOppositionBtn" type="button">Préparer la demande de certificat</button></article>
+    <article class="inj-after-card"><strong>Après le certificat</strong><small>Préparer le dossier de transmission au commissaire de justice : ordonnance, signification, certificat de non-opposition et décompte actualisé.</small><button class="btn btn-secondary" id="generateEnforcementBtn" type="button">Préparer l’exécution forcée</button></article>
+  </div>
+
+  <div class="inj-footer"><button class="btn btn-primary" id="markInjunctionBtn" type="button">✓ Enregistrer l’injonction préparée</button></div>
+
+  <!-- IDs conservés pour compatibilité avec l'ancien code, non affichés -->
+  <div style="display:none">
+    <div id="injunctionSummary"></div><div id="injunctionBordereau"></div><div id="legalStatus"></div><div id="pathWarning"></div>
+    <a id="proTribunalSearchBtn"></a><a id="privateTribunalSearchBtn"></a><a id="nonOppositionInfogreffeBtn"></a><a id="nonOppositionPrivateBtn"></a>
+    <div id="professionalPathCard"></div><div id="privatePathCard"></div>
+    <button id="generateInjunctionRequestBtn" type="button"></button><button id="generateCerfaBtn" type="button"></button><button id="printDebtStatementBtnPro" type="button"></button><button id="uploadInjunctionFilesBtnPro" type="button"></button>
+    <input type="checkbox" id="checkDebtCertain"><input type="checkbox" id="checkDebtLiquid"><input type="checkbox" id="checkDebtDue"><input type="checkbox" id="checkNoSeriousDispute"><input type="checkbox" id="checkFormalNotice"><input type="checkbox" id="checkDebtDisputed"><input type="checkbox" id="checkEvidenceWeak">
+  </div>
+</div></div></div>
 <div class="modal-backdrop" id="dossierDetailModal"><div class="modal"><div class="modal-inner">
   <div class="detail-head">
     <div>
@@ -571,7 +667,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObjec
 
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
-const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_FILLABLE_URL="/documents/cerfa-12946-remplissable.pdf",INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
+const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_PRO_URL="/documents/cerfa-12946-remplissable.pdf",CERFA_PRIVATE_URL="/documents/cerfa-12948-06.pdf",CERFA_FILLABLE_URL=CERFA_PRO_URL,INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="";
 const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
@@ -1642,7 +1738,7 @@ function initSignaturePad(){
 }
 initSignaturePad();
 
-async function generateCerfaPrefilled(signatureReady=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const response=await fetch(CERFA_FILLABLE_URL,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${CERFA_FILLABLE_URL}`);const pdfDoc = await PDFLib.PDFDocument.load(
+async function generateCerfaPrefilled(signatureReady=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
 
@@ -1917,7 +2013,7 @@ safeSetText(
 
 const invoiceRefs=normalizeInvoices(currentDossier).map(x=>x.ref).join(", ");
 safeSetText(form,"supporting_documents_1",`Facture(s) ${invoiceRefs} ; devis/contrat ; preuve de la prestation ; relances`);
-safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",todayFR());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-cerfa-12946-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
+safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",todayFR());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
 function debtStatementHtml(d=currentDossier){const calc=lateFeeBreakdown(d),rows=calc.rows.map(x=>`<tr><td>${escapeHtml(x.ref)}</td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Décompte actualisé</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#111;font-size:11pt}h1{font-size:18pt;margin:0 0 6mm}.meta{margin-bottom:8mm}table{width:100%;border-collapse:collapse;margin:8mm 0}th,td{border:1px solid #aaa;padding:7px;text-align:left}th{background:#eee}.totals{margin-left:auto;width:70%}.totals td:first-child{font-weight:700}.grand{font-weight:700;font-size:13pt}
 /* V2 — un seul tableau de bord : la zone historique devient uniquement la fiche détaillée */
 body .hero{display:none!important}
@@ -2110,7 +2206,33 @@ function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossi
   E.mailBtn.href=makeMailto(debtorEmail(currentDossier),actionTitle(action)+" – Facture "+invoiceNumber(currentDossier),currentText);
 }E.shareBtn.style.display=navigator.share?"":"none";E.modalText.classList.add("open")}
 function closeTextModal(){E.modalText.classList.remove("open");currentText="";currentAction="";E.medSendBox.style.display="none";E.markSentBtn.disabled=false;E.markSentBtn.textContent="Marquer comme envoyé"}
-function openInjunctionModal(){if(!currentDossier){alert("Sélectionnez un dossier.");return}currentAction="injunction";E.injunctionSummary.textContent=summaryInjunctionText(currentDossier);E.injunctionBordereau.textContent=bordereauText(currentDossier);syncLegalStatus();syncDebtorGuidance();E.injunctionUploadStatus.textContent="Pièces justificatives déposées :";renderInjunctionFiles();E.injunctionModal.classList.add("open")}
+function openInjunctionModal(){
+  if(!currentDossier){alert("Sélectionnez un dossier.");return}
+  currentAction="injunction";
+  const pro=isProfessionalDebtor(currentDossier);
+  const set=(id,v)=>{const el=$(id);if(el)el.textContent=v};
+  set("injunctionModalSub",`${currentDossier.ref||"Dossier"} — ${debtorName(currentDossier)} — ${debtorTypeLabel(currentDossier)}`);
+  set("injunctionRouteBadge",pro?"Tribunal de commerce":"Tribunal judiciaire");
+  set("cerfaInjunctionTitle",pro?"Cerfa n°12946*02 prérempli":"Cerfa n°12948*06 prérempli");
+  set("cerfaInjunctionHelp",pro?"Formulaire officiel du parcours professionnel.":"Formulaire officiel du parcours particulier devant le tribunal judiciaire.");
+  const search=$("injunctionCourtSearchBtn");
+  if(search){search.href=pro?infogreffeSearchUrl(currentDossier):JUSTICE_ANNUAIRE_URL;search.textContent=pro?"↗ Rechercher le tribunal de commerce compétent":"↗ Rechercher le tribunal compétent sur justice.fr"}
+  const dateInput=$("injunctionPreparationDate");
+  if(dateInput)dateInput.value=currentDossier.injunctionPreparationDate||new Date().toISOString().slice(0,10);
+  const c=currentDossier.injunctionCourt||{};
+  if($("injunctionCourtName"))$("injunctionCourtName").value=c.name||"";
+  if($("injunctionCourtCity"))$("injunctionCourtCity").value=c.city||"";
+  if($("injunctionCourtZip"))$("injunctionCourtZip").value=c.zip||"";
+  if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=c.address||"";
+  const pieces=$("injunctionGeneratedPieces");
+  if(pieces){
+    const labels=["Relance 1","Relance 2","Relance 3","Mise en demeure"];
+    pieces.innerHTML=labels.map((label,i)=>`<div class="inj-piece"><div><strong>${label}</strong><br><small>Document généré par Axe Flow</small></div><button class="detail-event-view" type="button" data-inj-view-step="${i+1}">Voir</button></div>`).join("");
+  }
+  if(E.injunctionUploadStatus)E.injunctionUploadStatus.textContent="Pièces complémentaires déposées :";
+  renderInjunctionFiles();
+  E.injunctionModal.classList.add("open");
+}
 function closeInjunction(){E.injunctionModal.classList.remove("open")}
 function openEditDossierModal(d=currentDossier){if(!d){alert("Sélectionnez un dossier.");return}currentDossier=d;$("editDossierRef").value=d.ref||"";fillInvoiceRows(E.editInvoiceRows,normalizeInvoices(d));E.editLateRateInput.value=Number(d.lateRatePercent??8.25);$("editContractBasisInput").value=contractBasis(d);$("editDebiteurTypeInput").value=debtorType(d);$("editDebtorNameInput").value=debtorName(d)==="Madame, Monsieur"?"":debtorName(d);$("editDebtorEmailInput").value=debtorEmail(d);$("editDebtorAddressInput").value=debtorAddress(d);$("editDebtorZipInput").value=debtorZip(d);$("editDebtorCityInput").value=debtorCity(d);E.editDossierModal.classList.add("open")}
 function closeEditDossierModal(){E.editDossierModal.classList.remove("open")}
@@ -2780,29 +2902,112 @@ E.markSentBtn.addEventListener("click",async()=>{if(!currentAction){alert("Aucun
 E.closeInjunctionModal.addEventListener("click",closeInjunction);
 E.injunctionModal.addEventListener("click",e=>{if(e.target===E.injunctionModal)closeInjunction()});
 ["checkDebtCertain","checkDebtLiquid","checkDebtDue","checkNoSeriousDispute","checkFormalNotice","checkDebtDisputed","checkEvidenceWeak"].forEach(id=>$(id).addEventListener("change",syncLegalStatus));
-E.generateInjunctionRequestBtn?.addEventListener("click",()=>{
+function injunctionCourtData(){
+  return{
+    name:clean($("injunctionCourtName")?.value),
+    city:clean($("injunctionCourtCity")?.value),
+    zip:clean($("injunctionCourtZip")?.value),
+    address:clean($("injunctionCourtAddress")?.value)
+  };
+}
+function injunctionCourtLabel(){
+  const c=injunctionCourtData();
+  return c.name||[isProfessionalDebtor(currentDossier)?"Tribunal de commerce":"Tribunal judiciaire",c.city].filter(Boolean).join(" de ");
+}
+function injunctionCourtAddressLabel(){
+  const c=injunctionCourtData();
+  return [c.address,[c.zip,c.city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+}
+function generateInjunctionRequestFromModal(){
   if(!currentDossier)return;
-  const courtName=clean(prompt("Ville ou nom du tribunal compétent :", ""));
-  const courtAddress=clean(prompt("Adresse du tribunal compétent :", ""));
   currentAction="injunction";
-  if(!signatureDataUrl){openSignatureModal("request",courtName,courtAddress);return;}openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
+  const courtName=injunctionCourtLabel(),courtAddress=injunctionCourtAddressLabel();
+  if(!courtName){alert("Renseignez d’abord la juridiction compétente.");return}
+  if(!signatureDataUrl){openSignatureModal("request",courtName,courtAddress);return}
+  openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
+}
+E.generateInjunctionRequestBtn?.addEventListener("click",generateInjunctionRequestFromModal);
+E.generateInjunctionRequestBtnPrivate?.addEventListener("click",generateInjunctionRequestFromModal);
+
+E.saveInjunctionCourtBtn?.addEventListener("click",async()=>{
+  if(!currentUser||!currentDossier)return;
+  const court=injunctionCourtData();
+  if(!court.name){alert("Renseignez le nom du tribunal.");return}
+  try{
+    E.saveInjunctionCourtBtn.disabled=true;E.saveInjunctionCourtBtn.textContent="Enregistrement...";
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),{injunctionCourt:court,updatedAt:serverTimestamp()});
+    currentDossier={...currentDossier,injunctionCourt:court};
+    E.saveInjunctionCourtBtn.textContent="Juridiction enregistrée ✓";
+    setTimeout(()=>{E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"},1200);
+  }catch(err){console.error(err);alert("Impossible d’enregistrer la juridiction.");E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"}
 });
-E.generateInjunctionRequestBtnPrivate?.addEventListener("click",()=>{
-  if(!currentDossier)return;
-  const courtName=clean(prompt("Ville ou nom du tribunal compétent :", ""));
-  const courtAddress=clean(prompt("Adresse du tribunal compétent :", ""));
-  currentAction="injunction";
-  if(!signatureDataUrl){openSignatureModal("request",courtName,courtAddress);return;}openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
-});
+
 E.generateCerfaBtn?.addEventListener("click",generateCerfaPrefilled);
 E.printDebtStatementBtnPro?.addEventListener("click",printDebtStatement);
 E.printDebtStatementBtnPrivate?.addEventListener("click",printDebtStatement);
 E.generateCerfaBtnPrivate?.addEventListener("click",generateCerfaPrefilled);
+
+$("injunctionGeneratedPieces")?.addEventListener("click",e=>{
+  const b=e.target.closest("[data-inj-view-step]");if(!b)return;
+  const map={1:"relance1",2:"relance2",3:"relance3",4:"med"};
+  const a=map[Number(b.dataset.injViewStep)];
+  if(a)openTextModal(a);
+});
+
 E.uploadInjunctionFilesBtnPro.addEventListener("click",()=>E.injunctionFilesInput.click());
 E.uploadInjunctionFilesBtnPrivate.addEventListener("click",()=>E.injunctionFilesInput.click());
 E.injunctionFilesInput.addEventListener("change",e=>uploadInjunctionFiles(e.target.files));
 if(E.injunctionFilesList){E.injunctionFilesList.addEventListener("click",e=>{const btn=e.target.closest("[data-delete-file]");if(!btn)return;deleteInjunctionFile(btn.dataset.deleteFile,btn.dataset.deletePath||"")})}
-E.markInjunctionBtn.addEventListener("click",async()=>{try{E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement...";await markStep("injunction");E.markInjunctionBtn.textContent="Envoyé ✔";setTimeout(()=>{E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée";closeInjunction()},700)}catch(err){console.error(err);alert("Erreur : l’injonction n’a pas été enregistrée dans l’historique.");E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="Marquer l’injonction comme envoyée"}});
+E.markInjunctionBtn.addEventListener("click",async()=>{
+  if(!currentUser||!currentDossier)return;
+  const prepDate=clean($("injunctionPreparationDate")?.value)||new Date().toISOString().slice(0,10);
+  const court=injunctionCourtData();
+  try{
+    E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement...";
+    const patch={
+      step:Math.max(5,getStep(currentDossier)),
+      statusLabel:"Injonction préparée",
+      injunctionPrepared:true,
+      injunctionPreparationDate:prepDate,
+      injunctionCourt:court,
+      updatedAt:serverTimestamp()
+    };
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+    currentDossier={...currentDossier,...patch};
+    try{
+      await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
+        type:"injunction_prepared",label:"Injonction préparée",date:prepDate,courtName:court.name||"",createdAt:serverTimestamp()
+      });
+    }catch(eventErr){console.warn("Chronologie injonction :",eventErr)}
+    showSuccessToast?.("Injonction préparée enregistrée");
+    E.markInjunctionBtn.textContent="Enregistrée ✓";
+    await loadDossiers(currentUser.uid);
+    setTimeout(()=>{E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="✓ Enregistrer l’injonction préparée";closeInjunction()},700);
+  }catch(err){
+    console.error(err);alert("Erreur : l’injonction préparée n’a pas été enregistrée.");
+    E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="✓ Enregistrer l’injonction préparée";
+  }
+});
+
+function simpleJudicialLetterHtml(title,body,d=currentDossier){
+  const c=injunctionCourtData(),date=clean($("injunctionPreparationDate")?.value)||new Date().toISOString().slice(0,10);
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#111;font-size:11pt;line-height:1.45}.top{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-bottom:18mm}.right{text-align:right}h1{font-size:16pt;margin:10mm 0 8mm}.sig{margin-top:12mm}.foot{position:fixed;bottom:4mm;left:18mm;right:18mm;text-align:center;color:#667;font-size:8pt}</style></head><body><div class="top"><div><strong>${escapeHtml(creditorName(d))}</strong><br>${escapeHtml(creditorAddress(d))}<br>${escapeHtml(creditorZip(d)+" "+creditorCity(d))}</div><div class="right"><strong>${escapeHtml(c.name||"Juridiction compétente")}</strong><br>${escapeHtml(c.address||"")}<br>${escapeHtml([c.zip,c.city].filter(Boolean).join(" "))}</div></div><div>Fait à ${escapeHtml(creditorCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><h1>${escapeHtml(title)}</h1><div>${body}</div><div class="sig"><strong>${escapeHtml(creditorName(d))}</strong></div><div class="foot">Document préparé via Axe Flow — ${escapeHtml(d?.ref||"")}</div></body></html>`;
+}
+function printHtmlDocument(html){
+  const w=window.open("","_blank");if(!w){alert("Autorisez les fenêtres contextuelles.");return}w.document.open();w.document.write(html);w.document.close();setTimeout(()=>w.print(),450);
+}
+$("generateNonOppositionBtn")?.addEventListener("click",()=>{
+  if(!currentDossier)return;
+  const body=`<p>Objet : demande de certificat de non-opposition à l’ordonnance portant injonction de payer.</p><p>Dossier Axe Flow : <strong>${escapeHtml(currentDossier.ref||"")}</strong><br>Débiteur : <strong>${escapeHtml(debtorName(currentDossier))}</strong></p><p>Je vous prie de bien vouloir délivrer un certificat de non-opposition relatif à l’ordonnance rendue dans ce dossier, sous réserve que le délai légal d’opposition soit expiré et qu’aucune opposition n’ait été enregistrée.</p><p>À joindre avant envoi : copie de l’ordonnance, preuve de signification et référence attribuée par la juridiction.</p>`;
+  printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,currentDossier));
+});
+$("generateEnforcementBtn")?.addEventListener("click",()=>{
+  if(!currentDossier)return;
+  const calc=lateFeeBreakdown(currentDossier);
+  const body=`<p>Objet : transmission d’un titre exécutoire en vue de mesures d’exécution.</p><p>Débiteur : <strong>${escapeHtml(debtorName(currentDossier))}</strong><br>Référence : <strong>${escapeHtml(currentDossier.ref||"")}</strong><br>Montant indicatif restant dû : <strong>${escapeHtml(formatCurrency(calc.total))}</strong></p><p>Pièces à transmettre : ordonnance portant injonction de payer, acte de signification, certificat de non-opposition, décompte actualisé et pièces utiles du dossier.</p><p>Le présent document prépare la transmission au commissaire de justice ; il ne déclenche aucune mesure d’exécution par lui-même.</p>`;
+  printHtmlDocument(simpleJudicialLetterHtml("DOSSIER DE TRANSMISSION AU COMMISSAIRE DE JUSTICE",body,currentDossier));
+});
+
 E.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
 E.saveCreditorBtn.addEventListener("click",async()=>{if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const patch={creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value),updatedAt:serverTimestamp()};try{E.saveCreditorBtn.disabled=true;E.saveCreditorBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveCreditorBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"},1200)}catch(err){console.error(err);alert("Erreur Firestore : le créancier n’a pas été enregistré.");E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"}});
 E.companyProfileBtn?.addEventListener("click",openCompanyProfileModal);
