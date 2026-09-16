@@ -668,6 +668,8 @@
   <div class="field"><label>Qualité du créancier</label><select id="cerfaClaimantKind"><option value="person">EI / micro-entreprise / personne physique</option><option value="company">Société / personne morale</option></select></div>
   <div class="field" id="cerfaClaimantGenderWrap"><label>Civilité du créancier</label><select id="cerfaClaimantGender"><option value="female">Madame</option><option value="male">Monsieur</option></select></div>
   <div class="field" id="cerfaDebtorGenderWrap"><label>Civilité du débiteur particulier</label><select id="cerfaDebtorGender"><option value="male">Monsieur</option><option value="female">Madame</option></select></div>
+  <div class="field" id="cerfaClaimantFirstNamesWrap"><label>Vos prénoms</label><input id="cerfaClaimantFirstNames" type="text" placeholder="Ex. Sophie"></div>
+  <div class="field" id="cerfaClaimantBirthDateWrap"><label>Date de naissance</label><input id="cerfaClaimantBirthDate" type="date"></div>
  </div>
  <div class="prep-note">Ces choix servent uniquement à cocher et renseigner correctement le Cerfa. Le nom du tribunal et son adresse sont repris automatiquement de la juridiction enregistrée plus haut.</div>
  <div class="prep-actions"><button class="btn btn-secondary" id="cancelCerfaOptions" type="button">Annuler</button><button class="btn btn-primary" id="confirmCerfaOptions" type="button">✓ Générer le Cerfa prérempli</button></div>
@@ -1850,8 +1852,13 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
     mark(page1,42.5,559.3,female); mark(page1,184,559.3,!female);
     put(page1,260,540,claimant.lastName,8.2,275);              // nom de naissance
-    put(page1,334,521,claimant.firstNames,8.2,205);            // prénoms
-    // date/lieu de naissance et profession : laissés vierges tant qu'ils ne sont pas collectés par Axe Flow
+    put(page1,116,501,clean(cerfaGenerationOptions?.claimantFirstNames)||claimant.firstNames,8.2,420); // prénoms
+    const claimantBirthDate=clean(cerfaGenerationOptions?.claimantBirthDate);
+    if(claimantBirthDate){
+      const [by,bm,bd]=claimantBirthDate.split("-");
+      put(page1,176,481,`${bd||""}${bm||""}${by||""}`,8.2,112);
+    }
+    // lieu de naissance et profession : laissés vierges tant qu'ils ne sont pas collectés par Axe Flow
     put(page1,133,440,"France",8.2,400);                       // nationalité
     put(page1,122,401,creditorAddress(currentDossier),8.2,415);// adresse
     put(page1,263,361,creditorCity(currentDossier),8.2,275);   // commune
@@ -1889,7 +1896,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
   const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
   let yy=724; for(const line of basis){put(page4,381,yy,line,7.5,172);yy-=13}
-  put(page4,80,499,injunctionPreparationFr(),8.4,105,true);     // champ Date
+  put(page4,80,455,injunctionPreparationFr(),8.4,105,true);     // champ Date — sous le tableau
 
   // Signature dans la zone officielle, à gauche et juste sous « Votre signature ».
   if(signatureDataUrl){
@@ -1897,7 +1904,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
       const maxW=105,maxH=34,scale=Math.min(maxW/img.width,maxH/img.height);
-      page4.drawImage(img,{x:72,y:454,width:img.width*scale,height:img.height*scale});
+      page4.drawImage(img,{x:72,y:395,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12948",e)}
   }
   return pdfDoc;
@@ -3262,9 +3269,9 @@ $("previewEnforcementBtn")?.addEventListener("click",()=>{
 $("closeCerfaOptionsModal")?.addEventListener("click",closeCerfaOptionsModal);
 $("cancelCerfaOptions")?.addEventListener("click",closeCerfaOptionsModal);
 $("cerfaOptionsModal")?.addEventListener("click",e=>{if(e.target.id==="cerfaOptionsModal")closeCerfaOptionsModal()});
-$("cerfaClaimantKind")?.addEventListener("change",()=>{$("cerfaClaimantGenderWrap").style.display=$("cerfaClaimantKind").value==="company"?"none":"flex"});
+$("cerfaClaimantKind")?.addEventListener("change",()=>{const isCompany=$("cerfaClaimantKind").value==="company";$("cerfaClaimantGenderWrap").style.display=isCompany?"none":"flex";$("cerfaClaimantFirstNamesWrap").style.display=isCompany?"none":"block";$("cerfaClaimantBirthDateWrap").style.display=isCompany?"none":"block";});
 $("confirmCerfaOptions")?.addEventListener("click",async()=>{
-  cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value};
+  cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value,claimantFirstNames:clean($("cerfaClaimantFirstNames")?.value),claimantBirthDate:clean($("cerfaClaimantBirthDate")?.value)};
   closeCerfaOptionsModal();
   await generateCerfaPrefilled(false);
 });
