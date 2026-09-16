@@ -1860,7 +1860,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
       const [by,bm,bd]=claimantBirthDate.split("-");
       put(page1,176,481,`${bd||""}${bm||""}${by||""}`,9.2,112);
     }
-    put(page1,145,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,390); // lieu de naissance
+    put(page1,160,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,375); // lieu de naissance — décalé dans la zone bleue
     // profession : laissée vierge tant qu'elle n'est pas collectée par Axe Flow
     put(page1,133,440,"France",8.2,400);                       // nationalité
     put(page1,122,401,creditorAddress(currentDossier),8.2,415);// adresse
@@ -1882,8 +1882,28 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   put(page2,73,389,"France",8.2,465);
   put(page2,160,369,dem.left,8.0,200); put(page2,372,369,dem.right,8.0,165);
 
-  // PAGE 3 — aucune option juridique facultative n'est cochée automatiquement.
-  // L'article 1408 (renvoi en cas d'opposition) restera vierge tant qu'une option explicite n'est pas proposée à l'utilisateur.
+  // PAGE 3 — VOTRE DEMANDE. Les options juridiques facultatives restent décochées.
+  // Le bloc libre est prérempli dynamiquement à partir DU dossier particulier courant.
+  const page3=pages[2];
+  const demandInvoices=normalizeInvoices(currentDossier);
+  const demandCalc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
+  const demandRefs=demandInvoices.map(i=>clean(i.ref)).filter(Boolean);
+  const demandDetails=demandInvoices.map(i=>{
+    const amount=Number(i.amount??i.amountTTC??0);
+    return `${clean(i.ref)||"facture"} d'un montant de ${money(amount)}`;
+  });
+  const demandText=[
+    `Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${money(demandCalc.principal)}.`,
+    `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${money(demandCalc.principalBalance)} reste due.`,
+    `Les factures, relances, mise en demeure et décompte actualisé sont joints à la présente requête.`
+  ].join(' ');
+  const drawWrapped=(page,x,y,text,size,maxWidth,lineHeight,maxLines)=>{
+    const words=sanitizePdfText(text).split(/\s+/); let line="",lines=[];
+    for(const word of words){const test=line?line+" "+word:word;if(font.widthOfTextAtSize(test,size)<=maxWidth)line=test;else{if(line)lines.push(line);line=word}}
+    if(line)lines.push(line);
+    lines.slice(0,maxLines).forEach((ln,i)=>page.drawText(ln,{x,y:y-i*lineHeight,size,font,color:ink}));
+  };
+  drawWrapped(page3,48,241,demandText,8.0,495,12,11);
 
   // PAGE 4 — SOMMES DEMANDÉES / FONDEMENT / DATE
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
