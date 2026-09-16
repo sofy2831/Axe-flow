@@ -1799,6 +1799,89 @@ function initSignaturePad(){
 initSignaturePad();
 
 let cerfaGenerationOptions=null;
+
+/* CERFA 12948*06 : le PDF officiel réutilise certains mêmes noms AcroForm
+   sur plusieurs pages. Pour éviter qu'une valeur se répète dans des rubriques
+   sans rapport, le parcours particulier aplatit d'abord le formulaire vierge,
+   puis écrit les données Axe Flow aux coordonnées exactes du CERFA officiel. */
+async function generatePrivateCerfa12948Overlay(pdfDoc){
+  const {rgb,StandardFonts}=PDFLib;
+  try{pdfDoc.getForm().flatten()}catch(e){console.warn("Aplatissement CERFA 12948",e)}
+  const font=await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold=await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const pages=pdfDoc.getPages();
+  const ink=rgb(0.04,0.08,0.16);
+  const put=(page,x,y,text,size=8.4,max=80,isBold=false)=>{
+    let t=sanitizePdfText(text||"").trim(); if(!t)return;
+    const f=isBold?bold:font;
+    while(t.length && f.widthOfTextAtSize(t,size)>max)t=t.slice(0,-1);
+    page.drawText(t,{x,y,size,font:f,color:ink});
+  };
+  const mark=(page,x,y,on)=>{if(on)page.drawText("X",{x:x+1.5,y:y+1.2,size:8.5,font:bold,color:ink})};
+  const p=currentUserData?.businessProfile||{};
+  const claimantCompany=(cerfaGenerationOptions?.claimantKind||"person")==="company";
+  const claimant=splitPersonName(creditorName(currentDossier));
+  const debtor=splitPersonName(debtorName(currentDossier));
+  const cem=splitEmail(creditorEmail(currentDossier));
+  const dem=splitEmail(debtorEmail(currentDossier));
+  const page1=pages[0],page2=pages[1],page3=pages[2],page4=pages[3];
+
+  // PAGE 1 - DEMANDEUR
+  put(page1,243,627,creditorName(currentDossier),9,275,true); // Votre identité (demandeur)
+  if(claimantCompany){
+    put(page1,296,262,p.legalForm||"",8.5,240);
+    put(page1,123,241,creditorName(currentDossier),8.5,415);
+    put(page1,136,221,p.representative||p.representant||"",8.5,400);
+    put(page1,171,201,creditorAddress(currentDossier),8.5,365);
+    put(page1,111,181,creditorZip(currentDossier),8.5,75);
+    put(page1,250,181,creditorCity(currentDossier),8.5,285);
+    put(page1,161,162,cem.left,8.2,200); put(page1,371,162,cem.right,8.2,165);
+    put(page1,165,143,creditorPhone(currentDossier),8.2,135);
+  }else{
+    const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
+    mark(page1,42.5,559.3,female); mark(page1,184,559.3,!female);
+    put(page1,260,560,claimant.lastName||creditorName(currentDossier),8.5,275);
+    put(page1,334,521,claimant.firstNames,8.5,205);
+    put(page1,168,461,creditorAddress(currentDossier),8.5,370);
+    put(page1,110,361,creditorZip(currentDossier),8.5,78);
+    put(page1,263,361,creditorCity(currentDossier),8.5,275);
+    put(page1,188,341,"France",8.5,205);
+    put(page1,188,321,cem.left,8.2,205); put(page1,409,321,cem.right,8.2,128);
+  }
+
+  // PAGE 2 - PREMIER DEBITEUR PARTICULIER
+  put(page2,154,566,debtorName(currentDossier),9,330,true);
+  const dfemale=(cerfaGenerationOptions?.debtorGender||"male")==="female";
+  mark(page2,42.7,527.4,dfemale); mark(page2,184.5,527.7,!dfemale);
+  put(page2,252,509,debtor.lastName,8.5,287);
+  put(page2,116,469,debtor.firstNames,8.5,420);
+  put(page2,114,449,debtorAddress(currentDossier),8.5,425);
+  put(page2,113,409,debtorZip(currentDossier),8.5,72);
+  put(page2,263,409,debtorCity(currentDossier),8.5,275);
+  put(page2,73,389,"France",8.5,465);
+  put(page2,160,369,dem.left,8.2,200); put(page2,372,369,dem.right,8.2,165);
+
+  // PAGE 3 - renvoi en cas d'opposition : juridiction déjà enregistrée
+  put(page3,170,562,injunctionCourtLabel(),8.4,365);
+
+  // PAGE 4 - SOMMES / FONDEMENT / DATE
+  const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
+  const invoices=normalizeInvoices(currentDossier);
+  put(page4,213,710,amountForCerfa(calc.principal)+" EUR",9,145,true);
+  const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)))];
+  const rate=rates.length===1?rates[0]:0;
+  if(rate>0){mark(page4,42.9,611.6,true);put(page4,81,599,String(rate).replace(".",",")+" %",8.5,104);put(page4,212,598,amountForCerfa(calc.interests)+" EUR",8.5,145)}
+  const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
+  const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean).join("\n");
+  // Colonne fondement : lignes courtes pour rester dans la grande zone bleue.
+  let yy=718; for(const line of basis.split("\n")){put(page4,381,yy,line,7.7,172);yy-=13}
+  put(page4,70,470,injunctionPreparationFr(),8.8,110,true);
+
+  // Signature à gauche, remontée sous "Votre signature"
+  if(signatureDataUrl){try{const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);const maxW=120,maxH=42,scale=Math.min(maxW/img.width,maxH/img.height);page4.drawImage(img,{x:70,y:402,width:img.width*scale,height:img.height*scale})}catch(e){console.warn("Signature CERFA 12948",e)}}
+
+  return pdfDoc;
+}
 function openCerfaOptionsModal(){
   if(!currentDossier)return;
   const p=currentUserData?.businessProfile||{};
@@ -1813,6 +1896,15 @@ function closeCerfaOptionsModal(){$("cerfaOptionsModal")?.classList.remove("open
 async function generateCerfaPrefilled(signatureReady=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
+
+if(!isProfessionalDebtor(currentDossier)){
+  await generatePrivateCerfa12948Overlay(pdfDoc);
+  const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"});
+  const a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");
+  a.href=URL.createObjectURL(blob);a.download=`${safeRef}-cerfa-12948-06-prefilled.pdf`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  return;
+}
 
 const form = pdfDoc.getForm();
 
