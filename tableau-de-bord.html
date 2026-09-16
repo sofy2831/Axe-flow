@@ -3013,22 +3013,32 @@ E.generateInjunctionRequestBtn?.addEventListener("click",generateInjunctionReque
 E.generateInjunctionRequestBtnPrivate?.addEventListener("click",generateInjunctionRequestFromModal);
 
 E.saveInjunctionCourtBtn?.addEventListener("click",async()=>{
-  if(!currentUser||!currentDossier)return;
+  if(!currentUser||!currentDossier){alert("Aucun dossier sélectionné.");return}
   const court=injunctionCourtData();
-  if(!court.name){alert("Renseignez le nom du tribunal.");return}
-  const saved=$("injunctionCourtSaved");
+  if(!court.name||!court.city||!court.zip||!court.address){
+    alert("Renseignez le nom du tribunal, la ville, le code postal et l’adresse.");return;
+  }
+  const saved=$("injunctionCourtSaved"),btn=E.saveInjunctionCourtBtn,oldText=btn.textContent;
   try{
-    E.saveInjunctionCourtBtn.disabled=true;E.saveInjunctionCourtBtn.textContent="Enregistrement...";
-    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),{injunctionCourt:court,updatedAt:serverTimestamp()});
-    currentDossier={...currentDossier,injunctionCourt:court};
-    E.saveInjunctionCourtBtn.textContent="Enregistré ✓";
-    if(saved)saved.style.display="inline-flex";
+    btn.disabled=true;btn.textContent="Enregistrement...";
+    const ref=doc(db,"users",currentUser.uid,"requests",currentDossier.id);
+    await updateDoc(ref,{
+      injunctionCourt:court,
+      courtName:court.name,
+      courtCity:court.city,
+      courtZip:court.zip,
+      courtAddress:court.address,
+      updatedAt:serverTimestamp()
+    });
+    currentDossier={...currentDossier,injunctionCourt:court,courtName:court.name,courtCity:court.city,courtZip:court.zip,courtAddress:court.address};
+    btn.textContent="✓ Juridiction enregistrée";
+    if(saved){saved.textContent="✓ Juridiction enregistrée";saved.style.display="inline-flex";}
     showSuccessToast("✓ Juridiction enregistrée");
-    setTimeout(()=>{E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"},1300);
+    setTimeout(()=>{btn.disabled=false;btn.textContent=oldText;if(saved)saved.style.display="none"},2200);
   }catch(err){
     console.error("Enregistrement juridiction :",err);
-    alert("La juridiction n’a pas pu être enregistrée dans Firestore. Vérifiez la console/règle Firestore.");
-    E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction";
+    btn.disabled=false;btn.textContent=oldText;
+    alert("Impossible d’enregistrer la juridiction.\nCode : "+(err?.code||"inconnu")+"\n"+(err?.message||""));
     if(saved)saved.style.display="none";
   }
 });
@@ -3148,7 +3158,7 @@ $("confirmCerfaOptions")?.addEventListener("click",async()=>{
 
 /* handler juridiction V4 */
 document.addEventListener("click",async(e)=>{
-  const btn=e.target.closest("#saveCourtBtn"); if(!btn)return;
+  const btn=e.target.closest("#__obsolete_saveCourtBtn"); if(!btn)return;
   e.preventDefault(); if(!currentDossier)return;
   const court={name:clean($("injunctionCourtName")?.value),city:clean($("injunctionCourtCity")?.value),zip:clean($("injunctionCourtZip")?.value),address:clean($("injunctionCourtAddress")?.value)};
   if(!court.name||!court.city||!court.zip||!court.address){alert("Renseignez le nom du tribunal, la ville, le code postal et l’adresse.");return;}
