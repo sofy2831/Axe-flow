@@ -1890,11 +1890,11 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   const demandRefs=demandInvoices.map(i=>clean(i.ref)).filter(Boolean);
   const demandDetails=demandInvoices.map(i=>{
     const amount=Number(i.amount??i.amountTTC??0);
-    return `${clean(i.ref)||"facture"} d'un montant de ${money(amount)}`;
+    return `${clean(i.ref)||"facture"} d'un montant de ${formatCurrency(amount)}`;
   });
   const demandText=[
-    `Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${money(demandCalc.principal)}.`,
-    `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${money(demandCalc.principalBalance)} reste due.`,
+    `Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${formatCurrency(demandCalc.principal)}.`,
+    `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${formatCurrency(demandCalc.principalBalance)} reste due.`,
     `Les factures, relances, mise en demeure et décompte actualisé sont joints à la présente requête.`
   ].join(' ');
   const drawWrapped=(page,x,y,text,size,maxWidth,lineHeight,maxLines)=>{
