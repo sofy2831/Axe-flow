@@ -156,6 +156,20 @@ service cloud.firestore {
         "miseEnDemeureSentAt",
         "injunctionPreparedAt",
 
+        // Juridiction compétente / injonction
+        "injunctionCourt",
+        "courtName",
+        "courtCity",
+        "courtZip",
+        "courtAddress",
+
+        // Juridiction compétente / injonction
+        "injunctionCourt",
+        "courtName",
+        "courtCity",
+        "courtZip",
+        "courtAddress",
+
         // Injonction
         "injunctionPublished",
         "postOrderChoice",
