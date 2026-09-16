@@ -1903,7 +1903,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     if(line)lines.push(line);
     lines.slice(0,maxLines).forEach((ln,i)=>page.drawText(ln,{x,y:y-i*lineHeight,size,font,color:ink}));
   };
-  drawWrapped(page3,48,241,demandText,8.0,495,12,11);
+  drawWrapped(page3,48,199,demandText,8.0,495,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
   // PAGE 4 — SOMMES DEMANDÉES / FONDEMENT / DATE
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
@@ -1919,7 +1919,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
   const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
   let yy=724; for(const line of basis){put(page4,381,yy,line,7.5,172);yy-=13}
-  put(page4,80,455,injunctionPreparationFr(),8.4,105,true);     // champ Date — sous le tableau
+  put(page4,80,459.2,injunctionPreparationFr(),8.4,105,true);   // champ Date remonté d’environ 0,5 % de la hauteur A4
 
   // Signature dans la zone officielle, à gauche et juste sous « Votre signature ».
   if(signatureDataUrl){
