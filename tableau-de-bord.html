@@ -413,6 +413,17 @@
 #injunctionModal .inj-route-badge{display:inline-flex;align-items:center;padding:4px 9px;border-radius:999px;background:rgba(137,103,255,.13);border:1px solid rgba(137,103,255,.22);color:#d9d0ff;font-size:.72rem;font-weight:800}
 @media(max-width:820px){#injunctionModal .inj-court-grid,#injunctionModal .inj-doc-grid,#injunctionModal .inj-after{grid-template-columns:1fr}}
 
+
+/* ===== V20 — finition injonction ===== */
+#injunctionModal .inj-piece{grid-template-columns:auto 1fr auto}
+#injunctionModal .inj-piece-tag{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:rgba(61,208,143,.10);border:1px solid rgba(61,208,143,.25);color:#3dd08f;font-size:.78rem;font-weight:900}
+#injunctionModal .detail-event-view{appearance:none;border:1px solid rgba(255,255,255,.13);background:#17243b;color:#eaf0ff;border-radius:9px;padding:7px 12px;font:inherit;font-size:.76rem;font-weight:800;cursor:pointer}
+#injunctionModal .detail-event-view:hover{border-color:rgba(255,127,31,.45);color:#fff}
+#injunctionModal .inj-after-card .btn{background:#1769aa;border-color:#2a80c4;color:#fff}
+#injunctionModal .inj-after-card .btn:hover{background:#1d78bd;border-color:#3890d4}
+#injunctionModal .inj-court-saved{display:inline-flex;align-items:center;gap:7px;color:#3dd08f;font-size:.76rem;font-weight:800;margin-left:3px}
+#injunctionModal .inj-court-saved::before{content:"✓";width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:rgba(61,208,143,.13);border:1px solid rgba(61,208,143,.30)}
+
 </style>
 </head>
 <body>
@@ -575,7 +586,7 @@
 <div class="modal-backdrop" id="modalText"><div class="modal"><div class="modal-inner"><div class="modal-head"><div><h2 id="modalTitle">Document</h2><div class="panel-sub" id="modalSub">—</div></div><button class="close-btn" id="closeModal" type="button">×</button></div><div class="letter-header"><div class="note-box soft" id="modalCreditorBox">Créancier : —</div><div class="note-box soft" id="modalDebtorBox">Débiteur : —</div></div><div class="note-box warning" id="medSendBox" style="display:none;margin-bottom:14px"><strong>Mise en demeure : LRAR fortement recommandée.</strong><br>Envoi conseillé : <strong>lettre recommandée avec accusé de réception</strong> via La Poste + copie simple par mail.<div style="margin-top:10px"><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste LRAR</a></div></div><div class="text-preview" id="textContent"></div><div class="modal-actions"><button class="btn btn-secondary" id="shareBtn" type="button" style="display:none">Partager</button><a class="btn btn-primary" id="mailBtn" target="_blank" rel="noopener">Envoyer par mail</a><button class="btn btn-secondary" id="printPdfBtn" type="button">Imprimer / PDF</button><button class="btn btn-danger" id="markSentBtn" type="button">Marquer comme envoyé</button></div></div></div></div>
 <div class="modal-backdrop" id="injunctionModal"><div class="modal"><div class="modal-inner">
   <div class="modal-head">
-    <div class="inj-headline"><div class="inj-icon">⚖</div><div><h2>Mini-dossier judiciaire — Injonction de payer</h2><div class="panel-sub" id="injunctionModalSub">Préparation du dossier judiciaire</div></div></div>
+    <div class="inj-headline"><div class="inj-icon">⚖</div><div><h2>Injonction de payer</h2><div class="panel-sub" id="injunctionModalSub">Préparation du dossier judiciaire</div></div></div>
     <button class="close-btn" id="closeInjunctionModal" type="button">×</button>
   </div>
 
@@ -591,7 +602,7 @@
     </div>
     <div class="inj-inline-actions">
       <a class="btn btn-secondary" id="injunctionCourtSearchBtn" href="https://www.justice.fr/recherche/annuaires" target="_blank" rel="noopener">↗ Rechercher le tribunal compétent</a>
-      <button class="btn btn-primary" id="saveInjunctionCourtBtn" type="button">Enregistrer la juridiction</button>
+      <button class="btn btn-primary" id="saveInjunctionCourtBtn" type="button">Enregistrer la juridiction</button><span class="inj-court-saved" id="injunctionCourtSaved" style="display:none">Juridiction enregistrée</span>
     </div>
   </section>
 
@@ -1212,7 +1223,8 @@ function sanitizePdfText(value){return String(value||"").replace(/[\u202F\u00A0]
 
 
 function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""){
-  const calc=lateFeeBreakdown(d);
+  const prepIso=injunctionPreparationIso(),prepDate=injunctionPreparationDateObj(),prepFr=injunctionPreparationFr();
+  const calc=lateFeeBreakdown(d,prepDate);
   const invoices=normalizeInvoices(d);
   const pro=isProfessionalDebtor(d);
   const reference=clean(d?.ref)||"—";
@@ -1230,7 +1242,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   ).join("");
 
   const interestHtml=calc.rows.map(x=>
-    `<li>Facture ${escapeHtml(x.ref)} : ${x.days} jour(s) de retard, intérêts arrêtés au ${escapeHtml(todayFR())} : ${escapeHtml(formatCurrency(x.interests))}${pro?`, indemnité forfaitaire : ${escapeHtml(formatCurrency(x.recoveryFee))}`:""}.</li>`
+    `<li>Facture ${escapeHtml(x.ref)} : ${x.days} jour(s) de retard, intérêts arrêtés au ${escapeHtml(prepFr)} : ${escapeHtml(formatCurrency(x.interests))}${pro?`, indemnité forfaitaire : ${escapeHtml(formatCurrency(x.recoveryFee))}`:""}.</li>`
   ).join("");
 
   const relanceHtml=relances.length
@@ -1257,27 +1269,27 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
 <style>
   @page{size:A4;margin:0}
   *{box-sizing:border-box}
-  body{margin:0;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11.3pt;line-height:1.42}
-  .print-page{position:relative;width:210mm;height:297mm;padding:16mm 18mm 20mm;page-break-after:always;overflow:hidden}
+  body{margin:0;background:#fff;color:#111827;font-family:Arial,Helvetica,sans-serif;font-size:10.8pt;line-height:1.48}
+  .print-page{position:relative;width:210mm;height:297mm;padding:15mm 17mm 20mm;border-top:5mm solid #0f1a33;page-break-after:always;overflow:hidden}
   .print-page:last-child{page-break-after:auto}
   .letter-head{display:grid;grid-template-columns:1fr 1fr;gap:28mm;margin-bottom:15mm}
   .sender,.recipient{white-space:pre-line}
   .recipient{padding-top:18mm}
   .date{margin-top:12mm}
-  .subject{margin:0 0 10mm;font-weight:700}
-  h1{font-size:15pt;text-align:center;margin:0 0 2mm}
-  .legal-subtitle{text-align:center;font-size:10.5pt;margin-bottom:12mm}
-  h2{font-size:11.5pt;margin:7mm 0 3mm;letter-spacing:.01em}
+  .subject{margin:0 0 8mm;padding:3mm 4mm;border-left:1.4mm solid #ff7f1f;background:#fff5ed;font-weight:800;color:#0f1a33}
+  h1{font-size:16pt;text-align:center;margin:0 0 2mm;color:#0f1a33;letter-spacing:.02em}
+  .legal-subtitle{text-align:center;font-size:10pt;color:#5b6475;margin-bottom:10mm}
+  h2{font-size:10.8pt;margin:6mm 0 3mm;padding-bottom:1.5mm;border-bottom:.5mm solid #ff7f1f;color:#0f1a33;letter-spacing:.02em}
   p{margin:0 0 4mm}
   ul,ol{margin:0 0 4mm;padding-left:7mm}
   li{margin-bottom:2mm}
   .identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:14mm}
   .identity-block{white-space:pre-line}
-  .amount-box{border:1px solid #bbb;padding:4mm 5mm;margin:5mm 0}
-  .total{font-weight:700}
-  .signature{margin-top:10mm}
+  .amount-box{border:1px solid #d7dce5;border-left:1.5mm solid #ff7f1f;padding:4mm 5mm;margin:5mm 0;background:#fbfcfe}
+  .total{font-weight:800;color:#ff6a00}
+  .signature{margin-top:8mm}
   .attachments{columns:1;margin-top:4mm}
-  footer{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:1px solid #999;padding-top:3mm;display:flex;justify-content:space-between;gap:10mm;font-size:9pt;color:#444}
+  footer{position:absolute;left:17mm;right:17mm;bottom:8mm;border-top:1px solid #cbd2dd;padding-top:3mm;display:flex;justify-content:space-between;gap:10mm;font-size:8.5pt;color:#667085}
   footer strong{white-space:nowrap}
 
 /* ===== V6 — signatures, taux par facture, modale détail dossier ===== */
@@ -1319,7 +1331,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <div class="letter-head">
     <div class="sender">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}</div>
     <div class="recipient">${escapeHtml(courtTitle).replace(/\n/g,"<br>")}${courtAddress?`<br><br>${escapeHtml(courtAddress).replace(/\n/g,"<br>")}`:""}
-      <div class="date">Fait le ${escapeHtml(todayFR())}</div>
+      <div class="date">Fait le ${escapeHtml(prepFr)}</div>
     </div>
   </div>
 
@@ -1352,7 +1364,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   ${relanceHtml}
   <p>La créance est certaine, liquide et exigible. Elle est fondée sur : ${escapeHtml(contractBasis(d))}.</p>
 
-  <h2>DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${escapeHtml(todayFR())}</h2>
+  <h2>DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${escapeHtml(prepFr)}</h2>
   <div class="amount-box">
     <p>Principal : <strong>${escapeHtml(formatCurrency(calc.principal))}</strong></p>
     <p>Pénalités de retard au taux annuel de ${escapeHtml(String(calc.annualRate).replace(".",","))} % : <strong>${escapeHtml(formatCurrency(calc.interests))}</strong></p>
@@ -1374,7 +1386,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <p>Il est demandé au juge de :</p>
   <ol>
     <li>Enjoindre au débiteur de payer au requérant la somme principale de ${escapeHtml(formatCurrency(calc.principal))} ;</li>
-    <li>Ajouter les pénalités de retard arrêtées au ${escapeHtml(todayFR())}, soit ${escapeHtml(formatCurrency(calc.interests))}, avec poursuite de leur calcul jusqu’au complet paiement ;</li>
+    <li>Ajouter les pénalités de retard arrêtées au ${escapeHtml(prepFr)}, soit ${escapeHtml(formatCurrency(calc.interests))}, avec poursuite de leur calcul jusqu’au complet paiement ;</li>
     ${pro?`<li>Ajouter les indemnités forfaitaires de recouvrement, soit ${escapeHtml(formatCurrency(calc.recoveryFees))} ;</li>`:""}
     <li>Mettre à la charge du débiteur les frais de la procédure selon décision du juge.</li>
   </ol>
@@ -1382,7 +1394,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <p>Le requérant certifie exacts les renseignements contenus dans la présente demande et joint les pièces justificatives mentionnées au bordereau.</p>
 
   <div class="signature">
-    <p>Fait le ${escapeHtml(todayFR())}</p>
+    <p>Fait le ${escapeHtml(prepFr)}</p>
     <p>Signature du requérant :</p>
     <p><strong>${escapeHtml(creditorName(d))}</strong></p>
     ${signatureImgHtml()}
@@ -1659,7 +1671,7 @@ function openSignatureModal(target,courtName="",courtAddress=""){pendingSignedDo
 function closeSignatureModal(clearPending=true){$("signatureModal")?.classList.remove("open");if(clearPending){pendingSignedDocument="";pendingCourtName="";pendingCourtAddress="";}}
 function prepareSignatureCanvas(){const canvas=$("signatureCanvas"),ctx=canvas?.getContext("2d");if(!canvas||!ctx)return;ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle="#111";ctx.lineWidth=4;ctx.lineCap="round";ctx.lineJoin="round";canvas.dataset.hasInk="0";if(signatureDataUrl){const img=new Image();img.onload=()=>{ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);const r=Math.min((canvas.width-80)/img.width,(canvas.height-50)/img.height);const w=img.width*r,h=img.height*r;ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h);canvas.dataset.hasInk="1"};img.src=signatureDataUrl}}
 function canvasSignatureDataUrl(){const canvas=$("signatureCanvas");return canvas?.dataset.hasInk==="1"?canvas.toDataURL("image/png"):""}
-async function addSignatureToCerfaPdf(pdfDoc){if(!signatureDataUrl)return;try{const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);const pages=pdfDoc.getPages();if(pages.length<4)throw new Error("Le Cerfa ne contient pas de page 4.");const page=pages[3];const maxW=280,maxH=65,scale=Math.min(maxW/img.width,maxH/img.height);const width=img.width*scale,height=img.height*scale;const x=(page.getWidth()-width)/2;const y=91;page.drawImage(img,{x,y,width,height});}catch(e){console.warn("Signature Cerfa non apposée",e)}}
+async function addSignatureToCerfaPdf(pdfDoc){if(!signatureDataUrl)return;try{const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);const pages=pdfDoc.getPages();if(pages.length<4)throw new Error("Le Cerfa ne contient pas de page 4.");const page=pages[3];const maxW=280,maxH=65,scale=Math.min(maxW/img.width,maxH/img.height);const width=img.width*scale,height=img.height*scale;const x=58;const y=118;page.drawImage(img,{x,y,width,height});}catch(e){console.warn("Signature Cerfa non apposée",e)}}
 async function continueSignedDocument(){const target=pendingSignedDocument,courtName=pendingCourtName,courtAddress=pendingCourtAddress;closeSignatureModal();if(target==="cerfa")await generateCerfaPrefilled(true);else if(target==="request")openInjunctionRequestPrint(currentDossier,courtName,courtAddress);}
 
 
@@ -1820,9 +1832,31 @@ if(isProfessionalDebtor(currentDossier)){
   safeSetText(form,"debtor1_company_address","");
 }
 
-const courtName=clean(prompt("Nom du tribunal compétent à reporter page 4 du Cerfa :", "")),courtAddress=clean(prompt("Adresse du tribunal compétent à reporter page 4 du Cerfa :", ""));safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);const debtCalc = lateFeeBreakdown(currentDossier);
+const courtName=injunctionCourtLabel(),courtAddress=injunctionCourtAddressLabel();safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);const debtCalc = lateFeeBreakdown(currentDossier);
 const invoices = normalizeInvoices(currentDossier);
 const professional = isProfessionalDebtor(currentDossier);
+
+if(!professional){
+  const cp=splitPersonName(creditorName(currentDossier)),dp=splitPersonName(debtorName(currentDossier));
+  const cem=splitEmail(creditorEmail(currentDossier)),dem=splitEmail(debtorEmail(currentDossier));
+  // Cerfa 12948*06 — noms de champs génériques du formulaire officiel.
+  // Page 1 : demandeur
+  safeSetText(form,"text_52",creditorName(currentDossier));
+  safeSetText(form,"text_49",cp.lastName);
+  safeSetText(form,"text_24",cp.firstNames);
+  safeSetText(form,"text_20",creditorAddress(currentDossier));
+  safeSetText(form,"text_37",creditorZip(currentDossier));
+  safeSetText(form,"text_9",creditorCity(currentDossier));
+  safeSetText(form,"text_41","France");
+  safeSetText(form,"text_50",cem.left);
+  safeSetText(form,"text_13",cem.right);
+  // Page 2 : premier débiteur — champs essentiels
+  safeSetText(form,"text_54",dp.lastName);
+  safeSetText(form,"text_56",debtorAddress(currentDossier));
+  // Page 4 : date et montants (les champs restants seront affinés après relevé complet du mapping)
+  safeSetText(form,"text_53",amountForCerfa(debtCalc.principal));
+}
+
 
 /* =========================
    PRINCIPAL
@@ -2013,47 +2047,27 @@ safeSetText(
 
 const invoiceRefs=normalizeInvoices(currentDossier).map(x=>x.ref).join(", ");
 safeSetText(form,"supporting_documents_1",`Facture(s) ${invoiceRefs} ; devis/contrat ; preuve de la prestation ; relances`);
-safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",todayFR());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
-function debtStatementHtml(d=currentDossier){const calc=lateFeeBreakdown(d),rows=calc.rows.map(x=>`<tr><td>${escapeHtml(x.ref)}</td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Décompte actualisé</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#111;font-size:11pt}h1{font-size:18pt;margin:0 0 6mm}.meta{margin-bottom:8mm}table{width:100%;border-collapse:collapse;margin:8mm 0}th,td{border:1px solid #aaa;padding:7px;text-align:left}th{background:#eee}.totals{margin-left:auto;width:70%}.totals td:first-child{font-weight:700}.grand{font-weight:700;font-size:13pt}
-/* V2 — un seul tableau de bord : la zone historique devient uniquement la fiche détaillée */
-body .hero{display:none!important}
-body .panel-dossiers{display:none!important}
-body .dashboard-grid{grid-template-columns:minmax(280px,4fr) minmax(0,8fr)!important;grid-template-areas:"summary summary" "actions timeline"!important}
-body .details-divider{margin-top:26px;margin-bottom:14px}
-@media(max-width:900px){body .dashboard-grid{grid-template-columns:1fr!important;grid-template-areas:"summary" "actions" "timeline"!important}}
-
-/* ===== V6 — signatures, taux par facture, modale détail dossier ===== */
-#createDossierModal .invoice-row{grid-template-columns:minmax(120px,1fr) minmax(125px,.9fr) minmax(125px,.9fr) minmax(125px,.9fr) minmax(110px,.7fr) auto}
-#companySignaturePreviewWrap{display:none}
-#dossierDetailModal .modal{width:min(1180px,calc(100vw - 28px));background:#101a31;border:1px solid rgba(255,255,255,.10);border-radius:20px;box-shadow:0 28px 90px rgba(0,0,0,.48)}
-#dossierDetailModal .modal-inner{padding:18px}
-#dossierDetailModal .detail-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
-#dossierDetailModal .detail-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-#dossierDetailModal .detail-name{font-size:1.5rem;font-weight:850;margin:0 0 4px}
-#dossierDetailModal .detail-contact{color:var(--muted);font-size:.9rem}
-#dossierDetailModal .detail-path{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
-#dossierDetailModal .detail-step{padding:10px 8px;border:1px solid rgba(255,255,255,.08);border-radius:12px;text-align:center;background:rgba(255,255,255,.025)}
-#dossierDetailModal .detail-step small{display:block;color:var(--soft);font-size:.68rem}
-#dossierDetailModal .detail-step strong{display:block;margin-top:3px;font-size:.78rem}
-#dossierDetailModal .detail-step.done{border-color:rgba(61,208,143,.20);background:rgba(61,208,143,.07)}
-#dossierDetailModal .detail-step.current{border-color:rgba(255,127,31,.30);background:rgba(255,127,31,.10)}
-#dossierDetailModal .detail-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
-#dossierDetailModal .detail-kpi{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035)}
-#dossierDetailModal .detail-kpi span{display:block;color:var(--soft);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em}
-#dossierDetailModal .detail-kpi strong{display:block;margin-top:6px;font-size:1rem}
-#dossierDetailModal .detail-kpi.total{border-color:rgba(255,127,31,.30);background:rgba(255,127,31,.08)}
-#dossierDetailModal .detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
-#dossierDetailModal .detail-actions .btn{min-height:38px;border-radius:10px}
-#dossierDetailModal .detail-section{padding-top:14px;margin-top:14px;border-top:1px solid var(--line)}
-#dossierDetailModal .detail-section h3{margin:0 0 10px;font-size:1rem}
-#dossierDetailModal .detail-invoice{display:flex;justify-content:space-between;gap:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);margin-bottom:8px}
-#dossierDetailModal .detail-invoice small{display:block;color:var(--muted)}
-#dossierDetailModal .detail-timeline{display:grid;gap:8px}
-#dossierDetailModal .detail-event{padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
-#dossierDetailModal .detail-event time{display:block;color:var(--accent);font-size:.72rem;font-weight:800;margin-bottom:4px}
-@media(max-width:900px){#dossierDetailModal .detail-path{grid-template-columns:repeat(2,1fr)}#dossierDetailModal .detail-kpis{grid-template-columns:1fr 1fr}#createDossierModal .invoice-row{grid-template-columns:1fr}}
-
-</style></head><body><h1>Décompte actualisé de la créance</h1><div class="meta">Dossier : ${escapeHtml(d?.ref||"—")}<br>Créancier : ${escapeHtml(creditorName(d))}<br>Débiteur : ${escapeHtml(debtorName(d))}<br>Arrêté au : ${escapeHtml(calc.asOf.toLocaleDateString("fr-FR"))}</div><table><thead><tr><th>Facture</th><th>Échéance</th><th>Principal</th><th>Jours</th><th>Intérêts</th>${isProfessionalDebtor(d)?"<th>Indemnité</th>":""}</tr></thead><tbody>${rows}</tbody></table><table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>Total réclamé</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table><p>Les pénalités de retard continuent à courir jusqu’au complet paiement.</p></body></html>`}
+safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",injunctionPreparationFr());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
+function debtStatementHtml(d=currentDossier){
+  const prepDate=injunctionPreparationDateObj(),prepFr=injunctionPreparationFr(),calc=lateFeeBreakdown(d,prepDate);
+  const rows=calc.rows.map(x=>`<tr><td><strong>${escapeHtml(x.ref)}</strong></td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");
+  return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Décompte actualisé — ${escapeHtml(d?.ref||"")}</title><style>
+  @page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fff}
+  .page{width:210mm;min-height:297mm;padding:15mm 17mm 18mm;border-top:5mm solid #0f1a33;position:relative}
+  h1{font-size:18pt;color:#0f1a33;margin:0 0 2mm}.bar{width:25mm;height:1.2mm;background:#ff7f1f;margin:0 0 7mm}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:2mm 12mm;padding:4mm;background:#f6f8fb;border:1px solid #dfe4ec;border-radius:2mm;font-size:9.5pt;margin-bottom:7mm}
+  .meta strong{color:#0f1a33}.section{font-size:10.5pt;color:#ff6a00;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:7mm 0 2.5mm}
+  table{width:100%;border-collapse:collapse;font-size:9.2pt}th{background:#0f1a33;color:#fff;text-align:left;padding:3mm 2.4mm}td{border:1px solid #d8dee8;padding:2.8mm 2.4mm}tbody tr:nth-child(even){background:#f8fafc}
+  .totals{width:68%;margin:7mm 0 0 auto}.totals td:first-child{font-weight:700}.grand td{background:#fff2e8;border-color:#ffb77f;font-weight:900;color:#0f1a33}.grand td:last-child{color:#ff6a00;font-size:11pt}
+  .note{margin-top:7mm;padding:3.5mm 4mm;border-left:1.2mm solid #ff7f1f;background:#fff8f2;font-size:9pt}
+  footer{position:absolute;left:17mm;right:17mm;bottom:8mm;border-top:1px solid #d5dae3;padding-top:2.5mm;display:flex;justify-content:space-between;font-size:8pt;color:#667085}
+  </style></head><body><section class="page"><h1>DÉCOMPTE ACTUALISÉ DE LA CRÉANCE</h1><div class="bar"></div>
+  <div class="meta"><div><strong>Dossier</strong><br>${escapeHtml(d?.ref||"—")}</div><div><strong>Arrêté au</strong><br>${escapeHtml(prepFr)}</div><div><strong>Créancier</strong><br>${escapeHtml(creditorName(d))}</div><div><strong>Débiteur</strong><br>${escapeHtml(debtorName(d))}</div></div>
+  <div class="section">Détail des factures</div>
+  <table><thead><tr><th>Facture</th><th>Échéance</th><th>Principal</th><th>Jours</th><th>Intérêts</th>${isProfessionalDebtor(d)?"<th>Indemnité</th>":""}</tr></thead><tbody>${rows}</tbody></table>
+  <table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>TOTAL RÉCLAMÉ</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table>
+  <div class="note">Décompte établi à la date de préparation du dossier. Les intérêts, lorsqu’ils sont applicables, continuent à courir jusqu’au complet paiement.</div>
+  <footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>Décompte de créance</strong></footer></section></body></html>`}
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
 async function renderInjunctionFiles(){if(!currentUser||!currentDossier||!E.injunctionFilesList)return;E.injunctionFilesList.innerHTML="";try{const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files")),files=[];snap.forEach(s=>{const f=s.data()||{};if(f.type==="injunction_piece")files.push({id:s.id,...f})});files.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));if(!files.length){E.injunctionFilesList.innerHTML=`<div class="upload-status">Aucune pièce déposée pour ce dossier.</div>`;return}files.forEach(f=>{const item=document.createElement("div");item.className="uploaded-file-item";const name=esc(f.name||f.filename||"Pièce jointe"),url=esc(f.url||"#"),size=f.size?`<span class="uploaded-file-meta">${Math.ceil(Number(f.size||0)/1024)} Ko</span>`:"",path=esc(f.path||"");item.innerHTML=`<span title="${name}">${name}</span>${size}<div class="uploaded-file-actions"><a href="${url}" target="_blank" rel="noopener">Voir</a><button class="mini-delete-file-btn" type="button" data-delete-file="${esc(f.id)}" data-delete-path="${path}">Supprimer</button></div>`;E.injunctionFilesList.appendChild(item)})}catch(err){console.error(err);E.injunctionFilesList.innerHTML=`<div class="upload-status">Impossible de charger les pièces du dossier.</div>`}}
 async function deleteInjunctionFile(fileId,path){if(!currentUser||!currentDossier||!fileId)return;if(!confirm("Supprimer cette pièce du dossier ?"))return;try{await deleteDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id,"files",fileId));if(path){try{await deleteObject(storageRef(storage,path))}catch(storageError){console.warn("Fichier Storage non supprimé :",storageError)}}await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:"Pièce injonction supprimée",description:`Une pièce a été supprimée le ${todayFR()}`,action:"delete_injunction_file",type:"file_delete",createdAt:serverTimestamp()});await renderInjunctionFiles();await renderTimeline()}catch(err){console.error(err);alert("Suppression impossible. Vérifie les règles Firebase.")}}
@@ -2223,11 +2237,11 @@ function openInjunctionModal(){
   if($("injunctionCourtName"))$("injunctionCourtName").value=c.name||"";
   if($("injunctionCourtCity"))$("injunctionCourtCity").value=c.city||"";
   if($("injunctionCourtZip"))$("injunctionCourtZip").value=c.zip||"";
-  if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=c.address||"";
+  if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=c.address||"";if($("injunctionCourtSaved"))$("injunctionCourtSaved").style.display=c.name?"inline-flex":"none";
   const pieces=$("injunctionGeneratedPieces");
   if(pieces){
     const labels=["Relance 1","Relance 2","Relance 3","Mise en demeure"];
-    pieces.innerHTML=labels.map((label,i)=>`<div class="inj-piece"><div><strong>${label}</strong><br><small>Document généré par Axe Flow</small></div><button class="detail-event-view" type="button" data-inj-view-step="${i+1}">Voir</button></div>`).join("");
+    pieces.innerHTML=labels.map((label,i)=>`<div class="inj-piece"><span class="inj-piece-tag">${i<3?"R"+(i+1):"MD"}</span><div><strong>${label}</strong><br><small>Document généré par Axe Flow</small></div><button class="detail-event-view" type="button" data-inj-view-step="${i+1}">Voir</button></div>`).join("");
   }
   if(E.injunctionUploadStatus)E.injunctionUploadStatus.textContent="Pièces complémentaires déposées :";
   renderInjunctionFiles();
@@ -2918,6 +2932,16 @@ function injunctionCourtAddressLabel(){
   const c=injunctionCourtData();
   return [c.address,[c.zip,c.city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 }
+
+function injunctionPreparationIso(){
+  return clean($("injunctionPreparationDate")?.value)||currentDossier?.injunctionPreparationDate||isoToday();
+}
+function injunctionPreparationDateObj(){
+  const iso=injunctionPreparationIso();
+  return parseLocalDate(iso)||new Date();
+}
+function injunctionPreparationFr(){return fmtDateFR(injunctionPreparationIso())||todayFR()}
+
 function generateInjunctionRequestFromModal(){
   if(!currentDossier)return;
   currentAction="injunction";
@@ -2933,13 +2957,20 @@ E.saveInjunctionCourtBtn?.addEventListener("click",async()=>{
   if(!currentUser||!currentDossier)return;
   const court=injunctionCourtData();
   if(!court.name){alert("Renseignez le nom du tribunal.");return}
+  const saved=$("injunctionCourtSaved");
   try{
     E.saveInjunctionCourtBtn.disabled=true;E.saveInjunctionCourtBtn.textContent="Enregistrement...";
     await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),{injunctionCourt:court,updatedAt:serverTimestamp()});
     currentDossier={...currentDossier,injunctionCourt:court};
-    E.saveInjunctionCourtBtn.textContent="Juridiction enregistrée ✓";
-    setTimeout(()=>{E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"},1200);
-  }catch(err){console.error(err);alert("Impossible d’enregistrer la juridiction.");E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"}
+    E.saveInjunctionCourtBtn.textContent="Enregistré ✓";
+    if(saved)saved.style.display="inline-flex";
+    setTimeout(()=>{E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"},1300);
+  }catch(err){
+    console.error("Enregistrement juridiction :",err);
+    alert("La juridiction n’a pas pu être enregistrée dans Firestore. Vérifiez la console/règle Firestore.");
+    E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction";
+    if(saved)saved.style.display="none";
+  }
 });
 
 E.generateCerfaBtn?.addEventListener("click",generateCerfaPrefilled);
@@ -2990,11 +3021,22 @@ E.markInjunctionBtn.addEventListener("click",async()=>{
 });
 
 function simpleJudicialLetterHtml(title,body,d=currentDossier){
-  const c=injunctionCourtData(),date=clean($("injunctionPreparationDate")?.value)||new Date().toISOString().slice(0,10);
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#111;font-size:11pt;line-height:1.45}.top{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-bottom:18mm}.right{text-align:right}h1{font-size:16pt;margin:10mm 0 8mm}.sig{margin-top:12mm}.foot{position:fixed;bottom:4mm;left:18mm;right:18mm;text-align:center;color:#667;font-size:8pt}</style></head><body><div class="top"><div><strong>${escapeHtml(creditorName(d))}</strong><br>${escapeHtml(creditorAddress(d))}<br>${escapeHtml(creditorZip(d)+" "+creditorCity(d))}</div><div class="right"><strong>${escapeHtml(c.name||"Juridiction compétente")}</strong><br>${escapeHtml(c.address||"")}<br>${escapeHtml([c.zip,c.city].filter(Boolean).join(" "))}</div></div><div>Fait à ${escapeHtml(creditorCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><h1>${escapeHtml(title)}</h1><div>${body}</div><div class="sig"><strong>${escapeHtml(creditorName(d))}</strong></div><div class="foot">Document préparé via Axe Flow — ${escapeHtml(d?.ref||"")}</div></body></html>`;
+  const c=injunctionCourtData(),date=injunctionPreparationIso(),profile=currentUserData?.businessProfile||{};
+  const company=clean(profile.companyName)||clean(profile.raisonSociale)||creditorName(d)||"";
+  const representative=clean(profile.representative)||creditorName(d)||"";
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)} — ${escapeHtml(d?.ref||"")}</title><style>
+  @page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fff}.page{width:210mm;min-height:297mm;padding:15mm 18mm 20mm;border-top:5mm solid #0f1a33;position:relative}
+  .top{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-bottom:13mm}.right{text-align:left;padding-top:12mm}.date{margin:8mm 0 5mm;color:#667085}.subject{border-left:1.4mm solid #ff7f1f;background:#fff5ed;padding:3mm 4mm;font-weight:800;color:#0f1a33;margin-bottom:8mm}
+  h1{font-size:16pt;color:#0f1a33;margin:0 0 2mm}.bar{width:25mm;height:1.2mm;background:#ff7f1f;margin-bottom:8mm}p{line-height:1.55;margin:0 0 4mm}.signature{margin-top:12mm}.signature img{display:block;max-width:52mm;max-height:24mm;object-fit:contain;margin-top:2mm}
+  footer{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:1px solid #d5dae3;padding-top:2.5mm;display:flex;justify-content:space-between;font-size:8pt;color:#667085}
+  </style></head><body><section class="page"><div class="top"><div><strong>${escapeHtml(company)}</strong><br>${escapeHtml(creditorAddress(d))}<br>${escapeHtml(creditorZip(d)+" "+creditorCity(d))}</div><div class="right"><strong>${escapeHtml(c.name||"Juridiction compétente")}</strong><br>${escapeHtml(c.address||"")}<br>${escapeHtml([c.zip,c.city].filter(Boolean).join(" "))}</div></div><div class="date">Fait à ${escapeHtml(creditorCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><div class="subject">Objet : ${escapeHtml(title)}</div><h1>${escapeHtml(title)}</h1><div class="bar"></div><div>${body}</div><div class="signature"><strong>${escapeHtml(company)}</strong>${representative&&representative!==company?`<br>${escapeHtml(representative)}`:""}${signatureImgHtml()}</div><footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>${escapeHtml(company)}</strong></footer></section></body></html>`;
 }
 function printHtmlDocument(html){
-  const w=window.open("","_blank");if(!w){alert("Autorisez les fenêtres contextuelles.");return}w.document.open();w.document.write(html);w.document.close();setTimeout(()=>w.print(),450);
+  const iframe=document.createElement("iframe");
+  iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";
+  document.body.appendChild(iframe);
+  const w=iframe.contentWindow;w.document.open();w.document.write(html);w.document.close();
+  setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1200)},400);
 }
 $("generateNonOppositionBtn")?.addEventListener("click",()=>{
   if(!currentDossier)return;
