@@ -424,6 +424,20 @@
 #injunctionModal .inj-court-saved{display:inline-flex;align-items:center;gap:7px;color:#3dd08f;font-size:.76rem;font-weight:800;margin-left:3px}
 #injunctionModal .inj-court-saved::before{content:"✓";width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:rgba(61,208,143,.13);border:1px solid rgba(61,208,143,.30)}
 
+
+/* ===== V3 — injonction / post-ordonnance ===== */
+#injunctionModal .inj-piece-tag{min-width:34px;width:auto;padding:0 8px;height:25px;border-radius:7px;background:rgba(255,127,31,.10);border:1px solid rgba(255,127,31,.28);color:#ff8b35}
+#injunctionModal .detail-event-view{border:0;background:transparent;color:#ff7f1f;padding:6px 4px;font-weight:850}
+#injunctionModal .detail-event-view::before{content:"↗ ";font-size:.8rem}
+#injunctionModal .detail-event-view:hover{background:transparent;color:#ff9b52}
+.judicial-prep-modal .modal{width:min(760px,calc(100vw - 28px))}
+.judicial-prep-modal .prep-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.judicial-prep-modal .prep-note{margin-top:14px;padding:13px 14px;border:1px solid rgba(255,127,31,.24);background:rgba(255,127,31,.07);border-radius:12px;color:#dbe4f5;font-size:.82rem;line-height:1.5}
+.judicial-prep-modal .prep-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px;flex-wrap:wrap}
+.judicial-prep-modal .search-link{margin-top:10px;display:inline-flex}
+.cerfa-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.judicial-prep-modal .prep-grid,.cerfa-choice-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -647,6 +661,35 @@
     <input type="checkbox" id="checkDebtCertain"><input type="checkbox" id="checkDebtLiquid"><input type="checkbox" id="checkDebtDue"><input type="checkbox" id="checkNoSeriousDispute"><input type="checkbox" id="checkFormalNotice"><input type="checkbox" id="checkDebtDisputed"><input type="checkbox" id="checkEvidenceWeak">
   </div>
 </div></div></div>
+
+<div class="modal-backdrop judicial-prep-modal" id="cerfaOptionsModal"><div class="modal"><div class="modal-inner">
+ <div class="modal-head"><div><h2>Préparer le Cerfa n°12948*06</h2><div class="panel-sub">Identité à reporter sur le formulaire officiel</div></div><button class="close-btn" id="closeCerfaOptionsModal" type="button">×</button></div>
+ <div class="cerfa-choice-grid">
+  <div class="field"><label>Qualité du créancier</label><select id="cerfaClaimantKind"><option value="person">EI / micro-entreprise / personne physique</option><option value="company">Société / personne morale</option></select></div>
+  <div class="field" id="cerfaClaimantGenderWrap"><label>Civilité du créancier</label><select id="cerfaClaimantGender"><option value="female">Madame</option><option value="male">Monsieur</option></select></div>
+  <div class="field" id="cerfaDebtorGenderWrap"><label>Civilité du débiteur particulier</label><select id="cerfaDebtorGender"><option value="male">Monsieur</option><option value="female">Madame</option></select></div>
+ </div>
+ <div class="prep-note">Ces choix servent uniquement à cocher et renseigner correctement le Cerfa. Le nom du tribunal et son adresse sont repris automatiquement de la juridiction enregistrée plus haut.</div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="cancelCerfaOptions" type="button">Annuler</button><button class="btn btn-primary" id="confirmCerfaOptions" type="button">✓ Générer le Cerfa prérempli</button></div>
+</div></div></div>
+
+<div class="modal-backdrop judicial-prep-modal" id="nonOppositionPrepModal"><div class="modal"><div class="modal-inner">
+ <div class="modal-head"><div><h2>Demande de certificat de non-opposition</h2><div class="panel-sub">Préparation du courrier à la juridiction</div></div><button class="close-btn" id="closeNonOppositionPrep" type="button">×</button></div>
+ <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="nonOppositionDate" type="date"></div><div class="field"><label>Canal de transmission</label><select id="nonOppositionChannel"><option>Courrier</option><option>Email</option><option>Dépôt au greffe</option></select></div></div>
+ <div class="prep-note"><strong>Pièces à joindre avant envoi :</strong> copie de l’ordonnance, preuve de signification et référence attribuée par la juridiction.</div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="cancelNonOppositionPrep" type="button">Annuler</button><button class="btn btn-primary" id="previewNonOppositionBtn" type="button">Prévisualiser le courrier</button></div>
+</div></div></div>
+
+<div class="modal-backdrop judicial-prep-modal" id="enforcementPrepModal"><div class="modal"><div class="modal-inner">
+ <div class="modal-head"><div><h2>Transmission au commissaire de justice</h2><div class="panel-sub">Préparer le courrier d’exécution</div></div><button class="close-btn" id="closeEnforcementPrep" type="button">×</button></div>
+ <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="enforcementDate" type="date"></div><div class="field"><label>Canal de transmission</label><select id="enforcementChannel"><option>Email</option><option>Courrier</option><option>Dépôt à l’étude</option></select></div></div>
+ <div class="field" style="margin-top:12px"><label>Nom de l’étude / commissaire de justice</label><input id="enforcementOfficerName" type="text" placeholder="Étude / Maître …"></div>
+ <div class="field" style="margin-top:12px"><label>Adresse</label><input id="enforcementOfficerAddress" type="text" placeholder="Adresse, code postal, ville"></div>
+ <a class="btn btn-secondary search-link" id="enforcementOfficerSearch" href="https://www.justice.fr/annuaires" target="_blank" rel="noopener">↗ Rechercher un commissaire de justice</a>
+ <div class="prep-note"><strong>Pièces à transmettre :</strong> ordonnance portant injonction de payer, acte de signification, certificat de non-opposition, décompte actualisé et pièces utiles du dossier.</div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="cancelEnforcementPrep" type="button">Annuler</button><button class="btn btn-primary" id="previewEnforcementBtn" type="button">Prévisualiser le courrier</button></div>
+</div></div></div>
+
 <div class="modal-backdrop" id="dossierDetailModal"><div class="modal"><div class="modal-inner">
   <div class="detail-head">
     <div>
@@ -1228,6 +1271,11 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   const invoices=normalizeInvoices(d);
   const pro=isProfessionalDebtor(d);
   const reference=clean(d?.ref)||"—";
+  const profile=currentUserData?.businessProfile||{};
+  const reqCompany=clean(profile.companyName)||clean(profile.raisonSociale)||creditorName(d)||"Créancier";
+  const reqSiret=clean(profile.siret)||"";
+  const reqAddress=[creditorAddress(d),[creditorZip(d),creditorCity(d)].filter(Boolean).join(" ")].filter(Boolean);
+  const reqHeader=[reqCompany,reqSiret?`SIRET : ${reqSiret}`:"",...reqAddress].filter(Boolean).join("\n");
   const courtTitle=tribunalPresidentBlock(d,currentCourtName);
   const courtAddress=clean(currentCourtAddress);
   const relances=[
@@ -1329,7 +1377,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
 
 <section class="print-page">
   <div class="letter-head">
-    <div class="sender">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}</div>
+    <div class="sender">${escapeHtml(reqHeader).replace(/\n/g,"<br>")}</div>
     <div class="recipient">${escapeHtml(courtTitle).replace(/\n/g,"<br>")}${courtAddress?`<br><br>${escapeHtml(courtAddress).replace(/\n/g,"<br>")}`:""}
       <div class="date">Fait le ${escapeHtml(prepFr)}</div>
     </div>
@@ -1342,7 +1390,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <div class="identity-grid">
     <div>
       <h2>REQUÉRANT</h2>
-      <div class="identity-block">${escapeHtml(creditorBlock(d)).replace(/\n/g,"<br>")}<br>Courriel : ${escapeHtml(creditorEmail(d)||"À compléter")}</div>
+      <div class="identity-block">${escapeHtml(reqHeader).replace(/\n/g,"<br>")}<br>Courriel : ${escapeHtml(creditorEmail(d)||"À compléter")}</div>
     </div>
     <div>
       <h2>DÉBITEUR</h2>
@@ -1750,6 +1798,18 @@ function initSignaturePad(){
 }
 initSignaturePad();
 
+let cerfaGenerationOptions=null;
+function openCerfaOptionsModal(){
+  if(!currentDossier)return;
+  const p=currentUserData?.businessProfile||{};
+  const legal=clean(p.legalForm||"").toLowerCase();
+  const isCompany=/sas|sarl|eurl|sa|sci|scp|sasu/.test(legal);
+  $("cerfaClaimantKind").value=isCompany?"company":"person";
+  $("cerfaClaimantGenderWrap").style.display=isCompany?"none":"flex";
+  $("cerfaDebtorGenderWrap").style.display=isProfessionalDebtor(currentDossier)?"none":"flex";
+  $("cerfaOptionsModal").classList.add("open");
+}
+function closeCerfaOptionsModal(){$("cerfaOptionsModal")?.classList.remove("open")}
 async function generateCerfaPrefilled(signatureReady=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
@@ -1758,8 +1818,7 @@ const form = pdfDoc.getForm();
 
 const email=splitEmail(creditorEmail(currentDossier));
 const debtorEmailParts=splitEmail(debtorEmail(currentDossier));
-const claimantKind=clean(prompt("Créancier : tapez EI pour une personne physique / micro-entreprise, ou SOCIETE pour une personne morale.","EI")).toLowerCase();
-const claimantIsCompany=claimantKind.startsWith("s");
+const claimantIsCompany=(cerfaGenerationOptions?.claimantKind||"person")==="company";
 const claimantPerson=splitPersonName(creditorName(currentDossier));
 
 if(claimantIsCompany){
@@ -1782,8 +1841,7 @@ if(claimantIsCompany){
   safeSetText(form,"claimant_company_email_2",email.right);
   safeSetText(form,"claimant_company_phone",creditorPhone(currentDossier));
 }else{
-  const genderAnswer=clean(prompt("Civilité du créancier : Madame ou Monsieur ?","Madame")).toLowerCase();
-  const female=genderAnswer.startsWith("mad");
+  const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
   safeCheck(form,"claimant_gender_female",female);
   safeCheck(form,"claimant_gender_male",!female);
   safeSetText(form,"claimant_last_name",claimantPerson.lastName);
@@ -1816,8 +1874,7 @@ if(isProfessionalDebtor(currentDossier)){
   safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right);
 }else{
   const debtorPerson=splitPersonName(debtorName(currentDossier));
-  const genderAnswer=clean(prompt("Civilité du débiteur particulier : Madame ou Monsieur ?","Monsieur")).toLowerCase();
-  const female=genderAnswer.startsWith("mad");
+  const female=(cerfaGenerationOptions?.debtorGender||"male")==="female";
   safeCheck(form,"debtor1_gender_female",female);
   safeCheck(form,"debtor1_gender_male",!female);
   safeSetText(form,"debtor1_last_name",debtorPerson.lastName);
@@ -1841,7 +1898,9 @@ if(!professional){
   const cem=splitEmail(creditorEmail(currentDossier)),dem=splitEmail(debtorEmail(currentDossier));
   // Cerfa 12948*06 — noms de champs génériques du formulaire officiel.
   // Page 1 : demandeur
-  safeSetText(form,"text_52",creditorName(currentDossier));
+  safeCheck(form,"checkbox_1",(cerfaGenerationOptions?.claimantGender||"female")==="female");
+  safeCheck(form,"checkbox_2",(cerfaGenerationOptions?.claimantGender||"female")==="male");
+  safeSetText(form,"text_52",cp.lastName||creditorName(currentDossier));
   safeSetText(form,"text_49",cp.lastName);
   safeSetText(form,"text_24",cp.firstNames);
   safeSetText(form,"text_20",creditorAddress(currentDossier));
@@ -2241,7 +2300,7 @@ function openInjunctionModal(){
   const pieces=$("injunctionGeneratedPieces");
   if(pieces){
     const labels=["Relance 1","Relance 2","Relance 3","Mise en demeure"];
-    pieces.innerHTML=labels.map((label,i)=>`<div class="inj-piece"><span class="inj-piece-tag">${i<3?"R"+(i+1):"MD"}</span><div><strong>${label}</strong><br><small>Document généré par Axe Flow</small></div><button class="detail-event-view" type="button" data-inj-view-step="${i+1}">Voir</button></div>`).join("");
+    pieces.innerHTML=labels.map((label,i)=>`<div class="inj-piece"><span class="inj-piece-tag">${i<3?"R"+(i+1):"MED"}</span><div><strong>${label}</strong><br><small>Document généré par Axe Flow</small></div><button class="detail-event-view" type="button" data-inj-view-step="${i+1}">Voir</button></div>`).join("");
   }
   if(E.injunctionUploadStatus)E.injunctionUploadStatus.textContent="Pièces complémentaires déposées :";
   renderInjunctionFiles();
@@ -2964,6 +3023,7 @@ E.saveInjunctionCourtBtn?.addEventListener("click",async()=>{
     currentDossier={...currentDossier,injunctionCourt:court};
     E.saveInjunctionCourtBtn.textContent="Enregistré ✓";
     if(saved)saved.style.display="inline-flex";
+    showSuccessToast("✓ Juridiction enregistrée");
     setTimeout(()=>{E.saveInjunctionCourtBtn.disabled=false;E.saveInjunctionCourtBtn.textContent="Enregistrer la juridiction"},1300);
   }catch(err){
     console.error("Enregistrement juridiction :",err);
@@ -2973,16 +3033,19 @@ E.saveInjunctionCourtBtn?.addEventListener("click",async()=>{
   }
 });
 
-E.generateCerfaBtn?.addEventListener("click",generateCerfaPrefilled);
+E.generateCerfaBtn?.addEventListener("click",openCerfaOptionsModal);
 E.printDebtStatementBtnPro?.addEventListener("click",printDebtStatement);
 E.printDebtStatementBtnPrivate?.addEventListener("click",printDebtStatement);
-E.generateCerfaBtnPrivate?.addEventListener("click",generateCerfaPrefilled);
+E.generateCerfaBtnPrivate?.addEventListener("click",openCerfaOptionsModal);
 
 $("injunctionGeneratedPieces")?.addEventListener("click",e=>{
-  const b=e.target.closest("[data-inj-view-step]");if(!b)return;
+  const b=e.target.closest("[data-inj-view-step]");if(!b||!currentDossier)return;
   const map={1:"relance1",2:"relance2",3:"relance3",4:"med"};
-  const a=map[Number(b.dataset.injViewStep)];
-  if(a)openTextModal(a);
+  const a=map[Number(b.dataset.injViewStep)];if(!a)return;
+  const dateMap={relance1:currentDossier.relance1SentAt,relance2:currentDossier.relance2SentAt,relance3:currentDossier.relance3SentAt,med:currentDossier.miseEnDemeureSentAt};
+  currentAction=a;
+  const body=buildText(a,currentDossier);
+  previewProfessionalLetter(body,currentDossier,dateMap[a]||injunctionPreparationIso());
 });
 
 E.uploadInjunctionFilesBtnPro.addEventListener("click",()=>E.injunctionFilesInput.click());
@@ -3020,16 +3083,19 @@ E.markInjunctionBtn.addEventListener("click",async()=>{
   }
 });
 
-function simpleJudicialLetterHtml(title,body,d=currentDossier){
-  const c=injunctionCourtData(),date=injunctionPreparationIso(),profile=currentUserData?.businessProfile||{};
+function simpleJudicialLetterHtml(title,body,d=currentDossier,options={}){
+  const c=injunctionCourtData(),date=clean(options.date)||injunctionPreparationIso(),profile=currentUserData?.businessProfile||{};
   const company=clean(profile.companyName)||clean(profile.raisonSociale)||creditorName(d)||"";
+  const siret=clean(profile.siret)||"";
   const representative=clean(profile.representative)||creditorName(d)||"";
+  const recipientName=clean(options.recipientName)||c.name||"Juridiction compétente";
+  const recipientAddress=clean(options.recipientAddress)||[c.address,[c.zip,c.city].filter(Boolean).join(" ")].filter(Boolean).join("\n");
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)} — ${escapeHtml(d?.ref||"")}</title><style>
   @page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fff}.page{width:210mm;min-height:297mm;padding:15mm 18mm 20mm;border-top:5mm solid #0f1a33;position:relative}
-  .top{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-bottom:13mm}.right{text-align:left;padding-top:12mm}.date{margin:8mm 0 5mm;color:#667085}.subject{border-left:1.4mm solid #ff7f1f;background:#fff5ed;padding:3mm 4mm;font-weight:800;color:#0f1a33;margin-bottom:8mm}
+  .top{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-bottom:13mm}.right{text-align:left;padding-top:12mm;white-space:pre-line}.date{margin:8mm 0 5mm;color:#667085}.subject{border-left:1.4mm solid #ff7f1f;background:#fff5ed;padding:3mm 4mm;font-weight:800;color:#0f1a33;margin-bottom:8mm}
   h1{font-size:16pt;color:#0f1a33;margin:0 0 2mm}.bar{width:25mm;height:1.2mm;background:#ff7f1f;margin-bottom:8mm}p{line-height:1.55;margin:0 0 4mm}.signature{margin-top:12mm}.signature img{display:block;max-width:52mm;max-height:24mm;object-fit:contain;margin-top:2mm}
   footer{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:1px solid #d5dae3;padding-top:2.5mm;display:flex;justify-content:space-between;font-size:8pt;color:#667085}
-  </style></head><body><section class="page"><div class="top"><div><strong>${escapeHtml(company)}</strong><br>${escapeHtml(creditorAddress(d))}<br>${escapeHtml(creditorZip(d)+" "+creditorCity(d))}</div><div class="right"><strong>${escapeHtml(c.name||"Juridiction compétente")}</strong><br>${escapeHtml(c.address||"")}<br>${escapeHtml([c.zip,c.city].filter(Boolean).join(" "))}</div></div><div class="date">Fait à ${escapeHtml(creditorCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><div class="subject">Objet : ${escapeHtml(title)}</div><h1>${escapeHtml(title)}</h1><div class="bar"></div><div>${body}</div><div class="signature"><strong>${escapeHtml(company)}</strong>${representative&&representative!==company?`<br>${escapeHtml(representative)}`:""}${signatureImgHtml()}</div><footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>${escapeHtml(company)}</strong></footer></section></body></html>`;
+  </style></head><body><section class="page"><div class="top"><div><strong>${escapeHtml(company)}</strong>${siret?`<br>SIRET : ${escapeHtml(siret)}`:""}<br>${escapeHtml(creditorAddress(d))}<br>${escapeHtml(creditorZip(d)+" "+creditorCity(d))}</div><div class="right"><strong>${escapeHtml(recipientName)}</strong><br>${escapeHtml(recipientAddress)}</div></div><div class="date">Fait à ${escapeHtml(creditorCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><div class="subject">Objet : ${escapeHtml(title)}</div><h1>${escapeHtml(title)}</h1><div class="bar"></div><div>${body}</div><div class="signature"><strong>${escapeHtml(company)}</strong>${representative&&representative!==company?`<br>${escapeHtml(representative)}`:""}${signatureImgHtml()}</div><footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>${escapeHtml(company)}</strong></footer></section></body></html>`;
 }
 function printHtmlDocument(html){
   const iframe=document.createElement("iframe");
@@ -3038,16 +3104,46 @@ function printHtmlDocument(html){
   const w=iframe.contentWindow;w.document.open();w.document.write(html);w.document.close();
   setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1200)},400);
 }
-$("generateNonOppositionBtn")?.addEventListener("click",()=>{
+function openPrepModal(id,dateId){
+  const modal=$(id),date=$(dateId);if(date)date.value=isoToday();modal?.classList.add("open");
+}
+function closePrepModal(id){$(id)?.classList.remove("open")}
+
+$("generateNonOppositionBtn")?.addEventListener("click",()=>openPrepModal("nonOppositionPrepModal","nonOppositionDate"));
+$("closeNonOppositionPrep")?.addEventListener("click",()=>closePrepModal("nonOppositionPrepModal"));
+$("cancelNonOppositionPrep")?.addEventListener("click",()=>closePrepModal("nonOppositionPrepModal"));
+$("nonOppositionPrepModal")?.addEventListener("click",e=>{if(e.target.id==="nonOppositionPrepModal")closePrepModal("nonOppositionPrepModal")});
+$("previewNonOppositionBtn")?.addEventListener("click",()=>{
   if(!currentDossier)return;
-  const body=`<p>Objet : demande de certificat de non-opposition à l’ordonnance portant injonction de payer.</p><p>Dossier Axe Flow : <strong>${escapeHtml(currentDossier.ref||"")}</strong><br>Débiteur : <strong>${escapeHtml(debtorName(currentDossier))}</strong></p><p>Je vous prie de bien vouloir délivrer un certificat de non-opposition relatif à l’ordonnance rendue dans ce dossier, sous réserve que le délai légal d’opposition soit expiré et qu’aucune opposition n’ait été enregistrée.</p><p>À joindre avant envoi : copie de l’ordonnance, preuve de signification et référence attribuée par la juridiction.</p>`;
-  printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,currentDossier));
+  const channel=clean($("nonOppositionChannel")?.value),date=clean($("nonOppositionDate")?.value)||isoToday();
+  const body=`<p>Madame, Monsieur,</p><p>Je vous prie de bien vouloir me délivrer un <strong>certificat de non-opposition</strong> concernant l’ordonnance portant injonction de payer rendue dans le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong>, opposant le créancier à <strong>${escapeHtml(debtorName(currentDossier))}</strong>.</p><p>Cette demande intervient après signification de l’ordonnance et sous réserve de l’expiration du délai légal d’opposition sans opposition enregistrée.</p><p>Je vous remercie de bien vouloir adresser le certificat au créancier aux coordonnées figurant sur le présent courrier.</p><p>Canal de transmission préparé : <strong>${escapeHtml(channel)}</strong>.</p><p>Veuillez agréer, Madame, Monsieur, l’expression de mes salutations distinguées.</p>`;
+  closePrepModal("nonOppositionPrepModal");
+  printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,currentDossier,{date}));
 });
-$("generateEnforcementBtn")?.addEventListener("click",()=>{
+
+$("generateEnforcementBtn")?.addEventListener("click",()=>openPrepModal("enforcementPrepModal","enforcementDate"));
+$("closeEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
+$("cancelEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
+$("enforcementPrepModal")?.addEventListener("click",e=>{if(e.target.id==="enforcementPrepModal")closePrepModal("enforcementPrepModal")});
+$("previewEnforcementBtn")?.addEventListener("click",()=>{
   if(!currentDossier)return;
-  const calc=lateFeeBreakdown(currentDossier);
-  const body=`<p>Objet : transmission d’un titre exécutoire en vue de mesures d’exécution.</p><p>Débiteur : <strong>${escapeHtml(debtorName(currentDossier))}</strong><br>Référence : <strong>${escapeHtml(currentDossier.ref||"")}</strong><br>Montant indicatif restant dû : <strong>${escapeHtml(formatCurrency(calc.total))}</strong></p><p>Pièces à transmettre : ordonnance portant injonction de payer, acte de signification, certificat de non-opposition, décompte actualisé et pièces utiles du dossier.</p><p>Le présent document prépare la transmission au commissaire de justice ; il ne déclenche aucune mesure d’exécution par lui-même.</p>`;
-  printHtmlDocument(simpleJudicialLetterHtml("DOSSIER DE TRANSMISSION AU COMMISSAIRE DE JUSTICE",body,currentDossier));
+  const officer=clean($("enforcementOfficerName")?.value),address=clean($("enforcementOfficerAddress")?.value);
+  if(!officer||!address){alert("Renseignez l’étude choisie et son adresse.");return}
+  const channel=clean($("enforcementChannel")?.value),date=clean($("enforcementDate")?.value)||isoToday();
+  const calc=lateFeeBreakdown(currentDossier,parseLocalDate(date)||new Date());
+  const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(currentDossier))}</strong>, demeurant ${escapeHtml(debtorAddress(currentDossier))}, ${escapeHtml(debtorZip(currentDossier)+" "+debtorCity(currentDossier))}.</p><p>Le montant indicatif restant dû arrêté au ${escapeHtml(fmtDateFR(date))} s’élève à <strong>${escapeHtml(formatCurrency(calc.total))}</strong>, sous réserve de l’actualisation des intérêts, frais et sommes légalement applicables.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Canal de transmission préparé : <strong>${escapeHtml(channel)}</strong>.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
+  closePrepModal("enforcementPrepModal");
+  printHtmlDocument(simpleJudicialLetterHtml("TRANSMISSION POUR EXÉCUTION D’UN TITRE EXÉCUTOIRE",body,currentDossier,{date,recipientName:officer,recipientAddress:address}));
+});
+
+$("closeCerfaOptionsModal")?.addEventListener("click",closeCerfaOptionsModal);
+$("cancelCerfaOptions")?.addEventListener("click",closeCerfaOptionsModal);
+$("cerfaOptionsModal")?.addEventListener("click",e=>{if(e.target.id==="cerfaOptionsModal")closeCerfaOptionsModal()});
+$("cerfaClaimantKind")?.addEventListener("change",()=>{$("cerfaClaimantGenderWrap").style.display=$("cerfaClaimantKind").value==="company"?"none":"flex"});
+$("confirmCerfaOptions")?.addEventListener("click",async()=>{
+  cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value};
+  closeCerfaOptionsModal();
+  await generateCerfaPrefilled(false);
 });
 
 E.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
