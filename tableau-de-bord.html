@@ -3147,7 +3147,21 @@ $("confirmCerfaOptions")?.addEventListener("click",async()=>{
 });
 
 /* handler juridiction V4 */
-document.addEventListener("click",async(e)=>{\n  const btn=e.target.closest("#saveCourtBtn"); if(!btn)return;\n  e.preventDefault(); if(!currentDossier)return;\n  const court={name:clean($("injunctionCourtName")?.value),city:clean($("injunctionCourtCity")?.value),zip:clean($("injunctionCourtZip")?.value),address:clean($("injunctionCourtAddress")?.value)};\n  if(!court.name||!court.city||!court.zip||!court.address){alert("Renseignez le nom du tribunal, la ville, le code postal et l’adresse.");return;}\n  const old=btn.textContent; btn.disabled=true; btn.textContent="Enregistrement…";\n  try{\n    await updateDoc(doc(db,"users",currentUid,"requests",currentDossier.id),{injunctionCourt:court,courtName:court.name,courtCity:court.city,courtZip:court.zip,courtAddress:court.address,updatedAt:serverTimestamp()});\n    Object.assign(currentDossier,{injunctionCourt:court,courtName:court.name,courtCity:court.city,courtZip:court.zip,courtAddress:court.address});\n    showSuccessToast("✓ Juridiction enregistrée"); btn.textContent="✓ Juridiction enregistrée";\n    setTimeout(()=>{btn.disabled=false;btn.textContent=old},2200);\n  }catch(err){console.error(err);btn.disabled=false;btn.textContent=old;alert("Impossible d’enregistrer la juridiction : "+(err?.message||"erreur Firestore"));}\n});\n\nE.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
+document.addEventListener("click",async(e)=>{
+  const btn=e.target.closest("#saveCourtBtn"); if(!btn)return;
+  e.preventDefault(); if(!currentDossier)return;
+  const court={name:clean($("injunctionCourtName")?.value),city:clean($("injunctionCourtCity")?.value),zip:clean($("injunctionCourtZip")?.value),address:clean($("injunctionCourtAddress")?.value)};
+  if(!court.name||!court.city||!court.zip||!court.address){alert("Renseignez le nom du tribunal, la ville, le code postal et l’adresse.");return;}
+  const old=btn.textContent; btn.disabled=true; btn.textContent="Enregistrement…";
+  try{
+    await updateDoc(doc(db,"users",currentUid,"requests",currentDossier.id),{injunctionCourt:court,courtName:court.name,courtCity:court.city,courtZip:court.zip,courtAddress:court.address,updatedAt:serverTimestamp()});
+    Object.assign(currentDossier,{injunctionCourt:court,courtName:court.name,courtCity:court.city,courtZip:court.zip,courtAddress:court.address});
+    showSuccessToast("✓ Juridiction enregistrée"); btn.textContent="✓ Juridiction enregistrée";
+    setTimeout(()=>{btn.disabled=false;btn.textContent=old},2200);
+  }catch(err){console.error(err);btn.disabled=false;btn.textContent=old;alert("Impossible d’enregistrer la juridiction : "+(err?.message||"erreur Firestore"));}
+});
+
+E.logoutBtn.addEventListener("click",async()=>{await signOut(auth);location.href="connexion.html"});
 E.saveCreditorBtn.addEventListener("click",async()=>{if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}const patch={creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value),updatedAt:serverTimestamp()};try{E.saveCreditorBtn.disabled=true;E.saveCreditorBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);currentDossier={...currentDossier,...patch};E.saveCreditorBtn.textContent="Enregistré ✔";await loadDossiers(currentUser.uid);setTimeout(()=>{E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"},1200)}catch(err){console.error(err);alert("Erreur Firestore : le créancier n’a pas été enregistré.");E.saveCreditorBtn.disabled=false;E.saveCreditorBtn.textContent="Enregistrer créancier"}});
 E.companyProfileBtn?.addEventListener("click",openCompanyProfileModal);
 E.topNewDossierBtn?.addEventListener("click",()=>E.addDossierBtn?.click());
