@@ -2715,7 +2715,9 @@ function dossierDelayDays(d){
 }
 function dossierNextAction(d){
   if(d?.status==="paid_closed"||d?.lifecycleStatus==="closed")return{label:"Aucune action — dossier clôturé",date:""};
-  if(principalBalance(d)<=0 && (d?.injunctionPublished||getStep(d)>=5))return{label:"Finaliser la procédure judiciaire",date:""};
+  // Un dossier intégralement payé ne doit jamais proposer de préparer une nouvelle injonction.
+  // La procédure judiciaire déjà engagée reste accessible depuis le dossier.
+  if(principalBalance(d)<=0)return{label:"Finaliser la procédure judiciaire",date:""};
   const step=getStep(d);
   const labels={0:"Lancer la Relance 1 (Courtoise)",1:"Envoyer la Relance 2 (Ferme)",2:"Envoyer la Relance 3 (Ultime)",3:"Préparer la Mise en demeure",4:"Préparer l’injonction de payer",5:"Suivi de la procédure judiciaire"};
   let date="";const raw=d?.nextActionAt||d?.prochaineActionAt||d?.next_action_at;if(raw)date=fmtDateFR(raw);
