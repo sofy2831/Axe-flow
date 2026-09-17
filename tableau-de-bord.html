@@ -668,12 +668,11 @@
   <div class="field"><label>Qualité du créancier</label><select id="cerfaClaimantKind"><option value="person">EI / micro-entreprise / personne physique</option><option value="company">Société / personne morale</option></select></div>
   <div class="field" id="cerfaClaimantGenderWrap"><label>Civilité du créancier</label><select id="cerfaClaimantGender"><option value="female">Madame</option><option value="male">Monsieur</option></select></div>
   <div class="field" id="cerfaDebtorGenderWrap"><label>Civilité du débiteur particulier</label><select id="cerfaDebtorGender"><option value="male">Monsieur</option><option value="female">Madame</option></select></div>
-  <div class="field" id="cerfaClaimantFirstNamesWrap"><label>Vos prénoms</label><input id="cerfaClaimantFirstNames" type="text" placeholder="Ex. Sophie"></div>
   <div class="field" id="cerfaClaimantBirthDateWrap"><label>Date de naissance</label><input id="cerfaClaimantBirthDate" type="date"></div>
   <div class="field" id="cerfaClaimantBirthPlaceWrap"><label>Lieu de naissance</label><input id="cerfaClaimantBirthPlace" type="text" placeholder="Ex. Toulouse"></div>
  </div>
- <div class="prep-note">Ces choix servent uniquement à cocher et renseigner correctement le Cerfa. Le nom du tribunal et son adresse sont repris automatiquement de la juridiction enregistrée plus haut.</div>
- <div class="prep-actions"><button class="btn btn-secondary" id="cancelCerfaOptions" type="button">Annuler</button><button class="btn btn-primary" id="confirmCerfaOptions" type="button">✓ Générer le Cerfa prérempli</button></div>
+ <div class="prep-note">Les autres coordonnées du demandeur sont reprises automatiquement depuis « Mon entreprise ». Le nom du tribunal et son adresse proviennent de la juridiction enregistrée dans le dossier.</div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="previewCerfaOptions" type="button">◉ Prévisualiser le Cerfa</button><button class="btn btn-secondary" id="cancelCerfaOptions" type="button">Annuler</button><button class="btn btn-primary" id="confirmCerfaOptions" type="button">Valider et enregistrer</button></div>
 </div></div></div>
 
 <div class="modal-backdrop judicial-prep-modal" id="nonOppositionPrepModal"><div class="modal"><div class="modal-inner">
@@ -1852,22 +1851,22 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   }else{
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
     mark(page1,42.5,559.3,female); mark(page1,184,559.3,!female);
-    put(page1,262,559,`${claimant.lastName} ${clean(cerfaGenerationOptions?.claimantFirstNames)||claimant.firstNames}`.trim(),8.2,270); // nom + prénom en face de Madame / Monsieur
-    put(page1,260,540,claimant.lastName,8.2,275);              // nom de naissance
-    put(page1,116,501,clean(cerfaGenerationOptions?.claimantFirstNames)||claimant.firstNames,8.2,420); // prénoms
+    put(page1,262,559,`${claimant.lastName} ${claimant.firstNames}`.trim(),8.2,270); // nom + prénom en face de Madame / Monsieur
+    put(page1,263,540,claimant.lastName,8.2,272);              // nom de naissance
+    put(page1,119,501,claimant.firstNames,8.2,417); // prénoms
     const claimantBirthDate=clean(cerfaGenerationOptions?.claimantBirthDate);
     if(claimantBirthDate){
       const [by,bm,bd]=claimantBirthDate.split("-");
-      put(page1,176,481,`${bd||""}${bm||""}${by||""}`,9.2,112);
+      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,177.2+(i*15.5),481,ch,9.2,10));
     }
-    put(page1,160,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,375); // lieu de naissance — décalé dans la zone bleue
+    put(page1,163,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,372); // lieu de naissance — décalé dans la zone bleue
     // profession : laissée vierge tant qu'elle n'est pas collectée par Axe Flow
-    put(page1,133,440,"France",8.2,400);                       // nationalité
-    put(page1,122,401,creditorAddress(currentDossier),8.2,415);// adresse
-    put(page1,263,361,creditorCity(currentDossier),8.2,275);   // commune
-    put(page1,110,361,creditorZip(currentDossier),8.2,78);     // CP
-    put(page1,76,341,clean(p.country)||"France",8.2,460);      // pays
-    put(page1,188,321,cem.left,8.0,205); put(page1,409,321,cem.right,8.0,128);
+    put(page1,136,440,"France",8.2,397);                       // nationalité
+    put(page1,125,401,creditorAddress(currentDossier),8.2,412);// adresse
+    put(page1,266,361,creditorCity(currentDossier),8.2,272);   // commune
+    String(creditorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page1,111.2+(i*15.5),361,ch,8.2,10));     // CP
+    put(page1,79,341,clean(p.country)||"France",8.2,457);      // pays
+    put(page1,191,321,cem.left,8.0,202); put(page1,412,321,cem.right,8.0,125);
   }
 
   // PAGE 2 — PREMIER DÉBITEUR PARTICULIER
@@ -1940,11 +1939,13 @@ function openCerfaOptionsModal(){
   const isCompany=/sas|sarl|eurl|sa|sci|scp|sasu/.test(legal);
   $("cerfaClaimantKind").value=isCompany?"company":"person";
   $("cerfaClaimantGenderWrap").style.display=isCompany?"none":"flex";
+  $("cerfaClaimantBirthDateWrap").style.display=isCompany?"none":"block";
+  $("cerfaClaimantBirthPlaceWrap").style.display=isCompany?"none":"block";
   $("cerfaDebtorGenderWrap").style.display=isProfessionalDebtor(currentDossier)?"none":"flex";
   $("cerfaOptionsModal").classList.add("open");
 }
 function closeCerfaOptionsModal(){$("cerfaOptionsModal")?.classList.remove("open")}
-async function generateCerfaPrefilled(signatureReady=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
+async function generateCerfaPrefilled(signatureReady=false,previewOnly=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
 
@@ -1952,8 +1953,9 @@ if(!isProfessionalDebtor(currentDossier)){
   await generatePrivateCerfa12948Overlay(pdfDoc);
   const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"});
   const a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");
-  a.href=URL.createObjectURL(blob);a.download=`${safeRef}-cerfa-12948-06-prefilled.pdf`;
-  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  a.href=URL.createObjectURL(blob);
+  if(previewOnly){window.open(a.href,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(a.href),60000);}
+  else{a.download=`${safeRef}-cerfa-12948-06-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}
   return;
 }
 
@@ -2249,7 +2251,7 @@ safeSetText(
 
 const invoiceRefs=normalizeInvoices(currentDossier).map(x=>x.ref).join(", ");
 safeSetText(form,"supporting_documents_1",`Facture(s) ${invoiceRefs} ; devis/contrat ; preuve de la prestation ; relances`);
-safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",injunctionPreparationFr());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);a.download=`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
+safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",injunctionPreparationFr());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);if(previewOnly){window.open(a.href,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(a.href),60000)}else{a.download=`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
 function debtStatementHtml(d=currentDossier){
   const prepDate=injunctionPreparationDateObj(),prepFr=injunctionPreparationFr(),calc=lateFeeBreakdown(d,prepDate);
   const rows=calc.rows.map(x=>`<tr><td><strong>${escapeHtml(x.ref)}</strong></td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");
@@ -3292,9 +3294,14 @@ $("previewEnforcementBtn")?.addEventListener("click",()=>{
 $("closeCerfaOptionsModal")?.addEventListener("click",closeCerfaOptionsModal);
 $("cancelCerfaOptions")?.addEventListener("click",closeCerfaOptionsModal);
 $("cerfaOptionsModal")?.addEventListener("click",e=>{if(e.target.id==="cerfaOptionsModal")closeCerfaOptionsModal()});
-$("cerfaClaimantKind")?.addEventListener("change",()=>{const isCompany=$("cerfaClaimantKind").value==="company";$("cerfaClaimantGenderWrap").style.display=isCompany?"none":"flex";$("cerfaClaimantFirstNamesWrap").style.display=isCompany?"none":"block";$("cerfaClaimantBirthDateWrap").style.display=isCompany?"none":"block";$("cerfaClaimantBirthPlaceWrap").style.display=isCompany?"none":"block";});
+$("cerfaClaimantKind")?.addEventListener("change",()=>{const isCompany=$("cerfaClaimantKind").value==="company";$("cerfaClaimantGenderWrap").style.display=isCompany?"none":"flex";$("cerfaClaimantBirthDateWrap").style.display=isCompany?"none":"block";$("cerfaClaimantBirthPlaceWrap").style.display=isCompany?"none":"block";});
+$("previewCerfaOptions")?.addEventListener("click",async()=>{
+  cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value,claimantBirthDate:clean($("cerfaClaimantBirthDate")?.value),claimantBirthPlace:clean($("cerfaClaimantBirthPlace")?.value)};
+  await generateCerfaPrefilled(false,true);
+});
+
 $("confirmCerfaOptions")?.addEventListener("click",async()=>{
-  cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value,claimantFirstNames:clean($("cerfaClaimantFirstNames")?.value),claimantBirthDate:clean($("cerfaClaimantBirthDate")?.value),claimantBirthPlace:clean($("cerfaClaimantBirthPlace")?.value)};
+  cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value,claimantBirthDate:clean($("cerfaClaimantBirthDate")?.value),claimantBirthPlace:clean($("cerfaClaimantBirthPlace")?.value)};
   closeCerfaOptionsModal();
   await generateCerfaPrefilled(false);
 });
