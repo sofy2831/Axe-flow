@@ -670,11 +670,6 @@
     <a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">↗ La Poste — lettre recommandée en ligne</a>
   </div>
 
-  <div class="inj-after">
-    <article class="inj-after-card"><strong>Après l’ordonnance</strong><small>Après signification de l’ordonnance et expiration du délai d’opposition, préparer la demande de certificat de non-opposition auprès de la juridiction compétente.</small><button class="btn btn-secondary" id="generateNonOppositionBtn" type="button">Préparer la demande de certificat</button></article>
-    <article class="inj-after-card"><strong>Après le certificat</strong><small>Préparer le dossier de transmission au commissaire de justice : ordonnance, signification, certificat de non-opposition et décompte actualisé.</small><button class="btn btn-secondary" id="generateEnforcementBtn" type="button">Préparer l’exécution forcée</button></article>
-  </div>
-
   <div class="inj-ready-download"><span>✓ Dossier prêt à déposer</span><button class="btn" id="downloadInjunctionZipBtn" type="button">⇩ Télécharger le dossier complet</button></div>
 
   <div class="inj-footer"><button class="btn btn-primary" id="markInjunctionBtn" type="button">✓ Enregistrer l’injonction préparée</button></div>
@@ -738,6 +733,7 @@
     <div class="detail-kpi"><span>Retard</span><strong id="detailDelay" style="color:#ff8fa3">—</strong></div>
   </div>
   <div class="detail-actions" id="detailActions"></div>
+  <div id="detailJudicialAfter" class="detail-judicial-after" style="display:none"></div>
   <div class="detail-section"><h3>Factures</h3><div id="detailInvoices"></div></div>
   <div class="detail-section"><h3>Chronologie</h3><div class="detail-timeline" id="detailTimeline"><div class="empty-state">Chargement…</div></div></div>
   <div class="detail-section"><h3>Historique des règlements</h3><div class="detail-payment-history" id="detailPaymentsHistory"><div class="empty-state">Aucun règlement enregistré.</div></div></div>
@@ -755,7 +751,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_PRO_URL="/documents/cerfa-12946-remplissable.pdf",CERFA_PRIVATE_URL="/documents/cerfa-12948-06.pdf",CERFA_FILLABLE_URL=CERFA_PRO_URL,INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="";
-const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","downloadInjunctionZipBtn","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
+const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","downloadInjunctionZipBtn","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailJudicialAfter","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
 const E={};ids.forEach(id=>E[id]=$(id));
 const clean=s=>String(s||"").trim(),esc=s=>String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"),escapeHtml=esc;
 function formatCurrency(v){return Number(v||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -1595,7 +1591,15 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     .sign{margin-top:4mm}
     .foot{margin-top:4mm}
   }
-  </style></head><body><div class="page">
+  
+/* V16 — suivi judiciaire déplacé dans le dossier */
+#dossierDetailModal .detail-judicial-after{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 16px}
+#dossierDetailModal .detail-judicial-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(4,12,30,.34)}
+#dossierDetailModal .detail-judicial-card strong{display:block;margin-bottom:5px}
+#dossierDetailModal .detail-judicial-card small{display:block;color:var(--muted);font-size:.76rem;line-height:1.45}
+#dossierDetailModal .detail-judicial-card .btn{width:100%;margin-top:10px;min-height:38px;border-radius:9px;background:#1769aa;border-color:#2a80c4;color:#fff}
+@media(max-width:820px){#dossierDetailModal .detail-judicial-after{grid-template-columns:1fr}}
+</style></head><body><div class="page">
   <div class="head">
     <div class="sender"><strong>${escapeHtml(companyName)}</strong>${senderLines.slice(1).length?`<br>${senderLines.slice(1).map(escapeHtml).join("<br>")}`:""}</div>
     <div class="recipient">${escapeHtml(recipient).replace(/\n/g,"<br>")}</div>
@@ -2303,7 +2307,7 @@ async function downloadCompleteInjunctionZip(){
   if(!window.JSZip||!window.html2pdf){alert("Le module ZIP/PDF n’est pas chargé. Rechargez la page puis réessayez.");return}
   const btn=E.downloadInjunctionZipBtn,safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");
   try{
-    if(btn){btn.disabled=true;btn.textContent="Préparation du ZIP…"}
+    if(btn){btn.disabled=true;btn.textContent="Préparation des PDF…"}
     const zip=new JSZip(),folder=zip.folder("pieces");
     const actions=[
       ["relance1","relance_1",currentDossier.relance1SentAt],
@@ -2324,6 +2328,7 @@ async function downloadCompleteInjunctionZip(){
     window.__axeFlowCerfaCapture=(blob,name)=>{capturedCerfa=blob;capturedCerfaName=name};
     try{await generateCerfaPrefilled(true,false)}finally{window.__axeFlowCerfaCapture=previousCapture}
     if(capturedCerfa)folder.file(capturedCerfaName||`cerfa_${safeRef}.pdf`,capturedCerfa);
+    if(btn)btn.textContent="Ajout des pièces complémentaires…";
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"));
     const complementaryFolder=zip.folder("pieces_complementaires");
     for(const ds of snap.docs){
@@ -2331,15 +2336,13 @@ async function downloadCompleteInjunctionZip(){
       if(f.type!=="injunction_piece")continue;
       try{
         let bytes=null;
-        if(f.path){
-          bytes=await getBytes(storageRef(storage,f.path));
-        }else if(f.url){
-          const r=await fetch(f.url);
-          if(r.ok)bytes=await r.arrayBuffer();
-        }
+        const withTimeout=(promise,ms=10000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Délai de téléchargement dépassé")),ms))]);
+        if(f.path){try{bytes=await withTimeout(getBytes(storageRef(storage,f.path)),10000)}catch(storageErr){console.warn("Lecture Storage directe impossible, tentative via URL",storageErr)}}
+        if(!bytes&&f.url){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);try{const r=await fetch(f.url,{signal:controller.signal});if(r.ok)bytes=await r.arrayBuffer()}finally{clearTimeout(timer)}}
         if(bytes)complementaryFolder.file(f.name||f.filename||`piece_${ds.id}`,bytes);
       }catch(err){console.warn("Pièce complémentaire non ajoutée au ZIP",f.name,err)}
     }
+    if(btn)btn.textContent="Création du ZIP…";
     const blob=await zip.generateAsync({type:"blob"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`dossier_injonction_${safeRef}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
     showSuccessToast?.("Dossier complet ZIP téléchargé");
   }catch(err){console.error(err);alert("Impossible de préparer le dossier ZIP. "+(err?.message||err))}finally{if(btn){btn.disabled=false;btn.textContent="⇩ Télécharger le dossier complet"}}
@@ -2790,6 +2793,15 @@ async function loadDetailTimeline(d){
   try{
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
     snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
+    const injunctionRegistered=events.some(ev=>(ev.action||ev.type)==="injunction_prepared");
+    if(E.detailJudicialAfter){
+      E.detailJudicialAfter.style.display=injunctionRegistered?"grid":"none";
+      E.detailJudicialAfter.innerHTML=injunctionRegistered?`<article class="detail-judicial-card"><strong>Après l’ordonnance</strong><small>Après signification de l’ordonnance et expiration du délai d’opposition, préparer la demande de certificat de non-opposition auprès de la juridiction compétente.</small><button class="btn" type="button" data-judicial-followup="non_opposition">Préparer la demande de certificat</button></article><article class="detail-judicial-card"><strong>Après le certificat</strong><small>Préparer le dossier de transmission au commissaire de justice : ordonnance, signification, certificat de non-opposition et décompte actualisé.</small><button class="btn" type="button" data-judicial-followup="enforcement">Préparer l’exécution forcée</button></article>`:"";
+      E.detailJudicialAfter.querySelectorAll("[data-judicial-followup]").forEach(btn=>btn.addEventListener("click",()=>{
+        const kind=btn.dataset.judicialFollowup; E.dossierDetailModal.classList.remove("open");
+        if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
+      }));
+    }
 
     // Si un règlement partiel intervient après l'enregistrement de l'injonction,
     // afficher systématiquement la ligne judiciaire associée. Cette ligne est
@@ -2939,6 +2951,7 @@ function openDossierDetailModal(d){
     actionHtml=`<button class="btn btn-secondary judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button><button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button></div></div>`;
   }
   E.detailActions.innerHTML=actionHtml;
+  if(E.detailJudicialAfter){E.detailJudicialAfter.style.display="none";E.detailJudicialAfter.innerHTML="";}
   E.detailActions.querySelector("#detailRecordPaymentBtn")?.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();E.recordPaymentBtn?.click()});
   E.detailActions.querySelectorAll("[data-detail-action]").forEach(btn=>btn.addEventListener("click",ev=>{
     ev.preventDefault();ev.stopPropagation();
