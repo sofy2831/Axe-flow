@@ -1864,9 +1864,9 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     const claimantBirthDate=clean(cerfaGenerationOptions?.claimantBirthDate);
     if(claimantBirthDate){
       const [by,bm,bd]=claimantBirthDate.split("-");
-      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,180.2+(i*15.5),481,ch,9.2,10));
+      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,180.2+(i*15.5)-(i>=4?1.2:0),481,ch,9.2,10));
     }
-    put(page1,166,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,369); // lieu de naissance — décalé dans la zone bleue
+    put(page1,169,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,366); // lieu de naissance — +0,5 % vers la droite
     // profession : laissée vierge tant qu'elle n'est pas collectée par Axe Flow
     put(page1,139,440,"France",8.2,394);                       // nationalité
     put(page1,128,401,creditorAddress(currentDossier),8.2,409);// adresse
@@ -2728,13 +2728,25 @@ async function loadDetailTimeline(d){
       return
     }
     E.detailTimeline.innerHTML=events.map(ev=>{
-      const canView=["relance1","relance2","relance3"].includes(ev.action);
-      return`<div class="detail-event"><div class="detail-event-main"><time>${esc(fmtDateFR(ev.effectiveDate||ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>${canView?`<button class="detail-event-view" type="button" data-view-action="${esc(ev.action)}" data-view-date="${esc(ev.effectiveDate||"")}">↗ Voir</button>`:""}</div>`;
+      const eventAction=ev.action||ev.type||"";
+      const eventDate=ev.effectiveDate||ev.date||"";
+      const canView=["relance1","relance2","relance3","injunction_prepared"].includes(eventAction);
+      return`<div class="detail-event"><div class="detail-event-main"><time>${esc(fmtDateFR(eventDate||ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.label||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>${canView?`<button class="detail-event-view" type="button" data-view-action="${esc(eventAction)}" data-view-date="${esc(eventDate)}">↗ Voir</button>`:""}</div>`;
     }).join("");
     E.detailTimeline.querySelectorAll("[data-view-action]").forEach(btn=>btn.addEventListener("click",()=>{
-      currentAction=btn.dataset.viewAction;
+      const action=btn.dataset.viewAction;
+      const eventDate=btn.dataset.viewDate||isoToday();
+      if(action==="injunction_prepared"){
+        const court=d.injunctionCourt||{};
+        const previousDate=d.injunctionPreparationDate;
+        d.injunctionPreparationDate=eventDate;
+        try{openInjunctionRequestPrint(d,court.name||"",court.address||"")}
+        finally{d.injunctionPreparationDate=previousDate}
+        return;
+      }
+      currentAction=action;
       currentText=buildText(currentAction,d);
-      previewProfessionalLetter(currentText,d,btn.dataset.viewDate||isoToday());
+      previewProfessionalLetter(currentText,d,eventDate);
     }));
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
