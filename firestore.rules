@@ -320,6 +320,10 @@ service cloud.firestore {
         "officerZip",
         "officerCity",
 
+        // Clôture du dossier
+        "closureReason",
+        "closureComment",
+
         "createdAt",
         "updatedAt"
       ];
