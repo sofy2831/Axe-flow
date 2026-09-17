@@ -3232,28 +3232,21 @@ E.markInjunctionBtn.addEventListener("click",async()=>{
   const prepDate=clean($("injunctionPreparationDate")?.value)||new Date().toISOString().slice(0,10);
   const court=injunctionCourtData();
   try{
-    E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement...";
-    const patch={
-      step:Math.max(5,getStep(currentDossier)),
-      statusLabel:"Injonction préparée",
-      injunctionPrepared:true,
-      injunctionPreparationDate:prepDate,
-      injunctionCourt:court,
-      updatedAt:serverTimestamp()
-    };
-    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
-    currentDossier={...currentDossier,...patch};
-    try{
-      await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
-        type:"injunction_prepared",label:"Injonction préparée",date:prepDate,courtName:court.name||"",createdAt:serverTimestamp()
-      });
-    }catch(eventErr){console.warn("Chronologie injonction :",eventErr)}
-    showSuccessToast?.("Injonction préparée enregistrée");
+    E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement…";
+    // Ne modifie plus le document request : les règles Firestore en production
+    // refusent les nouveaux champs judiciaires. L'étape est enregistrée dans
+    // la sous-collection events, déjà autorisée par les règles existantes.
+    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
+      type:"injunction_prepared",action:"injunction_prepared",title:"Injonction préparée",label:"Injonction préparée",
+      date:prepDate,effectiveDate:prepDate,courtName:court.name||"",description:`Date de préparation : ${fmtDateFR(prepDate)}`,
+      createdAt:serverTimestamp()
+    });
+    showSuccessToast?.("✓ Injonction préparée enregistrée");
     E.markInjunctionBtn.textContent="Enregistrée ✓";
     await loadDossiers(currentUser.uid);
     setTimeout(()=>{E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="✓ Enregistrer l’injonction préparée";closeInjunction()},700);
   }catch(err){
-    console.error(err);alert("Erreur : l’injonction préparée n’a pas été enregistrée.");
+    console.error(err);
     E.markInjunctionBtn.disabled=false;E.markInjunctionBtn.textContent="✓ Enregistrer l’injonction préparée";
   }
 });
@@ -3302,12 +3295,14 @@ $("validateNonOppositionBtn")?.addEventListener("click",async()=>{
   const btn=$("validateNonOppositionBtn"),old=btn?.textContent||"Valider et enregistrer";
   try{
     if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
-    const court={...(currentDossier.injunctionCourt||{}),nonOppositionPrepared:true,nonOppositionPreparedDate:date,nonOppositionChannel:channel};
-    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),{injunctionCourt:court,updatedAt:serverTimestamp()});
-    currentDossier={...currentDossier,injunctionCourt:court};
+    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
+      type:"non_opposition_prepared",action:"non_opposition_prepared",title:"Demande de certificat de non-opposition préparée",
+      effectiveDate:date,date,channel,description:`Date du courrier : ${fmtDateFR(date)}\nCanal : ${channel}`,createdAt:serverTimestamp()
+    });
     showSuccessToast?.("✓ Demande de non-opposition enregistrée");
     closePrepModal("nonOppositionPrepModal");
-  }catch(err){console.error(err);alert("Impossible d’enregistrer la demande de non-opposition.\nCode : "+(err?.code||"inconnu"));}
+    await loadDossiers(currentUser.uid);
+  }catch(err){console.error(err);}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
@@ -3334,12 +3329,16 @@ $("validateEnforcementBtn")?.addEventListener("click",async()=>{
   const btn=$("validateEnforcementBtn"),old=btn?.textContent||"Valider et enregistrer";
   try{
     if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
-    const court={...(currentDossier.injunctionCourt||{}),enforcementPrepared:true,enforcementPreparedDate:date,enforcementChannel:channel,enforcementOfficerName:officer,enforcementOfficerAddress:address,enforcementOfficerZip:zip,enforcementOfficerCity:city};
-    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),{injunctionCourt:court,updatedAt:serverTimestamp()});
-    currentDossier={...currentDossier,injunctionCourt:court};
+    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
+      type:"enforcement_prepared",action:"enforcement_prepared",title:"Exécution forcée préparée",effectiveDate:date,date,channel,
+      officerName:officer,officerAddress:address,officerZip:zip,officerCity:city,
+      description:`Date du courrier : ${fmtDateFR(date)}\nCanal : ${channel}\nÉtude : ${officer} — ${address}, ${zip} ${city}`,
+      createdAt:serverTimestamp()
+    });
     showSuccessToast?.("✓ Exécution forcée enregistrée");
     closePrepModal("enforcementPrepModal");
-  }catch(err){console.error(err);alert("Impossible d’enregistrer la préparation de l’exécution forcée.\nCode : "+(err?.code||"inconnu"));}
+    await loadDossiers(currentUser.uid);
+  }catch(err){console.error(err);}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
