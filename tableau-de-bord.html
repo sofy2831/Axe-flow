@@ -2341,18 +2341,31 @@ async function downloadCompleteInjunctionZip(){
     if(btn)btn.textContent="Ajout des pièces complémentaires…";
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"));
     const complementaryFolder=zip.folder("pieces_complementaires");
-    const complementaryDocs=snap.docs.map(ds=>({id:ds.id,...(ds.data()||{})}));
-    await Promise.all(complementaryDocs.map(async f=>{
-      try{
-        let bytes=null;
-        const filePath=clean(f.path||f.storagePath||f.filePath),fileUrl=clean(f.url||f.downloadURL||f.downloadUrl);
-        const withTimeout=(promise,ms=7000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Délai de téléchargement dépassé")),ms))]);
-        if(filePath){try{bytes=await withTimeout(getBytes(storageRef(storage,filePath)),7000)}catch(storageErr){console.warn("Lecture Storage directe impossible, tentative via URL",storageErr)}}
-        if(!bytes&&fileUrl){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);try{const r=await fetch(fileUrl,{signal:controller.signal,cache:"force-cache"});if(r.ok)bytes=await r.arrayBuffer()}finally{clearTimeout(timer)}}
-        if(bytes)complementaryFolder.file(f.name||f.filename||`piece_${f.id}`,bytes);
-        else console.warn("Pièce complémentaire sans contenu récupérable",f);
-      }catch(err){console.warn("Pièce complémentaire non ajoutée au ZIP",f.name||f.filename,err)}
-    }));
+    // Le ZIP doit reprendre exactement les pièces visibles dans la zone « Pièces complémentaires ».
+    const complementaryDocs=snap.docs.map(ds=>({id:ds.id,...(ds.data()||{})})).filter(f=>f.type==="injunction_piece");
+    const missing=[];
+    for(const f of complementaryDocs){
+      const fileName=clean(f.name||f.filename)||`piece_${f.id}`;
+      const filePath=clean(f.path||f.storagePath||f.filePath);
+      const fileUrl=clean(f.url||f.downloadURL||f.downloadUrl);
+      let bytes=null,lastError=null;
+      // 1) L'URL déjà utilisée par le bouton « Voir » est la source la plus fidèle à la pièce affichée.
+      if(fileUrl){
+        try{
+          const r=await fetch(fileUrl,{method:"GET",cache:"no-store",credentials:"omit"});
+          if(!r.ok)throw new Error(`HTTP ${r.status}`);
+          bytes=await r.arrayBuffer();
+        }catch(err){lastError=err;console.warn("Téléchargement par URL impossible :",fileName,err)}
+      }
+      // 2) Repli sur Firebase Storage avec le chemin enregistré lors de l'upload.
+      if(!bytes&&filePath){
+        try{bytes=await getBytes(storageRef(storage,filePath))}
+        catch(err){lastError=err;console.warn("Téléchargement Storage impossible :",fileName,err)}
+      }
+      if(bytes&&bytes.byteLength){complementaryFolder.file(fileName,bytes)}
+      else missing.push(`${fileName}${lastError?.message?` (${lastError.message})`:""}`);
+    }
+    if(missing.length)throw new Error(`Pièce(s) complémentaire(s) non récupérée(s) : ${missing.join(", ")}`);
     if(btn)btn.textContent="Création du ZIP…";
     const blob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:4}});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`dossier_injonction_${safeRef}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
     showSuccessToast?.("Dossier complet ZIP téléchargé");
@@ -3422,7 +3435,7 @@ $("injunctionGeneratedPieces")?.addEventListener("click",e=>{
   previewProfessionalLetter(body,currentDossier,dateMap[a]||injunctionPreparationIso());
 });
 
-E.downloadInjunctionZipBtn?.addEventListener("click",downloadCompleteInjunctionZip);
+E.downloadInjunctionZipBtn?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();downloadCompleteInjunctionZip()});
 E.uploadInjunctionFilesBtnPro.addEventListener("click",()=>E.injunctionFilesInput.click());
 E.uploadInjunctionFilesBtnPrivate.addEventListener("click",()=>E.injunctionFilesInput.click());
 E.injunctionFilesInput.addEventListener("change",e=>uploadInjunctionFiles(e.target.files));
