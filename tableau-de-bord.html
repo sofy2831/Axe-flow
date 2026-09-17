@@ -2341,18 +2341,30 @@ async function downloadCompleteInjunctionZip(){
     if(btn)btn.textContent="Ajout des pièces complémentaires…";
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"));
     const complementaryFolder=zip.folder("pieces_complementaires");
-    const complementaryDocs=snap.docs.map(ds=>({id:ds.id,...(ds.data()||{})}));
-    await Promise.all(complementaryDocs.map(async f=>{
+    // Le ZIP doit reprendre exactement les pièces visibles dans « Pièces complémentaires ».
+    // On privilégie l’URL de téléchargement déjà utilisée par le bouton « Voir » : elle est
+    // immédiatement exploitable et évite une seconde résolution Storage inutile.
+    const complementaryDocs=snap.docs.map(ds=>({id:ds.id,...(ds.data()||{})})).filter(f=>f.type==="injunction_piece");
+    let addedComplementary=0;
+    for(const f of complementaryDocs){
       try{
         let bytes=null;
-        const filePath=clean(f.path||f.storagePath||f.filePath),fileUrl=clean(f.url||f.downloadURL||f.downloadUrl);
-        const withTimeout=(promise,ms=7000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Délai de téléchargement dépassé")),ms))]);
-        if(filePath){try{bytes=await withTimeout(getBytes(storageRef(storage,filePath)),7000)}catch(storageErr){console.warn("Lecture Storage directe impossible, tentative via URL",storageErr)}}
-        if(!bytes&&fileUrl){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);try{const r=await fetch(fileUrl,{signal:controller.signal,cache:"force-cache"});if(r.ok)bytes=await r.arrayBuffer()}finally{clearTimeout(timer)}}
-        if(bytes)complementaryFolder.file(f.name||f.filename||`piece_${f.id}`,bytes);
-        else console.warn("Pièce complémentaire sans contenu récupérable",f);
+        const fileUrl=clean(f.url||f.downloadURL||f.downloadUrl),filePath=clean(f.path||f.storagePath||f.filePath);
+        if(fileUrl){
+          try{
+            const r=await fetch(fileUrl,{cache:"no-store"});
+            if(!r.ok)throw new Error(`HTTP ${r.status}`);
+            bytes=await r.arrayBuffer();
+          }catch(urlErr){console.warn("Téléchargement par URL impossible, tentative Storage",urlErr)}
+        }
+        if(!bytes&&filePath){bytes=await getBytes(storageRef(storage,filePath));}
+        if(bytes&&bytes.byteLength){
+          complementaryFolder.file(f.name||f.filename||`piece_${f.id}`,bytes);
+          addedComplementary++;
+        }else console.warn("Pièce complémentaire vide ou inaccessible",f);
       }catch(err){console.warn("Pièce complémentaire non ajoutée au ZIP",f.name||f.filename,err)}
-    }));
+    }
+    if(complementaryDocs.length&&!addedComplementary)throw new Error("Les pièces complémentaires visibles n’ont pas pu être ajoutées au ZIP.");
     if(btn)btn.textContent="Création du ZIP…";
     const blob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:4}});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`dossier_injonction_${safeRef}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
     showSuccessToast?.("Dossier complet ZIP téléchargé");
@@ -2919,7 +2931,7 @@ async function loadDetailTimeline(d){
         const ev=events.find(x=>(x.action||x.type)==="enforcement_prepared"&&(x.effectiveDate||x.date||"")===eventDate)||events.find(x=>(x.action||x.type)==="enforcement_prepared")||{};
         const officer=clean(ev.officerName),address=clean(ev.officerAddress),zip=clean(ev.officerZip),city=clean(ev.officerCity);
         const calc=lateFeeBreakdown(d,parseLocalDate(eventDate)||new Date());
-        const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(d.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(d))}</strong>, demeurant ${escapeHtml(debtorAddress(d))}, ${escapeHtml(debtorZip(d)+" "+debtorCity(d))}.</p><p>Le montant indicatif restant dû s’élève à <strong>${escapeHtml(formatCurrency(calc.total))}</strong>, sous réserve de l’actualisation des intérêts, frais et sommes légalement applicables.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
+        const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(d.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(d))}</strong>, demeurant ${escapeHtml(debtorAddress(d))}, ${escapeHtml(debtorZip(d)+" "+debtorCity(d))}.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
         printHtmlDocument(simpleJudicialLetterHtml("TRANSMISSION POUR EXÉCUTION D’UN TITRE EXÉCUTOIRE",body,d,{date:eventDate,recipientName:officer,recipientAddress:[address,`${zip} ${city}`].filter(Boolean).join("\n")}));
         return;
       }
@@ -3516,7 +3528,7 @@ $("previewEnforcementBtn")?.addEventListener("click",()=>{
   if(!officer||!address||!zip||!city){alert("Renseignez l’étude choisie, son adresse, son code postal et sa ville.");return}
   const channel=clean($("enforcementChannel")?.value),date=clean($("enforcementDate")?.value)||isoToday();
   const calc=lateFeeBreakdown(currentDossier,parseLocalDate(date)||new Date());
-  const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(currentDossier))}</strong>, demeurant ${escapeHtml(debtorAddress(currentDossier))}, ${escapeHtml(debtorZip(currentDossier)+" "+debtorCity(currentDossier))}.</p><p>Le montant indicatif restant dû s’élève à <strong>${escapeHtml(formatCurrency(calc.total))}</strong>, sous réserve de l’actualisation des intérêts, frais et sommes légalement applicables.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
+  const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(currentDossier))}</strong>, demeurant ${escapeHtml(debtorAddress(currentDossier))}, ${escapeHtml(debtorZip(currentDossier)+" "+debtorCity(currentDossier))}.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
   printHtmlDocument(simpleJudicialLetterHtml("TRANSMISSION POUR EXÉCUTION D’UN TITRE EXÉCUTOIRE",body,currentDossier,{date,recipientName:officer,recipientAddress:[address,`${zip} ${city}`].join("\n")}));
 });
 
