@@ -1,0 +1,16 @@
+[
+  {
+    "origin": [
+      "https://flow.axe-dossier.fr",
+      "https://axe-flow-recover.web.app",
+      "https://axe-flow-recover.firebaseapp.com"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Disposition",
+      "Content-Length"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
