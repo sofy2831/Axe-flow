@@ -1,9 +1,7 @@
 [
   {
     "origin": [
-      "https://flow.axe-dossier.fr",
-      "https://axe-flow-recover.web.app",
-      "https://axe-flow-recover.firebaseapp.com"
+      "https://flow.axe-dossier.fr"
     ],
     "method": ["GET", "HEAD"],
     "responseHeader": [
