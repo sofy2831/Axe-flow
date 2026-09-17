@@ -459,6 +459,10 @@
 #dossierDetailModal .detail-payment-closing-actions{display:flex;gap:8px;flex-wrap:wrap}
 #dossierDetailModal .detail-payment-closing-actions .btn-final-close{background:#19c88b;border-color:#19c88b;color:#fff}
 
+
+/* V15 — actions de fin de procédure */
+#dossierDetailModal .judicial-folder-btn{min-height:38px;height:38px;min-width:170px;width:auto;padding:0 16px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+#dossierDetailModal .detail-payment-closing-actions .btn,#dossierDetailModal .detail-payment-closing-actions .btn-final-close{min-height:38px;height:38px;padding:0 14px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -744,7 +748,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, getDoc, deleteDoc, deleteField, serverTimestamp, Timestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, getBytes, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
@@ -1034,10 +1038,7 @@ Réf. dossier : ${d?.ref||"—"}
 
 INFORMATION AU GREFFE — RÈGLEMENT INTÉGRAL DE LA CRÉANCE
 
-Nous vous informons, dans le cadre du dossier ${d?.ref||"—"} pendant devant votre juridiction, qu'un paiement du débiteur ${debtorName(d)} a été enregistré le ${paidDate} pour un montant de ${amount}. Au ${fmtDateFR(paidDate)}, le principal restant dû est de 0,00 € et le TOTAL RESTANT À RÉGLER de 0,00 €. Nous sollicitons en conséquence l'arrêt de la procédure et vous prions d'agréer nos salutations distinguées.
-
-${creditorName(d)}
-${clean(currentUserData?.businessProfile?.representative)||""}`;
+Nous vous informons, dans le cadre du dossier ${d?.ref||"—"} pendant devant votre juridiction, qu'un paiement du débiteur ${debtorName(d)} a été enregistré le ${paidDate} pour un montant de ${amount}. Au ${fmtDateFR(paidDate)}, le principal restant dû est de 0,00 € et le TOTAL RESTANT À RÉGLER de 0,00 €. Nous sollicitons en conséquence l'arrêt de la procédure.`;
 }
 
 function debtorClosureAfterInjunctionText(d){
@@ -1052,10 +1053,7 @@ Réf. dossier : ${d?.ref||"—"}
 CONFIRMATION DE RÈGLEMENT INTÉGRAL
 
 Nous accusons réception de votre règlement du ${paidDate} d'un montant de ${amount} (${method}). Ce paiement est enregistré au titre du dossier ${d?.ref||"—"}. Après imputation, le principal restant dû s'élève à 0,00 € et le TOTAL RESTANT À RÉGLER (tous accessoires compris) à 0,00 € à la date du ${fmtDateFR(paidDate)}.
-Le paiement intégral permet d'envisager l'arrêt de la procédure et la clôture du dossier.
-
-${creditorName(d)}
-${clean(currentUserData?.businessProfile?.representative)||""}`;
+Le paiement intégral permet d'envisager l'arrêt de la procédure et la clôture du dossier.`;
 }
 
 function closureText(d){
@@ -2327,7 +2325,21 @@ async function downloadCompleteInjunctionZip(){
     try{await generateCerfaPrefilled(true,false)}finally{window.__axeFlowCerfaCapture=previousCapture}
     if(capturedCerfa)folder.file(capturedCerfaName||`cerfa_${safeRef}.pdf`,capturedCerfa);
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"));
-    for(const ds of snap.docs){const f=ds.data()||{};if(f.type!=="injunction_piece"||!f.url)continue;try{const r=await fetch(f.url);if(r.ok)folder.file(f.name||f.filename||`piece_${ds.id}`,await r.blob())}catch(err){console.warn("Pièce complémentaire non ajoutée au ZIP",f.name,err)}}
+    const complementaryFolder=zip.folder("pieces_complementaires");
+    for(const ds of snap.docs){
+      const f=ds.data()||{};
+      if(f.type!=="injunction_piece")continue;
+      try{
+        let bytes=null;
+        if(f.path){
+          bytes=await getBytes(storageRef(storage,f.path));
+        }else if(f.url){
+          const r=await fetch(f.url);
+          if(r.ok)bytes=await r.arrayBuffer();
+        }
+        if(bytes)complementaryFolder.file(f.name||f.filename||`piece_${ds.id}`,bytes);
+      }catch(err){console.warn("Pièce complémentaire non ajoutée au ZIP",f.name,err)}
+    }
     const blob=await zip.generateAsync({type:"blob"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`dossier_injonction_${safeRef}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
     showSuccessToast?.("Dossier complet ZIP téléchargé");
   }catch(err){console.error(err);alert("Impossible de préparer le dossier ZIP. "+(err?.message||err))}finally{if(btn){btn.disabled=false;btn.textContent="⇩ Télécharger le dossier complet"}}
@@ -2481,6 +2493,25 @@ function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossi
   E.mailBtn.href=makeMailto(debtorEmail(currentDossier),actionTitle(action)+" – Facture "+invoiceNumber(currentDossier),currentText);
 }E.shareBtn.style.display=navigator.share?"":"none";E.modalText.classList.add("open")}
 function closeTextModal(){E.modalText.classList.remove("open");currentText="";currentAction="";E.medSendBox.style.display="none";E.markSentBtn.disabled=false;E.markSentBtn.textContent="Marquer comme envoyé"}
+function printJudicialClosureDirect(action){
+  if(!currentDossier)return;
+  const previousAction=currentAction;
+  currentAction=action;
+  const body=buildText(action,currentDossier);
+  let recipientOverride="";
+  if(action==="court_closure"){
+    const c=currentDossier?.injunctionCourt||{};
+    recipientOverride=["Monsieur le Greffier",clean(c.name),clean(c.address),[clean(c.zip),clean(c.city)].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+  }
+  const lastPayment=normalizePayments(currentDossier).at(-1)||{};
+  const html=professionalLetterHtml(body,currentDossier,recipientOverride,lastPayment.date||isoToday());
+  const iframe=document.createElement("iframe");
+  iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";
+  document.body.appendChild(iframe);
+  const w=iframe.contentWindow;
+  w.document.open();w.document.write(html);w.document.close();
+  setTimeout(()=>{w.focus();w.print();setTimeout(()=>{iframe.remove();currentAction=previousAction},1200)},350);
+}
 function openInjunctionModal(){
   if(!currentDossier){alert("Sélectionnez un dossier.");return}
   currentAction="injunction";
@@ -2905,7 +2936,7 @@ function openDossierDetailModal(d){
   }
   const judicialPaid=principalBalance(d)<=0&&(d?.status==="paid_pending_court_closure"||d?.nextAction==="CLOTURE_INJONCTION"||d?.injunctionPublished||step>=5);
   if(judicialPaid){
-    actionHtml=`<button class="btn btn-primary" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Injonction</button><div class="detail-payment-closing"><strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button><button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button></div></div>`;
+    actionHtml=`<button class="btn btn-secondary judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button><button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button></div></div>`;
   }
   E.detailActions.innerHTML=actionHtml;
   E.detailActions.querySelector("#detailRecordPaymentBtn")?.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();E.recordPaymentBtn?.click()});
@@ -2916,7 +2947,7 @@ function openDossierDetailModal(d){
     E.dossierDetailModal.classList.remove("open");
     // Appels directs : ne dépend plus des anciennes cartes/boutons cachés du tableau de bord.
     if(action==="injunction"){openInjunctionModal();return;}
-    if(action==="debtor_closure"||action==="court_closure"){openTextModal(action);return;}
+    if(action==="debtor_closure"||action==="court_closure"){printJudicialClosureDirect(action);return;}
     if(action==="closure"){openTextModal(action);return;}
     openTextModal(action);
   }));
