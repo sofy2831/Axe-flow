@@ -2717,6 +2717,34 @@ async function loadDetailTimeline(d){
   try{
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
     snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
+
+    // Si un règlement partiel intervient après l'enregistrement de l'injonction,
+    // afficher systématiquement la ligne judiciaire associée. Cette ligne est
+    // reconstruite depuis le règlement enregistré : elle reste donc visible même
+    // si l'ancien événement judicial_partial_payment n'a pas été créé en Firestore.
+    const injunctionEvents=events.filter(ev=>["injunction_prepared","injunction"].includes(ev.action||ev.type||""));
+    const eventIso=ev=>clean(ev?.effectiveDate||ev?.date||"");
+    const hasInjunctionAtPayment=paymentDate=>injunctionEvents.some(ev=>{
+      const injDate=eventIso(ev);
+      return !injDate||!paymentDate||injDate<=paymentDate;
+    });
+    const existingJudicialKeys=new Set(events.filter(ev=>(ev.action||ev.type)==="judicial_partial_payment").map(ev=>`${eventIso(ev)}|${Number(ev.amount||0).toFixed(2)}`));
+    const syntheticJudicial=[];
+    events.filter(ev=>(ev.action||ev.type)==="payment_received").forEach(ev=>{
+      const paymentDate=eventIso(ev), amount=Number(ev.amount||0), balanceAfter=Number(ev.balanceAfter);
+      const key=`${paymentDate}|${amount.toFixed(2)}`;
+      if(Number.isFinite(balanceAfter)&&balanceAfter>0&&hasInjunctionAtPayment(paymentDate)&&!existingJudicialKeys.has(key)){
+        syntheticJudicial.push({
+          id:`judicial-${ev.id||key}`,
+          title:"Paiement partiel pendant la procédure d’injonction",
+          description:`Nouveau total restant à régler : ${formatCurrency(balanceAfter)}. La procédure d’injonction se poursuit.`,
+          action:"judicial_partial_payment",type:"payment",amount,effectiveDate:paymentDate,
+          createdAt:ev.createdAt,_synthetic:true
+        });
+      }
+    });
+    events.push(...syntheticJudicial);
+
     events.sort((a,b)=>{
       const eventTime=x=>{
         if(x?.effectiveDate){
