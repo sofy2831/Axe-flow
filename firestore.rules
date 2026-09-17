@@ -155,6 +155,8 @@ service cloud.firestore {
         "relance3SentAt",
         "miseEnDemeureSentAt",
         "injunctionPreparedAt",
+        "injunctionPrepared",
+        "injunctionPreparationDate",
 
         // Juridiction compétente / injonction
         "injunctionCourt",
@@ -270,6 +272,8 @@ service cloud.firestore {
         "relance3SentAt",
         "miseEnDemeureSentAt",
         "injunctionPreparedAt",
+        "injunctionPrepared",
+        "injunctionPreparationDate",
 
         // Injonction
         "injunctionPublished",
@@ -306,6 +310,15 @@ service cloud.firestore {
         // Détails d'action amiable
         "channel",
         "note",
+
+        // Parcours judiciaire : injonction / non-opposition / exécution
+        "label",
+        "date",
+        "courtName",
+        "officerName",
+        "officerAddress",
+        "officerZip",
+        "officerCity",
 
         "createdAt",
         "updatedAt"
