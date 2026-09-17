@@ -709,14 +709,15 @@
 
 <div class="modal-backdrop judicial-prep-modal" id="nonOppositionPrepModal"><div class="modal"><div class="modal-inner">
  <div class="modal-head"><div><h2>Demande de certificat de non-opposition</h2><div class="panel-sub">Préparation du courrier à la juridiction</div></div><button class="close-btn" id="closeNonOppositionPrep" type="button">×</button></div>
- <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="nonOppositionDate" type="date"></div><div class="field"><label>Canal de transmission</label><select id="nonOppositionChannel"><option>Courrier</option><option>Email</option><option>Dépôt au greffe</option></select></div></div>
+ <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="nonOppositionDate" type="date"></div><div class="field"><label>Canal de transmission</label><input id="nonOppositionChannel" type="text" value="Courrier" readonly aria-readonly="true"></div></div>
  <div class="prep-note"><strong>Pièces à joindre avant envoi :</strong> copie de l’ordonnance, preuve de signification et référence attribuée par la juridiction.</div>
  <div class="prep-actions"><button class="btn btn-secondary" id="previewNonOppositionBtn" type="button">◉ Prévisualiser le courrier</button><button class="btn btn-secondary" id="cancelNonOppositionPrep" type="button">Annuler</button><button class="btn btn-primary" id="validateNonOppositionBtn" type="button">Valider et enregistrer</button></div>
 </div></div></div>
 
 <div class="modal-backdrop judicial-prep-modal" id="enforcementPrepModal"><div class="modal"><div class="modal-inner">
  <div class="modal-head"><div><h2>Transmission au commissaire de justice</h2><div class="panel-sub">Préparer le courrier d’exécution</div></div><button class="close-btn" id="closeEnforcementPrep" type="button">×</button></div>
- <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="enforcementDate" type="date"></div><div class="field"><label>Canal de transmission</label><select id="enforcementChannel"><option>Email</option><option>Courrier</option><option>Dépôt à l’étude</option></select></div></div>
+ <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="enforcementDate" type="date"></div><div class="field"><label>Canal de transmission</label><select id="enforcementChannel"><option value="Courrier">Courrier</option><option value="Email">Email</option></select></div></div>
+ <div class="field" id="enforcementOfficerEmailWrap" style="margin-top:12px;display:none"><label>Adresse email de l’étude</label><input id="enforcementOfficerEmail" type="email" placeholder="Ex. contact@etude.fr"></div>
  <div class="field" style="margin-top:12px"><label>Nom de l’étude / commissaire de justice</label><input id="enforcementOfficerName" type="text" placeholder="Étude / Maître …"></div>
  <div class="field" style="margin-top:12px"><label>Adresse</label><input id="enforcementOfficerAddress" type="text" placeholder="N° et voie"></div>
  <div class="prep-grid" style="margin-top:12px"><div class="field"><label>Code postal</label><input id="enforcementOfficerZip" type="text" inputmode="numeric" placeholder="Ex. 45000"></div><div class="field"><label>Ville</label><input id="enforcementOfficerCity" type="text" placeholder="Ex. Orléans"></div></div>
@@ -3512,7 +3513,7 @@ $("previewNonOppositionBtn")?.addEventListener("click",()=>{
 $("validateNonOppositionBtn")?.addEventListener("click",async()=>{
   if(!currentUser||!currentDossier)return;
   const date=clean($("nonOppositionDate")?.value)||isoToday();
-  const channel=clean($("nonOppositionChannel")?.value)||"Courrier";
+  const channel="Courrier";
   const btn=$("validateNonOppositionBtn"),old=btn?.textContent||"Valider et enregistrer";
   try{
     if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
@@ -3531,6 +3532,13 @@ $("generateEnforcementBtn")?.addEventListener("click",()=>openPrepModal("enforce
 $("closeEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
 $("cancelEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
 $("enforcementPrepModal")?.addEventListener("click",e=>{if(e.target.id==="enforcementPrepModal")closePrepModal("enforcementPrepModal")});
+function syncEnforcementChannel(){
+  const isEmail=clean($("enforcementChannel")?.value)==="Email";
+  const wrap=$("enforcementOfficerEmailWrap");
+  if(wrap)wrap.style.display=isEmail?"flex":"none";
+}
+$("enforcementChannel")?.addEventListener("change",syncEnforcementChannel);
+syncEnforcementChannel();
 $("previewEnforcementBtn")?.addEventListener("click",()=>{
   if(!currentDossier)return;
   const officer=clean($("enforcementOfficerName")?.value),address=clean($("enforcementOfficerAddress")?.value),zip=clean($("enforcementOfficerZip")?.value),city=clean($("enforcementOfficerCity")?.value);
@@ -3546,19 +3554,26 @@ $("validateEnforcementBtn")?.addEventListener("click",async()=>{
   const officer=clean($("enforcementOfficerName")?.value),address=clean($("enforcementOfficerAddress")?.value),zip=clean($("enforcementOfficerZip")?.value),city=clean($("enforcementOfficerCity")?.value);
   if(!officer||!address||!zip||!city){alert("Renseignez l’étude choisie, son adresse, son code postal et sa ville.");return}
   const date=clean($("enforcementDate")?.value)||isoToday();
-  const channel=clean($("enforcementChannel")?.value)||"Email";
+  const channel=clean($("enforcementChannel")?.value)||"Courrier";
+  const officerEmail=clean($("enforcementOfficerEmail")?.value);
+  if(channel==="Email"&&!officerEmail){alert("Renseignez l’adresse email de l’étude choisie.");return}
   const btn=$("validateEnforcementBtn"),old=btn?.textContent||"Valider et enregistrer";
   try{
     if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
     await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
       type:"enforcement_prepared",action:"enforcement_prepared",title:"Exécution forcée préparée",effectiveDate:date,date,channel,
-      officerName:officer,officerAddress:address,officerZip:zip,officerCity:city,
-      description:`Date du courrier : ${fmtDateFR(date)}\nCanal : ${channel}\nÉtude : ${officer} — ${address}, ${zip} ${city}`,
+      officerName:officer,officerAddress:address,officerZip:zip,officerCity:city,officerEmail,
+      description:`Date du courrier : ${fmtDateFR(date)}\nCanal : ${channel}\nÉtude : ${officer} — ${address}, ${zip} ${city}${officerEmail?`\nEmail : ${officerEmail}`:""}`,
       createdAt:serverTimestamp()
     });
     showSuccessToast?.("✓ Exécution forcée enregistrée");
     closePrepModal("enforcementPrepModal");
     await loadDossiers(currentUser.uid);
+    if(channel==="Email"&&officerEmail){
+      const subject=`Transmission pour exécution d’un titre exécutoire — ${currentDossier.ref||"Dossier"}`;
+      const body=`Maître,\n\nVeuillez trouver la transmission relative au dossier ${currentDossier.ref||""} concernant ${debtorName(currentDossier)}.\n\nLe courrier et les pièces utiles du dossier sont à joindre à cet email.\n\nCordialement,\n${creditorName(currentDossier)}`;
+      window.location.href=makeMailto(officerEmail,subject,body);
+    }
   }catch(err){console.error(err);}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
