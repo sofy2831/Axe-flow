@@ -1814,6 +1814,13 @@ function splitPersonNameFrench(value){
   // Axe Flow affiche les personnes sous la forme NOM Prénom(s) (ex. Cendrier Alexis).
   return{lastName:parts[0],firstNames:parts.slice(1).join(" ")};
 }
+function splitClaimantNameFrench(value){
+  const parts=clean(value).split(/\s+/).filter(Boolean);
+  if(!parts.length)return{firstNames:"",lastName:""};
+  if(parts.length===1)return{firstNames:"",lastName:parts[0]};
+  // Le représentant de « Mon entreprise » est saisi sous la forme Prénom(s) NOM.
+  return{firstNames:parts.slice(0,-1).join(" "),lastName:parts.at(-1)};
+}
 async function generatePrivateCerfa12948Overlay(pdfDoc){
   const {rgb,StandardFonts}=PDFLib;
   try{pdfDoc.getForm().flatten()}catch(e){console.warn("Aplatissement CERFA 12948",e)}
@@ -1831,7 +1838,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   const p=currentUserData?.businessProfile||{};
   const claimantCompany=(cerfaGenerationOptions?.claimantKind||"person")==="company";
   const claimantDisplay=clean(p.representative||p.representant||p.companyName||currentUserData?.displayName||creditorName(currentDossier));
-  const claimant=splitPersonNameFrench(claimantDisplay);
+  const claimant=splitClaimantNameFrench(claimantDisplay);
   const debtor=splitPersonNameFrench(debtorName(currentDossier));
   const cem=splitEmail(creditorEmail(currentDossier));
   const dem=splitEmail(debtorEmail(currentDossier));
@@ -1851,35 +1858,35 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   }else{
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
     mark(page1,42.5,559.3,female); mark(page1,184,559.3,!female);
-    put(page1,262,559,`${claimant.lastName} ${claimant.firstNames}`.trim(),8.2,270); // nom + prénom en face de Madame / Monsieur
-    put(page1,263,540,claimant.lastName,8.2,272);              // nom de naissance
-    put(page1,119,501,claimant.firstNames,8.2,417); // prénoms
+    put(page1,265,559,`${claimant.firstNames} ${claimant.lastName}`.trim(),8.2,267); // nom + prénom en face de Madame / Monsieur
+    put(page1,266,540,claimant.lastName,8.2,269);              // nom de naissance
+    put(page1,122,501,claimant.firstNames,8.2,414); // prénoms
     const claimantBirthDate=clean(cerfaGenerationOptions?.claimantBirthDate);
     if(claimantBirthDate){
       const [by,bm,bd]=claimantBirthDate.split("-");
-      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,177.2+(i*15.5),481,ch,9.2,10));
+      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,180.2+(i*15.5),481,ch,9.2,10));
     }
-    put(page1,163,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,372); // lieu de naissance — décalé dans la zone bleue
+    put(page1,166,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,369); // lieu de naissance — décalé dans la zone bleue
     // profession : laissée vierge tant qu'elle n'est pas collectée par Axe Flow
-    put(page1,136,440,"France",8.2,397);                       // nationalité
-    put(page1,125,401,creditorAddress(currentDossier),8.2,412);// adresse
-    put(page1,266,361,creditorCity(currentDossier),8.2,272);   // commune
-    String(creditorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page1,111.2+(i*15.5),361,ch,8.2,10));     // CP
-    put(page1,79,341,clean(p.country)||"France",8.2,457);      // pays
-    put(page1,191,321,cem.left,8.0,202); put(page1,412,321,cem.right,8.0,125);
+    put(page1,139,440,"France",8.2,394);                       // nationalité
+    put(page1,128,401,creditorAddress(currentDossier),8.2,409);// adresse
+    put(page1,269,361,creditorCity(currentDossier),8.2,269);   // commune
+    String(creditorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page1,114.2+(i*15.5),361,ch,8.2,10));     // CP
+    put(page1,82,341,clean(p.country)||"France",8.2,454);      // pays
+    put(page1,194,321,cem.left,8.0,199); put(page1,415,321,cem.right,8.0,122);
   }
 
   // PAGE 2 — PREMIER DÉBITEUR PARTICULIER
-  put(page2,154,566,debtorName(currentDossier),8.7,330,true);
+  put(page2,157,566,debtorName(currentDossier),8.7,327,true);
   const dfemale=(cerfaGenerationOptions?.debtorGender||"male")==="female";
   mark(page2,42.7,527.4,dfemale); mark(page2,184.5,527.7,!dfemale);
-  put(page2,252,508,debtor.lastName,8.2,287);                  // nom
-  put(page2,116,468,debtor.firstNames,8.2,420);                // prénoms
-  put(page2,114,449,debtorAddress(currentDossier),8.2,425);
-  put(page2,263,409,debtorCity(currentDossier),8.2,275);
-  put(page2,113,409,debtorZip(currentDossier),8.2,72);
-  put(page2,73,389,"France",8.2,465);
-  put(page2,160,369,dem.left,8.0,200); put(page2,372,369,dem.right,8.0,165);
+  put(page2,255,508,debtor.lastName,8.2,284);                  // nom
+  put(page2,119,468,debtor.firstNames,8.2,417);                // prénoms
+  put(page2,117,449,debtorAddress(currentDossier),8.2,422);
+  put(page2,266,409,debtorCity(currentDossier),8.2,272);
+  String(debtorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page2,116+(i*15.5),409,ch,8.2,10));
+  put(page2,76,389,"France",8.2,462);
+  put(page2,163,369,dem.left,8.0,197); put(page2,375,369,dem.right,8.0,162);
 
   // PAGE 3 — VOTRE DEMANDE. Les options juridiques facultatives restent décochées.
   // Le bloc libre est prérempli dynamiquement à partir DU dossier particulier courant.
@@ -1902,23 +1909,23 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     if(line)lines.push(line);
     lines.slice(0,maxLines).forEach((ln,i)=>page.drawText(ln,{x,y:y-i*lineHeight,size,font,color:ink}));
   };
-  drawWrapped(page3,48,199,demandText,8.0,495,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
+  drawWrapped(page3,51,199,demandText,8.0,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
   // PAGE 4 — SOMMES DEMANDÉES / FONDEMENT / DATE
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
   const invoices=normalizeInvoices(currentDossier);
-  put(page4,214,725,amountForCerfa(calc.principal)+" EUR",8.6,142,true); // principal
+  put(page4,217,725,amountForCerfa(calc.principal)+" EUR",8.6,139,true); // principal
   const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)))];
   const rate=rates.length===1?rates[0]:0;
   if(rate>0){
     mark(page4,42.9,611.6,true);
-    put(page4,81,599,String(rate).replace(".",",")+" %",8.2,104);
-    put(page4,213,598,amountForCerfa(calc.interests)+" EUR",8.2,142);
+    put(page4,84,599,String(rate).replace(".",",")+" %",8.2,101);
+    put(page4,216,598,amountForCerfa(calc.interests)+" EUR",8.2,139);
   }
   const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
   const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
-  let yy=724; for(const line of basis){put(page4,381,yy,line,7.5,172);yy-=13}
-  put(page4,80,459.2,injunctionPreparationFr(),8.4,105,true);   // champ Date remonté d’environ 0,5 % de la hauteur A4
+  let yy=724; for(const line of basis){put(page4,384,yy,line,7.5,169);yy-=13}
+  put(page4,83,459.2,injunctionPreparationFr(),8.4,102,true);   // champ Date remonté d’environ 0,5 % de la hauteur A4
 
   // Signature dans la zone officielle, à gauche et juste sous « Votre signature ».
   if(signatureDataUrl){
@@ -2274,8 +2281,8 @@ function debtStatementHtml(d=currentDossier){
   <footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>Décompte de créance</strong></footer></section></body></html>`}
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
 async function renderInjunctionFiles(){if(!currentUser||!currentDossier||!E.injunctionFilesList)return;E.injunctionFilesList.innerHTML="";try{const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files")),files=[];snap.forEach(s=>{const f=s.data()||{};if(f.type==="injunction_piece")files.push({id:s.id,...f})});files.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));if(!files.length){E.injunctionFilesList.innerHTML=`<div class="upload-status">Aucune pièce déposée pour ce dossier.</div>`;return}files.forEach(f=>{const item=document.createElement("div");item.className="uploaded-file-item";const name=esc(f.name||f.filename||"Pièce jointe"),url=esc(f.url||"#"),size=f.size?`<span class="uploaded-file-meta">${Math.ceil(Number(f.size||0)/1024)} Ko</span>`:"",path=esc(f.path||"");item.innerHTML=`<span title="${name}">${name}</span>${size}<div class="uploaded-file-actions"><a href="${url}" target="_blank" rel="noopener">Voir</a><button class="mini-delete-file-btn" type="button" data-delete-file="${esc(f.id)}" data-delete-path="${path}">Supprimer</button></div>`;E.injunctionFilesList.appendChild(item)})}catch(err){console.error(err);E.injunctionFilesList.innerHTML=`<div class="upload-status">Impossible de charger les pièces du dossier.</div>`}}
-async function deleteInjunctionFile(fileId,path){if(!currentUser||!currentDossier||!fileId)return;if(!confirm("Supprimer cette pièce du dossier ?"))return;try{await deleteDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id,"files",fileId));if(path){try{await deleteObject(storageRef(storage,path))}catch(storageError){console.warn("Fichier Storage non supprimé :",storageError)}}await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:"Pièce injonction supprimée",description:`Une pièce a été supprimée le ${todayFR()}`,action:"delete_injunction_file",type:"file_delete",createdAt:serverTimestamp()});await renderInjunctionFiles();await renderTimeline()}catch(err){console.error(err);alert("Suppression impossible. Vérifie les règles Firebase.")}}
-async function uploadInjunctionFiles(files){if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}if(!files||!files.length)return;try{E.uploadInjunctionFilesBtnPro.disabled=true;E.uploadInjunctionFilesBtnPrivate.disabled=true;let done=0;for(const file of files){const safeName=String(file.name||"piece").replace(/[^A-Za-z0-9_.-]+/g,"-"),path=`users/${currentUser.uid}/requests/${currentDossier.id}/injunction/${Date.now()}_${safeName}`,r=storageRef(storage,path);await uploadBytes(r,file,{contentType:file.type||"application/octet-stream"});const url=await getDownloadURL(r);await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"),{name:file.name,filename:file.name,url,path,type:"injunction_piece",mimeType:file.type||"",size:file.size||0,uploadedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});done++}E.injunctionUploadStatus.textContent=`${done} fichier(s) ajouté(s) au dossier.`;await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{title:"Pièces injonction ajoutées",description:`${done} fichier(s) uploadé(s) le ${todayFR()}`,action:"upload_injunction_files",type:"file_upload",createdAt:serverTimestamp()});await renderTimeline();await renderInjunctionFiles()}catch(err){console.error(err);alert("Upload impossible. Vérifie les règles Firebase Storage.")}finally{E.uploadInjunctionFilesBtnPro.disabled=false;E.uploadInjunctionFilesBtnPrivate.disabled=false;E.injunctionFilesInput.value=""}}
+async function deleteInjunctionFile(fileId,path){if(!currentUser||!currentDossier||!fileId)return;if(!confirm("Supprimer cette pièce du dossier ?"))return;try{await deleteDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id,"files",fileId));if(path){try{await deleteObject(storageRef(storage,path))}catch(storageError){console.warn("Fichier Storage non supprimé :",storageError)}}await renderInjunctionFiles();await renderTimeline()}catch(err){console.error(err);alert("Suppression impossible. Vérifie les règles Firebase.")}}
+async function uploadInjunctionFiles(files){if(!currentUser||!currentDossier){alert("Sélectionnez un dossier.");return}if(!files||!files.length)return;try{E.uploadInjunctionFilesBtnPro.disabled=true;E.uploadInjunctionFilesBtnPrivate.disabled=true;let done=0;for(const file of files){const safeName=String(file.name||"piece").replace(/[^A-Za-z0-9_.-]+/g,"-"),path=`users/${currentUser.uid}/requests/${currentDossier.id}/injunction/${Date.now()}_${safeName}`,r=storageRef(storage,path);await uploadBytes(r,file,{contentType:file.type||"application/octet-stream"});const url=await getDownloadURL(r);await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"),{name:file.name,filename:file.name,url,path,type:"injunction_piece",mimeType:file.type||"",size:file.size||0,uploadedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});done++}E.injunctionUploadStatus.textContent=`${done} fichier(s) ajouté(s) au dossier.`;await renderTimeline();await renderInjunctionFiles()}catch(err){console.error(err);alert("Upload impossible. Vérifie les règles Firebase Storage.")}finally{E.uploadInjunctionFilesBtnPro.disabled=false;E.uploadInjunctionFilesBtnPrivate.disabled=false;E.injunctionFilesInput.value=""}}
 function isoToday(){const d=new Date(),offset=d.getTimezoneOffset();return new Date(d.getTime()-offset*60000).toISOString().slice(0,10)}
 function updatePaymentPreview(){if(!currentDossier)return;const balance=principalBalance(currentDossier),amount=Number(E.paymentAmountInput.value||0),after=Math.max(0,balance-(Number.isFinite(amount)?amount:0));E.paymentBalancePreview.innerHTML=`Montant initial : <strong>${formatCurrency(principalAmount(currentDossier))}</strong><br>Paiements déjà reçus : <strong>${formatCurrency(totalPayments(currentDossier))}</strong><br>Solde actuel : <strong>${formatCurrency(balance)}</strong><br>Solde après ce paiement : <strong>${formatCurrency(after)}</strong>`}
 function openPaymentModal(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const balance=principalBalance(currentDossier);if(balance<=0){alert("Ce dossier est déjà intégralement payé.");return}E.paymentForm.reset();E.paymentDateInput.value=isoToday();E.paymentMethodInput.value="Virement";E.paymentAmountInput.max=String(balance);const total=lateFeeBreakdown(currentDossier).total;E.paymentModalSub.innerHTML=`Principal restant : <strong>${formatCurrency(balance)}</strong> — Total à régler : <span class="total-orange">${formatCurrency(total)}</span>`;if(E.fillFullPaymentBtn)E.fillFullPaymentBtn.textContent=`Solde intégral (${formatCurrency(balance)})`;updatePaymentPreview();E.paymentModal.classList.add("open");setTimeout(()=>E.paymentAmountInput.focus(),50)}
@@ -2701,7 +2708,7 @@ async function loadDetailTimeline(d){
   E.detailTimeline.innerHTML='<div class="empty-state">Chargement…</div>';
   try{
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
-    snap.forEach(s=>events.push({id:s.id,...s.data()}));
+    snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
     events.sort((a,b)=>{
       const eventTime=x=>{
         if(x?.effectiveDate){
@@ -2886,7 +2893,7 @@ async function renderTimeline(){
   }
   const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"));
   const all=[];
-  snap.forEach(s=>all.push({id:s.id,...s.data()}));
+  snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))all.push(ev)});
   all.sort((a,b)=>{
     const eventTime=x=>{
       if(x?.effectiveDate){
