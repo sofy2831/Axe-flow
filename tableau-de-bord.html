@@ -2747,7 +2747,13 @@ async function loadDetailTimeline(d){
       }
       if(action==="non_opposition_prepared"){
         const body=`<p>Madame, Monsieur,</p><p>Je vous prie de bien vouloir me délivrer un <strong>certificat de non-opposition</strong> concernant l’ordonnance portant injonction de payer rendue dans le dossier référencé <strong>${escapeHtml(d.ref||"")}</strong>, opposant le créancier à <strong>${escapeHtml(debtorName(d))}</strong>.</p><p>Cette demande intervient après signification de l’ordonnance et sous réserve de l’expiration du délai légal d’opposition sans opposition enregistrée.</p><p>Je vous remercie de bien vouloir adresser le certificat au créancier aux coordonnées figurant sur le présent courrier.</p><p>Veuillez agréer, Madame, Monsieur, l’expression de mes salutations distinguées.</p>`;
-        printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,d,{date:eventDate}));
+        const court=d.injunctionCourt||{};
+        const courtName=clean(court.name)||clean(d.courtName)||"Juridiction compétente";
+        const courtAddress=clean(court.address)||clean(d.courtAddress)||"";
+        const courtZip=clean(court.zip)||clean(d.courtZip)||"";
+        const courtCity=clean(court.city)||clean(d.courtCity)||"";
+        const recipientAddress=[courtAddress,[courtZip,courtCity].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+        printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,d,{date:eventDate,recipientName:courtName,recipientAddress}));
         return;
       }
       if(action==="enforcement_prepared"){
