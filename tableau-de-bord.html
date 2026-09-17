@@ -2802,10 +2802,24 @@ async function loadDetailTimeline(d){
       return x?.createdAt?.toMillis?.()||0;
     };
     events.sort((a,b)=>{
-      const delta=eventTime(a)-eventTime(b);if(delta)return delta;
+      // Chronologie du dossier : le plus récent en haut.
+      const delta=eventTime(b)-eventTime(a);if(delta)return delta;
       const aa=a.action||a.type||"",bb=b.action||b.type||"";
-      const p=(actionOrder[aa]??99)-(actionOrder[bb]??99);if(p)return p;
-      return (a?.createdAt?.toMillis?.()||0)-(b?.createdAt?.toMillis?.()||0);
+      // À date identique, conserver l'ordre métier demandé :
+      // paiement judiciaire puis règlement, avant l'étape qui les précède.
+      const sameDayOrder={
+        judicial_full_payment:0,
+        payment_received_full:1,
+        judicial_partial_payment:2,
+        payment_received:3,
+        injunction_prepared:4,
+        med:5,relance3:6,relance2:7,relance1:8,invoice_due:9
+      };
+      const aFull=aa==="payment_received"&&Number(a.balanceAfter)<=0;
+      const bFull=bb==="payment_received"&&Number(b.balanceAfter)<=0;
+      const ao=aFull?1:(sameDayOrder[aa]??50),bo=bFull?1:(sameDayOrder[bb]??50);
+      if(ao!==bo)return ao-bo;
+      return (b?.createdAt?.toMillis?.()||0)-(a?.createdAt?.toMillis?.()||0);
     });
     if(!events.length){
       if(firstInv){
@@ -2895,9 +2909,16 @@ function openDossierDetailModal(d){
   }
   E.detailActions.innerHTML=actionHtml;
   E.detailActions.querySelector("#detailRecordPaymentBtn")?.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();E.recordPaymentBtn?.click()});
-  E.detailActions.querySelectorAll("[data-detail-action]").forEach(btn=>btn.addEventListener("click",()=>{
-    if(btn.dataset.detailAction==="debtor_notice"){alert("Cette action sera raccordée au parcours Injonction lors de l’adaptation de cette étape.");return;}
-    E.dossierDetailModal.classList.remove("open");renderAll();document.querySelector(`[data-action="${btn.dataset.detailAction}"]`)?.click()
+  E.detailActions.querySelectorAll("[data-detail-action]").forEach(btn=>btn.addEventListener("click",ev=>{
+    ev.preventDefault();ev.stopPropagation();
+    const action=btn.dataset.detailAction;
+    if(action==="debtor_notice"){alert("Cette action sera raccordée au parcours Injonction lors de l’adaptation de cette étape.");return;}
+    E.dossierDetailModal.classList.remove("open");
+    // Appels directs : ne dépend plus des anciennes cartes/boutons cachés du tableau de bord.
+    if(action==="injunction"){openInjunctionModal();return;}
+    if(action==="debtor_closure"||action==="court_closure"){openTextModal(action);return;}
+    if(action==="closure"){openTextModal(action);return;}
+    openTextModal(action);
   }));
   E.detailInvoices.innerHTML=normalizeInvoices(d).map(inv=>`<div class="detail-invoice"><div><strong>${esc(inv.ref)}</strong><small>Émission ${esc(fmtDateFR(inv.issuedDate))} • Échéance ${esc(fmtDateFR(inv.dueDate))} • Taux ${Number(inv.lateRatePercent??8.25).toLocaleString("fr-FR")}%</small></div><strong>${formatCurrency(inv.amount)}</strong></div>`).join("")||'<div class="empty-state">Aucune facture.</div>';
   const paymentHistory=$("detailPaymentsHistory"),paymentRows=normalizePayments(d).slice().reverse();
