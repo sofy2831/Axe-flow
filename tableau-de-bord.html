@@ -2737,17 +2737,23 @@ async function markStep(action){
       nextActionAt:deleteField(),
       updatedAt:serverTimestamp()
     };
-    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
-    await releaseActiveEntitlementSlot(currentDossier);
-    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
-      title:"Dossier clôturé",
-      description:[`Motif : ${reason}`,comment?`Commentaire : ${comment}`:"",`Date de clôture : ${todayFR()}`].filter(Boolean).join("\n"),
-      action:"closure",
-      type:"closure",
-      closureReason:reason,
-      closureComment:comment,
-      createdAt:serverTimestamp()
+    // Clôture atomique : le dossier et sa ligne de chronologie sont enregistrés ensemble.
+    // Ainsi, si Firestore refuse l'événement, le dossier ne passe plus en « clôturé » à moitié.
+    const requestRef=doc(db,"users",currentUser.uid,"requests",currentDossier.id);
+    const closureEventRef=doc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"));
+    await runTransaction(db,async tx=>{
+      tx.update(requestRef,patch);
+      tx.set(closureEventRef,{
+        title:"Dossier clôturé",
+        description:[`Motif : ${reason}`,comment?`Commentaire : ${comment}`:"",`Date de clôture : ${todayFR()}`].filter(Boolean).join("\n"),
+        action:"closure",
+        type:"closure",
+        closureReason:reason,
+        closureComment:comment,
+        createdAt:serverTimestamp()
+      });
     });
+    await releaseActiveEntitlementSlot(currentDossier);
     await loadDossiers(currentUser.uid);
     return;
   }
@@ -3040,9 +3046,18 @@ function openDossierDetailModal(d){
     actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">Informer le débiteur</button>`;
     if(step>=5||d?.injunctionPublished)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="court_closure">Informer la juridiction</button>`;
   }
-  const judicialPaid=principalBalance(d)<=0&&(d?.status==="paid_pending_court_closure"||d?.nextAction==="CLOTURE_INJONCTION"||d?.injunctionPublished||step>=5);
+  const judicialPaid=principalBalance(d)<=0&&(
+    d?.status==="paid_pending_court_closure"||d?.status==="paid_closed"||d?.lifecycleStatus==="closed"||
+    d?.nextAction==="CLOTURE_INJONCTION"||d?.injunctionPublished||d?.injunctionPreparedAt||
+    d?.currentStep==="injunction_filed"||step>=5
+  );
   if(judicialPaid){
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button><button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
+    const closingText=fullyClosed
+      ?`<strong>✓ Dossier clôturé</strong><small>La créance est soldée. Les actions judiciaires postérieures à l’ordonnance restent accessibles.</small>`
+      :`<strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small>`;
+    const closeButton=fullyClosed?"":`<button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   E.detailActions.classList.toggle("judicial-premium-row",judicialPaid);
   E.detailActions.innerHTML=actionHtml;
