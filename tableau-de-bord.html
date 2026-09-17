@@ -679,7 +679,7 @@
  <div class="modal-head"><div><h2>Demande de certificat de non-opposition</h2><div class="panel-sub">Préparation du courrier à la juridiction</div></div><button class="close-btn" id="closeNonOppositionPrep" type="button">×</button></div>
  <div class="prep-grid"><div class="field"><label>Date du courrier</label><input id="nonOppositionDate" type="date"></div><div class="field"><label>Canal de transmission</label><select id="nonOppositionChannel"><option>Courrier</option><option>Email</option><option>Dépôt au greffe</option></select></div></div>
  <div class="prep-note"><strong>Pièces à joindre avant envoi :</strong> copie de l’ordonnance, preuve de signification et référence attribuée par la juridiction.</div>
- <div class="prep-actions"><button class="btn btn-secondary" id="cancelNonOppositionPrep" type="button">Annuler</button><button class="btn btn-primary" id="previewNonOppositionBtn" type="button">Prévisualiser le courrier</button></div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="previewNonOppositionBtn" type="button">◉ Prévisualiser le courrier</button><button class="btn btn-secondary" id="cancelNonOppositionPrep" type="button">Annuler</button><button class="btn btn-primary" id="validateNonOppositionBtn" type="button">Valider et enregistrer</button></div>
 </div></div></div>
 
 <div class="modal-backdrop judicial-prep-modal" id="enforcementPrepModal"><div class="modal"><div class="modal-inner">
@@ -689,7 +689,7 @@
  <div class="field" style="margin-top:12px"><label>Adresse</label><input id="enforcementOfficerAddress" type="text" placeholder="Adresse, code postal, ville"></div>
  <a class="btn btn-secondary search-link" id="enforcementOfficerSearch" href="https://annuaire.commissaire-justice.fr/" target="_blank" rel="noopener">↗ Annuaire des commissaires de justice</a>
  <div class="prep-note"><strong>Pièces à transmettre :</strong> ordonnance portant injonction de payer, acte de signification, certificat de non-opposition, décompte actualisé et pièces utiles du dossier.</div>
- <div class="prep-actions"><button class="btn btn-secondary" id="cancelEnforcementPrep" type="button">Annuler</button><button class="btn btn-primary" id="previewEnforcementBtn" type="button">Prévisualiser le courrier</button></div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="previewEnforcementBtn" type="button">◉ Prévisualiser le courrier</button><button class="btn btn-secondary" id="cancelEnforcementPrep" type="button">Annuler</button><button class="btn btn-primary" id="validateEnforcementBtn" type="button">Valider et enregistrer</button></div>
 </div></div></div>
 
 <div class="modal-backdrop" id="dossierDetailModal"><div class="modal"><div class="modal-inner">
@@ -1446,7 +1446,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <div class="signature">
     <p>Fait le ${escapeHtml(prepFr)}</p>
     <p>Signature du requérant :</p>
-    <p><strong>${escapeHtml(creditorName(d))}</strong></p>
+    <p><strong>${escapeHtml(clean(currentUserData?.businessProfile?.representative)||clean(currentUserData?.displayName)||creditorName(d))}</strong></p>
     ${signatureImgHtml()}
   </div>
 
@@ -3291,8 +3291,23 @@ $("previewNonOppositionBtn")?.addEventListener("click",()=>{
   if(!currentDossier)return;
   const channel=clean($("nonOppositionChannel")?.value),date=clean($("nonOppositionDate")?.value)||isoToday();
   const body=`<p>Madame, Monsieur,</p><p>Je vous prie de bien vouloir me délivrer un <strong>certificat de non-opposition</strong> concernant l’ordonnance portant injonction de payer rendue dans le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong>, opposant le créancier à <strong>${escapeHtml(debtorName(currentDossier))}</strong>.</p><p>Cette demande intervient après signification de l’ordonnance et sous réserve de l’expiration du délai légal d’opposition sans opposition enregistrée.</p><p>Je vous remercie de bien vouloir adresser le certificat au créancier aux coordonnées figurant sur le présent courrier.</p><p>Veuillez agréer, Madame, Monsieur, l’expression de mes salutations distinguées.</p>`;
-  closePrepModal("nonOppositionPrepModal");
   printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,currentDossier,{date}));
+});
+
+$("validateNonOppositionBtn")?.addEventListener("click",async()=>{
+  if(!currentUser||!currentDossier)return;
+  const date=clean($("nonOppositionDate")?.value)||isoToday();
+  const channel=clean($("nonOppositionChannel")?.value)||"Courrier";
+  const btn=$("validateNonOppositionBtn"),old=btn?.textContent||"Valider et enregistrer";
+  try{
+    if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
+    const patch={nonOppositionPrepared:true,nonOppositionPreparedDate:date,nonOppositionChannel:channel,updatedAt:serverTimestamp()};
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+    currentDossier={...currentDossier,...patch};
+    showSuccessToast?.("✓ Demande de non-opposition enregistrée");
+    closePrepModal("nonOppositionPrepModal");
+  }catch(err){console.error(err);alert("Impossible d’enregistrer la demande de non-opposition.\nCode : "+(err?.code||"inconnu"));}
+  finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
 $("generateEnforcementBtn")?.addEventListener("click",()=>openPrepModal("enforcementPrepModal","enforcementDate"));
@@ -3305,9 +3320,26 @@ $("previewEnforcementBtn")?.addEventListener("click",()=>{
   if(!officer||!address){alert("Renseignez l’étude choisie et son adresse.");return}
   const channel=clean($("enforcementChannel")?.value),date=clean($("enforcementDate")?.value)||isoToday();
   const calc=lateFeeBreakdown(currentDossier,parseLocalDate(date)||new Date());
-  const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(currentDossier))}</strong>, demeurant ${escapeHtml(debtorAddress(currentDossier))}, ${escapeHtml(debtorZip(currentDossier)+" "+debtorCity(currentDossier))}.</p><p>Le montant indicatif restant dû arrêté au ${escapeHtml(fmtDateFR(date))} s’élève à <strong>${escapeHtml(formatCurrency(calc.total))}</strong>, sous réserve de l’actualisation des intérêts, frais et sommes légalement applicables.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
-  closePrepModal("enforcementPrepModal");
+  const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(currentDossier))}</strong>, demeurant ${escapeHtml(debtorAddress(currentDossier))}, ${escapeHtml(debtorZip(currentDossier)+" "+debtorCity(currentDossier))}.</p><p>Le montant indicatif restant dû s’élève à <strong>${escapeHtml(formatCurrency(calc.total))}</strong>, sous réserve de l’actualisation des intérêts, frais et sommes légalement applicables.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
   printHtmlDocument(simpleJudicialLetterHtml("TRANSMISSION POUR EXÉCUTION D’UN TITRE EXÉCUTOIRE",body,currentDossier,{date,recipientName:officer,recipientAddress:address}));
+});
+
+$("validateEnforcementBtn")?.addEventListener("click",async()=>{
+  if(!currentUser||!currentDossier)return;
+  const officer=clean($("enforcementOfficerName")?.value),address=clean($("enforcementOfficerAddress")?.value);
+  if(!officer||!address){alert("Renseignez l’étude choisie et son adresse.");return}
+  const date=clean($("enforcementDate")?.value)||isoToday();
+  const channel=clean($("enforcementChannel")?.value)||"Email";
+  const btn=$("validateEnforcementBtn"),old=btn?.textContent||"Valider et enregistrer";
+  try{
+    if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
+    const patch={enforcementPrepared:true,enforcementPreparedDate:date,enforcementChannel:channel,enforcementOfficerName:officer,enforcementOfficerAddress:address,updatedAt:serverTimestamp()};
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),patch);
+    currentDossier={...currentDossier,...patch};
+    showSuccessToast?.("✓ Exécution forcée enregistrée");
+    closePrepModal("enforcementPrepModal");
+  }catch(err){console.error(err);alert("Impossible d’enregistrer la préparation de l’exécution forcée.\nCode : "+(err?.code||"inconnu"));}
+  finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
 $("closeCerfaOptionsModal")?.addEventListener("click",closeCerfaOptionsModal);
