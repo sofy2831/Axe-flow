@@ -2731,7 +2731,7 @@ async function loadDetailTimeline(d){
     E.detailTimeline.innerHTML=events.map(ev=>{
       const eventAction=ev.action||ev.type||"";
       const eventDate=ev.effectiveDate||ev.date||"";
-      const canView=["relance1","relance2","relance3","med","injunction_prepared"].includes(eventAction);
+      const canView=["relance1","relance2","relance3","med","injunction_prepared","non_opposition_prepared","enforcement_prepared"].includes(eventAction);
       return`<div class="detail-event"><div class="detail-event-main"><time>${esc(fmtDateFR(eventDate||ev.createdAt)||"—")}</time><strong>${esc(ev.title||ev.label||ev.action||"Action")}</strong>${ev.description?`<div class="ov-sub">${esc(ev.description)}</div>`:""}</div>${canView?`<button class="detail-event-view" type="button" data-view-action="${esc(eventAction)}" data-view-date="${esc(eventDate)}">↗ Voir</button>`:""}</div>`;
     }).join("");
     E.detailTimeline.querySelectorAll("[data-view-action]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -2743,6 +2743,19 @@ async function loadDetailTimeline(d){
         d.injunctionPreparationDate=eventDate;
         try{openInjunctionRequestPrint(d,court.name||"",court.address||"")}
         finally{d.injunctionPreparationDate=previousDate}
+        return;
+      }
+      if(action==="non_opposition_prepared"){
+        const body=`<p>Madame, Monsieur,</p><p>Je vous prie de bien vouloir me délivrer un <strong>certificat de non-opposition</strong> concernant l’ordonnance portant injonction de payer rendue dans le dossier référencé <strong>${escapeHtml(d.ref||"")}</strong>, opposant le créancier à <strong>${escapeHtml(debtorName(d))}</strong>.</p><p>Cette demande intervient après signification de l’ordonnance et sous réserve de l’expiration du délai légal d’opposition sans opposition enregistrée.</p><p>Je vous remercie de bien vouloir adresser le certificat au créancier aux coordonnées figurant sur le présent courrier.</p><p>Veuillez agréer, Madame, Monsieur, l’expression de mes salutations distinguées.</p>`;
+        printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,d,{date:eventDate}));
+        return;
+      }
+      if(action==="enforcement_prepared"){
+        const ev=events.find(x=>(x.action||x.type)==="enforcement_prepared"&&(x.effectiveDate||x.date||"")===eventDate)||events.find(x=>(x.action||x.type)==="enforcement_prepared")||{};
+        const officer=clean(ev.officerName),address=clean(ev.officerAddress),zip=clean(ev.officerZip),city=clean(ev.officerCity);
+        const calc=lateFeeBreakdown(d,parseLocalDate(eventDate)||new Date());
+        const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(d.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(d))}</strong>, demeurant ${escapeHtml(debtorAddress(d))}, ${escapeHtml(debtorZip(d)+" "+debtorCity(d))}.</p><p>Le montant indicatif restant dû s’élève à <strong>${escapeHtml(formatCurrency(calc.total))}</strong>, sous réserve de l’actualisation des intérêts, frais et sommes légalement applicables.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
+        printHtmlDocument(simpleJudicialLetterHtml("TRANSMISSION POUR EXÉCUTION D’UN TITRE EXÉCUTOIRE",body,d,{date:eventDate,recipientName:officer,recipientAddress:[address,`${zip} ${city}`].filter(Boolean).join("\n")}));
         return;
       }
       currentAction=action;
