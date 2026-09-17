@@ -2349,25 +2349,31 @@ async function downloadCompleteInjunctionZip(){
       const filePath=clean(f.path||f.storagePath||f.filePath);
       const fileUrl=clean(f.url||f.downloadURL||f.downloadUrl);
       let bytes=null,lastError=null;
-      // 1) L'URL déjà utilisée par le bouton « Voir » est la source la plus fidèle à la pièce affichée.
-      if(fileUrl){
+      // 1) Firebase Storage : même fichier que celui enregistré dans la modale.
+      if(filePath){
+        try{bytes=await getBytes(storageRef(storage,filePath))}
+        catch(err){lastError=err;console.warn("Téléchargement Storage impossible :",fileName,err)}
+      }
+      // 2) Repli sur l’URL du bouton « Voir » si nécessaire.
+      if(!bytes&&fileUrl){
         try{
-          const r=await fetch(fileUrl,{method:"GET",cache:"no-store",credentials:"omit"});
+          const r=await fetch(fileUrl,{method:"GET",cache:"no-store"});
           if(!r.ok)throw new Error(`HTTP ${r.status}`);
           bytes=await r.arrayBuffer();
         }catch(err){lastError=err;console.warn("Téléchargement par URL impossible :",fileName,err)}
-      }
-      // 2) Repli sur Firebase Storage avec le chemin enregistré lors de l'upload.
-      if(!bytes&&filePath){
-        try{bytes=await getBytes(storageRef(storage,filePath))}
-        catch(err){lastError=err;console.warn("Téléchargement Storage impossible :",fileName,err)}
       }
       if(bytes&&bytes.byteLength){complementaryFolder.file(fileName,bytes)}
       else missing.push(`${fileName}${lastError?.message?` (${lastError.message})`:""}`);
     }
     if(missing.length)throw new Error(`Pièce(s) complémentaire(s) non récupérée(s) : ${missing.join(", ")}`);
     if(btn)btn.textContent="Création du ZIP…";
-    const blob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:4}});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`dossier_injonction_${safeRef}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    // Les PDF sont déjà compressés : STORE est beaucoup plus rapide et évite les ZIP longs à finaliser.
+    const zipBytes=await zip.generateAsync({type:"uint8array",compression:"STORE"});
+    const blob=new Blob([zipBytes],{type:"application/zip"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=`dossier_injonction_${safeRef}.zip`;a.style.display="none";document.body.appendChild(a);
+    a.dispatchEvent(new MouseEvent("click",{bubbles:false,cancelable:true,view:window}));
+    setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},15000);
     showSuccessToast?.("Dossier complet ZIP téléchargé");
   }catch(err){console.error(err);alert("Impossible de préparer le dossier ZIP. "+(err?.message||err))}finally{if(btn){btn.disabled=false;btn.textContent="⇩ Télécharger le dossier complet"}}
 }
@@ -2691,12 +2697,14 @@ let overviewFilter="all";
 function dossierStageInfo(d){
   const step=getStep(d), paid=principalBalance(d)<=0, closed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
   if(closed)return{key:"closed",label:"Réglé",cls:"closed",stage:6};
+  // Un dossier intégralement payé doit apparaître comme payé sur le tableau de bord,
+  // même si la finalisation judiciaire n’est pas encore clôturée.
+  if(paid)return{key:"closed",label:"Payé",cls:"closed",stage:6};
   if(step>=5||d?.injunctionPublished)return{key:"injunction",label:"Injonction",cls:"inj",stage:5};
   if(step===4)return{key:"med",label:"Mise en demeure",cls:"med",stage:4};
   if(step===3)return{key:"amicable",label:"Relance 3",cls:"relance",stage:3};
   if(step===2)return{key:"amicable",label:"Relance 2",cls:"relance",stage:2};
   if(step===1)return{key:"amicable",label:"Relance 1",cls:"relance",stage:1};
-  if(paid)return{key:"closed",label:"Réglé",cls:"closed",stage:0};
   return{key:"open",label:"Échue",cls:"",stage:0};
 }
 function dossierDelayDays(d){
@@ -3435,7 +3443,7 @@ $("injunctionGeneratedPieces")?.addEventListener("click",e=>{
   previewProfessionalLetter(body,currentDossier,dateMap[a]||injunctionPreparationIso());
 });
 
-E.downloadInjunctionZipBtn?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();downloadCompleteInjunctionZip()});
+E.downloadInjunctionZipBtn?.addEventListener("click",async e=>{e.preventDefault();e.stopPropagation();await downloadCompleteInjunctionZip()});
 E.uploadInjunctionFilesBtnPro.addEventListener("click",()=>E.injunctionFilesInput.click());
 E.uploadInjunctionFilesBtnPrivate.addEventListener("click",()=>E.injunctionFilesInput.click());
 E.injunctionFilesInput.addEventListener("change",e=>uploadInjunctionFiles(e.target.files));
