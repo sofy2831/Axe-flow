@@ -1025,52 +1025,37 @@ function relanceNextInfo(action,effectiveDate){
 function nextActionInfo(action){if(action==="relance1")return{code:"RELANCE_2",label:"Relance 2 à préparer",days:RELANCE_GAP_DAYS};if(action==="relance2")return{code:"RELANCE_3",label:"Relance 3 à préparer",days:RELANCE_GAP_DAYS};if(action==="relance3")return{code:"MED",label:"Mise en demeure à préparer",days:RELANCE_GAP_DAYS};if(action==="med")return{code:"INJONCTION",label:"Injonction à préparer",days:MED_DELAY_DAYS};if(action==="injunction")return{code:"SIGNIFICATION",label:"Signification à organiser",days:0};return null}
 function nextActionLabel(code){return code==="RELANCE_2"?"Relance 2 à préparer":code==="RELANCE_3"?"Relance 3 à préparer":code==="MED"?"Mise en demeure à préparer":code==="INJONCTION"?"Injonction à préparer":code==="SIGNIFICATION"?"Signification à organiser":"Prochaine action"}
 function courtClosureText(d){
-  const refs=normalizeInvoices(d).map(x=>x.ref).filter(Boolean).join(", ");
-  const paymentDate=normalizePayments(d).at(-1)?.date;
-  const paidDate=paymentDate?fmtDateFR(paymentDate):todayFR();
-  return`Objet : Règlement intégral – information sur la requête en injonction de payer
+  const payments=normalizePayments(d),last=payments.at(-1)||{};
+  const paidDate=last.date||new Date().toISOString().slice(0,10);
+  const amount=formatCurrency(Number(last.amount||0));
+  return`Objet : Information — Paiement pendant la procédure d'injonction de payer
 
-Madame, Monsieur le Greffier,
+Réf. dossier : ${d?.ref||"—"}
 
-Nous vous informons que, dans le cadre de la requête en injonction de payer concernant le dossier ${d?.ref||"—"}, opposant :
+INFORMATION AU GREFFE — RÈGLEMENT INTÉGRAL DE LA CRÉANCE
 
-Créancier : ${creditorName(d)}
-Débiteur : ${debtorName(d)}
-${refs?`Facture(s) concernée(s) : ${refs}`:""}
-
-le débiteur a procédé au règlement intégral de la créance le ${paidDate}.
-
-Le solde principal restant dû est désormais de 0,00 €.
-
-En conséquence, le créancier n’entend plus poursuivre sa demande au titre de cette créance et vous remercie de bien vouloir prendre acte de ce règlement intégral et du désistement de la procédure correspondante.
-
-Nous restons à votre disposition pour toute pièce ou précision complémentaire.
-
-Cordialement,
+Nous vous informons, dans le cadre du dossier ${d?.ref||"—"} pendant devant votre juridiction, qu'un paiement du débiteur ${debtorName(d)} a été enregistré le ${paidDate} pour un montant de ${amount}. Au ${fmtDateFR(paidDate)}, le principal restant dû est de 0,00 € et le TOTAL RESTANT À RÉGLER de 0,00 €. Nous sollicitons en conséquence l'arrêt de la procédure et vous prions d'agréer nos salutations distinguées.
 
 ${creditorName(d)}
-Référence dossier Axe Flow : ${d?.ref||"—"}`;
+${clean(currentUserData?.businessProfile?.representative)||""}`;
 }
 
 function debtorClosureAfterInjunctionText(d){
-  const refs=normalizeInvoices(d).map(x=>x.ref).filter(Boolean).join(", ");
-  const paymentDate=normalizePayments(d).at(-1)?.date;
-  const paidDate=paymentDate?fmtDateFR(paymentDate):todayFR();
-  return`Objet : Confirmation de règlement intégral – clôture de la procédure
+  const payments=normalizePayments(d),last=payments.at(-1)||{};
+  const paidDate=last.date||new Date().toISOString().slice(0,10);
+  const amount=formatCurrency(Number(last.amount||0));
+  const method=clean(last.method)||"Règlement";
+  return`Objet : Information — Paiement pendant la procédure d'injonction de payer
 
-${debtorName(d)},
+Réf. dossier : ${d?.ref||"—"}
 
-Nous accusons réception de votre règlement intégral, enregistré le ${paidDate}, concernant ${refs?`la ou les facture(s) ${refs}`:"la créance faisant l’objet de notre dossier"}.
+CONFIRMATION DE RÈGLEMENT INTÉGRAL
 
-Le solde principal restant dû est désormais de 0,00 €.
+Nous accusons réception de votre règlement du ${paidDate} d'un montant de ${amount} (${method}). Ce paiement est enregistré au titre du dossier ${d?.ref||"—"}. Après imputation, le principal restant dû s'élève à 0,00 € et le TOTAL RESTANT À RÉGLER (tous accessoires compris) à 0,00 € à la date du ${fmtDateFR(paidDate)}.
+Le paiement intégral permet d'envisager l'arrêt de la procédure et la clôture du dossier.
 
-Une procédure d’injonction de payer ayant déjà été transmise au tribunal, nous informons également la juridiction du règlement intégral intervenu et de l’arrêt de notre demande au titre de cette créance.
-
-Nous vous confirmons en conséquence qu’aucune nouvelle démarche de recouvrement ne sera poursuivie pour les sommes désormais réglées.
-
-Cordialement,
-
-${creditorName(d)}`;
+${creditorName(d)}
+${clean(currentUserData?.businessProfile?.representative)||""}`;
 }
 
 function closureText(d){
@@ -1639,7 +1624,12 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
 
 function previewProfessionalLetter(body,d=currentDossier,effectiveDate=""){
   if(!E.letterPreviewModal||!E.letterPreviewFrame)return;
-  const html=professionalLetterHtml(body,d,"",effectiveDate);
+  let recipientOverride="";
+  if(currentAction==="court_closure"){
+    const c=d?.injunctionCourt||{};
+    recipientOverride=["Monsieur/Madame le Greffier",clean(c.name),clean(c.address),[clean(c.zip),clean(c.city)].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+  }
+  const html=professionalLetterHtml(body,d,recipientOverride,effectiveDate);
   E.letterPreviewFrame.srcdoc=html;
   E.letterPreviewSub.textContent=`${actionTitle(currentAction)} — ${d?.ref||"Dossier"}`;
   E.letterPreviewModal.classList.add("open");
@@ -2484,7 +2474,7 @@ async function validateRelanceAction(){
   }
 }
 
-function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(["relance1","relance2","relance3","med"].includes(action)){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
+function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(principalBalance(currentDossier)<=0&&!["closure","court_closure","debtor_closure","injunction"].includes(action)){alert("Ce dossier est intégralement payé. Aucune nouvelle action de recouvrement n’est nécessaire.");return}if(["relance1","relance2","relance3","med"].includes(action)){openRelanceActionModal(action);return}if(action==="injunction"){openInjunctionModal();return}currentDossier={...currentDossier,creditorName:clean(E.creditorNameEdit.value),creditorEmail:clean(E.creditorEmailEdit.value),creditorAddress:clean(E.creditorAddressEdit.value),creditorZip:clean(E.creditorZipEdit.value),creditorCity:clean(E.creditorCityEdit.value)};currentAction=action;currentText=buildText(action,currentDossier);E.modalTitle.textContent=actionTitle(action);E.modalSub.textContent=`${currentDossier.ref||"Dossier"} • Facture ${invoiceNumber(currentDossier)}`;E.modalCreditorBox.textContent="Vous / Créancier :\n"+creditorBlock(currentDossier);E.modalDebtorBox.textContent="Votre client / Débiteur :\n"+debtorBlock(currentDossier);E.medSendBox.style.display=action==="med"?"block":"none";E.textContent.textContent=currentText;if(action==="court_closure"){
   E.modalDebtorBox.textContent="Tribunal / Greffe :\nCoordonnées à compléter dans votre messagerie ou lors de l’impression.";
   E.mailBtn.href=makeMailto("",actionTitle(action)+" – "+(currentDossier.ref||"Dossier"),currentText);
 }else{
@@ -2798,17 +2788,26 @@ async function loadDetailTimeline(d){
     });
     events.push(...syntheticJudicial);
 
+    // Parcours métier affiché du plus ancien au plus récent.
+    // La facture échue ouvre toujours la chronologie, puis les actions suivent
+    // R1 → R2 → R3 → MED → injonction → règlements.
+    const firstInv=overviewPrimaryInvoice(d)||normalizeInvoices(d)[0];
+    if(firstInv?.dueDate&&!events.some(ev=>(ev.action||ev.type)==="invoice_due")){
+      events.push({id:"synthetic-invoice-due",action:"invoice_due",type:"invoice_due",title:"Facture échue",effectiveDate:firstInv.dueDate,description:`${formatCurrency(principalAmount(d))} à recouvrer.`});
+    }
+    const actionOrder={invoice_due:0,relance1:10,relance2:20,relance3:30,med:40,injunction_prepared:50,injunction:50,payment_received:60,judicial_partial_payment:61,judicial_full_payment:61,non_opposition_prepared:70,enforcement_prepared:80};
+    const eventTime=x=>{
+      const raw=x?.effectiveDate||x?.date;
+      if(raw){const dt=parseLocalDate(raw);if(dt)return dt.getTime()}
+      return x?.createdAt?.toMillis?.()||0;
+    };
     events.sort((a,b)=>{
-      const eventTime=x=>{
-        if(x?.effectiveDate){
-          const d=parseLocalDate(x.effectiveDate);if(d)return d.getTime();
-        }
-        return x?.createdAt?.toMillis?.()||0;
-      };
-      return eventTime(b)-eventTime(a);
+      const delta=eventTime(a)-eventTime(b);if(delta)return delta;
+      const aa=a.action||a.type||"",bb=b.action||b.type||"";
+      const p=(actionOrder[aa]??99)-(actionOrder[bb]??99);if(p)return p;
+      return (a?.createdAt?.toMillis?.()||0)-(b?.createdAt?.toMillis?.()||0);
     });
     if(!events.length){
-      const firstInv=overviewPrimaryInvoice(d)||normalizeInvoices(d)[0];
       if(firstInv){
         E.detailTimeline.innerHTML=`<div class="detail-event"><div class="detail-event-main"><time>${esc(fmtDateFR(firstInv.dueDate)||"—")}</time><strong>Facture échue</strong><div class="ov-sub">${esc(formatCurrency(principalAmount(d)))} en attente.</div></div></div>`;
       }else{
@@ -2892,7 +2891,7 @@ function openDossierDetailModal(d){
   }
   const judicialPaid=principalBalance(d)<=0&&(d?.status==="paid_pending_court_closure"||d?.nextAction==="CLOTURE_INJONCTION"||d?.injunctionPublished||step>=5);
   if(judicialPaid){
-    actionHtml=`<div class="detail-payment-closing"><strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button><button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button></div></div>`;
+    actionHtml=`<button class="btn btn-primary" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Injonction</button><div class="detail-payment-closing"><strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button><button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button></div></div>`;
   }
   E.detailActions.innerHTML=actionHtml;
   E.detailActions.querySelector("#detailRecordPaymentBtn")?.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();E.recordPaymentBtn?.click()});
