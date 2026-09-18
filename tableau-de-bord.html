@@ -792,7 +792,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, getBytes, d
 
 const firebaseConfig={apiKey:"AIzaSyCPbYJ8uVsS6Ikyudp9lCf6iB0i9K_OHX8",authDomain:"axe-flow.firebaseapp.com",projectId:"axe-flow",storageBucket:"axe-flow.firebasestorage.app",messagingSenderId:"295300543556",appId:"1:295300543556:web:3facac2d0c612e3456b811"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
-const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_PRO_URL="/documents/cerfa-12946-remplissable.pdf",CERFA_PRIVATE_URL="/documents/cerfa-12948-06.pdf",CERFA_FILLABLE_URL=CERFA_PRO_URL,INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
+const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_PRO_URL="/documents/cerfa_12946-02.pdf",CERFA_PRIVATE_URL="/documents/cerfa-12948-06.pdf",CERFA_FILLABLE_URL=CERFA_PRO_URL,INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="",returnToDetailAfterInjunction=false;
 const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","downloadInjunctionZipBtn","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailJudicialAfter","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","relanceFeesWrap","includeRelanceFees","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
@@ -2017,6 +2017,123 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   return pdfDoc;
 }
 
+
+/* CERFA 12946*02 — parcours professionnel.
+   Comme pour le 12948*06 particulier, le formulaire officiel est aplati puis
+   Axe Flow écrit les données aux coordonnées du CERFA. Cela évite les champs
+   AcroForm dupliqués / instables du PDF officiel. */
+async function generateProfessionalCerfa12946Overlay(pdfDoc){
+  const {rgb,StandardFonts}=PDFLib;
+  try{pdfDoc.getForm().flatten()}catch(e){console.warn("Aplatissement CERFA 12946",e)}
+  const font=await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold=await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const pages=pdfDoc.getPages();
+  const ink=rgb(0.04,0.08,0.16);
+  const put=(page,x,y,text,size=8.1,max=80,isBold=false)=>{
+    let t=sanitizePdfText(text||"").trim(); if(!t)return;
+    const f=isBold?bold:font;
+    while(t.length && f.widthOfTextAtSize(t,size)>max)t=t.slice(0,-1);
+    page.drawText(t,{x,y,size,font:f,color:ink});
+  };
+  const mark=(page,x,y,on)=>{if(on)page.drawText("X",{x:x+1.3,y:y+1,size:8.5,font:bold,color:ink})};
+  const wrap=(page,x,y,text,size,maxWidth,lineHeight,maxLines,isBold=false)=>{
+    const f=isBold?bold:font,words=sanitizePdfText(text||"").split(/\s+/).filter(Boolean);let line="",lines=[];
+    for(const word of words){const test=line?line+" "+word:word;if(f.widthOfTextAtSize(test,size)<=maxWidth)line=test;else{if(line)lines.push(line);line=word}}
+    if(line)lines.push(line);lines.slice(0,maxLines).forEach((ln,i)=>page.drawText(ln,{x,y:y-i*lineHeight,size,font:f,color:ink}));
+  };
+  const p=currentUserData?.businessProfile||{};
+  const claimantCompany=(cerfaGenerationOptions?.claimantKind||"person")==="company";
+  const claimantDisplay=clean(p.representative||p.representant||p.companyName||currentUserData?.displayName||creditorName(currentDossier));
+  const claimant=splitClaimantNameFrench(claimantDisplay);
+  const cem=splitEmail(creditorEmail(currentDossier));
+  const dem=splitEmail(debtorEmail(currentDossier));
+  const page1=pages[0],page3=pages[2],page4=pages[3];
+
+  // PAGE 1 — DEMANDEUR
+  if(claimantCompany){
+    put(page1,452,183,clean(p.legalForm||""),8.1,88);
+    put(page1,188,164,clean(p.companyName)||creditorName(currentDossier),8.3,352,true);
+    put(page1,207,143,clean(p.representative||p.representant||""),8.1,333);
+    put(page1,260,123,creditorAddress(currentDossier),8.1,280);
+    put(page1,171,103,creditorZip(currentDossier),8.1,75);
+    put(page1,381,103,creditorCity(currentDossier),8.1,159);
+    put(page1,246,83,cem.left,7.9,301); put(page1,570,83,cem.right,7.9,0);
+    put(page1,248,63,creditorPhone(currentDossier),8.0,218);
+  }else{
+    const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
+    mark(page1,42.5,501.2,female); mark(page1,184.3,501.2,!female);
+    put(page1,398,482,claimant.lastName,8.2,140);
+    put(page1,265,442,claimant.firstNames,8.2,273);
+    const bd=clean(cerfaGenerationOptions?.claimantBirthDate);
+    if(bd){const [yy,mm,dd]=bd.split("-");put(page1,198,422,`${dd||""}/${mm||""}/${yy||""}`,8.1,120)}
+    put(page1,72,402,clean(cerfaGenerationOptions?.claimantBirthPlace),8.1,360);
+    put(page1,207,382,"France",8.1,330);
+    put(page1,185,342,creditorAddress(currentDossier),8.1,353);
+    put(page1,188,262,creditorZip(currentDossier),8.1,95);
+    put(page1,405,262,creditorCity(currentDossier),8.1,133);
+    put(page1,113,282,clean(p.country)||"France",8.1,425);
+    put(page1,286,242,cem.left,7.9,318); put(page1,624,242,cem.right,7.9,0);
+    put(page1,293,222,creditorPhone(currentDossier),8.0,240);
+  }
+
+  // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
+  // Le dossier Pro Axe Flow fournit la dénomination, le représentant et les coordonnées.
+  put(page3,454,442,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.0,85);
+  put(page3,185,422,debtorName(currentDossier),8.4,354,true);
+  put(page3,208,402,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),8.1,331);
+  put(page3,261,382,debtorAddress(currentDossier),8.1,278);
+  put(page3,171,362,debtorZip(currentDossier),8.1,96);
+  put(page3,379,362,debtorCity(currentDossier),8.1,160);
+  put(page3,243,322,dem.left,7.9,306); put(page3,569,322,dem.right,7.9,0);
+  put(page3,253,302,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.0,213);
+
+  // PAGE 4 — JURIDICTION ET SOMMES DEMANDÉES
+  const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
+  const invoices=normalizeInvoices(currentDossier);
+  const court=injunctionCourtLabel();
+  mark(page4,42.7,659.7,true);
+  put(page4,275,648,court,7.8,263,true);
+
+  put(page4,82,505,invoices.length>1?`${invoices.length} factures impayées`:`Facture ${clean(invoices[0]?.ref)||"impayée"}`,7.8,208);
+  put(page4,331,520,amountForCerfa(calc.principal)+" EUR",8.3,218,true);
+
+  // Pénalités contractuelles : les taux pouvant différer par facture, le détail exact reste dans le décompte joint.
+  mark(page4,48.9,406.8,true);
+  const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)&&n>0))];
+  put(page4,97,394,rates.length===1?`${String(rates[0]).replace(".",",")} %`:`selon factures`,7.8,193);
+  put(page4,331,393,amountForCerfa(calc.interests)+" EUR",8.2,218,true);
+  put(page4,329,350,invoices.length===1?formatDateForCerfaDayAfter(invoices[0].dueDate):"Voir décompte joint",7.7,228);
+
+  // Indemnité forfaitaire B2B : frais accessoires.
+  put(page4,82,295,"Indemnité forfaitaire de recouvrement",7.5,208);
+  put(page4,331,295,amountForCerfa(calc.recoveryFees)+" EUR",8.2,218,true);
+
+  const refs=invoices.map(i=>clean(i.ref)).filter(Boolean).join(", ");
+  const basis=[
+    `Factures : ${refs}`,
+    contractBasis(currentDossier),
+    `Pénalités contractuelles arrêtées au ${injunctionPreparationFr()} : ${amountForCerfa(calc.interests)} EUR`,
+    `${invoices.length} indemnité${invoices.length>1?"s":""} forfaitaire${invoices.length>1?"s":""} x 40 EUR : ${amountForCerfa(calc.recoveryFees)} EUR`,
+    `TOTAL RÉCLAMÉ : ${amountForCerfa(calc.total)} EUR`,
+    `Voir décompte actualisé joint.`
+  ].filter(Boolean).join("\n");
+  basis.split("\n").slice(0,8).forEach((line,i)=>wrap(page4,385,526-i*26,line,7.1,164,9,2,i===4));
+
+  const docs=`Facture(s) ${refs} ; devis/contrat ou justificatif de la prestation ; relances ; mise en demeure et preuve d'envoi ; décompte actualisé ; échanges et pièces complémentaires.`;
+  wrap(page4,48,210,docs,7.4,500,10,4);
+  put(page4,101,143,injunctionPreparationFr(),8.2,155,true);
+
+  if(signatureDataUrl){
+    try{
+      const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
+      const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
+      const maxW=105,maxH=30,scale=Math.min(maxW/img.width,maxH/img.height);
+      page4.drawImage(img,{x:135,y:80,width:img.width*scale,height:img.height*scale});
+    }catch(e){console.warn("Signature CERFA 12946",e)}
+  }
+  return pdfDoc;
+}
+
 function openCerfaOptionsModal(){
   if(!currentDossier)return;
   const cerfaModalTitle=$("cerfaOptionsModal")?.querySelector("h2");
@@ -2046,299 +2163,15 @@ if(!isProfessionalDebtor(currentDossier)){
   return;
 }
 
-const form = pdfDoc.getForm();
+await generateProfessionalCerfa12946Overlay(pdfDoc);
+  const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"});
+  const a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");
+  a.href=URL.createObjectURL(blob);
+  if(previewOnly){window.open(a.href,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(a.href),60000)}
+  else if(window.__axeFlowCerfaCapture){window.__axeFlowCerfaCapture(blob,`${safeRef}-cerfa-12946-02-prefilled.pdf`);URL.revokeObjectURL(a.href)}
+  else{a.download=`${safeRef}-cerfa-12946-02-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
 
-const email=splitEmail(creditorEmail(currentDossier));
-const debtorEmailParts=splitEmail(debtorEmail(currentDossier));
-const claimantIsCompany=(cerfaGenerationOptions?.claimantKind||"person")==="company";
-const claimantPerson=splitPersonName(creditorName(currentDossier));
-
-if(claimantIsCompany){
-  safeCheck(form,"claimant_gender_female",false);
-  safeCheck(form,"claimant_gender_male",false);
-  safeSetText(form,"claimant_last_name","");
-  safeSetText(form,"claimant_first_names","");
-  safeSetText(form,"claimant_address","");
-  safeSetText(form,"claimant_zip","");
-  safeSetText(form,"claimant_city","");
-  safeSetText(form,"claimant_country","");
-  safeSetText(form,"claimant_email","");
-  safeSetText(form,"claimant_email_2","");
-  safeSetText(form,"claimant_phone","");
-  safeSetText(form,"claimant_company_name",creditorName(currentDossier));
-  safeSetText(form,"claimant_company_address",creditorAddress(currentDossier));
-  safeSetText(form,"claimant_company_zip",creditorZip(currentDossier));
-  safeSetText(form,"claimant_company_city",creditorCity(currentDossier));
-  safeSetText(form,"claimant_company_email",email.left);
-  safeSetText(form,"claimant_company_email_2",email.right);
-  safeSetText(form,"claimant_company_phone",creditorPhone(currentDossier));
-}else{
-  const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
-  safeCheck(form,"claimant_gender_female",female);
-  safeCheck(form,"claimant_gender_male",!female);
-  safeSetText(form,"claimant_last_name",claimantPerson.lastName);
-  safeSetText(form,"claimant_first_names",claimantPerson.firstNames);
-  safeSetText(form,"claimant_address",creditorAddress(currentDossier));
-  safeSetText(form,"claimant_zip",creditorZip(currentDossier));
-  safeSetText(form,"claimant_city",creditorCity(currentDossier));
-  safeSetText(form,"claimant_country","France");
-  safeSetText(form,"claimant_email",email.left);
-  safeSetText(form,"claimant_email_2",email.right);
-  safeSetText(form,"claimant_phone",creditorPhone(currentDossier));
-  safeSetText(form,"claimant_company_name","");
-  safeSetText(form,"claimant_company_address","");
-  safeSetText(form,"claimant_company_zip","");
-  safeSetText(form,"claimant_company_city","");
-  safeSetText(form,"claimant_company_email","");
-  safeSetText(form,"claimant_company_email_2","");
-}
-
-if(isProfessionalDebtor(currentDossier)){
-  safeCheck(form,"debtor1_gender_female",false);
-  safeCheck(form,"debtor1_gender_male",false);
-  safeSetText(form,"debtor1_last_name","");
-  safeSetText(form,"debtor1_first_names","");
-  safeSetText(form,"debtor1_company_name",debtorName(currentDossier));
-  safeSetText(form,"debtor1_company_address",debtorAddress(currentDossier));
-  safeSetText(form,"debtor1_company_zip",debtorZip(currentDossier));
-  safeSetText(form,"debtor1_company_city",debtorCity(currentDossier));
-  safeSetText(form,"debtor1_company_email",debtorEmailParts.left);
-  safeSetText(form,"debtor1_company_email_2",debtorEmailParts.right);
-}else{
-  const debtorPerson=splitPersonName(debtorName(currentDossier));
-  const female=(cerfaGenerationOptions?.debtorGender||"male")==="female";
-  safeCheck(form,"debtor1_gender_female",female);
-  safeCheck(form,"debtor1_gender_male",!female);
-  safeSetText(form,"debtor1_last_name",debtorPerson.lastName);
-  safeSetText(form,"debtor1_first_names",debtorPerson.firstNames);
-  safeSetText(form,"debtor1_address",debtorAddress(currentDossier));
-  safeSetText(form,"debtor1_zip",debtorZip(currentDossier));
-  safeSetText(form,"debtor1_city",debtorCity(currentDossier));
-  safeSetText(form,"debtor1_country","France");
-  safeSetText(form,"debtor1_email",debtorEmailParts.left);
-  safeSetText(form,"debtor1_email_2",debtorEmailParts.right);
-  safeSetText(form,"debtor1_company_name","");
-  safeSetText(form,"debtor1_company_address","");
-}
-
-const courtName=injunctionCourtLabel(),courtAddress=injunctionCourtAddressLabel();safeCheck(form,"request_referral_if_opposition",true);safeSetText(form,"request_competent_court",courtName);safeSetText(form,"request_competent_court_2",courtAddress);const debtCalc = lateFeeBreakdown(currentDossier);
-const invoices = normalizeInvoices(currentDossier);
-const professional = isProfessionalDebtor(currentDossier);
-
-if(!professional){
-  const cp=splitPersonName(creditorName(currentDossier)),dp=splitPersonName(debtorName(currentDossier));
-  const cem=splitEmail(creditorEmail(currentDossier)),dem=splitEmail(debtorEmail(currentDossier));
-  // Cerfa 12948*06 — noms de champs génériques du formulaire officiel.
-  // Page 1 : demandeur
-  safeCheck(form,"checkbox_1",(cerfaGenerationOptions?.claimantGender||"female")==="female");
-  safeCheck(form,"checkbox_2",(cerfaGenerationOptions?.claimantGender||"female")==="male");
-  safeSetText(form,"text_52",cp.lastName||creditorName(currentDossier));
-  safeSetText(form,"text_49",cp.lastName);
-  safeSetText(form,"text_24",cp.firstNames);
-  safeSetText(form,"text_20",creditorAddress(currentDossier));
-  safeSetText(form,"text_37",creditorZip(currentDossier));
-  safeSetText(form,"text_9",creditorCity(currentDossier));
-  safeSetText(form,"text_41","France");
-  safeSetText(form,"text_50",cem.left);
-  safeSetText(form,"text_13",cem.right);
-  // Page 2 : premier débiteur — champs essentiels
-  safeSetText(form,"text_54",dp.lastName);
-  safeSetText(form,"text_56",debtorAddress(currentDossier));
-  // Page 4 : date et montants (les champs restants seront affinés après relevé complet du mapping)
-  safeSetText(form,"text_53",amountForCerfa(debtCalc.principal));
-}
-
-
-/* =========================
-   PRINCIPAL
-========================= */
-
-safeSetText(
-  form,
-  "claim_principal",
-  invoices.length > 1
-    ? `${invoices.length} factures impayées`
-    : `Facture impayée${invoices[0]?.ref ? ` ${invoices[0].ref}` : ""}`
-);
-
-safeSetText(
-  form,
-  "claim_principal_amount_1",
-  amountForCerfa(debtCalc.principal)
-);
-
-/*
- * Ne pas remplir le principal une seconde fois.
- * C'était la cause des deux lignes identiques à 500 €.
- */
-safeSetText(form, "claim_principal_amount_2", "");
-
-safeSetText(
-  form,
-  "claim_principal_basis_1",
-  `Factures : ${invoices.map(invoice => invoice.ref).join(", ")}`
-);
-
-safeSetText(
-  form,
-  "claim_principal_basis_2",
-  contractBasis(currentDossier)
-);
-
-safeSetText(
-  form,
-  "claim_principal_basis_3",
-  `Principal : ${amountForCerfa(debtCalc.principal)} EUR`
-);
-
-/* =========================
-   INTÉRÊTS CONTRACTUELS
-========================= */
-
-/*
- * Les factures prévoient un taux de pénalités.
- * On coche donc "intérêts au taux contractuel",
- * et non "intérêts au taux légal".
- */
-safeCheck(form, "claim_interest_legal_enabled", false);
-safeCheck(form, "claim_interest_contractual_enabled", true);
-
-safeSetText(
-  form,
-  "claim_interest_contractual_rate",
-  `${Number(debtCalc.annualRate || currentDossier.lateRatePercent || 0)
-    .toFixed(2)
-    .replace(".", ",")} %`
-);
-
-safeSetText(
-  form,
-  "claim_interest_contractual_amount",
-  amountForCerfa(debtCalc.interests)
-);
-
-/*
- * Plusieurs factures peuvent avoir des échéances différentes.
- * Il ne faut donc pas inscrire une seule date de départ trompeuse.
- */
-safeSetText(
-  form,
-  "claim_interest_legal_start_date",
-  invoices.length === 1
-    ? formatDateForCerfaDayAfter(invoices[0].dueDate)
-    : "Voir décompte joint"
-);
-
-safeSetText(
-  form,
-  "claim_interest_contractual_basis",
-  `Pénalités arrêtées au ${todayFR()}`
-);
-
-safeSetText(
-  form,
-  "claim_interest_contractual_basis_2",
-  invoices
-    .slice(0, 2)
-    .map(invoice =>
-      `${invoice.ref} : échéance ${fmtDateFR(invoice.dueDate)}`
-    )
-    .join(" ; ")
-);
-
-safeSetText(
-  form,
-  "claim_interest_contractual_basis_3",
-  invoices
-    .slice(2, 4)
-    .map(invoice =>
-      `${invoice.ref} : échéance ${fmtDateFR(invoice.dueDate)}`
-    )
-    .join(" ; ")
-);
-
-safeSetText(
-  form,
-  "claim_interest_contractual_basis_4",
-  `Voir décompte joint`
-);
-
-/* On laisse vides les champs relatifs aux intérêts au taux légal. */
-safeSetText(form, "claim_interest_legal_amount", "");
-safeSetText(form, "claim_interest_legal_basis_1", "");
-safeSetText(form, "claim_interest_legal_basis_2", "");
-safeSetText(form, "claim_interest_legal_basis_3", "");
-safeSetText(form, "claim_interest_legal_basis_4", "");
-
-/* =========================
-   FRAIS ACCESSOIRES
-========================= */
-
-if (professional && debtCalc.recoveryFees > 0) {
-  safeSetText(
-    form,
-    "claim_additional_costs",
-    "Indemnité forfaitaire"
-  );
-
-  safeSetText(
-    form,
-    "claim_additional_costs_amount_1",
-    amountForCerfa(debtCalc.recoveryFees)
-  );
-
-  safeSetText(form, "claim_additional_costs_amount_2", "");
-
-  safeSetText(
-    form,
-    "claim_additional_costs_basis_1",
-    `${invoices.length} facture${invoices.length > 1 ? "s" : ""} × 40 EUR`
-  );
-
-  safeSetText(
-    form,
-    "claim_additional_costs_basis_2",
-    "Art. L.441-10 et D.441-5 C. com."
-  );
-} else {
-  /*
-   * Particulier : aucune indemnité forfaitaire de 40 €.
-   */
-  safeSetText(form, "claim_additional_costs", "");
-  safeSetText(form, "claim_additional_costs_amount_1", "");
-  safeSetText(form, "claim_additional_costs_amount_2", "");
-  safeSetText(form, "claim_additional_costs_basis_1", "");
-  safeSetText(form, "claim_additional_costs_basis_2", "");
-}
-
-/* Aucune clause pénale distincte dans ce dossier. */
-safeSetText(form, "claim_penalty_amount", "");
-safeSetText(form, "claim_penalty_basis_1", "");
-safeSetText(form, "claim_penalty_basis_2", "");
-
-/* =========================
-   TOTAL RÉCLAMÉ
-========================= */
-
-/*
- * Le Cerfa ne possède pas de champ interne spécifique "total".
- * On l'indique donc clairement dans le fondement de la créance.
- */
-const totalBreakdown = `Total réclamé : ${amountForCerfa(debtCalc.total)} EUR`;
-
-safeSetText(
-  form,
-  "claim_principal_basis_3",
-  totalBreakdown
-);
-
-/* =========================
-   PIÈCES JUSTIFICATIVES
-========================= */
-
-const invoiceRefs=normalizeInvoices(currentDossier).map(x=>x.ref).join(", ");
-safeSetText(form,"supporting_documents_1",`Facture(s) ${invoiceRefs} ; devis/contrat ; preuve de la prestation ; relances`);
-safeSetText(form,"supporting_documents_2",`Mise en demeure et preuve d’envoi ; décompte actualisé ; échanges utiles`);safeSetText(form,"claim_date",injunctionPreparationFr());try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}await addSignatureToCerfaPdf(pdfDoc);try{form.updateFieldAppearances()}catch(appearanceError){console.warn("Apparences PDF non mises à jour",appearanceError)}const blob=new Blob([await pdfDoc.save()],{type:"application/pdf"}),a=document.createElement("a"),safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");a.href=URL.createObjectURL(blob);if(previewOnly){window.open(a.href,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(a.href),60000)}else if(window.__axeFlowCerfaCapture){window.__axeFlowCerfaCapture(blob,`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`);URL.revokeObjectURL(a.href)}else{a.download=`${safeRef}-${isProfessionalDebtor(currentDossier)?"cerfa-12946":"cerfa-12948-06"}-prefilled.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}}catch(error){console.error(error);alert("Impossible de générer le Cerfa prérempli. Détail console : "+(error?.message||error))}finally{E.generateCerfaBtn.disabled=false;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=false;E.generateCerfaBtn.textContent="Cerfa officiel prérempli";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Cerfa officiel prérempli"}}
 function debtStatementHtml(d=currentDossier){
   const prepDate=injunctionPreparationDateObj(),prepFr=injunctionPreparationFr(),calc=lateFeeBreakdown(d,prepDate);
   const rows=calc.rows.map(x=>`<tr><td><strong>${escapeHtml(x.ref)}</strong></td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");
