@@ -3653,6 +3653,7 @@ $("previewEnforcementBtn")?.addEventListener("click",()=>{
 
 $("validateEnforcementBtn")?.addEventListener("click",async()=>{
   if(!currentUser||!currentDossier)return;
+  const dossier=currentDossier;
   const officer=clean($("enforcementOfficerName")?.value),address=clean($("enforcementOfficerAddress")?.value),zip=clean($("enforcementOfficerZip")?.value),city=clean($("enforcementOfficerCity")?.value);
   if(!officer||!address||!zip||!city){alert("Renseignez l’étude choisie, son adresse, son code postal et sa ville.");return}
   const date=clean($("enforcementDate")?.value)||isoToday();
@@ -3660,24 +3661,38 @@ $("validateEnforcementBtn")?.addEventListener("click",async()=>{
   const officerEmail=clean($("enforcementOfficerEmail")?.value);
   if(channel==="Email"&&!officerEmail){alert("Renseignez l’adresse email de l’étude choisie.");return}
   const btn=$("validateEnforcementBtn"),old=btn?.textContent||"Valider et enregistrer";
+  const dossierRef=dossier.ref||"Dossier";
+  const dossierDebtor=debtorName(dossier);
+  const dossierCreditor=creditorName(dossier);
   try{
     if(btn){btn.disabled=true;btn.textContent="Enregistrement…"}
-    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
-      type:"enforcement_prepared",action:"enforcement_prepared",title:"Exécution forcée préparée",effectiveDate:date,date,channel,
-      officerName:officer,officerAddress:address,officerZip:zip,officerCity:city,officerEmail,
+    // L'événement conserve uniquement les champs standards de chronologie :
+    // les coordonnées de l'étude restent dans la description afin d'éviter
+    // un refus Firestore sur des champs judiciaires supplémentaires.
+    await addDoc(collection(db,"users",currentUser.uid,"requests",dossier.id,"events"),{
+      type:"enforcement_prepared",
+      action:"enforcement_prepared",
+      title:"Exécution forcée préparée",
+      effectiveDate:date,
       description:`Date du courrier : ${fmtDateFR(date)}\nCanal : ${channel}\nÉtude : ${officer} — ${address}, ${zip} ${city}${officerEmail?`\nEmail : ${officerEmail}`:""}`,
       createdAt:serverTimestamp()
     });
     showSuccessToast?.("✓ Exécution forcée enregistrée");
     closePrepModal("enforcementPrepModal");
-    await loadDossiers(currentUser.uid);
+
+    // En Email, ouvrir la messagerie immédiatement après l'enregistrement,
+    // avant le rechargement du dossier (qui peut remplacer currentDossier).
     if(channel==="Email"&&officerEmail){
-      const subject=`Transmission pour exécution d’un titre exécutoire — ${currentDossier.ref||"Dossier"}`;
-      const body=`Maître,\n\nVeuillez trouver la transmission relative au dossier ${currentDossier.ref||""} concernant ${debtorName(currentDossier)}.\n\nLe courrier et les pièces utiles du dossier sont à joindre à cet email.\n\nCordialement,\n${creditorName(currentDossier)}`;
+      const subject=`Transmission pour exécution d’un titre exécutoire — ${dossierRef}`;
+      const body=`Maître,\n\nVeuillez trouver la transmission relative au dossier ${dossierRef} concernant ${dossierDebtor}.\n\nLe courrier et les pièces utiles du dossier sont à joindre à cet email.\n\nCordialement,\n${dossierCreditor}`;
       window.location.href=makeMailto(officerEmail,subject,body);
     }
-  }catch(err){console.error(err);}
-  finally{if(btn){btn.disabled=false;btn.textContent=old}}
+
+    await loadDossiers(currentUser.uid);
+  }catch(err){
+    console.error("Enregistrement exécution forcée :",err);
+    alert("Impossible d’enregistrer la transmission au commissaire de justice.");
+  }finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
 $("closeCerfaOptionsModal")?.addEventListener("click",closeCerfaOptionsModal);
