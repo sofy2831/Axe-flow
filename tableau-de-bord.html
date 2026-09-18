@@ -1925,46 +1925,46 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   // PAGE 1 — DEMANDEUR. Les coordonnées suivent exactement les champs du CERFA 12948*06.
   put(page1,243,628,claimantCompany?(clean(p.companyName)||creditorName(currentDossier)):claimantDisplay,8.7,279,true);
   if(claimantCompany){
-    put(page1,296,262,p.legalForm||"",8.2,240);
-    put(page1,123,241,clean(p.companyName)||creditorName(currentDossier),8.2,415);
-    put(page1,136,221,clean(p.representative||p.representant||""),8.2,400);
-    put(page1,171,201,creditorAddress(currentDossier),8.2,365);
-    put(page1,111,181,creditorZip(currentDossier),8.2,75);
-    put(page1,250,181,creditorCity(currentDossier),8.2,285);
-    put(page1,161,162,cem.left,8.0,200); put(page1,371,162,cem.right,8.0,165);
-    put(page1,165,143,creditorPhone(currentDossier),8.0,135);
+    put(page1,296,262,p.legalForm||"",8.323,240);
+    put(page1,123,241,clean(p.companyName)||creditorName(currentDossier),8.323,415);
+    put(page1,136,221,clean(p.representative||p.representant||""),8.323,400);
+    put(page1,171,201,creditorAddress(currentDossier),8.323,365);
+    put(page1,111,181,creditorZip(currentDossier),8.323,75);
+    put(page1,250,181,creditorCity(currentDossier),8.323,285);
+    put(page1,161,162,cem.left,8.12,200); put(page1,371,162,cem.right,8.12,165);
+    put(page1,165,143,creditorPhone(currentDossier),8.12,135);
   }else{
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
     mark(page1,42.5,559.3,female); mark(page1,184,559.3,!female);
-    put(page1,265,559,`${claimant.firstNames} ${claimant.lastName}`.trim(),8.2,267); // nom + prénom en face de Madame / Monsieur
-    put(page1,266,540,claimant.lastName,8.2,269);              // nom de naissance
-    put(page1,122,501,claimant.firstNames,8.2,414); // prénoms
+    put(page1,265,559,`${claimant.firstNames} ${claimant.lastName}`.trim(),8.323,267); // nom + prénom en face de Madame / Monsieur
+    put(page1,266,540,claimant.lastName,8.323,269);              // nom de naissance
+    put(page1,122,501,claimant.firstNames,8.323,414); // prénoms
     const claimantBirthDate=clean(cerfaGenerationOptions?.claimantBirthDate);
     if(claimantBirthDate){
       const [by,bm,bd]=claimantBirthDate.split("-");
       `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,180.2+(i*15.5)-(i>=4?4.2:0),481,ch,9.2,10));
     }
-    put(page1,169,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,366); // lieu de naissance — +0,5 % vers la droite
+    put(page1,169,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.323,366); // lieu de naissance — +0,5 % vers la droite
     // profession : laissée vierge tant qu'elle n'est pas collectée par Axe Flow
-    put(page1,139,440,"France",8.2,394);                       // nationalité
-    put(page1,128,401,creditorAddress(currentDossier),8.2,409);// adresse
-    put(page1,269,361,creditorCity(currentDossier),8.2,269);   // commune
-    String(creditorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page1,114.2+(i*15.5),361,ch,8.2,10));     // CP
-    put(page1,82,341,clean(p.country)||"France",8.2,454);      // pays
-    put(page1,194,321,cem.left,8.0,199); put(page1,415,321,cem.right,8.0,122);
+    put(page1,139,440,"France",8.323,394);                       // nationalité
+    put(page1,128,401,creditorAddress(currentDossier),8.323,409);// adresse
+    put(page1,269,361,creditorCity(currentDossier),8.323,269);   // commune
+    String(creditorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page1,114.2+(i*15.5),361,ch,8.323,10));     // CP
+    put(page1,82,341,clean(p.country)||"France",8.323,454);      // pays
+    put(page1,194,321,cem.left,8.12,199); put(page1,415,321,cem.right,8.12,122);
   }
 
   // PAGE 2 — PREMIER DÉBITEUR PARTICULIER
   put(page2,157,566,debtorName(currentDossier),8.7,327,true);
   const dfemale=(cerfaGenerationOptions?.debtorGender||"male")==="female";
   mark(page2,42.7,527.4,dfemale); mark(page2,184.5,527.7,!dfemale);
-  put(page2,255,508,debtor.lastName,8.2,284);                  // nom
-  put(page2,119,468,debtor.firstNames,8.2,417);                // prénoms
-  put(page2,117,449,debtorAddress(currentDossier),8.2,422);
-  put(page2,266,409,debtorCity(currentDossier),8.2,272);
-  String(debtorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page2,116+(i*15.5),409,ch,8.2,10));
-  put(page2,76,389,"France",8.2,462);
-  put(page2,163,369,dem.left,8.0,197); put(page2,375,369,dem.right,8.0,162);
+  put(page2,255,508,debtor.lastName,8.323,284);                  // nom
+  put(page2,119,468,debtor.firstNames,8.323,417);                // prénoms
+  put(page2,117,449,debtorAddress(currentDossier),8.323,422);
+  put(page2,266,409,debtorCity(currentDossier),8.323,272);
+  String(debtorZip(currentDossier)||"").replace(/\D/g,"").slice(0,5).split("").forEach((ch,i)=>put(page2,116+(i*15.5),409,ch,8.323,10));
+  put(page2,76,389,"France",8.323,462);
+  put(page2,163,369,dem.left,8.12,197); put(page2,375,369,dem.right,8.12,162);
 
   // PAGE 3 — VOTRE DEMANDE. Les options juridiques facultatives restent décochées.
   // Le bloc libre est prérempli dynamiquement à partir DU dossier particulier courant.
@@ -1987,7 +1987,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     if(line)lines.push(line);
     lines.slice(0,maxLines).forEach((ln,i)=>page.drawText(ln,{x,y:y-i*lineHeight,size,font,color:ink}));
   };
-  drawWrapped(page3,51,199,demandText,8.0,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
+  drawWrapped(page3,51,199,demandText,8.12,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
   // PAGE 4 — SOMMES DEMANDÉES / FONDEMENT / DATE
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
@@ -1997,8 +1997,8 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   const rate=rates.length===1?rates[0]:0;
   if(rate>0){
     mark(page4,42.9,611.6,true);
-    put(page4,84,599,String(rate).replace(".",",")+" %",8.2,101);
-    put(page4,216,598,amountForCerfa(calc.interests)+" EUR",8.2,139);
+    put(page4,84,599,String(rate).replace(".",",")+" %",8.323,101);
+    put(page4,216,598,amountForCerfa(calc.interests)+" EUR",8.323,139);
   }
   const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
   const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
@@ -2051,32 +2051,32 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
 
   // PAGE 1 — DEMANDEUR
   if(claimantCompany){
-    put(page1,452,183,clean(p.legalForm||""),8.1,88);
-    put(page1,188,164,clean(p.companyName)||creditorName(currentDossier),8.3,352,true);
-    put(page1,207,143,clean(p.representative||p.representant||""),8.1,333);
-    put(page1,260,123,creditorAddress(currentDossier),8.1,280);
-    put(page1,171,103,creditorZip(currentDossier),8.1,75);
-    put(page1,381,103,creditorCity(currentDossier),8.1,159);
-    put(page1,246,83,cem.left,7.9,301); put(page1,570,83,cem.right,7.9,0);
-    put(page1,248,63,creditorPhone(currentDossier),8.0,218);
+    put(page1,452,183,clean(p.legalForm||""),8.221,88);
+    put(page1,188,164,clean(p.companyName)||creditorName(currentDossier),8.425,352,true);
+    put(page1,207,143,clean(p.representative||p.representant||""),8.221,333);
+    put(page1,260,123,creditorAddress(currentDossier),8.221,280);
+    put(page1,171,103,creditorZip(currentDossier),8.221,75);
+    put(page1,381,103,creditorCity(currentDossier),8.221,159);
+    put(page1,246,83,cem.left,8.018,301); put(page1,570,83,cem.right,8.018,0);
+    put(page1,248,63,creditorPhone(currentDossier),8.12,218);
   }else{
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
     mark(page1,42.5,501.2,female); mark(page1,184.3,501.2,!female);
-    put(page1,398,482,claimant.lastName,8.2,140);
-    put(page1,265,442,claimant.firstNames,8.2,273);
+    put(page1,398,482,claimant.lastName,8.323,140);
+    put(page1,265,442,claimant.firstNames,8.323,273);
     const bd=clean(cerfaGenerationOptions?.claimantBirthDate);
-    if(bd){const [yy,mm,dd]=bd.split("-");put(page1,198,422,`${dd||""}/${mm||""}/${yy||""}`,8.1,120)}
-    put(page1,72,402,clean(cerfaGenerationOptions?.claimantBirthPlace),8.1,360);
-    put(page1,207,382,"France",8.1,330);
-    put(page1,185,342,creditorAddress(currentDossier),8.1,353);
+    if(bd){const [yy,mm,dd]=bd.split("-");put(page1,198,422,`${dd||""}/${mm||""}/${yy||""}`,8.221,120)}
+    put(page1,72,402,clean(cerfaGenerationOptions?.claimantBirthPlace),8.221,360);
+    put(page1,207,382,"France",8.221,330);
+    put(page1,185,342,creditorAddress(currentDossier),8.221,353);
     // CERFA 12946*02 — page 1 : CP + commune sur leur ligne officielle
-    put(page1,188,302,creditorZip(currentDossier),8.1,95);
-    put(page1,405,302,creditorCity(currentDossier),8.1,133);
-    put(page1,113,282,clean(p.country)||"France",8.1,425);
+    put(page1,172.96,302,creditorZip(currentDossier),8.221,95);
+    put(page1,372.6,302,creditorCity(currentDossier),8.221,133);
+    put(page1,113,282,clean(p.country)||"France",8.221,425);
     // Adresse électronique sur la ligne « Votre adresse électronique »
-    put(page1,286,267,cem.left,7.9,318); put(page1,624,267,cem.right,7.9,0);
+    put(page1,263.12,267,cem.left,8.018,318); put(page1,574.08,267,cem.right,8.018,0);
     // Téléphone sur la ligne suivante
-    put(page1,293,247,creditorPhone(currentDossier),8.0,240);
+    put(page1,293,247,creditorPhone(currentDossier),8.12,240);
   }
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
