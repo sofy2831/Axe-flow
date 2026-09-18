@@ -2069,11 +2069,14 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     put(page1,72,402,clean(cerfaGenerationOptions?.claimantBirthPlace),8.1,360);
     put(page1,207,382,"France",8.1,330);
     put(page1,185,342,creditorAddress(currentDossier),8.1,353);
-    put(page1,188,262,creditorZip(currentDossier),8.1,95);
-    put(page1,405,262,creditorCity(currentDossier),8.1,133);
+    // CERFA 12946*02 — page 1 : CP + commune sur leur ligne officielle
+    put(page1,188,302,creditorZip(currentDossier),8.1,95);
+    put(page1,405,302,creditorCity(currentDossier),8.1,133);
     put(page1,113,282,clean(p.country)||"France",8.1,425);
-    put(page1,286,242,cem.left,7.9,318); put(page1,624,242,cem.right,7.9,0);
-    put(page1,293,222,creditorPhone(currentDossier),8.0,240);
+    // Adresse électronique sur la ligne « Votre adresse électronique »
+    put(page1,286,267,cem.left,7.9,318); put(page1,624,267,cem.right,7.9,0);
+    // Téléphone sur la ligne suivante
+    put(page1,293,247,creditorPhone(currentDossier),8.0,240);
   }
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
