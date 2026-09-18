@@ -2051,32 +2051,32 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
 
   // PAGE 1 — DEMANDEUR
   if(claimantCompany){
-    put(page1,452,183,clean(p.legalForm||""),8.55,88);
+    put(page1,452,183,clean(p.legalForm||""),9.23,88);
     put(page1,188,164,clean(p.companyName)||creditorName(currentDossier),8.425,352,true);
-    put(page1,207,143,clean(p.representative||p.representant||""),8.55,333);
-    put(page1,260,123,creditorAddress(currentDossier),8.55,280);
-    put(page1,171,103,creditorZip(currentDossier),8.55,75);
-    put(page1,381,103,creditorCity(currentDossier),8.55,159);
-    put(page1,246,83,cem.left,8.339,301); put(page1,570,83,cem.right,8.339,0);
-    put(page1,248,63,creditorPhone(currentDossier),8.445,218);
+    put(page1,207,143,clean(p.representative||p.representant||""),9.23,333);
+    put(page1,260,123,creditorAddress(currentDossier),9.23,280);
+    put(page1,171,103,creditorZip(currentDossier),9.23,75);
+    put(page1,381,103,creditorCity(currentDossier),9.23,159);
+    put(page1,246,83,cem.left,9.01,301); put(page1,570,83,cem.right,9.01,0);
+    put(page1,248,63,creditorPhone(currentDossier),9.12,218);
   }else{
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
     mark(page1,42.5,501.2,female); mark(page1,184.3,501.2,!female);
-    put(page1,398,482,claimant.lastName,8.656,140);
-    put(page1,265,442,claimant.firstNames,8.656,273);
+    put(page1,398,482,claimant.lastName,9.35,140);
+    put(page1,265,442,claimant.firstNames,9.35,273);
     const bd=clean(cerfaGenerationOptions?.claimantBirthDate);
-    if(bd){const [yy,mm,dd]=bd.split("-");put(page1,198,422,`${dd||""}/${mm||""}/${yy||""}`,8.55,120)}
-    put(page1,72,402,clean(cerfaGenerationOptions?.claimantBirthPlace),8.55,360);
-    put(page1,207,382,"France",8.55,330);
-    put(page1,185,342,creditorAddress(currentDossier),8.55,353);
+    if(bd){const [yy,mm,dd]=bd.split("-");put(page1,198,422,`${dd||""}/${mm||""}/${yy||""}`,9.23,120)}
+    put(page1,72,402,clean(cerfaGenerationOptions?.claimantBirthPlace),9.23,360);
+    put(page1,207,382,"France",9.23,330);
+    put(page1,185,342,creditorAddress(currentDossier),9.23,353);
     // CERFA 12946*02 — page 1 : CP + commune sur leur ligne officielle
-    put(page1,155.664,302,creditorZip(currentDossier),8.55,95);
-    put(page1,372.6,302,creditorCity(currentDossier),8.55,133);
-    put(page1,113,282,clean(p.country)||"France",8.55,425);
+    put(page1,142,302,creditorZip(currentDossier),9.23,95);
+    put(page1,372.6,302,creditorCity(currentDossier),9.23,133);
+    put(page1,113,282,clean(p.country)||"France",9.23,425);
     // Adresse électronique sur la ligne « Votre adresse électronique »
-    put(page1,236.808,267,cem.left,8.339,318); put(page1,516.672,267,cem.right,8.339,0);
+    put(page1,218,267,cem.left,9.01,318); put(page1,472,267,cem.right,9.01,0);
     // Téléphone sur la ligne suivante
-    put(page1,263.7,247,creditorPhone(currentDossier),8.445,240);
+    put(page1,228,247,creditorPhone(currentDossier),9.12,240);
   }
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
