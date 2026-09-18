@@ -2486,8 +2486,7 @@ let pendingRelanceAction=null;
 function syncRelanceValidationLabel(){
   if(!E.validateRelanceActionBtn)return;
   const channel=clean(E.relanceActionChannel?.value);
-  if(pendingRelanceAction==="med") E.validateRelanceActionBtn.textContent="Valider et enregistrer";
-  else E.validateRelanceActionBtn.textContent=channel==="Email"?"Préparer l'email et enregistrer":"Valider et enregistrer";
+  E.validateRelanceActionBtn.textContent=channel==="Email"?"Préparer l'email et enregistrer":"Valider et enregistrer";
 }
 
 function openRelanceActionModal(action="relance1"){
@@ -2532,7 +2531,7 @@ async function validateRelanceAction(){
 
     // Un navigateur ne peut pas certifier qu'un email a réellement été envoyé.
     // Si Email est choisi, on ouvre la messagerie avec le contenu prérempli.
-    if(channel==="Email" && action!=="med"){
+    if(channel==="Email"){
       const subject=`${actionTitle(action)} — ${currentDossier.ref||"Dossier"}`;
       window.location.href=makeMailto(debtorEmail(currentDossier),subject,currentText);
     }
@@ -2905,7 +2904,10 @@ async function loadDetailTimeline(d){
     // l’événement de chronologie « injunction_prepared » fait alors foi pour l’affichage.
     if(injunctionRegistered&&!d.__injunctionRegistered){
       d.__injunctionRegistered=true;
-      if(principalBalance(d)<=0){openDossierDetailModal(d);return;}
+      // Recomposer immédiatement le détail pour afficher la barre judiciaire premium,
+      // que le principal soit encore dû ou déjà soldé.
+      openDossierDetailModal(d);
+      return;
     }
     if(E.detailJudicialAfter){
       const showSeparateJudicial=injunctionRegistered&&principalBalance(d)>0;
@@ -3517,7 +3519,8 @@ $("saveInjunctionCourtBtn")?.addEventListener("click",async()=>{
     btn.textContent="✓ Juridiction enregistrée";
     if(saved){saved.textContent="✓ Juridiction enregistrée";saved.style.display="inline-flex";}
     showSuccessToast("✓ Juridiction enregistrée");
-    setTimeout(()=>{btn.disabled=false;btn.textContent=oldText;if(saved)saved.style.display="none"},2200);
+    btn.disabled=false;btn.textContent=oldText;
+    if(saved)setTimeout(()=>{saved.style.display="none"},900);
   }catch(err){
     console.error("Enregistrement juridiction :",err);
     btn.disabled=false;btn.textContent=oldText;
