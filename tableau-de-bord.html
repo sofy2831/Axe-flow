@@ -617,6 +617,7 @@
   <div class="form-grid action-form-grid">
     <div class="field"><label>Date de l'action</label><input type="date" id="relanceActionDate" /></div>
     <div class="field"><label>Canal</label><select id="relanceActionChannel"><option value="Email">Email</option><option value="Courrier">Courrier</option></select></div>
+    <label id="relanceFeesWrap" class="check-line field full" style="display:none;align-items:center;margin:0"><input type="checkbox" id="includeRelanceFees" style="width:auto;min-height:auto"><span>Inclure les pénalités de retard et l’indemnité forfaitaire dans cette relance</span></label>
     <div class="field full"><label>Note interne (optionnel)</label><textarea id="relanceActionNote" rows="3"></textarea></div>
   </div>
   <div class="med-post-box" id="medPostBox"><strong>Mise en demeure : envoi LRAR recommandé.</strong><br>Vous pouvez préparer le courrier dans Axe Flow puis l’envoyer en recommandé avec accusé de réception.<br><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste — Lettre recommandée en ligne</a></div>
@@ -791,7 +792,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 const RELANCE_GAP_DAYS=7,MED_DELAY_DAYS=8,CERFA_PRO_URL="/documents/cerfa-12946-remplissable.pdf",CERFA_PRIVATE_URL="/documents/cerfa-12948-06.pdf",CERFA_FILLABLE_URL=CERFA_PRO_URL,INFOGREFFE_SEARCH_URL="https://www.infogreffe.fr/recherche-entreprise-dirigeant/recherche-avancee",JUSTICE_ANNUAIRE_URL="https://www.justice.fr/recherche/annuaires";
 const CREATE_CHECKOUT_SESSION_URL="https://europe-west9-axe-flow.cloudfunctions.net/createCheckoutSession";
 let currentUser=null,currentUserData={},currentEntitlements=[],dossiers=[],currentDossier=null,currentText="",currentAction="",isCreatingDossier=false,signatureDataUrl="",pendingSignedDocument="",pendingCourtName="",pendingCourtAddress="",returnToDetailAfterInjunction=false;
-const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","downloadInjunctionZipBtn","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailJudicialAfter","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
+const $=id=>document.getElementById(id),ids=["userEmail","statusBadge","planBadge","logoutBtn","companyProfileBtn","topNewDossierBtn","companyProfileModal","closeCompanyProfileModal","companyProfileForm","companyNameInput","companyLegalFormInput","companySiretInput","companyAddressInput","companyAddress2Input","companyZipInput","companyCityInput","companyCountryInput","companyEmailInput","companyPhoneInput","companySignatureCityInput","companyRepresentativeInput","saveCompanyProfileBtn","companySignatureUploadBtn","companySignatureClearBtn","companySignatureFileInput","companySignatureStatus","companySignaturePreviewWrap","companySignaturePreview","delayR1Input","delayR2Input","delayR3Input","delayMedInput","saveCompanyDelaysBtn","dossierList","dossierSub","addDossierBtn","subscribeBtn","summaryRef","summaryInitialAmount","summaryPayments","summaryBalanceCard","summaryAmount","summaryDebtor","recordPaymentBtn","paymentModal","paymentModalSub","closePaymentModal","paymentForm","paymentAmountInput","paymentDateInput","paymentMethodInput","paymentReferenceInput","paymentBalancePreview","savePaymentBtn","creditorNameEdit","creditorEmailEdit","creditorAddressEdit","creditorZipEdit","creditorCityEdit","saveCreditorBtn","debtorNameView","debtorTypeView","debtorAddressView","debtorCityView","debtorEmailView","timeline","createDossierModal","closeCreateDossier","createDossierForm","createDossierSubmitBtn","invoiceRows","addInvoiceRowBtn","lateRateInput","editDossierModal","closeEditDossier","editDossierForm","editInvoiceRows","editAddInvoiceRowBtn","editLateRateInput","resetDossierTrackingBtn","saveDossierEditBtn","modalText","modalTitle","modalSub","textContent","modalCreditorBox","modalDebtorBox","medSendBox","closeModal","shareBtn","mailBtn","printPdfBtn","markSentBtn","injunctionModal","closeInjunctionModal","injunctionSummary","injunctionBordereau","generateInjunctionRequestBtn","generateInjunctionRequestBtnPrivate","generateCerfaBtn","generateCerfaBtnPrivate","printDebtStatementBtnPro","printDebtStatementBtnPrivate","uploadInjunctionFilesBtnPro","uploadInjunctionFilesBtnPrivate","injunctionFilesInput","injunctionUploadStatus","injunctionFilesList","downloadInjunctionZipBtn","markInjunctionBtn","legalStatus","nonOppositionInfogreffeBtn","nonOppositionPrivateBtn","proTribunalSearchBtn","privateTribunalSearchBtn","professionalPathCard","privatePathCard","pathWarning","dossierDetailModal","closeDossierDetailModal","detailTags","detailDebtorName","detailDebtorContact","detailPath","detailInitial","detailCollected","detailPrincipal","detailTotal","detailDelay","detailActions","detailJudicialAfter","detailInvoices","detailTimeline","relanceActionModal","closeRelanceActionModal","relanceActionTitle","relanceActionSub","relanceActionDateLabel","relanceActionAmount","relanceActionDate","relanceActionChannel","relanceActionNote","relanceFeesWrap","includeRelanceFees","previewRelanceActionBtn","cancelRelanceActionBtn","validateRelanceActionBtn","fillFullPaymentBtn","cancelPaymentBtn","debtorTypeProfessionalBtn","debtorTypePrivateBtn","letterPreviewModal","letterPreviewFrame","letterPreviewSub","closeLetterPreviewModal","printLetterPreviewBtn","successToast","successToastText","medPostBox"];
 const E={};ids.forEach(id=>E[id]=$(id));
 const clean=s=>String(s||"").trim(),esc=s=>String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"),escapeHtml=esc;
 function formatCurrency(v){return Number(v||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -1119,6 +1120,12 @@ Cordialement,
 ${creditorName(d)}`;
 }
 
+function optionalProFeesText(d){
+  if(!isProfessionalDebtor(d)||!E.includeRelanceFees?.checked)return "";
+  const calc=lateFeeBreakdown(d,E.relanceActionDate?.value?new Date(`${E.relanceActionDate.value}T12:00:00`):new Date());
+  return `\n\nPénalités de retard calculées : ${formatCurrency(calc.interests)}\nIndemnité forfaitaire de recouvrement : ${formatCurrency(calc.recoveryFees)}\nTOTAL À RÉGLER : ${formatCurrency(calc.total)}`;
+}
+
 function relance1Text(d){
   const invoices=normalizeInvoices(d),refs=invoices.map(x=>clean(x.ref)).filter(Boolean);
   const refsText=refs.length>1?refs.slice(0,-1).join(", ")+" et "+refs[refs.length-1]:(refs[0]||invoiceNumber(d));
@@ -1130,10 +1137,10 @@ ${debtorName(d)},
 Sauf erreur de notre part, ${plural?`les factures ${refsText}, d’un montant total restant dû de ${remaining}, demeurent impayées à ce jour.`:`la facture ${refsText}, d’un montant restant dû de ${remaining}, demeure impayée à ce jour.`}
 
 Nous vous remercions de procéder au règlement dans les plus brefs délais, ou de nous indiquer votre date de paiement.
-Si vous avez déjà effectué le paiement, nous vous prions de ne pas tenir compte de ce courrier.
+Si vous avez déjà effectué le paiement, nous vous prions de ne pas tenir compte de ce courrier.${optionalProFeesText(d)}
 
 Cordialement,
-Service Comptabilité`}
+${clean(currentUserData?.businessProfile?.companyName)||creditorName(d)}${clean(currentUserData?.businessProfile?.representative)?`\n${clean(currentUserData.businessProfile.representative)}`:""}`}
 function relance2Text(d){
   const invoices=normalizeInvoices(d),refs=invoices.map(x=>clean(x.ref)).filter(Boolean);
   const refsText=refs.length>1?refs.slice(0,-1).join(", ")+" et "+refs[refs.length-1]:(refs[0]||invoiceNumber(d));
@@ -1147,7 +1154,7 @@ Malgré notre première relance${r1p}, ${plural?`les factures ${refsText} demeur
 Le montant total restant dû est de ${remaining}.
 
 Nous vous remercions de régulariser la situation dans les plus brefs délais.
-À défaut, nous poursuivrons les démarches de recouvrement.
+À défaut, nous poursuivrons les démarches de recouvrement.${optionalProFeesText(d)}
 
 Cordialement,
 Service Comptabilité`}
@@ -1164,7 +1171,7 @@ Malgré nos précédentes relances${r2p}, ${plural?`les factures ${refsText} res
 Le montant total restant dû est de ${remaining}.
 
 Nous vous demandons de procéder au règlement sans délai.
-À défaut, une mise en demeure pourra être engagée.
+À défaut, une mise en demeure pourra être engagée.${optionalProFeesText(d)}
 
 Cordialement,
 Service Comptabilité`}
@@ -1172,8 +1179,10 @@ function medText(d){
   const calc=lateFeeBreakdown(d),pro=isProfessionalDebtor(d),plural=calc.rows.length>1?"Factures":"Facture";
   const detail=calc.rows.map(x=>`- ${x.ref} – échéance ${fmtDateFR(x.dueDate)} – principal ${formatCurrency(x.amount)} – intérêts ${formatCurrency(x.interests)}`).join("\n");
   const legalIntro=pro?"Conformément à l’article L. 441-10 du Code de commerce, les pénalités de retard sont exigibles de plein droit dès le lendemain de chaque échéance, sans rappel préalable.":"Les intérêts de retard sont calculés selon le taux applicable au dossier, à compter du lendemain de chaque échéance.";
-  const feeCount=calc.rows.filter(x=>x.recoveryFee>0).length,feeLine=pro&&feeCount?`\n- Indemnité forfaitaire de recouvrement (${feeCount} × 40 €) : ${formatCurrency(calc.recoveryFees)}`:"";
-  return`Objet : Mise en demeure de payer – ${plural} ${calc.rows.map(x=>x.ref).join(", ")}\n\n${debtorName(d)},\n\nMalgré les échéances convenues, les factures ci-dessous demeurent impayées :\n\n${detail}\n\n${legalIntro}\n\nDécompte arrêté au ${todayFR()} :\n- Montant initial des factures : ${formatCurrency(calc.initialPrincipal)}\n- Paiements reçus : - ${formatCurrency(calc.payments)}\n- Principal restant dû : ${formatCurrency(calc.principal)}\n- Intérêts de retard au taux annuel de ${String(calc.annualRate).replace(".",",")} % : ${formatCurrency(calc.interests)}${feeLine}\n- TOTAL À RÉGLER : ${formatCurrency(calc.total)}\n\nLes intérêts continueront à courir au taux indiqué jusqu’au complet paiement et seront actualisés, le cas échéant, lors de toute procédure judiciaire.\n\nEn conséquence, nous vous mettons formellement en demeure de régler la somme de ${formatCurrency(calc.total)} dans un délai de ${MED_DELAY_DAYS} jours à compter de la réception de la présente.\n\nÀ défaut de règlement dans ce délai, nous engagerons sans nouvelle relance toute procédure de recouvrement utile, notamment une procédure d’injonction de payer devant le tribunal compétent.\n\nLa présente vaut mise en demeure au sens des articles 1344 et suivants du Code civil.\n\nCordialement,\nService Comptabilité`;
+  const includeFees=pro&&!!E.includeRelanceFees?.checked;
+  const feeCount=calc.rows.filter(x=>x.recoveryFee>0).length,feeLine=includeFees&&feeCount?`\n- Indemnité forfaitaire de recouvrement (${feeCount} × 40 €) : ${formatCurrency(calc.recoveryFees)}`:"";
+  const medTotal=includeFees?calc.total:calc.principal;
+  return`Objet : Mise en demeure de payer – ${plural} ${calc.rows.map(x=>x.ref).join(", ")}\n\n${debtorName(d)},\n\nMalgré les échéances convenues, les factures ci-dessous demeurent impayées :\n\n${detail}\n\n${legalIntro}\n\nDécompte arrêté au ${todayFR()} :\n- Montant initial des factures : ${formatCurrency(calc.initialPrincipal)}\n- Paiements reçus : - ${formatCurrency(calc.payments)}\n- Principal restant dû : ${formatCurrency(calc.principal)}\n- Intérêts de retard au taux annuel de ${String(calc.annualRate).replace(".",",")} % : ${formatCurrency(calc.interests)}${feeLine}\n- TOTAL À RÉGLER : ${formatCurrency(calc.total)}\n\nLes intérêts continueront à courir au taux indiqué jusqu’au complet paiement et seront actualisés, le cas échéant, lors de toute procédure judiciaire.\n\nEn conséquence, nous vous mettons formellement en demeure de régler la somme de ${formatCurrency(medTotal)} dans un délai de ${MED_DELAY_DAYS} jours à compter de la réception de la présente.\n\nÀ défaut de règlement dans ce délai, nous engagerons sans nouvelle relance toute procédure de recouvrement utile, notamment une procédure d’injonction de payer devant le tribunal compétent.\n\nLa présente vaut mise en demeure au sens des articles 1344 et suivants du Code civil.\n\nCordialement,\nService Comptabilité`;
 }
 function debtStatementText(d=currentDossier,asOf=new Date()){
   const calc=lateFeeBreakdown(d,asOf),date=asOf.toLocaleDateString("fr-FR");
@@ -1589,7 +1598,7 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     intro=`Madame, Monsieur,<br><br>Malgré nos précédentes relances${previousDate!=="—"?`, dont la dernière en date du <strong>${escapeHtml(previousDate)}</strong>`:""}, ${plural?`les factures n°${escapeHtml(refsText)} restent impayées`:`la facture n°${escapeHtml(refsText)} reste impayée`}. Le principal restant dû s’élève à <strong>${escapeHtml(formatCurrency(remaining))}</strong>.<br><br>Nous vous demandons de procéder au règlement sans délai. À défaut, une mise en demeure pourra être engagée.${invoiceRowsHtml}`;
   }else if(currentAction==="med"){
     const detail=invoices.map(inv=>`${escapeHtml(inv.ref||"Facture")} — échéance ${escapeHtml(fmtDateFR(inv.dueDate)||"—")} — ${escapeHtml(formatCurrency(inv.amount||0))}`).join("<br>");
-    intro=`<strong>Lettre recommandée avec accusé de réception</strong><br><br>Madame, Monsieur,<br><br>Malgré nos précédentes relances, ${plural?`les factures n°${escapeHtml(refsText)} demeurent impayées`:`la facture n°${escapeHtml(refsText)} demeure impayée`}.<br><br>Par la présente, et conformément aux dispositions de l’article 1344 du Code civil, nous vous mettons en demeure de régler la somme totale de <strong>${escapeHtml(formatCurrency(calc.total))}</strong> dans un délai de <strong>${MED_DELAY_DAYS} jours</strong> à compter de la réception de la présente.<br><br>${plural?`<strong>Factures concernées :</strong><br>${detail}<br><br>`:""}À défaut de règlement dans ce délai, nous engagerons sans nouvelle relance toute procédure de recouvrement utile, notamment une procédure d’injonction de payer devant le tribunal compétent.`;
+    intro=`<strong>Lettre recommandée avec accusé de réception</strong><br><br>Madame, Monsieur,<br><br>Malgré nos précédentes relances, ${plural?`les factures n°${escapeHtml(refsText)} demeurent impayées`:`la facture n°${escapeHtml(refsText)} demeure impayée`}.<br><br>Par la présente, et conformément aux dispositions de l’article 1344 du Code civil, nous vous mettons en demeure de régler la somme totale de <strong>${escapeHtml(formatCurrency(isProfessionalDebtor(d)&&E.includeRelanceFees?.checked?calc.total:remaining))}</strong> dans un délai de <strong>${MED_DELAY_DAYS} jours</strong> à compter de la réception de la présente.<br><br>${plural?`<strong>Factures concernées :</strong><br>${detail}<br><br>`:""}À défaut de règlement dans ce délai, nous engagerons sans nouvelle relance toute procédure de recouvrement utile, notamment une procédure d’injonction de payer devant le tribunal compétent.`;
   }else{
     intro=escapeHtml(bodyWithoutSubject(body)).replace(/\n/g,"<br>");
   }
@@ -1663,7 +1672,8 @@ function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effec
     <tr><td>Principal initial</td><td>${escapeHtml(formatCurrency(principal))}</td></tr>
     <tr><td>Total réglé à ce jour</td><td>${escapeHtml(formatCurrency(paid))}</td></tr>
     <tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(remaining))}</td></tr>
-    <tr class="total"><td>TOTAL À RÉGLER</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr>
+    ${isProfessionalDebtor(d)&&E.includeRelanceFees?.checked?`<tr><td>Pénalités de retard calculées</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr><tr><td>Indemnité forfaitaire de recouvrement</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}
+    <tr class="total"><td>TOTAL À RÉGLER</td><td>${escapeHtml(formatCurrency(isProfessionalDebtor(d)&&E.includeRelanceFees?.checked?calc.total:remaining))}</td></tr>
   </tbody></table>`:""}
   <div class="closing">Nous vous prions d’agréer, Madame, Monsieur, l’expression de nos salutations distinguées.</div>
   <div class="sign"><strong>${escapeHtml(companyName)}</strong>${representative?escapeHtml(representative):""}${signature}</div>
@@ -2500,6 +2510,9 @@ function openRelanceActionModal(action="relance1"){
   const today=isoToday();E.relanceActionDate.value=today;E.relanceActionDateLabel.textContent=today;
   E.relanceActionAmount.textContent=formatCurrency(principalBalance(currentDossier));
   E.relanceActionChannel.value=action==="med"?"Courrier":"Email";E.relanceActionNote.value="";
+  const proFees=isProfessionalDebtor(currentDossier);
+  if(E.relanceFeesWrap)E.relanceFeesWrap.style.display=proFees?"flex":"none";
+  if(E.includeRelanceFees)E.includeRelanceFees.checked=false;
   E.medPostBox?.classList.toggle("show",action==="med");
   if(E.previewRelanceActionBtn)E.previewRelanceActionBtn.textContent=`⇩ Prévisualiser à la date ${today}`;
   syncRelanceValidationLabel();
