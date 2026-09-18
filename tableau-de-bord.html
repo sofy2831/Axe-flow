@@ -614,7 +614,7 @@
   <div class="action-amount-card"><span>Principal restant dû au <b id="relanceActionDateLabel">—</b></span><strong id="relanceActionAmount">0,00 €</strong></div>
   <div class="form-grid action-form-grid">
     <div class="field"><label>Date de l'action</label><input type="date" id="relanceActionDate" /></div>
-    <div class="field"><label>Canal</label><select id="relanceActionChannel"><option value="Email">Email</option><option value="Courrier">Courrier</option><option value="Téléphone">Téléphone</option></select></div>
+    <div class="field"><label>Canal</label><select id="relanceActionChannel"><option value="Email">Email</option><option value="Courrier">Courrier</option></select></div>
     <div class="field full"><label>Note interne (optionnel)</label><textarea id="relanceActionNote" rows="3"></textarea></div>
   </div>
   <div class="med-post-box" id="medPostBox"><strong>Mise en demeure : envoi LRAR recommandé.</strong><br>Vous pouvez préparer le courrier dans Axe Flow puis l’envoyer en recommandé avec accusé de réception.<br><a class="btn btn-secondary" href="https://www.laposte.fr/lettre-recommandee-en-ligne" target="_blank" rel="noopener">Ouvrir La Poste — Lettre recommandée en ligne</a></div>
@@ -798,7 +798,14 @@ function fmtDateFR(v){if(!v)return"—";try{if(v?.toDate)return v.toDate().toLoc
 function todayFR(){return new Date().toLocaleDateString("fr-FR")}
 function plusDays(days){return Timestamp.fromMillis(Date.now()+Number(days||0)*86400000)}
 function dateAfterDaysFR(days){return new Date(Date.now()+Number(days||0)*86400000).toLocaleDateString("fr-FR")}
-function generateRef(){const d=new Date();return`AF-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}-${Math.floor(1000+Math.random()*9000)}`}
+function generateRef(){
+  const d=new Date(),prefix=`AF-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}-`;
+  // Nouvelle numérotation séquentielle par compte et par mois.
+  // Les anciennes références aléatoires (1000–9999) restent inchangées et ne participent pas au nouveau compteur.
+  const used=(Array.isArray(dossiers)?dossiers:[]).map(x=>clean(x?.ref)).filter(r=>r.startsWith(prefix)).map(r=>Number(r.slice(prefix.length))).filter(n=>Number.isInteger(n)&&n>=1&&n<=999);
+  const next=(used.length?Math.max(...used):0)+1;
+  return `${prefix}${String(next).padStart(4,"0")}`;
+}
 function makeMailto(email,subject,body){return`mailto:${encodeURIComponent(email||"")}?subject=${encodeURIComponent(subject||"")}&body=${encodeURIComponent(body||"")}`}
 function creditorName(d=currentDossier){return clean(d?.creditorName)||clean(currentUserData?.businessProfile?.companyName)||clean(currentUserData?.displayName)||clean(currentUser?.email)||"Créancier"}
 function creditorEmail(d=currentDossier){return clean(d?.creditorEmail)||clean(currentUserData?.businessProfile?.email)||clean(currentUser?.email)}
@@ -1919,7 +1926,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     const claimantBirthDate=clean(cerfaGenerationOptions?.claimantBirthDate);
     if(claimantBirthDate){
       const [by,bm,bd]=claimantBirthDate.split("-");
-      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,180.2+(i*15.5)-(i>=4?1.2:0),481,ch,9.2,10));
+      `${bd||""}${bm||""}${by||""}`.split("").forEach((ch,i)=>put(page1,180.2+(i*15.5)-(i>=4?4.2:0),481,ch,9.2,10));
     }
     put(page1,169,461,clean(cerfaGenerationOptions?.claimantBirthPlace),8.2,366); // lieu de naissance — +0,5 % vers la droite
     // profession : laissée vierge tant qu'elle n'est pas collectée par Axe Flow
@@ -2614,8 +2621,8 @@ function openInjunctionModal(){
   const dateInput=$("injunctionPreparationDate");
   if(dateInput)dateInput.value=currentDossier.injunctionPreparationDate||new Date().toISOString().slice(0,10);
   const c=currentDossier.injunctionCourt||{};
-  if($("injunctionCourtName"))$("injunctionCourtName").value=c.name||"";
-  if($("injunctionCourtCity"))$("injunctionCourtCity").value=c.city||"";
+  if($("injunctionCourtName"))$("injunctionCourtName").value=c.name||(!pro&&debtorCity(currentDossier)?`Tribunal judiciaire de ${debtorCity(currentDossier)}`:"");
+  if($("injunctionCourtCity"))$("injunctionCourtCity").value=c.city||(!pro?debtorCity(currentDossier):"");
   if($("injunctionCourtZip"))$("injunctionCourtZip").value=c.zip||"";
   if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=c.address||"";if($("injunctionCourtSaved"))$("injunctionCourtSaved").style.display=c.name?"inline-flex":"none";
   const pieces=$("injunctionGeneratedPieces");
@@ -3053,11 +3060,14 @@ function openDossierDetailModal(d){
     actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">Informer le débiteur</button>`;
     if(step>=5||d?.injunctionPublished)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="court_closure">Informer la juridiction</button>`;
   }
+  const judicialRegistered=(d?.injunctionPublished||d?.injunctionPreparedAt||d?.__injunctionRegistered||d?.currentStep==="injunction_filed"||step>=5);
   const judicialPaid=principalBalance(d)<=0&&(
     d?.status==="paid_pending_court_closure"||d?.status==="paid_closed"||d?.lifecycleStatus==="closed"||
-    d?.nextAction==="CLOTURE_INJONCTION"||d?.injunctionPublished||d?.injunctionPreparedAt||d?.__injunctionRegistered||
-    d?.currentStep==="injunction_filed"||step>=5
+    d?.nextAction==="CLOTURE_INJONCTION"||judicialRegistered
   );
+  if(judicialRegistered&&principalBalance(d)>0){
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+  }
   if(judicialPaid){
     const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
     const closingText=fullyClosed
@@ -3066,7 +3076,7 @@ function openDossierDetailModal(d){
     const closeButton=fullyClosed?"":`<button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button>`;
     actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
-  E.detailActions.classList.toggle("judicial-premium-row",judicialPaid);
+  E.detailActions.classList.toggle("judicial-premium-row",judicialPaid||judicialRegistered);
   E.detailActions.innerHTML=actionHtml;
   if(E.detailJudicialAfter){E.detailJudicialAfter.style.display="none";E.detailJudicialAfter.innerHTML="";}
   E.detailActions.querySelector("#detailRecordPaymentBtn")?.addEventListener("click",()=>{E.dossierDetailModal.classList.remove("open");renderAll();E.recordPaymentBtn?.click()});
@@ -3478,7 +3488,8 @@ function generateInjunctionRequestFromModal(){
   currentAction="injunction";
   const courtName=injunctionCourtLabel(),courtAddress=injunctionCourtAddressLabel();
   if(!courtName){alert("Renseignez d’abord la juridiction compétente.");return}
-  if(!signatureDataUrl){openSignatureModal("request",courtName,courtAddress);return}
+  // La signature de « Mon entreprise » est utilisée automatiquement si elle existe.
+  // Pas de seconde modale de signature lors de la génération de la requête.
   openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
 }
 E.generateInjunctionRequestBtn?.addEventListener("click",generateInjunctionRequestFromModal);
