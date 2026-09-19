@@ -3506,7 +3506,14 @@ function injunctionCourtLabel(){
 }
 function injunctionCourtAddressLabel(){
   const c=injunctionCourtData();
-  return [c.address,[c.zip,c.city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  // En consultation historique (« Voir »), la modale d’injonction peut être fermée :
+  // reprendre alors les coordonnées enregistrées dans le dossier afin que la 2e ligne
+  // adresse + CP + ville reste présente sur le Cerfa.
+  const saved=currentDossier?.injunctionCourt||{};
+  const address=clean(c.address)||clean(saved.address)||clean(currentDossier?.courtAddress);
+  const zip=clean(c.zip)||clean(saved.zip)||clean(currentDossier?.courtZip);
+  const city=clean(c.city)||clean(saved.city)||clean(currentDossier?.courtCity);
+  return [address,[zip,city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 }
 
 function injunctionPreparationIso(){
