@@ -1994,7 +1994,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   // Cerfa 12948*06 — juridiction dans le champ « renvoyée devant », légèrement abaissée.
   put(page3,280,233.8,privateCourt,8.323,255,true);
   // Adresse complète enregistrée dans le dossier d’injonction, dans le champ officiel juste dessous.
-  put(page3,22,217.5,privateCourtAddress,8.323,220,true);
+  put(page3,30.9,217.5,privateCourtAddress,8.323,220,true);
 
   drawWrapped(page3,51,199,demandText,8.12,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
@@ -2019,7 +2019,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     try{
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=105,maxH=34,scale=Math.min(maxW/img.width,maxH/img.height);
+      const maxW=110.25,maxH=35.7,scale=Math.min(maxW/img.width,maxH/img.height);
       page4.drawImage(img,{x:72,y:383,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12948",e)}
   }
