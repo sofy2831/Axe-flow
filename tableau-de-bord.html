@@ -1988,7 +1988,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   });
   const demandText=[
     `Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${formatCurrency(demandCalc.principal)}.`,
-    `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${formatCurrency(demandCalc.principalBalance)} reste due.`,
+    `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${formatCurrency(demandCalc.principal)} reste due.`,
     `Les factures, relances, mise en demeure et décompte actualisé sont joints à la présente requête.`
   ].join(' ');
   const drawWrapped=(page,x,y,text,size,maxWidth,lineHeight,maxLines)=>{
