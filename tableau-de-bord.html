@@ -2539,10 +2539,10 @@ async function printJudicialClosureDirect(action){
     const c=currentDossier?.injunctionCourt||{};
     recipientOverride=["Monsieur le Greffier",clean(c.name),clean(c.address),[clean(c.zip),clean(c.city)].filter(Boolean).join(" ")].filter(Boolean).join("\n");
   }
-  const lastPayment=normalizePayments(currentDossier).at(-1)||{};
-  const html=professionalLetterHtml(body,currentDossier,recipientOverride,lastPayment.date||isoToday());
-  // La chronologie mémorise la date d’envoi (aujourd’hui), tandis que le courrier
-  // conserve volontairement sa date métier : celle du paiement intégral.
+  const sendDate=isoToday();
+  const html=professionalLetterHtml(body,currentDossier,recipientOverride,sendDate);
+  // La date en tête du courrier correspond à sa date réelle d’émission/envoi.
+  // La date du paiement intégral reste, elle, mentionnée dans le corps du courrier.
   await logJudicialNoticeInTimeline(action);
   const iframe=document.createElement("iframe");
   iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";
@@ -2979,9 +2979,9 @@ async function loadDetailTimeline(d){
           const c=d.injunctionCourt||{};
           recipientOverride=["Monsieur le Greffier",clean(c.name),clean(c.address),[clean(c.zip),clean(c.city)].filter(Boolean).join(" ")].filter(Boolean).join("\n");
         }
-        const lastPayment=normalizePayments(d).at(-1)||{};
-        // Important : le courrier reste daté du jour du paiement intégral, pas de la date d’envoi mémorisée dans la chronologie.
-        printHtmlDocument(professionalLetterHtml(body,d,recipientOverride,lastPayment.date||eventDate));
+        // Depuis la chronologie, on restitue le courrier avec sa date d’envoi historique.
+        // La date du paiement intégral reste indiquée séparément dans le corps du courrier.
+        printHtmlDocument(professionalLetterHtml(body,d,recipientOverride,eventDate||isoToday()));
         currentAction=previousAction;
         return;
       }
