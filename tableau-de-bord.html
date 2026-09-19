@@ -2135,8 +2135,8 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
       const maxW=175,maxH=52,scale=Math.min(maxW/img.width,maxH/img.height);
       // Masque seulement les deux parties bleues visibles, sans empiéter sur l'encadré inférieur.
-      // Efface uniquement le champ bleu de signature, sans toucher au cadre légal inférieur.
-      page4.drawRectangle({x:134,y:84,width:172,height:14,color:PDFLib.rgb(1,1,1)});
+      // Masque intégralement le champ bleu de signature, sans toucher au cadre légal inférieur.
+      page4.drawRectangle({x:132,y:82,width:178,height:18,color:PDFLib.rgb(1,1,1)});
       page4.drawImage(img,{x:153,y:77,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
