@@ -1978,7 +1978,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   // Le bloc libre est prérempli dynamiquement à partir DU dossier particulier courant.
   const page3=pages[2];
   const demandInvoices=normalizeInvoices(currentDossier);
-  const demandCalc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
+  const demandCalc=lateFeeBreakdown(dossierSnapshotAtDate(currentDossier,injunctionPreparationIso()),injunctionPreparationDateObj());
   const demandRefs=demandInvoices.map(i=>clean(i.ref)).filter(Boolean);
   const demandDetails=demandInvoices.map(i=>{
     const amount=Number(i.amount??i.amountTTC??0);
