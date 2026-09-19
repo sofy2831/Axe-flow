@@ -854,6 +854,14 @@ function principalBalance(d=currentDossier){return Number(Math.max(0,principalAm
 function dueAmount(d=currentDossier){return formatCurrency(principalBalance(d))}
 function dueAmountCerfa(d=currentDossier){return amountForCerfa(principalBalance(d))}
 function paymentAdjustedInvoices(d=currentDossier){const rows=normalizeInvoices(d).map((x,i)=>({...x,originalAmount:Number(x.amount||0),remainingAmount:Number(x.amount||0),_i:i})).sort((a,b)=>{const da=parseLocalDate(a.dueDate)?.getTime()||0,db=parseLocalDate(b.dueDate)?.getTime()||0;return da-db||a._i-b._i});let remaining=totalPayments(d);for(const row of rows){if(remaining<=0)break;const applied=Math.min(row.remainingAmount,remaining);row.remainingAmount=Number((row.remainingAmount-applied).toFixed(2));remaining=Number((remaining-applied).toFixed(2))}return rows.sort((a,b)=>a._i-b._i)}
+function dossierSnapshotAtDate(d,effectiveDate){
+  if(!d||!effectiveDate)return d;
+  const cutoff=String(effectiveDate).slice(0,10);
+  const payments=normalizePayments(d).filter(p=>!p.date||String(p.date).slice(0,10)<=cutoff).map(({amount,date,method,reference})=>({amount,date,method,reference}));
+  const paid=Number(payments.reduce((t,p)=>t+Number(p.amount||0),0).toFixed(2));
+  const initial=principalAmount(d);
+  return {...d,payments,totalPayments:paid,principalBalance:Number(Math.max(0,initial-paid).toFixed(2))};
+}
 function parseLocalDate(v){if(!v)return null;const d=new Date(`${v}T00:00:00`);return Number.isNaN(d.getTime())?null:d}
 function lateFeeBreakdown(d=currentDossier,asOf=new Date()){
   const annualRate=Number(d?.lateRatePercent??8.25),pro=isProfessionalDebtor(d),balance=principalBalance(d);
@@ -1799,7 +1807,7 @@ function openSignatureModal(target,courtName="",courtAddress=""){pendingSignedDo
 function closeSignatureModal(clearPending=true){$("signatureModal")?.classList.remove("open");if(clearPending){pendingSignedDocument="";pendingCourtName="";pendingCourtAddress="";}}
 function prepareSignatureCanvas(){const canvas=$("signatureCanvas"),ctx=canvas?.getContext("2d");if(!canvas||!ctx)return;ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle="#111";ctx.lineWidth=4;ctx.lineCap="round";ctx.lineJoin="round";canvas.dataset.hasInk="0";if(signatureDataUrl){const img=new Image();img.onload=()=>{ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);const r=Math.min((canvas.width-80)/img.width,(canvas.height-50)/img.height);const w=img.width*r,h=img.height*r;ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h);canvas.dataset.hasInk="1"};img.src=signatureDataUrl}}
 function canvasSignatureDataUrl(){const canvas=$("signatureCanvas");return canvas?.dataset.hasInk==="1"?canvas.toDataURL("image/png"):""}
-async function addSignatureToCerfaPdf(pdfDoc){if(!signatureDataUrl)return;try{const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);const pages=pdfDoc.getPages();if(pages.length<4)throw new Error("Le Cerfa ne contient pas de page 4.");const page=pages[3];const maxW=280,maxH=65,scale=Math.min(maxW/img.width,maxH/img.height);const width=img.width*scale,height=img.height*scale;const x=58;const y=118;page.drawImage(img,{x,y,width,height});}catch(e){console.warn("Signature Cerfa non apposée",e)}}
+async function addSignatureToCerfaPdf(pdfDoc){if(!signatureDataUrl)return;try{const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);const pages=pdfDoc.getPages();if(pages.length<4)throw new Error("Le Cerfa ne contient pas de page 4.");const page=pages[3];const maxW=350,maxH=82,scale=Math.min(maxW/img.width,maxH/img.height);const width=img.width*scale,height=img.height*scale;const x=58;const y=118;page.drawImage(img,{x,y,width,height});}catch(e){console.warn("Signature Cerfa non apposée",e)}}
 async function continueSignedDocument(){const target=pendingSignedDocument,courtName=pendingCourtName,courtAddress=pendingCourtAddress;closeSignatureModal();if(target==="cerfa")await generateCerfaPrefilled(true);else if(target==="request")openInjunctionRequestPrint(currentDossier,courtName,courtAddress);}
 
 
@@ -2889,11 +2897,12 @@ async function loadDetailTimeline(d){
       const action=btn.dataset.viewAction;
       const eventDate=btn.dataset.viewDate||isoToday();
       if(action==="injunction_prepared"){
-        const court=d.injunctionCourt||{};
-        const previousDate=d.injunctionPreparationDate;
-        d.injunctionPreparationDate=eventDate;
-        try{openInjunctionRequestPrint(d,court.name||"",court.address||"")}
-        finally{d.injunctionPreparationDate=previousDate}
+        const historicalDossier=dossierSnapshotAtDate(d,eventDate);
+        const court=historicalDossier.injunctionCourt||{};
+        const previousDate=historicalDossier.injunctionPreparationDate;
+        historicalDossier.injunctionPreparationDate=eventDate;
+        try{openInjunctionRequestPrint(historicalDossier,court.name||"",court.address||"")}
+        finally{historicalDossier.injunctionPreparationDate=previousDate}
         return;
       }
       if(action==="non_opposition_prepared"){
@@ -2916,8 +2925,9 @@ async function loadDetailTimeline(d){
         return;
       }
       currentAction=action;
-      currentText=buildText(currentAction,d);
-      previewProfessionalLetter(currentText,d,eventDate);
+      const historicalDossier=dossierSnapshotAtDate(d,eventDate);
+      currentText=buildText(currentAction,historicalDossier);
+      previewProfessionalLetter(currentText,historicalDossier,eventDate);
     }));
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
