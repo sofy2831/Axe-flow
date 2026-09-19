@@ -2074,21 +2074,21 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     put(page1,372.6,302,creditorCity(currentDossier),9.23,133);
     put(page1,113,282,clean(p.country)||"France",9.23,425);
     // Adresse électronique sur la ligne « Votre adresse électronique »
-    put(page1,218,267,cem.left,9.01,318); put(page1,472,267,cem.right,9.01,0);
+    put(page1,218,267,cem.left,9.01,250); put(page1,472,267,cem.right,9.01,125);
     // Téléphone sur la ligne suivante
     put(page1,228,247,creditorPhone(currentDossier),9.12,240);
   }
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
-  // Le dossier Pro Axe Flow fournit la dénomination, le représentant et les coordonnées.
-  put(page3,454,442,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.0,85);
-  put(page3,185,422,debtorName(currentDossier),8.4,354,true);
-  put(page3,208,402,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),8.1,331);
-  put(page3,261,382,debtorAddress(currentDossier),8.1,278);
-  put(page3,171,362,debtorZip(currentDossier),8.1,96);
-  put(page3,379,362,debtorCity(currentDossier),8.1,160);
-  put(page3,243,322,dem.left,7.9,306); put(page3,569,322,dem.right,7.9,0);
-  put(page3,253,302,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.0,213);
+  // Zone située en haut de la page 3 : continuation du PREMIER DÉBITEUR commencé page 2.
+  put(page3,454,716,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.0,85);
+  put(page3,185,694,debtorName(currentDossier),8.4,354,true);
+  put(page3,208,672,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),8.1,331);
+  put(page3,261,650,debtorAddress(currentDossier),8.1,278);
+  put(page3,171,628,debtorZip(currentDossier),8.1,96);
+  put(page3,379,628,debtorCity(currentDossier),8.1,160);
+  put(page3,243,606,dem.left,7.9,235); put(page3,505,606,dem.right,7.9,145);
+  put(page3,253,584,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.0,213);
 
   // PAGE 4 — JURIDICTION ET SOMMES DEMANDÉES
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
@@ -2098,18 +2098,18 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   put(page4,275,648,court,7.8,263,true);
 
   put(page4,82,505,invoices.length>1?`${invoices.length} factures impayées`:`Facture ${clean(invoices[0]?.ref)||"impayée"}`,7.8,208);
-  put(page4,331,520,amountForCerfa(calc.principal)+" EUR",8.3,218,true);
+  put(page4,275,520,amountForCerfa(calc.principal)+" EUR",8.3,218,true);
 
   // Pénalités contractuelles : les taux pouvant différer par facture, le détail exact reste dans le décompte joint.
   mark(page4,48.9,406.8,true);
   const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)&&n>0))];
   put(page4,97,394,rates.length===1?`${String(rates[0]).replace(".",",")} %`:`selon factures`,7.8,193);
-  put(page4,331,393,amountForCerfa(calc.interests)+" EUR",8.2,218,true);
+  put(page4,275,393,amountForCerfa(calc.interests)+" EUR",8.2,218,true);
   put(page4,329,350,invoices.length===1?formatDateForCerfaDayAfter(invoices[0].dueDate):"Voir décompte joint",7.7,228);
 
   // Indemnité forfaitaire B2B : frais accessoires.
   put(page4,82,295,"Indemnité forfaitaire de recouvrement",7.5,208);
-  put(page4,331,295,amountForCerfa(calc.recoveryFees)+" EUR",8.2,218,true);
+  put(page4,275,295,amountForCerfa(calc.recoveryFees)+" EUR",8.2,218,true);
 
   const refs=invoices.map(i=>clean(i.ref)).filter(Boolean).join(", ");
   const basis=[
@@ -2130,8 +2130,8 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     try{
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=105,maxH=30,scale=Math.min(maxW/img.width,maxH/img.height);
-      page4.drawImage(img,{x:135,y:80,width:img.width*scale,height:img.height*scale});
+      const maxW=132,maxH=38,scale=Math.min(maxW/img.width,maxH/img.height);
+      page4.drawImage(img,{x:135,y:88,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
   return pdfDoc;
