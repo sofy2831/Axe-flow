@@ -2492,6 +2492,30 @@ async function logJudicialNoticeInTimeline(action){
   }catch(err){console.warn('Historique information judiciaire :',err);}
 }
 
+async function historicalHtmlToPdfBlob(html){
+  if(!window.html2pdf)throw new Error("html2pdf n’est pas chargé");
+  // Un document HTML complet ne doit pas être injecté tel quel dans un <div> :
+  // certains navigateurs ne conservaient alors qu’une seule page. On sépare
+  // explicitement les styles du contenu avant la conversion PDF.
+  const parsed=new DOMParser().parseFromString(String(html||""),"text/html");
+  const holder=document.createElement("div");
+  holder.style.cssText="position:fixed;left:-100000px;top:0;width:210mm;background:#fff;z-index:-1";
+  const styles=[...parsed.querySelectorAll("style")].map(x=>x.textContent||"").join("\n");
+  if(styles){const style=document.createElement("style");style.textContent=styles;holder.appendChild(style);}
+  const content=document.createElement("div");
+  content.innerHTML=parsed.body?.innerHTML||String(html||"");
+  holder.appendChild(content);
+  document.body.appendChild(holder);
+  try{
+    return await window.html2pdf().set({
+      margin:0,filename:"document.pdf",image:{type:"jpeg",quality:.92},
+      html2canvas:{scale:1.35,useCORS:true,backgroundColor:"#ffffff"},
+      pagebreak:{mode:["css","legacy"]},
+      jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}
+    }).from(content).outputPdf("blob");
+  }finally{holder.remove();}
+}
+
 async function openHistoricalInjunctionBundle(d,eventDate){
   if(!d||!window.PDFLib||!window.html2pdf){alert('Les modules PDF ne sont pas chargés. Rechargez la page puis réessayez.');return;}
   const historicalDossier=dossierSnapshotAtDate(d,eventDate);
@@ -2506,16 +2530,26 @@ async function openHistoricalInjunctionBundle(d,eventDate){
   try{
     currentDossier=historicalDossier;
     if(dateInput)dateInput.value=eventDate;
-    const requestBlob=await htmlStringToPdfBlob(injunctionRequestPrintHtml(historicalDossier,court.name||'',court.address||''),true);
-    const statementBlob=await htmlStringToPdfBlob(debtStatementHtml(historicalDossier),true);
+
+    // 1. Requête historique complète (toutes ses pages).
+    const requestBlob=await historicalHtmlToPdfBlob(
+      injunctionRequestPrintHtml(historicalDossier,court.name||'',court.address||'')
+    );
+    // 2. Décompte historique arrêté à la même date.
+    const statementBlob=await historicalHtmlToPdfBlob(debtStatementHtml(historicalDossier));
+    // 3. Cerfa officiel historique.
     window.__axeFlowCerfaCapture=(blob)=>{cerfaBlob=blob;};
     await generateCerfaPrefilled(true,false);
     if(!cerfaBlob)throw new Error('Cerfa non généré');
+
     const merged=await PDFLib.PDFDocument.create();
+    // Ordre voulu dans « Voir » : requête → Cerfa → décompte.
     for(const blob of [requestBlob,cerfaBlob,statementBlob]){
       const part=await PDFLib.PDFDocument.load(await blob.arrayBuffer());
-      const pages=await merged.copyPages(part,part.getPageIndices());
-      pages.forEach(p=>merged.addPage(p));
+      const indices=part.getPageIndices();
+      if(!indices.length)throw new Error('Une pièce du dossier est vide');
+      const pages=await merged.copyPages(part,indices);
+      pages.forEach(page=>merged.addPage(page));
     }
     const result=new Blob([await merged.save()],{type:'application/pdf'});
     const url=URL.createObjectURL(result);
