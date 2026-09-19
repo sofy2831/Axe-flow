@@ -1988,8 +1988,9 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     lines.slice(0,maxLines).forEach((ln,i)=>page.drawText(ln,{x,y:y-i*lineHeight,size,font,color:ink}));
   };
   // Juridiction compétente : particulier = tribunal judiciaire enregistré dans le dossier.
+  // Placement dans le champ officiel après « renvoyée devant » (article 1408).
   const privateCourt=injunctionCourtLabel();
-  put(page3,39,292,privateCourt,8.323,285,true);
+  put(page3,280,457,privateCourt,8.323,255,true);
 
   drawWrapped(page3,51,199,demandText,8.12,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
@@ -3504,7 +3505,13 @@ $("previewNonOppositionBtn")?.addEventListener("click",()=>{
   if(!currentDossier)return;
   const channel=clean($("nonOppositionChannel")?.value),date=clean($("nonOppositionDate")?.value)||isoToday();
   const body=`<p>Madame, Monsieur,</p><p>Je vous prie de bien vouloir me délivrer un <strong>certificat de non-opposition</strong> concernant l’ordonnance portant injonction de payer rendue dans le dossier référencé <strong>${escapeHtml(currentDossier.ref||"")}</strong>, opposant le créancier à <strong>${escapeHtml(debtorName(currentDossier))}</strong>.</p><p>Cette demande intervient après signification de l’ordonnance et sous réserve de l’expiration du délai légal d’opposition sans opposition enregistrée.</p><p>Je vous remercie de bien vouloir adresser le certificat au créancier aux coordonnées figurant sur le présent courrier.</p><p>Veuillez agréer, Madame, Monsieur, l’expression de mes salutations distinguées.</p>`;
-  printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,currentDossier,{date}));
+  const court=currentDossier.injunctionCourt||{};
+  const courtName=clean(court.name)||clean(currentDossier.courtName)||injunctionCourtLabel();
+  const courtAddress=clean(court.address)||clean(currentDossier.courtAddress)||"";
+  const courtZip=clean(court.zip)||clean(currentDossier.courtZip)||"";
+  const courtCity=clean(court.city)||clean(currentDossier.courtCity)||"";
+  const recipientAddress=[courtAddress,[courtZip,courtCity].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+  printHtmlDocument(simpleJudicialLetterHtml("DEMANDE DE CERTIFICAT DE NON-OPPOSITION",body,currentDossier,{date,recipientName:courtName,recipientAddress}));
 });
 
 $("validateNonOppositionBtn")?.addEventListener("click",async()=>{
