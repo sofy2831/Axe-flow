@@ -2085,7 +2085,10 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   put(page3,185,684,debtorName(currentDossier),9.41,354,true);
   put(page3,208,664,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),9.07,331);
   put(page3,261,644,debtorAddress(currentDossier),9.07,278);
-  put(page3,138,622,debtorZip(currentDossier),10.20,110);
+  {
+    const zip=debtorZip(currentDossier).replace(/\s+/g,"");
+    put(page3,126,622,zip.split("").join(" "),10.20,125);
+  }
   put(page3,379,622,debtorCity(currentDossier),9.07,160);
   put(page3,220,606,dem.left,10.00,245); put(page3,475,606,dem.right,10.00,165);
   put(page3,213,586,clean(currentDossier.debtorPhone||currentDossier.phone||""),10.10,225);
@@ -2108,7 +2111,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   put(page4,275,350,invoices.length===1?formatDateForCerfaDayAfter(invoices[0].dueDate):"Voir décompte joint",7.7,228);
 
   // Indemnité forfaitaire B2B : frais accessoires.
-  put(page4,82,295,"Indemnité forfaitaire de recouvrement",7.5,208);
+  put(page4,70,295,"Indemnité forfaitaire de recouvrement",7.5,220);
   put(page4,275,295,amountForCerfa(calc.recoveryFees)+" EUR",8.2,218,true);
 
   const refs=invoices.map(i=>clean(i.ref)).filter(Boolean).join(", ");
@@ -2131,8 +2134,9 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
       const maxW=175,maxH=52,scale=Math.min(maxW/img.width,maxH/img.height);
-      // Masque uniquement le champ bleu de signature du formulaire officiel.
-      page4.drawRectangle({x:135,y:72,width:165,height:30,color:PDFLib.rgb(1,1,1)});
+      // Masque seulement les deux parties bleues visibles, sans empiéter sur l'encadré inférieur.
+      page4.drawRectangle({x:135,y:78,width:22,height:18,color:PDFLib.rgb(1,1,1)});
+      page4.drawRectangle({x:258,y:78,width:42,height:18,color:PDFLib.rgb(1,1,1)});
       page4.drawImage(img,{x:153,y:77,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
