@@ -2177,10 +2177,16 @@ function openCerfaOptionsModal(){
   const p=currentUserData?.businessProfile||{};
   const legal=clean(p.legalForm||"").toLowerCase();
   const isCompany=/sas|sarl|eurl|sa|sci|scp|sasu/.test(legal);
-  $("cerfaClaimantKind").value=isCompany?"company":"person";
-  $("cerfaClaimantGenderWrap").style.display=isCompany?"none":"flex";
-  $("cerfaClaimantBirthDateWrap").style.display=isCompany?"none":"block";
-  $("cerfaClaimantBirthPlaceWrap").style.display=isCompany?"none":"block";
+  const savedCerfa=currentDossier?.cerfaGenerationOptions||{};
+  $("cerfaClaimantKind").value=savedCerfa.claimantKind||(isCompany?"company":"person");
+  if($("cerfaClaimantGender"))$("cerfaClaimantGender").value=savedCerfa.claimantGender||"female";
+  if($("cerfaDebtorGender"))$("cerfaDebtorGender").value=savedCerfa.debtorGender||"male";
+  if($("cerfaClaimantBirthDate"))$("cerfaClaimantBirthDate").value=savedCerfa.claimantBirthDate||"";
+  if($("cerfaClaimantBirthPlace"))$("cerfaClaimantBirthPlace").value=savedCerfa.claimantBirthPlace||"";
+  const selectedCompany=$("cerfaClaimantKind").value==="company";
+  $("cerfaClaimantGenderWrap").style.display=selectedCompany?"none":"flex";
+  $("cerfaClaimantBirthDateWrap").style.display=selectedCompany?"none":"block";
+  $("cerfaClaimantBirthPlaceWrap").style.display=selectedCompany?"none":"block";
   $("cerfaDebtorGenderWrap").style.display=isProfessionalDebtor(currentDossier)?"none":"flex";
   $("cerfaOptionsModal").classList.add("open");
 }
@@ -2494,26 +2500,39 @@ async function logJudicialNoticeInTimeline(action){
 
 async function historicalHtmlToPdfBlob(html){
   if(!window.html2pdf)throw new Error("html2pdf n’est pas chargé");
-  // Un document HTML complet ne doit pas être injecté tel quel dans un <div> :
-  // certains navigateurs ne conservaient alors qu’une seule page. On sépare
-  // explicitement les styles du contenu avant la conversion PDF.
   const parsed=new DOMParser().parseFromString(String(html||""),"text/html");
+  const styles=[...parsed.querySelectorAll("style")].map(x=>x.textContent||"").join("\n");
+  const fixedPages=[...parsed.body.querySelectorAll(":scope > .print-page")];
+
+  // La requête Axe Flow est déjà composée de pages A4 fixes. Les convertir toutes
+  // ensemble avec page-break-after créait une page blanche après chaque page.
+  // On convertit donc chaque page A4 séparément puis on les assemble.
+  if(fixedPages.length>1 && window.PDFLib){
+    const merged=await PDFLib.PDFDocument.create();
+    for(const sourcePage of fixedPages){
+      const holder=document.createElement("div");
+      holder.style.cssText="position:fixed;left:-100000px;top:0;width:210mm;height:297mm;background:#fff;z-index:-1;overflow:hidden";
+      if(styles){const style=document.createElement("style");style.textContent=styles+"\n.print-page{page-break-after:auto!important;break-after:auto!important;margin:0!important;}";holder.appendChild(style);}
+      const page=sourcePage.cloneNode(true);
+      page.style.pageBreakAfter="auto"; page.style.breakAfter="auto";
+      holder.appendChild(page); document.body.appendChild(holder);
+      try{
+        const blob=await window.html2pdf().set({margin:0,filename:"page.pdf",image:{type:"jpeg",quality:.92},html2canvas:{scale:1.35,useCORS:true,backgroundColor:"#ffffff"},pagebreak:{mode:[]},jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}}).from(page).outputPdf("blob");
+        const part=await PDFLib.PDFDocument.load(await blob.arrayBuffer());
+        const [copied]=await merged.copyPages(part,[0]);
+        merged.addPage(copied);
+      }finally{holder.remove();}
+    }
+    return new Blob([await merged.save()],{type:"application/pdf"});
+  }
+
   const holder=document.createElement("div");
   holder.style.cssText="position:fixed;left:-100000px;top:0;width:210mm;background:#fff;z-index:-1";
-  const styles=[...parsed.querySelectorAll("style")].map(x=>x.textContent||"").join("\n");
   if(styles){const style=document.createElement("style");style.textContent=styles;holder.appendChild(style);}
-  const content=document.createElement("div");
-  content.innerHTML=parsed.body?.innerHTML||String(html||"");
-  holder.appendChild(content);
-  document.body.appendChild(holder);
-  try{
-    return await window.html2pdf().set({
-      margin:0,filename:"document.pdf",image:{type:"jpeg",quality:.92},
-      html2canvas:{scale:1.35,useCORS:true,backgroundColor:"#ffffff"},
-      pagebreak:{mode:["css","legacy"]},
-      jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}
-    }).from(content).outputPdf("blob");
-  }finally{holder.remove();}
+  const content=document.createElement("div"); content.innerHTML=parsed.body?.innerHTML||String(html||"");
+  holder.appendChild(content); document.body.appendChild(holder);
+  try{return await window.html2pdf().set({margin:0,filename:"document.pdf",image:{type:"jpeg",quality:.92},html2canvas:{scale:1.35,useCORS:true,backgroundColor:"#ffffff"},pagebreak:{mode:["css","legacy"]},jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}}).from(content).outputPdf("blob");}
+  finally{holder.remove();}
 }
 
 async function openHistoricalInjunctionBundle(d,eventDate){
@@ -2527,8 +2546,12 @@ async function openHistoricalInjunctionBundle(d,eventDate){
   const previousDateInput=dateInput?.value||'';
   let cerfaBlob=null;
   const previousCapture=window.__axeFlowCerfaCapture;
+  const previousCerfaOptions=cerfaGenerationOptions;
   try{
     currentDossier=historicalDossier;
+    // En consultation historique, reprendre les renseignements du demandeur
+    // enregistrés lors de la préparation du Cerfa (date/lieu de naissance, civilité...).
+    cerfaGenerationOptions={...(historicalDossier.cerfaGenerationOptions||previousCerfaOptions||{})};
     if(dateInput)dateInput.value=eventDate;
 
     // 1. Requête historique complète (toutes ses pages).
@@ -2558,6 +2581,7 @@ async function openHistoricalInjunctionBundle(d,eventDate){
   }catch(err){console.error(err);alert('Impossible d’ouvrir le dossier d’injonction complet : '+(err?.message||err));}
   finally{
     window.__axeFlowCerfaCapture=previousCapture;
+    cerfaGenerationOptions=previousCerfaOptions;
     currentDossier=previousDossier;
     if(dateInput)dateInput.value=previousDateInput;
   }
@@ -3759,6 +3783,14 @@ $("previewCerfaOptions")?.addEventListener("click",async()=>{
 
 $("confirmCerfaOptions")?.addEventListener("click",async()=>{
   cerfaGenerationOptions={claimantKind:$("cerfaClaimantKind").value,claimantGender:$("cerfaClaimantGender").value,debtorGender:$("cerfaDebtorGender").value,claimantBirthDate:clean($("cerfaClaimantBirthDate")?.value),claimantBirthPlace:clean($("cerfaClaimantBirthPlace")?.value)};
+  // Conserver ces renseignements dans le dossier : le Cerfa historique affiché via
+  // « Voir » doit rester identique au Cerfa préparé, notamment la date de naissance.
+  if(currentUser&&currentDossier){
+    try{
+      await updateDoc(doc(db,"users",currentUser.uid,"requests",currentDossier.id),{cerfaGenerationOptions:{...cerfaGenerationOptions},updatedAt:serverTimestamp()});
+      currentDossier={...currentDossier,cerfaGenerationOptions:{...cerfaGenerationOptions}};
+    }catch(err){console.warn("Enregistrement des options Cerfa :",err);}
+  }
   closeCerfaOptionsModal();
   await generateCerfaPrefilled(false);
 });
