@@ -2502,12 +2502,12 @@ async function historicalHtmlToPdfBlob(html){
   if(!window.html2pdf)throw new Error("html2pdf n’est pas chargé");
   const parsed=new DOMParser().parseFromString(String(html||""),"text/html");
   const styles=[...parsed.querySelectorAll("style")].map(x=>x.textContent||"").join("\n");
-  const fixedPages=[...parsed.body.querySelectorAll(":scope > .print-page")];
+  const fixedPages=[...parsed.body.children].filter(el=>el.classList?.contains('print-page')||el.classList?.contains('page'));
 
   // La requête Axe Flow est déjà composée de pages A4 fixes. Les convertir toutes
   // ensemble avec page-break-after créait une page blanche après chaque page.
   // On convertit donc chaque page A4 séparément puis on les assemble.
-  if(fixedPages.length>1 && window.PDFLib){
+  if(fixedPages.length>=1 && window.PDFLib){
     const merged=await PDFLib.PDFDocument.create();
     for(const sourcePage of fixedPages){
       const holder=document.createElement("div");
@@ -2555,8 +2555,9 @@ async function openHistoricalInjunctionBundle(d,eventDate){
     if(dateInput)dateInput.value=eventDate;
 
     // 1. Requête historique complète (toutes ses pages).
+    const historicalCourtAddress=[clean(court.address),[clean(court.zip),clean(court.city)].filter(Boolean).join(' ')].filter(Boolean).join(', ');
     const requestBlob=await historicalHtmlToPdfBlob(
-      injunctionRequestPrintHtml(historicalDossier,court.name||'',court.address||'')
+      injunctionRequestPrintHtml(historicalDossier,court.name||'',historicalCourtAddress)
     );
     // 2. Décompte historique arrêté à la même date.
     const statementBlob=await historicalHtmlToPdfBlob(debtStatementHtml(historicalDossier));
