@@ -275,6 +275,13 @@ service cloud.firestore {
         "injunctionPrepared",
         "injunctionPreparationDate",
 
+        // Juridiction compétente / injonction
+        "injunctionCourt",
+        "courtName",
+        "courtCity",
+        "courtZip",
+        "courtAddress",
+
         // Injonction
         "injunctionPublished",
         "postOrderChoice",
