@@ -2081,14 +2081,14 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
   // Zone située en haut de la page 3 : continuation du PREMIER DÉBITEUR commencé page 2.
-  put(page3,454,698,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.0,85);
-  put(page3,185,676,debtorName(currentDossier),8.4,354,true);
-  put(page3,208,654,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),8.1,331);
-  put(page3,261,632,debtorAddress(currentDossier),8.1,278);
-  put(page3,171,610,debtorZip(currentDossier),8.1,96);
-  put(page3,379,610,debtorCity(currentDossier),8.1,160);
-  put(page3,243,588,dem.left,7.9,235); put(page3,505,588,dem.right,7.9,145);
-  put(page3,253,566,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.0,213);
+  put(page3,454,710,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.96,85);
+  put(page3,185,688,debtorName(currentDossier),9.41,354,true);
+  put(page3,208,666,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),9.07,331);
+  put(page3,261,644,debtorAddress(currentDossier),9.07,278);
+  put(page3,171,622,debtorZip(currentDossier),9.07,96);
+  put(page3,379,622,debtorCity(currentDossier),9.07,160);
+  put(page3,243,600,dem.left,8.85,235); put(page3,505,600,dem.right,8.85,145);
+  put(page3,253,578,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.96,213);
 
   // PAGE 4 — JURIDICTION ET SOMMES DEMANDÉES
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
@@ -2131,7 +2131,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
       const maxW=175,maxH=52,scale=Math.min(maxW/img.width,maxH/img.height);
-      page4.drawImage(img,{x:135,y:98,width:img.width*scale,height:img.height*scale});
+      page4.drawImage(img,{x:153,y:64,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
   return pdfDoc;
