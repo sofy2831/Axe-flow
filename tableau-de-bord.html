@@ -2489,8 +2489,18 @@ function openInjunctionModal(){
   const dateInput=$("injunctionPreparationDate");
   if(dateInput)dateInput.value=currentDossier.injunctionPreparationDate||new Date().toISOString().slice(0,10);
   const c=currentDossier.injunctionCourt||{};
-  if($("injunctionCourtName"))$("injunctionCourtName").value=c.name||(!pro&&debtorCity(currentDossier)?`Tribunal judiciaire de ${debtorCity(currentDossier)}`:"");
-  if($("injunctionCourtCity"))$("injunctionCourtCity").value=c.city||(!pro?debtorCity(currentDossier):"");
+  const savedCity=clean(c.city||debtorCity(currentDossier));
+  const expectedCourtType=pro?"Tribunal de commerce":"Tribunal judiciaire";
+  let savedCourtName=clean(c.name);
+  if(savedCity){
+    savedCourtName=`${expectedCourtType} de ${savedCity.toUpperCase()}`;
+  }else if(savedCourtName){
+    savedCourtName=savedCourtName
+      .replace(/^Tribunal\s+judiciaire(?:\s+de)?/i,expectedCourtType)
+      .replace(/^Tribunal\s+de\s+commerce(?:\s+de)?/i,expectedCourtType);
+  }
+  if($("injunctionCourtName"))$("injunctionCourtName").value=savedCourtName;
+  if($("injunctionCourtCity"))$("injunctionCourtCity").value=savedCity;
   if($("injunctionCourtZip"))$("injunctionCourtZip").value=c.zip||"";
   if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=c.address||"";if($("injunctionCourtSaved"))$("injunctionCourtSaved").style.display=c.name?"inline-flex":"none";
   const pieces=$("injunctionGeneratedPieces");
@@ -3342,7 +3352,17 @@ function injunctionCourtData(){
 }
 function injunctionCourtLabel(){
   const c=injunctionCourtData();
-  return c.name||[isProfessionalDebtor(currentDossier)?"Tribunal de commerce":"Tribunal judiciaire",c.city].filter(Boolean).join(" de ");
+  const pro=isProfessionalDebtor(currentDossier);
+  const city=clean(c.city||debtorCity(currentDossier));
+  const expected=pro?"Tribunal de commerce":"Tribunal judiciaire";
+  // Le type de juridiction dépend du débiteur, même si un ancien dossier
+  // contient encore l'autre libellé.
+  if(city)return `${expected} de ${city.toUpperCase()}`;
+  const raw=clean(c.name);
+  if(!raw)return expected;
+  return raw
+    .replace(/^Tribunal\s+judiciaire(?:\s+de)?/i,expected)
+    .replace(/^Tribunal\s+de\s+commerce(?:\s+de)?/i,expected);
 }
 function injunctionCourtAddressLabel(){
   const c=injunctionCourtData();
