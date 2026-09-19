@@ -2918,7 +2918,14 @@ async function loadDetailTimeline(d){
       }
       if(action==="enforcement_prepared"){
         const ev=events.find(x=>(x.action||x.type)==="enforcement_prepared"&&(x.effectiveDate||x.date||"")===eventDate)||events.find(x=>(x.action||x.type)==="enforcement_prepared")||{};
-        const officer=clean(ev.officerName),address=clean(ev.officerAddress),zip=clean(ev.officerZip),city=clean(ev.officerCity);
+        // Les coordonnées du commissaire sont conservées dans la description de l’événement
+        // (compatibilité avec les règles Firestore existantes). On les restaure pour le courrier historique.
+        const enforcementDesc=String(ev.description||"");
+        const studyMatch=enforcementDesc.match(/Étude\s*:\s*(.+?)\s*[—-]\s*(.+?),\s*([0-9]{5})\s+([^\n]+)/i);
+        const officer=clean(ev.officerName)||clean(studyMatch?.[1]);
+        const address=clean(ev.officerAddress)||clean(studyMatch?.[2]);
+        const zip=clean(ev.officerZip)||clean(studyMatch?.[3]);
+        const city=clean(ev.officerCity)||clean(studyMatch?.[4]);
         const calc=lateFeeBreakdown(d,parseLocalDate(eventDate)||new Date());
         const body=`<p>Maître,</p><p>Je vous transmets le dossier référencé <strong>${escapeHtml(d.ref||"")}</strong> afin que vous examiniez la mise en œuvre des mesures d’exécution appropriées à l’encontre de <strong>${escapeHtml(debtorName(d))}</strong>, demeurant ${escapeHtml(debtorAddress(d))}, ${escapeHtml(debtorZip(d)+" "+debtorCity(d))}.</p><p>Je vous remercie de bien vouloir prendre connaissance des pièces transmises, me confirmer votre prise en charge et m’indiquer les diligences ou éléments complémentaires nécessaires.</p><p>Veuillez agréer, Maître, l’expression de mes salutations distinguées.</p>`;
         printHtmlDocument(simpleJudicialLetterHtml("TRANSMISSION POUR EXÉCUTION D’UN TITRE EXÉCUTOIRE",body,d,{date:eventDate,recipientName:officer,recipientAddress:[address,`${zip} ${city}`].filter(Boolean).join("\n")}));
