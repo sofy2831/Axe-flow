@@ -2504,7 +2504,9 @@ function openInjunctionModal(){
   const search=$("injunctionCourtSearchBtn");
   if(search){search.href=pro?infogreffeSearchUrl(currentDossier):JUSTICE_ANNUAIRE_URL;search.textContent=pro?"↗ Rechercher le tribunal de commerce compétent":"↗ Rechercher le tribunal compétent sur justice.fr"}
   const dateInput=$("injunctionPreparationDate");
-  if(dateInput)dateInput.value=currentDossier.injunctionPreparationDate||new Date().toISOString().slice(0,10);
+  // Si l’injonction a déjà été enregistrée, conserver sa date historique.
+  // Ne jamais remplacer cette date par la date du jour lors d’une réouverture du dossier.
+  if(dateInput)dateInput.value=currentDossier.injunctionPreparationDate||currentDossier.__injunctionPreparationDate||new Date().toISOString().slice(0,10);
   const c=currentDossier.injunctionCourt||{};
   const savedCity=clean(c.city||debtorCity(currentDossier));
   const expectedCourtType=pro?"Tribunal de commerce":"Tribunal judiciaire";
@@ -2794,7 +2796,14 @@ async function loadDetailTimeline(d){
   try{
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
     snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
-    const injunctionRegistered=events.some(ev=>(ev.action||ev.type)==="injunction_prepared");
+    const injunctionEvent=events.find(ev=>(ev.action||ev.type)==="injunction_prepared");
+    const injunctionRegistered=!!injunctionEvent;
+    // Conserver aussi la date historique de préparation : elle sert au Cerfa et au décompte
+    // lorsqu’on rouvre le dossier après des paiements ou après sa clôture.
+    if(injunctionEvent){
+      const historicalPrepDate=clean(injunctionEvent.effectiveDate||injunctionEvent.date);
+      if(historicalPrepDate)d.__injunctionPreparationDate=historicalPrepDate;
+    }
     // Conserver en mémoire le fait que l’injonction a déjà été finalisée/enregistrée.
     // Certains anciens dossiers n’ont pas injunctionPreparedAt dans le document principal :
     // l’événement de chronologie « injunction_prepared » fait alors foi pour l’affichage.
@@ -3396,7 +3405,9 @@ function injunctionCourtAddressLabel(){
 }
 
 function injunctionPreparationIso(){
-  return clean($("injunctionPreparationDate")?.value)||currentDossier?.injunctionPreparationDate||isoToday();
+  // Priorité à la date affichée, puis à la date historique de l’injonction enregistrée.
+  // Ainsi le Cerfa reste figé à la situation financière de sa date de préparation.
+  return clean($("injunctionPreparationDate")?.value)||currentDossier?.injunctionPreparationDate||currentDossier?.__injunctionPreparationDate||isoToday();
 }
 function injunctionPreparationDateObj(){
   const iso=injunctionPreparationIso();
@@ -3482,6 +3493,9 @@ E.markInjunctionBtn.addEventListener("click",async()=>{
       date:prepDate,effectiveDate:prepDate,courtName:court.name||"",description:`Date de préparation : ${fmtDateFR(prepDate)}`,
       createdAt:serverTimestamp()
     });
+    // Mémoriser immédiatement la date figée dans l’objet courant ; le rechargement suivant
+    // la retrouvera également depuis l’événement de chronologie.
+    currentDossier.__injunctionPreparationDate=prepDate;
     showSuccessToast?.("✓ Injonction préparée enregistrée");
     E.markInjunctionBtn.textContent="Enregistrée ✓";
     await loadDossiers(currentUser.uid);
