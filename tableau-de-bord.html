@@ -2081,14 +2081,14 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
   // Zone située en haut de la page 3 : continuation du PREMIER DÉBITEUR commencé page 2.
-  put(page3,454,716,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.0,85);
-  put(page3,185,694,debtorName(currentDossier),8.4,354,true);
-  put(page3,208,672,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),8.1,331);
-  put(page3,261,650,debtorAddress(currentDossier),8.1,278);
-  put(page3,171,628,debtorZip(currentDossier),8.1,96);
-  put(page3,379,628,debtorCity(currentDossier),8.1,160);
-  put(page3,243,606,dem.left,7.9,235); put(page3,505,606,dem.right,7.9,145);
-  put(page3,253,584,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.0,213);
+  put(page3,454,698,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.0,85);
+  put(page3,185,676,debtorName(currentDossier),8.4,354,true);
+  put(page3,208,654,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),8.1,331);
+  put(page3,261,632,debtorAddress(currentDossier),8.1,278);
+  put(page3,171,610,debtorZip(currentDossier),8.1,96);
+  put(page3,379,610,debtorCity(currentDossier),8.1,160);
+  put(page3,243,588,dem.left,7.9,235); put(page3,505,588,dem.right,7.9,145);
+  put(page3,253,566,clean(currentDossier.debtorPhone||currentDossier.phone||""),8.0,213);
 
   // PAGE 4 — JURIDICTION ET SOMMES DEMANDÉES
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
@@ -2105,7 +2105,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)&&n>0))];
   put(page4,97,394,rates.length===1?`${String(rates[0]).replace(".",",")} %`:`selon factures`,7.8,193);
   put(page4,275,393,amountForCerfa(calc.interests)+" EUR",8.2,218,true);
-  put(page4,329,350,invoices.length===1?formatDateForCerfaDayAfter(invoices[0].dueDate):"Voir décompte joint",7.7,228);
+  put(page4,275,350,invoices.length===1?formatDateForCerfaDayAfter(invoices[0].dueDate):"Voir décompte joint",7.7,228);
 
   // Indemnité forfaitaire B2B : frais accessoires.
   put(page4,82,295,"Indemnité forfaitaire de recouvrement",7.5,208);
@@ -2130,8 +2130,8 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     try{
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=132,maxH=38,scale=Math.min(maxW/img.width,maxH/img.height);
-      page4.drawImage(img,{x:135,y:88,width:img.width*scale,height:img.height*scale});
+      const maxW=175,maxH=52,scale=Math.min(maxW/img.width,maxH/img.height);
+      page4.drawImage(img,{x:135,y:98,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
   return pdfDoc;
@@ -2152,7 +2152,7 @@ function openCerfaOptionsModal(){
   $("cerfaOptionsModal").classList.add("open");
 }
 function closeCerfaOptionsModal(){$("cerfaOptionsModal")?.classList.remove("open")}
-async function generateCerfaPrefilled(signatureReady=false,previewOnly=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!signatureReady&&!signatureDataUrl){openSignatureModal("cerfa");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
+async function generateCerfaPrefilled(signatureReady=false,previewOnly=false){if(!currentDossier){alert("Sélectionnez un dossier.");return}if(!window.PDFLib){alert("PDF-lib n'est pas chargée.");return}try{E.generateCerfaBtn.disabled=true;if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.disabled=true;E.generateCerfaBtn.textContent="Génération...";if(E.generateCerfaBtnPrivate)E.generateCerfaBtnPrivate.textContent="Génération...";const cerfaUrl=isProfessionalDebtor(currentDossier)?CERFA_PRO_URL:CERFA_PRIVATE_URL;const response=await fetch(cerfaUrl,{cache:"no-store"});if(!response.ok)throw new Error(`PDF introuvable : ${cerfaUrl}`);const pdfDoc = await PDFLib.PDFDocument.load(
   await response.arrayBuffer()
 );
 
