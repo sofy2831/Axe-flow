@@ -857,7 +857,9 @@ function paymentAdjustedInvoices(d=currentDossier){const rows=normalizeInvoices(
 function dossierSnapshotAtDate(d,effectiveDate){
   if(!d||!effectiveDate)return d;
   const cutoff=String(effectiveDate).slice(0,10);
-  const payments=normalizePayments(d).filter(p=>!p.date||String(p.date).slice(0,10)<=cutoff).map(({amount,date,method,reference})=>({amount,date,method,reference}));
+  // Snapshot historique strict : seuls les règlements datés au plus tard à la date du document sont retenus.
+  // Un règlement postérieur (ou sans date exploitable) ne doit jamais remettre à zéro un Cerfa déjà préparé.
+  const payments=normalizePayments(d).filter(p=>p.date&&String(p.date).slice(0,10)<=cutoff).map(({amount,date,method,reference})=>({amount,date,method,reference}));
   const paid=Number(payments.reduce((t,p)=>t+Number(p.amount||0),0).toFixed(2));
   const initial=principalAmount(d);
   return {...d,payments,totalPayments:paid,principalBalance:Number(Math.max(0,initial-paid).toFixed(2))};
@@ -2007,8 +2009,10 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   drawWrapped(page3,51,199,demandText,8.12,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
   // PAGE 4 — SOMMES DEMANDÉES / FONDEMENT / DATE
-  const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
-  const invoices=normalizeInvoices(currentDossier);
+  // Même photographie financière que la page 3 : le Cerfa reste figé à sa date de préparation.
+  const cerfaSnapshot=dossierSnapshotAtDate(currentDossier,injunctionPreparationIso());
+  const calc=lateFeeBreakdown(cerfaSnapshot,injunctionPreparationDateObj());
+  const invoices=normalizeInvoices(cerfaSnapshot);
   put(page4,217,725,amountForCerfa(calc.principal)+" EUR",8.6,139,true); // principal
   const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)))];
   const rate=rates.length===1?rates[0]:0;
