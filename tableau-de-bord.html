@@ -2138,7 +2138,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       // Recouvre complètement les deux cases bleues du champ signature,
       // bordures comprises, sans déplacer la signature.
       page4.drawRectangle({x:124,y:89,width:54,height:38,color:PDFLib.rgb(1,1,1)});
-      page4.drawRectangle({x:238,y:89,width:92,height:38,color:PDFLib.rgb(1,1,1)});
+      page4.drawRectangle({x:238,y:89,width:93.84,height:38,color:PDFLib.rgb(1,1,1)});
       page4.drawImage(img,{x:153,y:77,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
