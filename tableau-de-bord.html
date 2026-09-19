@@ -2477,7 +2477,59 @@ function openTextModal(action){if(!currentDossier){alert("Sélectionnez un dossi
   E.mailBtn.href=makeMailto(debtorEmail(currentDossier),actionTitle(action)+" – Facture "+invoiceNumber(currentDossier),currentText);
 }E.shareBtn.style.display=navigator.share?"":"none";E.modalText.classList.add("open")}
 function closeTextModal(){E.modalText.classList.remove("open");currentText="";currentAction="";E.medSendBox.style.display="none";E.markSentBtn.disabled=false;E.markSentBtn.textContent="Marquer comme envoyé"}
-function printJudicialClosureDirect(action){
+async function logJudicialNoticeInTimeline(action){
+  if(!currentUser||!currentDossier||!['debtor_closure','court_closure'].includes(action))return;
+  const eventAction=action==='debtor_closure'?'debtor_notice_sent':'court_notice_sent';
+  const title=action==='debtor_closure'?'Information au débiteur envoyée':'Information à la juridiction envoyée';
+  const sendDate=isoToday();
+  try{
+    const eventsRef=collection(db,'users',currentUser.uid,'requests',currentDossier.id,'events');
+    const snap=await getDocs(eventsRef);
+    const already=snap.docs.some(ds=>{const ev=ds.data()||{};return (ev.action||ev.type)===eventAction;});
+    if(!already){
+      await addDoc(eventsRef,{type:eventAction,action:eventAction,title,label:title,date:sendDate,effectiveDate:sendDate,description:`Date d’envoi : ${fmtDateFR(sendDate)}`,createdAt:serverTimestamp()});
+    }
+  }catch(err){console.warn('Historique information judiciaire :',err);}
+}
+
+async function openHistoricalInjunctionBundle(d,eventDate){
+  if(!d||!window.PDFLib||!window.html2pdf){alert('Les modules PDF ne sont pas chargés. Rechargez la page puis réessayez.');return;}
+  const historicalDossier=dossierSnapshotAtDate(d,eventDate);
+  historicalDossier.injunctionPreparationDate=eventDate;
+  historicalDossier.__injunctionPreparationDate=eventDate;
+  const court=historicalDossier.injunctionCourt||{};
+  const previousDossier=currentDossier;
+  const dateInput=$('injunctionPreparationDate');
+  const previousDateInput=dateInput?.value||'';
+  let cerfaBlob=null;
+  const previousCapture=window.__axeFlowCerfaCapture;
+  try{
+    currentDossier=historicalDossier;
+    if(dateInput)dateInput.value=eventDate;
+    const requestBlob=await htmlStringToPdfBlob(injunctionRequestPrintHtml(historicalDossier,court.name||'',court.address||''),true);
+    const statementBlob=await htmlStringToPdfBlob(debtStatementHtml(historicalDossier),true);
+    window.__axeFlowCerfaCapture=(blob)=>{cerfaBlob=blob;};
+    await generateCerfaPrefilled(true,false);
+    if(!cerfaBlob)throw new Error('Cerfa non généré');
+    const merged=await PDFLib.PDFDocument.create();
+    for(const blob of [requestBlob,cerfaBlob,statementBlob]){
+      const part=await PDFLib.PDFDocument.load(await blob.arrayBuffer());
+      const pages=await merged.copyPages(part,part.getPageIndices());
+      pages.forEach(p=>merged.addPage(p));
+    }
+    const result=new Blob([await merged.save()],{type:'application/pdf'});
+    const url=URL.createObjectURL(result);
+    window.open(url,'_blank','noopener');
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(err){console.error(err);alert('Impossible d’ouvrir le dossier d’injonction complet : '+(err?.message||err));}
+  finally{
+    window.__axeFlowCerfaCapture=previousCapture;
+    currentDossier=previousDossier;
+    if(dateInput)dateInput.value=previousDateInput;
+  }
+}
+
+async function printJudicialClosureDirect(action){
   if(!currentDossier)return;
   const previousAction=currentAction;
   currentAction=action;
@@ -2489,6 +2541,9 @@ function printJudicialClosureDirect(action){
   }
   const lastPayment=normalizePayments(currentDossier).at(-1)||{};
   const html=professionalLetterHtml(body,currentDossier,recipientOverride,lastPayment.date||isoToday());
+  // La chronologie mémorise la date d’envoi (aujourd’hui), tandis que le courrier
+  // conserve volontairement sa date métier : celle du paiement intégral.
+  await logJudicialNoticeInTimeline(action);
   const iframe=document.createElement("iframe");
   iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";
   document.body.appendChild(iframe);
@@ -2880,8 +2935,9 @@ async function loadDetailTimeline(d){
         payment_received_full:1,
         judicial_partial_payment:2,
         payment_received:3,
-        injunction_prepared:4,
-        med:5,relance3:6,relance2:7,relance1:8,invoice_due:9
+        debtor_notice_sent:4,court_notice_sent:5,
+        injunction_prepared:6,
+        med:7,relance3:6,relance2:7,relance1:8,invoice_due:9
       };
       const aFull=aa==="payment_received"&&Number(a.balanceAfter)<=0;
       const bFull=bb==="payment_received"&&Number(b.balanceAfter)<=0;
@@ -2900,7 +2956,7 @@ async function loadDetailTimeline(d){
     E.detailTimeline.innerHTML=events.map(ev=>{
       const eventAction=ev.action||ev.type||"";
       const eventDate=ev.effectiveDate||ev.date||"";
-      const canView=["relance1","relance2","relance3","med","injunction_prepared","non_opposition_prepared","enforcement_prepared"].includes(eventAction);
+      const canView=["relance1","relance2","relance3","med","injunction_prepared","debtor_notice_sent","court_notice_sent","non_opposition_prepared","enforcement_prepared"].includes(eventAction);
       const displayTitle=eventAction==="injunction_prepared"?"Dossier d’injonction enregistré — prêt à être déposé":(ev.title||ev.label||ev.action||"Action");
       const eventTag=eventAction==="payment_received"?"PAIEMENT":["judicial_partial_payment","judicial_full_payment"].includes(eventAction)?"Paiement judiciaire":"";
       const side=[eventTag?`<span class="detail-event-tag ${["judicial_partial_payment","judicial_full_payment"].includes(eventAction)?"judicial":""}">${esc(eventTag)}</span>`:"",canView?`<button class="detail-event-view" type="button" data-view-action="${esc(eventAction)}" data-view-date="${esc(eventDate)}">↗ Voir</button>`:""].filter(Boolean).join("");
@@ -2910,12 +2966,23 @@ async function loadDetailTimeline(d){
       const action=btn.dataset.viewAction;
       const eventDate=btn.dataset.viewDate||isoToday();
       if(action==="injunction_prepared"){
-        const historicalDossier=dossierSnapshotAtDate(d,eventDate);
-        const court=historicalDossier.injunctionCourt||{};
-        const previousDate=historicalDossier.injunctionPreparationDate;
-        historicalDossier.injunctionPreparationDate=eventDate;
-        try{openInjunctionRequestPrint(historicalDossier,court.name||"",court.address||"")}
-        finally{historicalDossier.injunctionPreparationDate=previousDate}
+        // « Voir » ouvre désormais un seul PDF historique : requête + Cerfa + décompte.
+        openHistoricalInjunctionBundle(d,eventDate);
+        return;
+      }
+      if(action==="debtor_notice_sent"||action==="court_notice_sent"){
+        const noticeAction=action==="debtor_notice_sent"?"debtor_closure":"court_closure";
+        const previousAction=currentAction;currentAction=noticeAction;
+        const body=buildText(noticeAction,d);
+        let recipientOverride="";
+        if(noticeAction==="court_closure"){
+          const c=d.injunctionCourt||{};
+          recipientOverride=["Monsieur le Greffier",clean(c.name),clean(c.address),[clean(c.zip),clean(c.city)].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+        }
+        const lastPayment=normalizePayments(d).at(-1)||{};
+        // Important : le courrier reste daté du jour du paiement intégral, pas de la date d’envoi mémorisée dans la chronologie.
+        printHtmlDocument(professionalLetterHtml(body,d,recipientOverride,lastPayment.date||eventDate));
+        currentAction=previousAction;
         return;
       }
       if(action==="non_opposition_prepared"){
