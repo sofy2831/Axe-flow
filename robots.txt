@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /tableau-de-bord.html
+Disallow: /merci.html
+Disallow: /connexion.html
+Disallow: /stats-prospection.html
 
 Sitemap: https://flow.axe-dossier.fr/sitemap.xml
