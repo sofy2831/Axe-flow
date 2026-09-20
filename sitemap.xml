@@ -1,103 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
-
   <url>
     <loc>https://flow.axe-dossier.fr/</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/facture-impayee.html</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/client-ne-paie-pas.html</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/mise-en-demeure-impaye.html</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/injonction-de-payer.html</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/relance-facture-impayee.html</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
-  <!-- Nouvelles pages SEO Axe Flow -->
-
   <url>
     <loc>https://flow.axe-dossier.fr/facture-impayee-que-faire.html</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/combien-coute-recouvrement-facture-impayee.html</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/modele-mise-en-demeure-facture-impayee.html</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/comment-faire-une-injonction-de-payer.html</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/client-professionnel-ne-paie-pas.html</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/client-ignore-facture.html</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
-  <url>
-    <loc>https://flow.axe-dossier.fr/cgv.html</loc>
-  </url>
-
-  <url>
-    <loc>https://flow.axe-dossier.fr/mentions-legales.html</loc>
-  </url>
-
-  <url>
-    <loc>https://flow.axe-dossier.fr/confidentialite.html</loc>
-  </url>
-
-  <url>
-    <loc>https://flow.axe-dossier.fr/support.html</loc>
-  </url>
-
-  <url>
-    <loc>https://flow.axe-dossier.fr/connexion.html</loc>
-  </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/injonction-de-payer-sans-avocat.html</loc>
+    <lastmod>2026-09-20</lastmod>
   </url>
-
   <url>
     <loc>https://flow.axe-dossier.fr/dossier-injonction-de-payer.html</loc>
+    <lastmod>2026-09-20</lastmod>
   </url>
-  
-<url>
-  <loc>https://flow.axe-dossier.fr/bordereau-pieces-injonction-de-payer.html</loc>
-</url>
-  
-<url>
-  <loc>https://flow.axe-dossier.fr/tribunal-competent-injonction-de-payer.html</loc>
-</url>
-  
-
+  <url>
+    <loc>https://flow.axe-dossier.fr/bordereau-pieces-injonction-de-payer.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/tribunal-competent-injonction-de-payer.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/tarifs.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/demo.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/support.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/cgv.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/mentions-legales.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://flow.axe-dossier.fr/confidentialite.html</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
 </urlset>
