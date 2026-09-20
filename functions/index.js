@@ -332,6 +332,84 @@ exports.createCheckoutSession = onRequest(
   }
 );
 
+
+// ===== Portail client Stripe : gérer / résilier un abonnement =====
+exports.createCustomerPortalSession = onRequest(
+  {
+    cors: true,
+    secrets: [STRIPE_SECRET_KEY],
+  },
+  async (req, res) => {
+    try {
+      if (req.method !== "POST") {
+        return res.status(405).json({ error: "Méthode non autorisée" });
+      }
+
+      const authHeader = String(req.headers.authorization || "");
+      if (!authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Connexion requise" });
+      }
+
+      const decoded = await admin.auth().verifyIdToken(authHeader.slice(7));
+      const uid = decoded.uid;
+      const userRef = db.collection("users").doc(uid);
+
+      // Ne jamais accepter un customer Stripe envoyé par le navigateur.
+      // On le récupère uniquement depuis les paiements/entitlements du compte authentifié.
+      const paymentsSnap = await userRef.collection("payments")
+        .where("stripeCustomerId", "!=", "")
+        .limit(20)
+        .get();
+
+      let stripeCustomerId = "";
+      paymentsSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        if (!stripeCustomerId && data.stripeCustomerId) {
+          stripeCustomerId = String(data.stripeCustomerId).trim();
+        }
+      });
+
+      if (!stripeCustomerId) {
+        const entSnap = await userRef.collection("entitlements")
+          .where("stripeCustomerId", "!=", "")
+          .limit(20)
+          .get();
+
+        entSnap.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          if (!stripeCustomerId && data.stripeCustomerId) {
+            stripeCustomerId = String(data.stripeCustomerId).trim();
+          }
+        });
+      }
+
+      if (!stripeCustomerId) {
+        return res.status(404).json({
+          error: "Aucun abonnement Stripe n’est associé à ce compte.",
+        });
+      }
+
+      const stripeSecret = STRIPE_SECRET_KEY.value();
+      if (!stripeSecret) {
+        return res.status(500).json({ error: "Configuration Stripe manquante" });
+      }
+
+      const stripe = Stripe(stripeSecret);
+      const session = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: `${APP_URL}/support.html`,
+      });
+
+      return res.status(200).json({ url: session.url });
+    } catch (error) {
+      console.error("createCustomerPortalSession ERROR:", error);
+      return res.status(500).json({
+        error: "Impossible d’ouvrir le portail d’abonnement.",
+      });
+    }
+  }
+);
+
 exports.stripeWebhook = onRequest(
   {
     cors: false,
