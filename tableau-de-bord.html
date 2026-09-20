@@ -1214,7 +1214,7 @@ Réf. dossier : ${d?.ref||"—"}
 
 INFORMATION AU GREFFE — RÈGLEMENT INTÉGRAL DE LA CRÉANCE
 
-Nous vous informons, dans le cadre du dossier ${d?.ref||"—"} pendant devant votre juridiction, qu'un paiement du débiteur ${debtorName(d)} a été enregistré le ${paidDate} pour un montant de ${amount}. Au ${fmtDateFR(paidDate)}, le principal restant dû est de 0,00 € et le TOTAL RESTANT À RÉGLER de 0,00 €. Nous sollicitons en conséquence l'arrêt de la procédure.`;
+Nous vous informons, dans le cadre du dossier ${d?.ref||"—"} pendant devant votre juridiction, que le dernier paiement du débiteur ${debtorName(d)}, enregistré le ${fmtDateFR(paidDate)} pour un montant de ${amount}, solde intégralement la créance. Le principal restant dû est désormais de 0,00 € et le TOTAL RESTANT À RÉGLER de 0,00 €. Nous sollicitons en conséquence l'arrêt de la procédure.`;
 }
 
 function debtorClosureAfterInjunctionText(d){
@@ -1228,7 +1228,7 @@ Réf. dossier : ${d?.ref||"—"}
 
 CONFIRMATION DE RÈGLEMENT INTÉGRAL
 
-Nous accusons réception de votre règlement du ${paidDate} d'un montant de ${amount} (${method}). Ce paiement est enregistré au titre du dossier ${d?.ref||"—"}. Après imputation, le principal restant dû s'élève à 0,00 € et le TOTAL RESTANT À RÉGLER (tous accessoires compris) à 0,00 € à la date du ${fmtDateFR(paidDate)}.
+Nous accusons réception de votre dernier règlement du ${fmtDateFR(paidDate)} d'un montant de ${amount} (${method}). Ce dernier paiement solde intégralement la créance du dossier ${d?.ref||"—"}. Le principal restant dû s'élève désormais à 0,00 € et le TOTAL RESTANT À RÉGLER (tous accessoires compris) à 0,00 €.
 Le paiement intégral permet d'envisager l'arrêt de la procédure et la clôture du dossier.`;
 }
 
@@ -1350,7 +1350,7 @@ function injunctionAttachmentsText(d=currentDossier){
 
   const base=[
     "Bordereau des pièces justificatives",
-    "Cerfa n°12946*02 prérempli",
+    isProfessionalDebtor(d)?"Cerfa n°12946*02 prérempli":"Cerfa n°12948*06 prérempli",
     "Décompte actualisé de la créance",
     "Facture(s) impayée(s)",
     "Contrat / devis / bon de commande, si applicable",
@@ -2125,7 +2125,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   // Cerfa 12948*06 — juridiction dans le champ « renvoyée devant », légèrement abaissée.
   put(page3,280,233.8,privateCourt,8.323,255,true);
   // Adresse complète enregistrée dans le dossier d’injonction, dans le champ officiel juste dessous.
-  put(page3,30.9,217.5,privateCourtAddress,8.323,220,true);
+  put(page3,39.8,217.5,privateCourtAddress,8.323,220,true);
 
   drawWrapped(page3,51,199,demandText,8.12,492,12,11); // bloc « Votre demande » descendu d’environ 5 % de la hauteur A4
 
@@ -2152,8 +2152,8 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     try{
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=110.25,maxH=35.7,scale=Math.min(maxW/img.width,maxH/img.height);
-      page4.drawImage(img,{x:72,y:383,width:img.width*scale,height:img.height*scale});
+      const maxW=165,maxH=53.5,scale=Math.min(maxW/img.width,maxH/img.height);
+      page4.drawImage(img,{x:72,y:374,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12948",e)}
   }
   return pdfDoc;
