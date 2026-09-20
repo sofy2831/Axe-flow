@@ -1,0 +1,14 @@
+[
+  {
+    "origin": [
+      "https://flow.axe-dossier.fr"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Disposition",
+      "Content-Length"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
