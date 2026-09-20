@@ -8,6 +8,18 @@
   <meta name="description" content="Support Axe Flow : aide, assistance technique, problème de paiement, création de dossier et contact." />
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#0b3145" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Support — Axe Flow" />
+  <meta property="og:description" content="Support Axe Flow : aide, assistance technique, problème de paiement, création de dossier et contact." />
+  <meta property="og:url" content="https://flow.axe-dossier.fr/support.html" />
+  <meta property="og:site_name" content="Axe Flow" />
+  <meta property="og:image" content="https://flow.axe-dossier.fr/images/axe-flow-cover.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Support — Axe Flow" />
+  <meta name="twitter:description" content="Aide et assistance Axe Flow pour votre compte, vos dossiers et vos paiements." />
+  <meta name="twitter:image" content="https://flow.axe-dossier.fr/images/axe-flow-cover.png" />
+  <link rel="canonical" href="https://flow.axe-dossier.fr/support.html" />
 
   <link rel="icon" type="image/png" href="images/axe-flow-cover.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -319,7 +331,15 @@
           <strong>Email support</strong>
           <a href="mailto:contact@axe-dossier.fr">
             contact@axe-dossier.fr
-          </a>
+          </a><br>
+          <a href="tel:+33674063300">06 74 06 33 00</a>
+        </div>
+
+        <div style="margin-top:16px">
+          <button id="manageSubscriptionBtn" class="btn btn-primary" type="button">
+            Gérer / résilier mon abonnement
+          </button>
+          <p id="portalStatus" style="margin:10px 0 0;color:var(--muted);font-size:.9rem"></p>
         </div>
 
         <p style="margin-top:16px">
@@ -340,7 +360,7 @@
 
           <div class="faq-item">
             <strong>Je n’arrive pas à créer un dossier</strong>
-            Vérifiez qu’un crédit dossier actif est disponible dans votre tableau de bord.
+            Vérifiez votre formule dans le tableau de bord : crédits disponibles pour l’offre ponctuelle 49 €, ou nombre de dossiers actifs pour les offres Pro 89 € et Pro 30 à 169 €.
           </div>
 
           <div class="faq-item">
@@ -391,6 +411,74 @@
 
   </div>
 </main>
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3YNU0Yk78FrG2cX9-yP-Rl9iKf_MfyS0",
+    authDomain: "axe-flow.firebaseapp.com",
+    projectId: "axe-flow",
+    storageBucket: "axe-flow.firebasestorage.app",
+    messagingSenderId: "987113977515",
+    appId: "1:987113977515:web:7c5af11bb6d90c1c8caa19"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const btn = document.getElementById("manageSubscriptionBtn");
+  const status = document.getElementById("portalStatus");
+  const portalEndpoint = "https://europe-west9-axe-flow.cloudfunctions.net/createCustomerPortalSession";
+
+  let currentUser = null;
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user || null;
+    if (!currentUser) {
+      status.textContent = "Connectez-vous à votre compte Axe Flow pour gérer votre abonnement.";
+    } else {
+      status.textContent = "";
+    }
+  });
+
+  btn.addEventListener("click", async () => {
+    try {
+      if (!currentUser) {
+        window.location.href = "connexion.html";
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = "Ouverture du portail sécurisé Stripe…";
+
+      const idToken = await currentUser.getIdToken();
+      const response = await fetch(portalEndpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${idToken}`,
+          "Content-Type": "application/json"
+        },
+        body: "{}"
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Impossible d’ouvrir le portail Stripe.");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error(error);
+      status.textContent = error.message || "Impossible d’ouvrir le portail Stripe.";
+      btn.disabled = false;
+    }
+  });
+</script>
 
 </body>
 </html>
