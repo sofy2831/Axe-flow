@@ -3161,14 +3161,6 @@ async function saveCompanyDelays(){
   try{E.saveCompanyDelaysBtn.disabled=true;E.saveCompanyDelaysBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid),{businessProfile:profile,updatedAt:serverTimestamp()});currentUserData={...currentUserData,businessProfile:profile};E.saveCompanyDelaysBtn.textContent="Enregistré ✔";setTimeout(()=>{E.saveCompanyDelaysBtn.disabled=false;E.saveCompanyDelaysBtn.textContent="Enregistrer les délais"},1000)}catch(err){console.error(err);alert("Impossible d’enregistrer les délais.");E.saveCompanyDelaysBtn.disabled=false;E.saveCompanyDelaysBtn.textContent="Enregistrer les délais"}
 }
 
-async function loadDetailTimeline(d){
-  if(!currentUser||!d||!E.detailTimeline)return;
-  E.detailTimeline.innerHTML='<div class="empty-state">Chargement…</div>';
-  try{
-    const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
-    snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
-    const injunctionEvent=events.find(ev=>(ev.action||ev.type)==="injunction_prepared");
-
 function addMonthsSafe(iso, months){
   const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(clean(iso));
   if(!m)return "";
@@ -3184,6 +3176,15 @@ function judicialDeadlineHtml(d,kind){
   if(!due)return "";
   return `<div class="judicial-deadline">${kind==="certificate"?"Certificat à demander à partir du":"Exécution forcée à partir du"} ${fmtDateFR(due)}</div>`;
 }
+
+async function loadDetailTimeline(d){
+  if(!currentUser||!d||!E.detailTimeline)return;
+  E.detailTimeline.innerHTML='<div class="empty-state">Chargement…</div>';
+  try{
+    const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
+    snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
+    const injunctionEvent=events.find(ev=>(ev.action||ev.type)==="injunction_prepared");
+
     const significationEvent=events.filter(ev=>(ev.action||ev.type)==="injunction_signification").sort((a,b)=>String(b.effectiveDate||b.date||"").localeCompare(String(a.effectiveDate||a.date||"")))[0];
     const injunctionRegistered=!!injunctionEvent;
     if(significationEvent){const sd=clean(significationEvent.effectiveDate||significationEvent.date);if(sd)d.__significationDate=sd;}
