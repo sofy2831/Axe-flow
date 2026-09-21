@@ -1645,7 +1645,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <div class="signature">
     <p>Fait le ${escapeHtml(prepFr)}</p>
     <p>Signature du requérant :</p>
-    <p><strong>${escapeHtml(clean(currentUserData?.businessProfile?.representative)||clean(currentUserData?.displayName)||creditorName(d))}</strong></p>
+    <p><strong>${escapeHtml(clean(currentUserData?.businessProfile?.companyName)||creditorName(d))}</strong>${clean(currentUserData?.businessProfile?.representative||currentUserData?.businessProfile?.representant||currentUserData?.displayName)?`<br>${escapeHtml(clean(currentUserData?.businessProfile?.representative||currentUserData?.businessProfile?.representant||currentUserData?.displayName))}`:""}</p>
     ${signatureImgHtml()}
   </div>
 
@@ -2235,17 +2235,20 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   const debtorLegalForm=explicitDebtorLegalForm||(legalMatch?legalMatch[1].toUpperCase():"");
   const debtorDenomination=(!explicitDebtorLegalForm&&legalMatch)?debtorFullName.replace(/\s*\b(SASU|SAS|SARL|EURL|SA|SCI|SCP)\b\s*$/i,"").trim():debtorFullName;
   // Zone située en haut de la page 3 : continuation du PREMIER DÉBITEUR commencé page 2.
-  put(page3,454,710,debtorLegalForm,8.96,85);
+  put(page3,454,701.6,debtorLegalForm,8.96,85);
   put(page3,185,684,debtorDenomination,9.41,354,true);
   put(page3,208,664,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),9.07,331);
   put(page3,261,644,debtorAddress(currentDossier),9.07,278);
   {
     const zip=debtorZip(currentDossier).replace(/\s+/g,"");
-    put(page3,120,622,zip.split("").join("  "),10.20,132);
+    const first3=zip.slice(0,3).split("").join("  ");
+    const last2=zip.slice(3,5).split("").join("  ");
+    put(page3,120,622,first3,10.20,82);
+    put(page3,174.5,622,last2,10.20,55); // +0,5 % env. vers la droite pour les 2 derniers chiffres
   }
   put(page3,379,622,debtorCity(currentDossier),9.07,160);
   put(page3,220,606,dem.left,10.00,245); put(page3,475,606,dem.right,10.00,165);
-  put(page3,213,586,clean(currentDossier.debtorPhone||currentDossier.phone||""),10.10,225);
+  put(page3,198,586,clean(currentDossier.debtorPhone||currentDossier.phone||""),10.10,240);
 
   // PAGE 4 — JURIDICTION ET SOMMES DEMANDÉES
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
@@ -2290,7 +2293,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     try{
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=175,maxH=32,scale=Math.min(maxW/img.width,maxH/img.height);
+      const maxW=190,maxH=36,scale=Math.min(maxW/img.width,maxH/img.height);
       // Masque seulement les deux parties bleues visibles, sans empiéter sur l'encadré inférieur.
       // Recouvre complètement les deux cases bleues du champ signature,
       // bordures comprises, sans déplacer la signature.
@@ -2300,7 +2303,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       page4.drawRectangle({x:238,y:89,width:125,height:38,color:PDFLib.rgb(1,1,1)});
       // Petit cache ciblé sur le morceau bleu restant entre la signature et le cache droit.
       page4.drawRectangle({x:205,y:89,width:40,height:38,color:PDFLib.rgb(1,1,1)});
-      page4.drawImage(img,{x:153,y:93,width:img.width*scale,height:img.height*scale});
+      page4.drawImage(img,{x:145,y:92,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
   return pdfDoc;
