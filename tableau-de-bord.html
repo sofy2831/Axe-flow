@@ -562,6 +562,31 @@
   letter-spacing:0;
 }
 
+
+/* ===== Harmonisation police des TEXTES de la zone judiciaire ===== */
+/* Même rendu de lecture que le texte du bloc "Dossier clôturé" */
+#dossierDetailModal .judicial-folder-delay,
+#dossierDetailModal .judicial-follow-card small{
+  font-size:.82rem;
+  font-weight:400;
+  line-height:1.45;
+  letter-spacing:0;
+}
+
+/* Le texte du dossier judiciaire reste blanc/bleu clair selon sa structure,
+   mais sans petite police condensée. */
+#dossierDetailModal .judicial-folder-delay{
+  color:#a9c6df;
+}
+#dossierDetailModal .judicial-folder-delay strong{
+  font-size:inherit;
+  font-weight:700;
+  line-height:inherit;
+}
+#dossierDetailModal .judicial-follow-card small{
+  color:#a9c6df;
+}
+
 </style>
 </head>
 <body>
