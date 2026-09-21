@@ -526,6 +526,10 @@
   opacity:.97;
   text-align:center;
 }
+
+.judicial-folder-btn{flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:10px!important;white-space:normal!important}
+.judicial-folder-title{display:flex;align-items:center;justify-content:center;gap:7px;font-weight:900}
+.judicial-folder-delay{display:block;max-width:245px;font-size:.69rem;line-height:1.35;font-weight:500;text-align:center;color:#fff;opacity:.98}
 </style>
 </head>
 <body>
@@ -1692,30 +1696,6 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
 
 
 
-<div class="modal-backdrop" id="paidJudicialWarningModal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="paidJudicialWarningTitle">
-    <div class="modal-inner">
-      <div class="paid-warning-head">
-        <div class="paid-warning-icon">✓</div>
-        <div>
-          <h2 id="paidJudicialWarningTitle">Créance intégralement réglée</h2>
-          <div class="panel-sub">Le solde de cette créance est de 0,00 €.</div>
-        </div>
-      </div>
-      <div class="paid-warning-text">
-        Aucune poursuite de la procédure d’exécution n’est nécessaire.
-        Finalisez la procédure en informant, si nécessaire, le débiteur et la juridiction.
-      </div>
-      <div class="paid-warning-note">
-        Vous pouvez néanmoins poursuivre cette étape si votre situation l’exige.
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" id="paidJudicialCancelBtn" type="button">Revenir au dossier</button>
-        <button class="btn btn-primary" id="paidJudicialContinueBtn" type="button">Continuer malgré tout</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>`;
@@ -3378,7 +3358,7 @@ function openDossierDetailModal(d){
     d?.nextAction==="CLOTURE_INJONCTION"||judicialRegistered
   );
   if(judicialRegistered&&principalBalance(d)>0){
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="judicial-delay-note"><strong>Délai indicatif :</strong> après dépôt, le traitement de la requête par la juridiction prend généralement 2 à 6 semaines selon le tribunal.</div><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif :</strong><br>après dépôt, traitement par la juridiction généralement sous 2 à 6 semaines selon le tribunal.</span></button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   if(judicialPaid){
     const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
@@ -3386,7 +3366,7 @@ function openDossierDetailModal(d){
       ?`<strong>✓ Dossier clôturé</strong><small>La créance est soldée. Les actions judiciaires postérieures à l’ordonnance restent accessibles.</small>`
       :`<strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small>`;
     const closeButton=fullyClosed?"":`<button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button>`;
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif :</strong><br>après dépôt, traitement par la juridiction généralement sous 2 à 6 semaines selon le tribunal.</span></button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   E.detailActions.classList.toggle("judicial-premium-row",judicialPaid||judicialRegistered);
   E.detailActions.innerHTML=actionHtml;
@@ -4183,6 +4163,30 @@ if($("dossierDetailModal")){
 <div id="successToast" class="success-toast" role="status" aria-live="polite">
   <span class="success-toast-icon">✓</span>
   <span id="successToastText">Action enregistrée</span>
+</div>
+<div class="modal-backdrop" id="paidJudicialWarningModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="paidJudicialWarningTitle">
+    <div class="modal-inner">
+      <div class="paid-warning-head">
+        <div class="paid-warning-icon">✓</div>
+        <div>
+          <h2 id="paidJudicialWarningTitle">Créance intégralement réglée</h2>
+          <div class="panel-sub">Le solde de cette créance est de 0,00 €.</div>
+        </div>
+      </div>
+      <div class="paid-warning-text">
+        Aucune poursuite de la procédure d’exécution n’est nécessaire.
+        Finalisez la procédure en informant, si nécessaire, le débiteur et la juridiction.
+      </div>
+      <div class="paid-warning-note">
+        Vous pouvez néanmoins poursuivre cette étape si votre situation l’exige.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="paidJudicialCancelBtn" type="button">Revenir au dossier</button>
+        <button class="btn btn-primary" id="paidJudicialContinueBtn" type="button">Continuer malgré tout</button>
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 </html>
