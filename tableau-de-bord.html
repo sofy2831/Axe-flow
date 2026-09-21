@@ -1645,7 +1645,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <div class="signature">
     <p>Fait le ${escapeHtml(prepFr)}</p>
     <p>Signature du requérant :</p>
-    <p><strong>${escapeHtml(clean(currentUserData?.businessProfile?.companyName)||creditorName(d))}</strong>${clean(currentUserData?.businessProfile?.representative||currentUserData?.businessProfile?.representant||currentUserData?.displayName)?`<br>${escapeHtml(clean(currentUserData?.businessProfile?.representative||currentUserData?.businessProfile?.representant||currentUserData?.displayName))}`:""}</p>
+    <p><strong>${escapeHtml(clean(currentUserData?.businessProfile?.companyName)||creditorName(d))}</strong>${clean(currentUserData?.businessProfile?.representative||currentUserData?.businessProfile?.representant||currentUserData?.displayName)?`<br>Représentée par ${escapeHtml(clean(currentUserData?.businessProfile?.representative||currentUserData?.businessProfile?.representant||currentUserData?.displayName))}`:""}</p>
     ${signatureImgHtml()}
   </div>
 
@@ -1669,11 +1669,17 @@ function openInjunctionRequestPrint(d,currentCourtName="",currentCourtAddress=""
   doc.open();
   doc.write(injunctionRequestPrintHtml(d,currentCourtName,currentCourtAddress));
   doc.close();
-  setTimeout(()=>{
+  const printWhenReady=async()=>{
+    try{
+      const imgs=[...doc.images];
+      await Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
+      if(doc.fonts?.ready)await doc.fonts.ready;
+    }catch{}
     w.focus();
     w.print();
-    setTimeout(()=>iframe.remove(),1200);
-  },400);
+    setTimeout(()=>iframe.remove(),1500);
+  };
+  setTimeout(printWhenReady,250);
 }
 
 function professionalLetterHtml(body,d=currentDossier,recipientOverride="",effectiveDate=""){
@@ -1931,7 +1937,30 @@ function refreshCompanySignaturePreview(){
   }
 }
 
-function signatureImgHtml(){return signatureDataUrl?`<img src="${signatureDataUrl}" alt="Signature du requérant" style="display:block;max-width:105mm;max-height:38mm;object-fit:contain;margin-top:2mm">`:""}
+async function signaturePngBytes(){
+  if(!signatureDataUrl)return null;
+  // PDF-lib n’intègre pas directement le WEBP. On normalise toute signature PNG/JPG/WEBP en PNG.
+  return await new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,img.naturalWidth||img.width);
+        canvas.height=Math.max(1,img.naturalHeight||img.height);
+        const ctx=canvas.getContext("2d");
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0);
+        const b64=canvas.toDataURL("image/png").split(",")[1];
+        const bin=atob(b64),bytes=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+        resolve(bytes);
+      }catch(e){reject(e)}
+    };
+    img.onerror=()=>reject(new Error("Signature illisible"));
+    img.src=signatureDataUrl;
+  });
+}
+function signatureImgHtml(){return signatureDataUrl?`<img src="${signatureDataUrl}" alt="Signature du requérant" style="display:block;width:auto;max-width:70mm;max-height:24mm;object-fit:contain;margin-top:2mm">`:""}
 function openSignatureModal(target,courtName="",courtAddress=""){pendingSignedDocument=target||"";pendingCourtName=courtName;pendingCourtAddress=courtAddress;const modal=$("signatureModal"),canvas=$("signatureCanvas");if(!modal||!canvas)return;modal.classList.add("open");prepareSignatureCanvas();}
 function closeSignatureModal(clearPending=true){$("signatureModal")?.classList.remove("open");if(clearPending){pendingSignedDocument="";pendingCourtName="";pendingCourtAddress="";}}
 function prepareSignatureCanvas(){const canvas=$("signatureCanvas"),ctx=canvas?.getContext("2d");if(!canvas||!ctx)return;ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle="#111";ctx.lineWidth=4;ctx.lineCap="round";ctx.lineJoin="round";canvas.dataset.hasInk="0";if(signatureDataUrl){const img=new Image();img.onload=()=>{ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);const r=Math.min((canvas.width-80)/img.width,(canvas.height-50)/img.height);const w=img.width*r,h=img.height*r;ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h);canvas.dataset.hasInk="1"};img.src=signatureDataUrl}}
@@ -2244,7 +2273,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     const first3=zip.slice(0,3).split("").join("  ");
     const last2=zip.slice(3,5).split("").join("  ");
     put(page3,120,622,first3,10.20,82);
-    put(page3,174.5,622,last2,10.20,55); // +0,5 % env. vers la droite pour les 2 derniers chiffres
+    put(page3,168.4,622,last2,10.20,55); // V3 : 2 derniers chiffres décalés à gauche d’environ 1,02 % de la largeur A4
   }
   put(page3,379,622,debtorCity(currentDossier),9.07,160);
   put(page3,220,606,dem.left,10.00,245); put(page3,475,606,dem.right,10.00,165);
@@ -2291,19 +2320,11 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
 
   if(signatureDataUrl){
     try{
-      const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
-      const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=190,maxH=36,scale=Math.min(maxW/img.width,maxH/img.height);
-      // Masque seulement les deux parties bleues visibles, sans empiéter sur l'encadré inférieur.
-      // Recouvre complètement les deux cases bleues du champ signature,
-      // bordures comprises, sans déplacer la signature.
-      page4.drawRectangle({x:124,y:89,width:54,height:38,color:PDFLib.rgb(1,1,1)});
-      page4.drawRectangle({x:238,y:89,width:103.224,height:38,color:PDFLib.rgb(1,1,1)});
-      // Cache blanc supplémentaire : recouvre le reliquat bleu à droite sans déplacer la signature.
-      page4.drawRectangle({x:238,y:89,width:125,height:38,color:PDFLib.rgb(1,1,1)});
-      // Petit cache ciblé sur le morceau bleu restant entre la signature et le cache droit.
-      page4.drawRectangle({x:205,y:89,width:40,height:38,color:PDFLib.rgb(1,1,1)});
-      page4.drawImage(img,{x:145,y:92,width:img.width*scale,height:img.height*scale});
+      const bytes=await signaturePngBytes();
+      const img=await pdfDoc.embedPng(bytes);
+      const maxW=145,maxH=34,scale=Math.min(maxW/img.width,maxH/img.height);
+      // V3 : signature directement dans la case officielle « Votre signature ».
+      page4.drawImage(img,{x:145,y:93,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
   return pdfDoc;
