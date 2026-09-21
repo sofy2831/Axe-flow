@@ -3171,7 +3171,7 @@ function addMonthsSafe(iso, months){
 }
 function judicialDeadlineHtml(d,kind){
   const sign=clean(d?.__significationDate);
-  if(!sign)return `<div class="judicial-deadline pending">/div>`;
+  if(!sign)return "";
   const due=addMonthsSafe(sign,kind==="certificate"?1:2);
   if(!due)return "";
   return `<div class="judicial-deadline">${kind==="certificate"?"Certificat à demander à partir du":"Exécution forcée à partir du"} ${fmtDateFR(due)}</div>`;
