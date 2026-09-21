@@ -1423,7 +1423,7 @@ DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${todayFR()}
 Montant initial des factures : ${formatCurrency(calc.initialPrincipal)}
 Paiements reçus : - ${formatCurrency(calc.payments)}
 Principal restant dû : ${formatCurrency(calc.principal)}
-Pénalités de retard au taux annuel de ${String(calc.annualRate).replace(".",",")} % : ${formatCurrency(calc.interests)}${pro?`\nIndemnités forfaitaires de recouvrement : ${formatCurrency(calc.recoveryFees)}`:""}
+Pénalités de retard ${pro?"calculées selon le taux applicable à chaque facture":`au taux annuel de ${String(calc.annualRate).replace(".",",")} %`} : ${formatCurrency(calc.interests)}${pro?`\nIndemnités forfaitaires de recouvrement : ${formatCurrency(calc.recoveryFees)}`:""}
 TOTAL RÉCLAMÉ : ${formatCurrency(calc.total)}
 
 Détail :
@@ -1536,6 +1536,10 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   .attachments{columns:1;margin-top:4mm}
   footer{position:absolute;left:17mm;right:17mm;bottom:8mm;border-top:1px solid #cbd2dd;padding-top:3mm;display:flex;justify-content:space-between;gap:10mm;font-size:8.5pt;color:#667085}
   footer strong{white-space:nowrap}
+  .request-page-2{font-size:10.35pt;line-height:1.42}
+  .request-page-2 h2{margin:5mm 0 2.5mm}
+  .request-page-2 p,.request-page-2 ul,.request-page-2 ol{margin-bottom:3.2mm}
+  .request-page-2 li{margin-bottom:1.5mm}
 
 /* ===== V6 — signatures, taux par facture, modale détail dossier ===== */
 #createDossierModal .invoice-row{grid-template-columns:minmax(120px,1fr) minmax(125px,.9fr) minmax(125px,.9fr) minmax(125px,.9fr) minmax(110px,.7fr) auto}
@@ -1601,7 +1605,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   ${footer(1)}
 </section>
 
-<section class="print-page">
+<section class="print-page request-page-2">
   <h2>EXPOSÉ DES FAITS</h2>
   <p>Le requérant a fourni au débiteur les prestations ou biens correspondant à la créance suivante :</p>
   <ol>${invoiceHtml}</ol>
@@ -1612,7 +1616,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <h2>DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${escapeHtml(prepFr)}</h2>
   <div class="amount-box">
     <p>Principal : <strong>${escapeHtml(formatCurrency(calc.principal))}</strong></p>
-    <p>Pénalités de retard au taux annuel de ${escapeHtml(String(calc.annualRate).replace(".",","))} % : <strong>${escapeHtml(formatCurrency(calc.interests))}</strong></p>
+    <p>Pénalités de retard ${pro?"calculées selon le taux applicable à chaque facture":`au taux annuel de ${escapeHtml(String(calc.annualRate).replace(".",","))} %`} : <strong>${escapeHtml(formatCurrency(calc.interests))}</strong></p>
     ${pro?`<p>Indemnités forfaitaires de recouvrement : <strong>${escapeHtml(formatCurrency(calc.recoveryFees))}</strong></p>`:""}
     <p class="total">TOTAL RÉCLAMÉ : ${escapeHtml(formatCurrency(calc.total))}</p>
   </div>
@@ -2224,9 +2228,15 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   }
 
   // PAGE 3 — PREMIER DÉBITEUR PROFESSIONNEL / PERSONNE MORALE
+  // Si la forme juridique n'a pas été saisie séparément, on la déduit du nom (ex. « DURAND BÂTIMENT SARL »).
+  const debtorFullName=debtorName(currentDossier);
+  const explicitDebtorLegalForm=clean(currentDossier.debtorLegalForm||currentDossier.legalForm||"");
+  const legalMatch=debtorFullName.match(/\b(SASU|SAS|SARL|EURL|SA|SCI|SCP)\b\s*$/i);
+  const debtorLegalForm=explicitDebtorLegalForm||(legalMatch?legalMatch[1].toUpperCase():"");
+  const debtorDenomination=(!explicitDebtorLegalForm&&legalMatch)?debtorFullName.replace(/\s*\b(SASU|SAS|SARL|EURL|SA|SCI|SCP)\b\s*$/i,"").trim():debtorFullName;
   // Zone située en haut de la page 3 : continuation du PREMIER DÉBITEUR commencé page 2.
-  put(page3,454,710,clean(currentDossier.debtorLegalForm||currentDossier.legalForm||""),8.96,85);
-  put(page3,185,684,debtorName(currentDossier),9.41,354,true);
+  put(page3,454,710,debtorLegalForm,8.96,85);
+  put(page3,185,684,debtorDenomination,9.41,354,true);
   put(page3,208,664,clean(currentDossier.debtorContact||currentDossier.contactName||currentDossier.contact||""),9.07,331);
   put(page3,261,644,debtorAddress(currentDossier),9.07,278);
   {
@@ -2241,8 +2251,11 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
   const calc=lateFeeBreakdown(currentDossier,injunctionPreparationDateObj());
   const invoices=normalizeInvoices(currentDossier);
   const court=injunctionCourtLabel();
+  const courtAddress=injunctionCourtAddressLabel();
   mark(page4,42.7,659.7,true);
   put(page4,275,648,court,7.8,263,true);
+  // Deuxième ligne du champ juridiction : adresse + CP + ville enregistrés pour le tribunal.
+  put(page4,55,632,courtAddress,7.8,285,true);
 
   put(page4,82,505,invoices.length>1?`${invoices.length} factures impayées`:`Facture ${clean(invoices[0]?.ref)||"impayée"}`,7.8,208);
   put(page4,275,520,amountForCerfa(calc.principal)+" EUR",8.3,218,true);
@@ -2277,7 +2290,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     try{
       const bytes=await fetch(signatureDataUrl).then(r=>r.arrayBuffer());
       const img=signatureDataUrl.startsWith("data:image/jpeg")?await pdfDoc.embedJpg(bytes):await pdfDoc.embedPng(bytes);
-      const maxW=175,maxH=52,scale=Math.min(maxW/img.width,maxH/img.height);
+      const maxW=175,maxH=32,scale=Math.min(maxW/img.width,maxH/img.height);
       // Masque seulement les deux parties bleues visibles, sans empiéter sur l'encadré inférieur.
       // Recouvre complètement les deux cases bleues du champ signature,
       // bordures comprises, sans déplacer la signature.
@@ -2287,7 +2300,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       page4.drawRectangle({x:238,y:89,width:125,height:38,color:PDFLib.rgb(1,1,1)});
       // Petit cache ciblé sur le morceau bleu restant entre la signature et le cache droit.
       page4.drawRectangle({x:205,y:89,width:40,height:38,color:PDFLib.rgb(1,1,1)});
-      page4.drawImage(img,{x:153,y:77,width:img.width*scale,height:img.height*scale});
+      page4.drawImage(img,{x:153,y:93,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
   }
   return pdfDoc;
@@ -2357,7 +2370,7 @@ function debtStatementHtml(d=currentDossier){
   <div class="meta"><div><strong>Dossier</strong><br>${escapeHtml(d?.ref||"—")}</div><div><strong>Arrêté au</strong><br>${escapeHtml(prepFr)}</div><div><strong>Créancier</strong><br>${escapeHtml(creditorName(d))}</div><div><strong>Débiteur</strong><br>${escapeHtml(debtorName(d))}</div></div>
   <div class="section">Détail des factures</div>
   <table><thead><tr><th>Facture</th><th>Échéance</th><th>Principal</th><th>Jours</th><th>Intérêts</th>${isProfessionalDebtor(d)?"<th>Indemnité</th>":""}</tr></thead><tbody>${rows}</tbody></table>
-  <table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>TOTAL RÉCLAMÉ</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table>
+  <table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>${isProfessionalDebtor(d)?"Pénalités de retard selon taux de chaque facture":`Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)`}</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>TOTAL RÉCLAMÉ</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table>
   <div class="note">Décompte établi à la date de préparation du dossier. Les intérêts, lorsqu’ils sont applicables, continuent à courir jusqu’au complet paiement.</div>
   <footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>Décompte de créance</strong></footer></section></body></html>`}
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
