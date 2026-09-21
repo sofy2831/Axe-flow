@@ -2316,14 +2316,14 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
 
   const docs=`Facture(s) ${refs} ; devis/contrat ou justificatif de la prestation ; relances ; mise en demeure et preuve d'envoi ; décompte actualisé ; échanges et pièces complémentaires.`;
   wrap(page4,48,210,docs,7.4,500,10,4);
-  put(page4,101,143,injunctionPreparationFr(),8.2,155,true);
+  put(page4,101,143,injunctionPreparationFr(),11.2,175,true); // V5 : date agrandie
 
   if(signatureDataUrl){
     try{
       const bytes=await signaturePngBytes();
       const img=await pdfDoc.embedPng(bytes);
-      // V4 : masque le rectangle bleu du champ officiel puis affiche une signature nettement plus grande.
-      page4.drawRectangle({x:143,y:88,width:158,height:27,color:rgb(1,1,1)});
+      // V5 : masque largement tout le champ bleu officiel sous la signature.
+      page4.drawRectangle({x:138,y:78,width:225,height:48,color:rgb(1,1,1)});
       const maxW=190,maxH=62,scale=Math.min(maxW/img.width,maxH/img.height);
       page4.drawImage(img,{x:145,y:76,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
