@@ -516,6 +516,16 @@
 #paidJudicialWarningModal .modal-actions{margin-top:18px}
 #paidJudicialWarningModal .modal-actions .btn{border-radius:9px;min-width:120px}
 
+
+.judicial-delay-note{
+  margin:10px auto 0;
+  max-width:260px;
+  font-size:.72rem;
+  line-height:1.38;
+  color:#fff;
+  opacity:.97;
+  text-align:center;
+}
 </style>
 </head>
 <body>
@@ -3316,6 +3326,13 @@ async function loadDetailTimeline(d){
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
 let pendingPaidJudicialAction=null;
+function keepPostOrderButtonsClickable(root=document){
+  root.querySelectorAll('[data-judicial-inline="non_opposition"],[data-judicial-inline="enforcement"]').forEach(btn=>{
+    btn.disabled=false;
+    btn.removeAttribute("disabled");
+    btn.setAttribute("aria-disabled","false");
+  });
+}
 function runWithPaidJudicialWarning(action,d=currentDossier){
   if(!d||principalBalance(d)>0){ action(); return; }
   pendingPaidJudicialAction=action;
@@ -3361,7 +3378,7 @@ function openDossierDetailModal(d){
     d?.nextAction==="CLOTURE_INJONCTION"||judicialRegistered
   );
   if(judicialRegistered&&principalBalance(d)>0){
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.<br><br><strong style="color:#ffe7c2">Délai indicatif :</strong> après dépôt, le traitement de la requête par la juridiction prend généralement 2 à 6 semaines selon le tribunal.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="judicial-delay-note"><strong>Délai indicatif :</strong> après dépôt, le traitement de la requête par la juridiction prend généralement 2 à 6 semaines selon le tribunal.</div><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   if(judicialPaid){
     const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
@@ -4151,6 +4168,16 @@ $("paidJudicialWarningModal")?.addEventListener("click",(e)=>{
     closePaidJudicialWarning();
   }
 });
+
+
+const postOrderButtonObserver=new MutationObserver(()=>{
+  const root=$("dossierDetailModal");
+  if(root?.classList.contains("open"))keepPostOrderButtonsClickable(root);
+});
+if($("dossierDetailModal")){
+  postOrderButtonObserver.observe($("dossierDetailModal"),{childList:true,subtree:true,attributes:true,attributeFilter:["disabled"]});
+  $("dossierDetailModal").addEventListener("click",()=>setTimeout(()=>keepPostOrderButtonsClickable($("dossierDetailModal")),0));
+}
 
 </script>
 <div id="successToast" class="success-toast" role="status" aria-live="polite">
