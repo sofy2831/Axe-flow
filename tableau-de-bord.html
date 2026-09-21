@@ -2708,6 +2708,12 @@ async function openHistoricalInjunctionBundle(d,eventDate){
   const previousDossier=currentDossier;
   const dateInput=$('injunctionPreparationDate');
   const previousDateInput=dateInput?.value||'';
+  const previousCourtInputs={
+    name:$("injunctionCourtName")?.value||"",
+    city:$("injunctionCourtCity")?.value||"",
+    zip:$("injunctionCourtZip")?.value||"",
+    address:$("injunctionCourtAddress")?.value||""
+  };
   let cerfaBlob=null;
   const previousCapture=window.__axeFlowCerfaCapture;
   const previousCerfaOptions=cerfaGenerationOptions;
@@ -2718,10 +2724,21 @@ async function openHistoricalInjunctionBundle(d,eventDate){
     cerfaGenerationOptions={...(historicalDossier.cerfaGenerationOptions||previousCerfaOptions||{})};
     if(dateInput)dateInput.value=eventDate;
 
+    // Consultation historique : le Cerfa doit reprendre la juridiction enregistrée
+    // avec l'injonction, et non une valeur résiduelle de la modale ou la ville du débiteur.
+    const historicalCourtName=clean(court.name)||clean(historicalDossier.courtName)||"";
+    const historicalCourtCity=clean(court.city)||clean(historicalDossier.courtCity)||"";
+    const historicalCourtZip=clean(court.zip)||clean(historicalDossier.courtZip)||"";
+    const historicalCourtAddress=clean(court.address)||clean(historicalDossier.courtAddress)||"";
+    if($("injunctionCourtName"))$("injunctionCourtName").value=historicalCourtName;
+    if($("injunctionCourtCity"))$("injunctionCourtCity").value=historicalCourtCity;
+    if($("injunctionCourtZip"))$("injunctionCourtZip").value=historicalCourtZip;
+    if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=historicalCourtAddress;
+
     // 1. Requête historique complète (toutes ses pages).
-    const historicalCourtAddress=[clean(court.address),[clean(court.zip),clean(court.city)].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    const historicalCourtAddressLabel=[historicalCourtAddress,[historicalCourtZip,historicalCourtCity].filter(Boolean).join(' ')].filter(Boolean).join(', ');
     const requestBlob=await historicalHtmlToPdfBlob(
-      injunctionRequestPrintHtml(historicalDossier,court.name||'',historicalCourtAddress)
+      injunctionRequestPrintHtml(historicalDossier,historicalCourtName,historicalCourtAddressLabel)
     );
     // 2. Décompte historique arrêté à la même date.
     const statementBlob=await historicalHtmlToPdfBlob(debtStatementHtml(historicalDossier));
@@ -2749,6 +2766,10 @@ async function openHistoricalInjunctionBundle(d,eventDate){
     cerfaGenerationOptions=previousCerfaOptions;
     currentDossier=previousDossier;
     if(dateInput)dateInput.value=previousDateInput;
+    if($("injunctionCourtName"))$("injunctionCourtName").value=previousCourtInputs.name;
+    if($("injunctionCourtCity"))$("injunctionCourtCity").value=previousCourtInputs.city;
+    if($("injunctionCourtZip"))$("injunctionCourtZip").value=previousCourtInputs.zip;
+    if($("injunctionCourtAddress"))$("injunctionCourtAddress").value=previousCourtInputs.address;
   }
 }
 
@@ -3243,6 +3264,15 @@ async function loadDetailTimeline(d){
     }));
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
+function confirmPaidJudicialContinuation(d=currentDossier){
+  if(!d||principalBalance(d)>0)return true;
+  return window.confirm(
+    "Créance intégralement réglée\n\n"+
+    "Aucune poursuite de la procédure d’exécution n’est nécessaire. "+
+    "Finalisez la procédure en informant, si nécessaire, le débiteur et la juridiction.\n\n"+
+    "Cliquez sur OK pour continuer malgré tout, ou sur Annuler pour revenir au dossier."
+  );
+}
 function openDossierDetailModal(d){
   if(!d||!E.dossierDetailModal)return;
   currentDossier=d;
@@ -3278,7 +3308,7 @@ function openDossierDetailModal(d){
     d?.nextAction==="CLOTURE_INJONCTION"||judicialRegistered
   );
   if(judicialRegistered&&principalBalance(d)>0){
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="action-tag">⚖</span>Dossier judiciaire</button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.<br><br><strong style="color:#ffe7c2">Délai indicatif :</strong> après dépôt, le traitement de la requête par la juridiction prend généralement 2 à 6 semaines selon le tribunal.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Après signification et expiration du délai d’opposition, préparer la demande de certificat de non-opposition.</small></div><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Préparer la transmission au commissaire de justice avec les pièces judiciaires et le décompte actualisé.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   if(judicialPaid){
     const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
@@ -3306,6 +3336,7 @@ function openDossierDetailModal(d){
   E.detailActions.querySelectorAll("[data-judicial-inline]").forEach(btn=>btn.addEventListener("click",ev=>{
     ev.preventDefault();ev.stopPropagation();
     const kind=btn.dataset.judicialInline;
+    if(!confirmPaidJudicialContinuation(currentDossier))return;
     E.dossierDetailModal.classList.remove("open");
     if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
   }));
@@ -3869,7 +3900,7 @@ function openPrepModal(id,dateId){
 }
 function closePrepModal(id){$(id)?.classList.remove("open")}
 
-$("generateNonOppositionBtn")?.addEventListener("click",()=>openPrepModal("nonOppositionPrepModal","nonOppositionDate"));
+$("generateNonOppositionBtn")?.addEventListener("click",()=>{if(confirmPaidJudicialContinuation(currentDossier))openPrepModal("nonOppositionPrepModal","nonOppositionDate")});
 $("closeNonOppositionPrep")?.addEventListener("click",()=>closePrepModal("nonOppositionPrepModal"));
 $("cancelNonOppositionPrep")?.addEventListener("click",()=>closePrepModal("nonOppositionPrepModal"));
 $("nonOppositionPrepModal")?.addEventListener("click",e=>{if(e.target.id==="nonOppositionPrepModal")closePrepModal("nonOppositionPrepModal")});
@@ -3904,7 +3935,7 @@ $("validateNonOppositionBtn")?.addEventListener("click",async()=>{
   finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
-$("generateEnforcementBtn")?.addEventListener("click",()=>openPrepModal("enforcementPrepModal","enforcementDate"));
+$("generateEnforcementBtn")?.addEventListener("click",()=>{if(confirmPaidJudicialContinuation(currentDossier))openPrepModal("enforcementPrepModal","enforcementDate")});
 $("closeEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
 $("cancelEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
 $("enforcementPrepModal")?.addEventListener("click",e=>{if(e.target.id==="enforcementPrepModal")closePrepModal("enforcementPrepModal")});
