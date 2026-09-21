@@ -491,6 +491,31 @@
 
 /* Correctif ciblé : masque uniquement l’ancien bloc judiciaire dupliqué sous la barre premium */
 #detailJudicialAfter{display:none!important}
+
+/* ===== V23 — Alerte créance soldée, modale Axe Flow ===== */
+#paidJudicialWarningModal{z-index:240}
+#paidJudicialWarningModal .modal{
+  width:min(620px,calc(100vw - 28px));
+  background:#101a31;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  box-shadow:0 28px 90px rgba(0,0,0,.48)
+}
+#paidJudicialWarningModal .modal-inner{padding:24px}
+#paidJudicialWarningModal .paid-warning-head{display:flex;gap:13px;align-items:flex-start}
+#paidJudicialWarningModal .paid-warning-icon{
+  flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:11px;
+  background:rgba(61,208,143,.12);border:1px solid rgba(61,208,143,.28);color:#63e6a8;font-weight:900
+}
+#paidJudicialWarningModal h2{margin:0 0 6px;font-size:1.18rem}
+#paidJudicialWarningModal .paid-warning-text{color:var(--muted);font-size:.88rem;line-height:1.55;margin-top:16px}
+#paidJudicialWarningModal .paid-warning-note{
+  margin-top:14px;padding:12px 14px;border-radius:11px;border:1px solid rgba(255,179,71,.24);
+  background:rgba(255,179,71,.07);color:#ffe1a8;font-size:.79rem;line-height:1.45
+}
+#paidJudicialWarningModal .modal-actions{margin-top:18px}
+#paidJudicialWarningModal .modal-actions .btn{border-radius:9px;min-width:120px}
+
 </style>
 </head>
 <body>
@@ -1655,6 +1680,32 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   ${footer(3)}
 </section>
 
+
+
+<div class="modal-backdrop" id="paidJudicialWarningModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="paidJudicialWarningTitle">
+    <div class="modal-inner">
+      <div class="paid-warning-head">
+        <div class="paid-warning-icon">✓</div>
+        <div>
+          <h2 id="paidJudicialWarningTitle">Créance intégralement réglée</h2>
+          <div class="panel-sub">Le solde de cette créance est de 0,00 €.</div>
+        </div>
+      </div>
+      <div class="paid-warning-text">
+        Aucune poursuite de la procédure d’exécution n’est nécessaire.
+        Finalisez la procédure en informant, si nécessaire, le débiteur et la juridiction.
+      </div>
+      <div class="paid-warning-note">
+        Vous pouvez néanmoins poursuivre cette étape si votre situation l’exige.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="paidJudicialCancelBtn" type="button">Revenir au dossier</button>
+        <button class="btn btn-primary" id="paidJudicialContinueBtn" type="button">Continuer malgré tout</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>`;
@@ -3264,14 +3315,16 @@ async function loadDetailTimeline(d){
     }));
   }catch(err){console.warn(err);E.detailTimeline.innerHTML='<div class="empty-state">Chronologie indisponible.</div>'}
 }
-function confirmPaidJudicialContinuation(d=currentDossier){
-  if(!d||principalBalance(d)>0)return true;
-  return window.confirm(
-    "Créance intégralement réglée\n\n"+
-    "Aucune poursuite de la procédure d’exécution n’est nécessaire. "+
-    "Finalisez la procédure en informant, si nécessaire, le débiteur et la juridiction.\n\n"+
-    "Cliquez sur OK pour continuer malgré tout, ou sur Annuler pour revenir au dossier."
-  );
+let pendingPaidJudicialAction=null;
+function runWithPaidJudicialWarning(action,d=currentDossier){
+  if(!d||principalBalance(d)>0){ action(); return; }
+  pendingPaidJudicialAction=action;
+  const modal=$("paidJudicialWarningModal");
+  if(modal){modal.classList.add("open");modal.setAttribute("aria-hidden","false");}
+}
+function closePaidJudicialWarning(){
+  const modal=$("paidJudicialWarningModal");
+  if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");}
 }
 function openDossierDetailModal(d){
   if(!d||!E.dossierDetailModal)return;
@@ -3336,9 +3389,10 @@ function openDossierDetailModal(d){
   E.detailActions.querySelectorAll("[data-judicial-inline]").forEach(btn=>btn.addEventListener("click",ev=>{
     ev.preventDefault();ev.stopPropagation();
     const kind=btn.dataset.judicialInline;
-    if(!confirmPaidJudicialContinuation(currentDossier))return;
-    E.dossierDetailModal.classList.remove("open");
-    if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
+    runWithPaidJudicialWarning(()=>{
+      E.dossierDetailModal.classList.remove("open");
+      if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
+    },currentDossier);
   }));
   E.detailInvoices.innerHTML=normalizeInvoices(d).map(inv=>`<div class="detail-invoice"><div><strong>${esc(inv.ref)}</strong><small>Émission ${esc(fmtDateFR(inv.issuedDate))} • Échéance ${esc(fmtDateFR(inv.dueDate))} • Taux ${Number(inv.lateRatePercent??8.25).toLocaleString("fr-FR")}%</small></div><strong>${formatCurrency(inv.amount)}</strong></div>`).join("")||'<div class="empty-state">Aucune facture.</div>';
   if(isProfessionalDebtor(d)){
@@ -3900,7 +3954,7 @@ function openPrepModal(id,dateId){
 }
 function closePrepModal(id){$(id)?.classList.remove("open")}
 
-$("generateNonOppositionBtn")?.addEventListener("click",()=>{if(confirmPaidJudicialContinuation(currentDossier))openPrepModal("nonOppositionPrepModal","nonOppositionDate")});
+$("generateNonOppositionBtn")?.addEventListener("click",()=>runWithPaidJudicialWarning(()=>openPrepModal("nonOppositionPrepModal","nonOppositionDate"),currentDossier));
 $("closeNonOppositionPrep")?.addEventListener("click",()=>closePrepModal("nonOppositionPrepModal"));
 $("cancelNonOppositionPrep")?.addEventListener("click",()=>closePrepModal("nonOppositionPrepModal"));
 $("nonOppositionPrepModal")?.addEventListener("click",e=>{if(e.target.id==="nonOppositionPrepModal")closePrepModal("nonOppositionPrepModal")});
@@ -3935,7 +3989,7 @@ $("validateNonOppositionBtn")?.addEventListener("click",async()=>{
   finally{if(btn){btn.disabled=false;btn.textContent=old}}
 });
 
-$("generateEnforcementBtn")?.addEventListener("click",()=>{if(confirmPaidJudicialContinuation(currentDossier))openPrepModal("enforcementPrepModal","enforcementDate")});
+$("generateEnforcementBtn")?.addEventListener("click",()=>runWithPaidJudicialWarning(()=>openPrepModal("enforcementPrepModal","enforcementDate"),currentDossier));
 $("closeEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
 $("cancelEnforcementPrep")?.addEventListener("click",()=>closePrepModal("enforcementPrepModal"));
 $("enforcementPrepModal")?.addEventListener("click",e=>{if(e.target.id==="enforcementPrepModal")closePrepModal("enforcementPrepModal")});
@@ -4080,6 +4134,24 @@ onAuthStateChanged(auth,async user=>{
     alert("Le tableau de bord est connecté, mais les données n’ont pas pu être chargées. Consultez la console.");
   }
 });
+
+$("paidJudicialCancelBtn")?.addEventListener("click",()=>{
+  pendingPaidJudicialAction=null;
+  closePaidJudicialWarning();
+});
+$("paidJudicialContinueBtn")?.addEventListener("click",()=>{
+  const action=pendingPaidJudicialAction;
+  pendingPaidJudicialAction=null;
+  closePaidJudicialWarning();
+  if(typeof action==="function")action();
+});
+$("paidJudicialWarningModal")?.addEventListener("click",(e)=>{
+  if(e.target===e.currentTarget){
+    pendingPaidJudicialAction=null;
+    closePaidJudicialWarning();
+  }
+});
+
 </script>
 <div id="successToast" class="success-toast" role="status" aria-live="polite">
   <span class="success-toast-icon">✓</span>
