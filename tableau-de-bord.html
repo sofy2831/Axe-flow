@@ -535,6 +535,9 @@
 .judicial-folder-delay{display:block;max-width:245px;font-size:.69rem;line-height:1.35;font-weight:500;text-align:center;color:#fff;opacity:.98}
 
 /* V24 — enregistrement judiciaire figé + signification */
+
+.judicial-deadline{margin-top:7px;color:var(--accent);font-size:.72rem;font-weight:800;line-height:1.35}
+.judicial-deadline.pending{color:var(--soft);font-weight:650}
 #injunctionModal .inj-footer{align-items:center}
 #injunctionModal #markInjunctionBtn:disabled{opacity:.48;cursor:not-allowed;background:#526173;border-color:#526173;box-shadow:none}
 #injunctionModal #injunctionPreparedSaved{margin-left:4px}
@@ -856,7 +859,7 @@
  <div class="modal-head"><div><h2>Signification de l’ordonnance</h2><div class="panel-sub">Enregistrer la date de signification par le commissaire de justice</div></div><button class="close-btn" id="closeSignificationPrep" type="button">×</button></div>
  <div class="prep-grid"><div class="field"><label>Date de signification</label><input id="significationDate" type="date"></div></div>
  <div class="prep-note">Cette date sert de référence aux délais postérieurs à l’ordonnance.</div>
- <div class="prep-actions"><button class="btn btn-secondary" id="cancelSignificationPrep" type="button">Annuler</button><button class="btn btn-primary" id="validateSignificationBtn" type="button">Enregistrer la signification</button></div>
+ <div class="prep-actions"><button class="btn btn-secondary" id="cancelSignificationPrep" type="button">Annuler</button><button class="btn btn-primary" id="validateSignificationBtn" type="button">Enregistrer la DATE de signification au débiteur</button></div>
 </div></div></div>
 
 <div class="modal-backdrop judicial-prep-modal" id="nonOppositionPrepModal"><div class="modal"><div class="modal-inner">
@@ -3165,6 +3168,22 @@ async function loadDetailTimeline(d){
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
     snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
     const injunctionEvent=events.find(ev=>(ev.action||ev.type)==="injunction_prepared");
+
+function addMonthsSafe(iso, months){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(clean(iso));
+  if(!m)return "";
+  const y=Number(m[1]), mo=Number(m[2])-1, day=Number(m[3]);
+  const last=new Date(y,mo+months+1,0).getDate();
+  const d=new Date(y,mo+months,Math.min(day,last));
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function judicialDeadlineHtml(d,kind){
+  const sign=clean(d?.__significationDate);
+  if(!sign)return `<div class="judicial-deadline pending">Date calculée après enregistrement de la signification</div>`;
+  const due=addMonthsSafe(sign,kind==="certificate"?1:2);
+  if(!due)return "";
+  return `<div class="judicial-deadline">${kind==="certificate"?"Certificat à demander à partir du":"Exécution forcée à partir du"} ${fmtDateFR(due)}</div>`;
+}
     const significationEvent=events.filter(ev=>(ev.action||ev.type)==="injunction_signification").sort((a,b)=>String(b.effectiveDate||b.date||"").localeCompare(String(a.effectiveDate||a.date||"")))[0];
     const injunctionRegistered=!!injunctionEvent;
     if(significationEvent){const sd=clean(significationEvent.effectiveDate||significationEvent.date);if(sd)d.__significationDate=sd;}
@@ -3187,7 +3206,7 @@ async function loadDetailTimeline(d){
     if(E.detailJudicialAfter){
       const showSeparateJudicial=injunctionRegistered&&principalBalance(d)>0;
       E.detailJudicialAfter.style.display=showSeparateJudicial?"grid":"none";
-      E.detailJudicialAfter.innerHTML=showSeparateJudicial?`<article class="detail-judicial-card"><strong>Après l’ordonnance</strong><small>Après signification de l’ordonnance et expiration du délai d’opposition, préparer la demande de certificat de non-opposition auprès de la juridiction compétente.</small><button class="btn" type="button" data-judicial-followup="non_opposition">Préparer la demande de certificat</button></article><article class="detail-judicial-card"><strong>Après le certificat</strong><small>Préparer le dossier de transmission au commissaire de justice : ordonnance, signification, certificat de non-opposition et décompte actualisé.</small><button class="btn" type="button" data-judicial-followup="enforcement">Préparer l’exécution forcée</button></article>`:"";
+      E.detailJudicialAfter.innerHTML=showSeparateJudicial?`<article class="detail-judicial-card"><strong>Après l’ordonnance obtenue</strong><small>Après signification au débiteur, le délai d’opposition est d’un mois.</small><button class="btn" type="button" data-judicial-followup="non_opposition">Demander le certificat</button></article><article class="detail-judicial-card"><strong>Après le certificat</strong><small>Préparer le dossier de transmission au commissaire de justice : ordonnance, signification, certificat de non-opposition et décompte actualisé.</small><button class="btn" type="button" data-judicial-followup="enforcement">Préparer l’exécution forcée</button></article>`:"";
       E.detailJudicialAfter.querySelectorAll("[data-judicial-followup]").forEach(btn=>btn.addEventListener("click",()=>{
         const kind=btn.dataset.judicialFollowup; E.dossierDetailModal.classList.remove("open");
         if(kind==="signification")openSignificationModal(); else if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
@@ -3382,7 +3401,7 @@ function openDossierDetailModal(d){
     d?.nextAction==="CLOTURE_INJONCTION"||judicialRegistered
   );
   if(judicialRegistered&&principalBalance(d)>0){
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Faites signifier l’ordonnance par un commissaire de justice. Le débiteur dispose d’1 mois après la signification pour former opposition.</small></div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la signification</button><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></div></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Ordonnances rendues dès le 01/09/2026 : exécution forcée après 2 mois suivant la signification, en l’absence d’opposition.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance obtenue</strong><small>Faites signifier l’ordonnance au débiteur par un commissaire de justice.</small>${judicialDeadlineHtml(d,"certificate")}</div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la DATE de signification au débiteur</button><button class="btn" type="button" data-judicial-inline="non_opposition">Demander le certificat</button></div></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>En l’absence d’opposition, l’exécution forcée est possible après le délai légal.</small>${judicialDeadlineHtml(d,"enforcement")}</div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   if(judicialPaid){
     const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
@@ -3390,7 +3409,7 @@ function openDossierDetailModal(d){
       ?`<strong>✓ Dossier clôturé</strong><small>La créance est soldée. Les actions judiciaires postérieures à l’ordonnance restent accessibles.</small>`
       :`<strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small>`;
     const closeButton=fullyClosed?"":`<button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button>`;
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance</strong><small>Faites signifier l’ordonnance par un commissaire de justice. Le débiteur dispose d’1 mois après la signification pour former opposition.</small></div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la signification</button><button class="btn" type="button" data-judicial-inline="non_opposition">Préparer le certificat</button></div></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>Ordonnances rendues dès le 01/09/2026 : exécution forcée après 2 mois suivant la signification, en l’absence d’opposition.</small></div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance obtenue</strong><small>Faites signifier l’ordonnance au débiteur par un commissaire de justice.</small>${judicialDeadlineHtml(d,"certificate")}</div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la DATE de signification au débiteur</button><button class="btn" type="button" data-judicial-inline="non_opposition">Demander le certificat</button></div></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>En l’absence d’opposition, l’exécution forcée est possible après le délai légal.</small>${judicialDeadlineHtml(d,"enforcement")}</div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   E.detailActions.classList.toggle("judicial-premium-row",judicialPaid||judicialRegistered);
   E.detailActions.innerHTML=actionHtml;
