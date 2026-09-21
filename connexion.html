@@ -82,6 +82,12 @@
     .point span{display:block;color:var(--muted);font-size:.9rem;}
     .hero-note{padding:16px 18px;border-radius:18px;background:rgba(255,127,31,0.10);border:1px solid rgba(255,127,31,0.18);color:#fff4ea;font-size:.92rem;}
     .auth-card{padding:28px 24px;display:flex;flex-direction:column;justify-content:flex-start;}
+    .google-auth{display:grid;gap:12px;margin-bottom:18px;}
+    .google-btn{width:100%;min-height:52px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:#fff;color:#202124;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:11px;transition:.2s ease;}
+    .google-btn:hover{background:#f5f5f5;transform:translateY(-1px);}
+    .google-btn svg{width:20px;height:20px;flex:0 0 auto;}
+    .auth-separator{display:flex;align-items:center;gap:12px;color:var(--soft);font-size:.82rem;}
+    .auth-separator::before,.auth-separator::after{content:"";height:1px;background:rgba(255,255,255,.10);flex:1;}
     .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
     .tab-btn{min-height:48px;border:none;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#fff;font-weight:800;cursor:pointer;transition:.2s ease;}
     .tab-btn.active{background:linear-gradient(135deg, var(--accent), var(--accent-2));border-color:transparent;box-shadow:0 18px 40px rgba(255,127,31,0.22);}
@@ -151,13 +157,26 @@
           </div>
 
           <div class="hero-points">
-            <div class="point"><div class="point-mark">01</div><div><strong>Compte client</strong><span>Créez votre accès ou connectez-vous avec votre email.</span></div></div>
+            <div class="point"><div class="point-mark">01</div><div><strong>Compte client</strong><span>Créez votre accès ou connectez-vous avec Google ou votre email.</span></div></div>
             <div class="point"><div class="point-mark">02</div><div><strong>Paiement</strong><span>Après connexion, l’offre choisie est confirmée par paiement sécurisé.</span></div></div>
             <div class="point point-full"><div class="point-mark">03</div><div><strong>Tableau de bord</strong><span>Après paiement, vous revenez dans l’espace client pour créer le dossier impayé.</span></div></div>
           </div>
 
            </div>
         <div class="auth-card">
+          <div class="google-auth">
+            <button class="google-btn" type="button" id="googleAuthBtn" aria-label="Continuer avec Google">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41z"/>
+                <path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.63-2.43l-3.24-2.54c-.9.6-2.05.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22z"/>
+                <path fill="#FBBC05" d="M6.39 13.86A6.02 6.02 0 0 1 6.07 12c0-.65.11-1.28.32-1.86V7.52H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.48l3.35-2.62z"/>
+                <path fill="#EA4335" d="M12 6.01c1.47 0 2.79.51 3.83 1.5l2.87-2.88A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.96 5.52l3.35 2.62C7.18 7.77 9.39 6.01 12 6.01z"/>
+              </svg>
+              <span>Continuer avec Google</span>
+            </button>
+            <div class="auth-separator"><span>ou avec votre e-mail</span></div>
+          </div>
+
           <div class="tabs">
             <button class="tab-btn active" type="button" data-tab="login">Connexion</button>
             <button class="tab-btn" type="button" data-tab="register">Créer un compte</button>
@@ -196,7 +215,7 @@
         </div>
       </section>
 
-      <div class="footer-note">Axe Flow - accès client sécurisé par email et mot de passe.</div>
+      <div class="footer-note">Axe Flow - accès client sécurisé par Google ou email et mot de passe.</div>
     </div>
   </main>
 
@@ -204,6 +223,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
     getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     sendPasswordResetEmail
@@ -237,6 +258,7 @@
   const statusBox = document.getElementById("statusBox");
   const loginSubmit = document.getElementById("loginSubmit");
   const registerSubmit = document.getElementById("registerSubmit");
+  const googleAuthBtn = document.getElementById("googleAuthBtn");
   const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
   const loginPanel = document.getElementById("panel-login");
   const registerPanel = document.getElementById("panel-register");
@@ -405,6 +427,36 @@
 
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: "select_account" });
+
+  googleAuthBtn.addEventListener("click", async () => {
+    try {
+      setLoading(googleAuthBtn, true, "Connexion avec Google...");
+      setStatus("Connexion Google en cours...", "info");
+
+      const cred = await signInWithPopup(auth, googleProvider);
+
+      setStatus("Connexion Google réussie. Préparation de la suite...", "success");
+      await continueAfterAuth(cred.user);
+
+    } catch (error) {
+      console.error("Erreur connexion Google :", error);
+
+      if (error?.code === "auth/popup-closed-by-user") {
+        setStatus("Connexion Google annulée.", "info");
+      } else if (error?.code === "auth/popup-blocked") {
+        setStatus("La fenêtre Google a été bloquée par le navigateur. Autorisez les fenêtres contextuelles puis réessayez.", "error");
+      } else if (error?.code === "auth/account-exists-with-different-credential") {
+        setStatus("Cette adresse est déjà associée à un compte Axe Flow. Connectez-vous d’abord avec votre méthode habituelle.", "error");
+      } else {
+        setStatus(mapAuthError(error), "error");
+      }
+    } finally {
+      setLoading(googleAuthBtn, false);
+    }
   });
 
   loginForm.addEventListener("submit", async (e) => {
