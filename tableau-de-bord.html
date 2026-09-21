@@ -2323,7 +2323,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
       const bytes=await signaturePngBytes();
       const img=await pdfDoc.embedPng(bytes);
       // V5 : masque largement tout le champ bleu officiel sous la signature.
-      page4.drawRectangle({x:138,y:78,width:225,height:48,color:rgb(1,1,1)});
+      page4.drawRectangle({x:132,y:78,width:231,height:48,color:rgb(1,1,1)}); // V6 : masque blanc élargi de 1 % vers la gauche
       const maxW=190,maxH=62,scale=Math.min(maxW/img.width,maxH/img.height);
       page4.drawImage(img,{x:145,y:76,width:img.width*scale,height:img.height*scale});
     }catch(e){console.warn("Signature CERFA 12946",e)}
