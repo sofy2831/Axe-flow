@@ -178,6 +178,11 @@
     }
 
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .offer-card{padding:18px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)}
+    .offer-card strong{display:block;color:#fff;font-size:1.02rem;margin-bottom:4px}
+    .offer-price{font-size:1.55rem;font-weight:900;color:var(--accent2);line-height:1.2}
+    .offer-desc{color:var(--muted);font-size:.9rem;margin-top:7px}
 
     .note{
       margin-top:18px;
@@ -386,6 +391,7 @@
       .layout{grid-template-columns:1fr}
       .toc{position:relative;top:auto}
       .internal-links{grid-template-columns:1fr}
+      .offer-grid{grid-template-columns:1fr}
     }
 
     @media(max-width:760px){
@@ -459,7 +465,8 @@
           Une facture impayée ne se règle pas toujours avec un simple rappel. La relance doit suivre une progression claire : relance simple, relance ferme, dernier rappel, puis mise en demeure si le client ne paie toujours pas.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+          <a class="btn btn-primary" href="demo.html">Voir la démo</a>
+          <a class="btn btn-secondary" href="index.html#tarifs">Voir les tarifs</a>
           <a class="btn btn-secondary" href="#methode">Voir la méthode</a>
         </div>
         <div class="note">
@@ -622,8 +629,14 @@ Cordialement,</div>
             <p>
               Ouvrez un dossier Axe Flow, générez vos relances, suivez l’historique et préparez la mise en demeure si le client ne règle toujours pas.
             </p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="index.html#tarifs">Créer mon dossier — 49 €</a>
+            <div class="offer-grid" aria-label="Tarifs Axe Flow">
+              <div class="offer-card"><strong>Ponctuel</strong><div class="offer-price">49 €</div><div class="offer-desc">3 dossiers.</div></div>
+              <div class="offer-card"><strong>Pro</strong><div class="offer-price">89 €/mois</div><div class="offer-desc">Jusqu’à 10 dossiers actifs simultanément.</div></div>
+              <div class="offer-card"><strong>Pro 30</strong><div class="offer-price">169 €/mois</div><div class="offer-desc">Jusqu’à 30 dossiers actifs simultanément.</div></div>
+            </div>
+            <div class="hero-actions" style="margin-top:18px">
+              <a class="btn btn-primary" href="demo.html">Voir la démo</a>
+              <a class="btn btn-secondary" href="index.html#tarifs">Voir les tarifs et choisir une offre</a>
               <a class="btn btn-secondary" href="mise-en-demeure-impaye.html">Lire : mise en demeure</a>
             </div>
           </div>
