@@ -13,17 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js">
 
-// V25 — seuil 10 000 € / opposition
-$("highAmountCancelBtn")?.addEventListener("click",()=>{closeHighAmountInjunctionWarning();if(returnToDetailAfterInjunction&&currentDossier){returnToDetailAfterInjunction=false;openDossierDetailModal(currentDossier)}});
-$("highAmountContinueBtn")?.addEventListener("click",continueHighAmountInjunction);
-$("highAmountInjunctionModal")?.addEventListener("click",e=>{if(e.target===$("highAmountInjunctionModal"))closeHighAmountInjunctionWarning()});
-$("closeOppositionModal")?.addEventListener("click",closeOppositionModal);
-$("cancelOppositionBtn")?.addEventListener("click",closeOppositionModal);
-$("saveOppositionBtn")?.addEventListener("click",saveOpposition);
-$("oppositionModal")?.addEventListener("click",e=>{if(e.target===$("oppositionModal"))closeOppositionModal()});
-$("closeLawyerRequiredBtn")?.addEventListener("click",closeLawyerRequiredModal);
-$("lawyerRequiredModal")?.addEventListener("click",e=>{if(e.target===$("lawyerRequiredModal"))closeLawyerRequiredModal()});
-
 </script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
@@ -4364,6 +4353,18 @@ if($("dossierDetailModal")){
   $("dossierDetailModal").addEventListener("click",()=>setTimeout(()=>keepPostOrderButtonsClickable($("dossierDetailModal")),0));
 }
 
+
+
+// V25 — seuil 10 000 € / opposition : raccordement des nouvelles modales
+$("highAmountCancelBtn")?.addEventListener("click",()=>{closeHighAmountInjunctionWarning();if(returnToDetailAfterInjunction&&currentDossier){returnToDetailAfterInjunction=false;openDossierDetailModal(currentDossier)}});
+$("highAmountContinueBtn")?.addEventListener("click",continueHighAmountInjunction);
+$("highAmountInjunctionModal")?.addEventListener("click",e=>{if(e.target===$("highAmountInjunctionModal"))closeHighAmountInjunctionWarning()});
+$("closeOppositionModal")?.addEventListener("click",closeOppositionModal);
+$("cancelOppositionBtn")?.addEventListener("click",closeOppositionModal);
+$("saveOppositionBtn")?.addEventListener("click",saveOpposition);
+$("oppositionModal")?.addEventListener("click",e=>{if(e.target===$("oppositionModal"))closeOppositionModal()});
+$("closeLawyerRequiredBtn")?.addEventListener("click",closeLawyerRequiredModal);
+$("lawyerRequiredModal")?.addEventListener("click",e=>{if(e.target===$("lawyerRequiredModal"))closeLawyerRequiredModal()});
 </script>
 
 <div class="modal-backdrop" id="highAmountInjunctionModal" aria-hidden="true">
