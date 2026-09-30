@@ -2517,7 +2517,7 @@ function debtStatementHtml(d=currentDossier){
   <table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>${isProfessionalDebtor(d)?"Pénalités de retard selon taux de chaque facture":`Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)`}</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>TOTAL RÉCLAMÉ</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table>
   <div class="note">Décompte établi à la date de préparation du dossier. Les intérêts, lorsqu’ils sont applicables, continuent à courir jusqu’au complet paiement.</div>
   <footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>Décompte de créance</strong></footer></section></body></html>`}
-async function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");await downloadPdfFromHtml(debtStatementHtml(currentDossier),`decompte_${safeRef}.pdf`)}
+function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
 async function htmlStringToPdfBlob(html,zipMode=false){
   if(!window.html2pdf)throw new Error("html2pdf n’est pas chargé");
   const holder=document.createElement("div");holder.style.cssText="position:fixed;left:-100000px;top:0;width:794px;background:white";holder.innerHTML=html;document.body.appendChild(holder);
@@ -4013,13 +4013,13 @@ async function downloadPdfFromHtml(html,filename){
   a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
-async function generateInjunctionRequestFromModal(){
+function generateInjunctionRequestFromModal(){
   if(!currentDossier)return;
   currentAction="injunction";
   const courtName=injunctionCourtLabel(),courtAddress=injunctionCourtAddressLabel();
   if(!courtName){alert("Renseignez d’abord la juridiction compétente.");return}
-  const safeRef=String(currentDossier.ref||"dossier").replace(/[^A-Za-z0-9-]+/g,"-");
-  await downloadPdfFromHtml(injunctionRequestPrintHtml(currentDossier,courtName,courtAddress),`requete_${safeRef}.pdf`);
+  // Conserver l'aperçu / modale d'impression d'origine pour la requête.
+  openInjunctionRequestPrint(currentDossier,courtName,courtAddress);
 }
 E.generateInjunctionRequestBtn?.addEventListener("click",generateInjunctionRequestFromModal);
 E.generateInjunctionRequestBtnPrivate?.addEventListener("click",generateInjunctionRequestFromModal);
