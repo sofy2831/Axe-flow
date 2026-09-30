@@ -3250,7 +3250,9 @@ async function loadDetailTimeline(d){
     if(oppositionEvent&&!d.oppositionReceived){
       d.oppositionReceived=true;
       d.oppositionDate=clean(oppositionEvent.effectiveDate||oppositionEvent.date);
-      d.oppositionRequiresLawyer=!!oppositionEvent.requiresLawyer;
+      // Les rules Firestore n'autorisent pas de champ « requiresLawyer » dans events.
+      // On le recalcule depuis le montant figé de l'injonction au chargement du dossier.
+      d.oppositionRequiresLawyer=injunctionClaimAmount(d)>10000;
       // Recomposer une seule fois le détail afin que le bouton et l’état opposition
       // soient restaurés après rechargement sans écrire de nouveaux champs request.
       openDossierDetailModal(d);
@@ -3504,7 +3506,10 @@ async function saveOpposition(){
     await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
       title:"Opposition du débiteur enregistrée",
       description:`Notification d’opposition reçue du tribunal.${oppositionFileData?` Pièce jointe : ${oppositionFileData.name}.`:""}${requiresLawyer?" Montant de la demande supérieur à 10 000 € : représentation par avocat requise dans le cas général.":""}`,
-      action:"injunction_opposition",type:"judicial",effectiveDate:date,claimAmount:Number(amount.toFixed(2)),requiresLawyer,oppositionFileId:oppositionFileData?.id||null,createdAt:serverTimestamp()
+      action:"injunction_opposition",
+      type:"judicial",
+      effectiveDate:date,
+      createdAt:serverTimestamp()
     });
     currentDossier.oppositionReceived=true;currentDossier.oppositionDate=date;currentDossier.oppositionRequiresLawyer=requiresLawyer;
     closeOppositionModal();
