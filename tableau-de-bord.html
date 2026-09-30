@@ -11,7 +11,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js">
+
+// V25 — seuil 10 000 € / opposition
+$("highAmountCancelBtn")?.addEventListener("click",()=>{closeHighAmountInjunctionWarning();if(returnToDetailAfterInjunction&&currentDossier){returnToDetailAfterInjunction=false;openDossierDetailModal(currentDossier)}});
+$("highAmountContinueBtn")?.addEventListener("click",continueHighAmountInjunction);
+$("highAmountInjunctionModal")?.addEventListener("click",e=>{if(e.target===$("highAmountInjunctionModal"))closeHighAmountInjunctionWarning()});
+$("closeOppositionModal")?.addEventListener("click",closeOppositionModal);
+$("cancelOppositionBtn")?.addEventListener("click",closeOppositionModal);
+$("saveOppositionBtn")?.addEventListener("click",saveOpposition);
+$("oppositionModal")?.addEventListener("click",e=>{if(e.target===$("oppositionModal"))closeOppositionModal()});
+$("closeLawyerRequiredBtn")?.addEventListener("click",closeLawyerRequiredModal);
+$("lawyerRequiredModal")?.addEventListener("click",e=>{if(e.target===$("lawyerRequiredModal"))closeLawyerRequiredModal()});
+
+</script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <style>
@@ -950,6 +963,18 @@
 </div></div></div>
 
 <div class="modal-backdrop" id="signatureModal"><div class="modal small"><div class="modal-inner"><div class="modal-head"><div><h2>Apposer ma signature</h2><div class="panel-sub">Dessinez votre signature ou importez une image. Elle sera apposée sur la requête et le Cerfa générés pour ce dossier.</div></div><button class="close-btn" id="closeSignatureModal" type="button">×</button></div><div class="signature-pad-wrap"><canvas id="signatureCanvas" class="signature-pad" width="900" height="260" aria-label="Zone de signature"></canvas><div class="signature-choice"><button class="btn btn-secondary" id="clearSignatureBtn" type="button">Effacer</button><button class="btn btn-secondary" id="uploadSignatureBtn" type="button">Importer une signature scannée</button><input id="signatureFileInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none"><button class="btn btn-primary" id="saveSignatureBtn" type="button">Utiliser cette signature</button></div><div class="note-box soft">La signature est utilisée dans votre navigateur pour générer les documents. Elle n'est pas enregistrée dans Firestore.</div></div></div></div></div>
+
+<style>
+/* V25 — seuil 10 000 € et opposition du débiteur */
+#highAmountInjunctionModal,#oppositionModal,#lawyerRequiredModal{z-index:245}
+#highAmountInjunctionModal .modal,#oppositionModal .modal,#lawyerRequiredModal .modal{width:min(620px,calc(100vw - 28px));background:#101a31;border:1px solid rgba(255,255,255,.10);border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.48)}
+#highAmountInjunctionModal .modal-inner,#oppositionModal .modal-inner,#lawyerRequiredModal .modal-inner{padding:24px}
+.legal-alert-head{display:flex;gap:13px;align-items:flex-start}.legal-alert-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:11px;background:rgba(255,179,71,.12);border:1px solid rgba(255,179,71,.30);color:#ffd18a;font-weight:900}
+.legal-alert-text{margin-top:16px;padding:14px;border-radius:12px;border:1px solid rgba(255,179,71,.24);background:rgba(255,179,71,.07);color:#ffe7c2;font-size:.84rem;line-height:1.55}
+.legal-alert-text strong{color:#fff}.legal-alert-note{margin-top:10px;color:var(--muted);font-size:.78rem;line-height:1.5}
+#oppositionModal .field input{background:#202c42;border-color:rgba(255,255,255,.12);border-radius:10px}.opposition-confirm{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.82rem}.opposition-confirm input{margin-top:3px;accent-color:var(--accent)}
+#lawyerRequiredModal .legal-alert-icon{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.28);color:#ffb5b5}.opposition-recorded{margin-top:8px;padding:8px 10px;border-radius:9px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.20);color:#ffc4c4;font-size:.74rem;line-height:1.4}
+</style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -3254,7 +3279,7 @@ async function loadDetailTimeline(d){
       E.detailJudicialAfter.innerHTML=showSeparateJudicial?`<article class="detail-judicial-card"><strong>Après l’ordonnance obtenue</strong><small>Après signification au débiteur, le délai d’opposition est d’un mois.</small><button class="btn" type="button" data-judicial-followup="non_opposition">Demander le certificat</button></article><article class="detail-judicial-card"><strong>Après le certificat</strong><small>Préparer le dossier de transmission au commissaire de justice : ordonnance, signification, certificat de non-opposition et décompte actualisé.</small><button class="btn" type="button" data-judicial-followup="enforcement">Préparer l’exécution forcée</button></article>`:"";
       E.detailJudicialAfter.querySelectorAll("[data-judicial-followup]").forEach(btn=>btn.addEventListener("click",()=>{
         const kind=btn.dataset.judicialFollowup; E.dossierDetailModal.classList.remove("open");
-        if(kind==="signification")openSignificationModal(); else if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
+        if(kind==="signification")openSignificationModal(); else if(kind==="opposition")openOppositionModal(); else if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
       }));
     }
 
@@ -3411,6 +3436,66 @@ function closePaidJudicialWarning(){
   const modal=$("paidJudicialWarningModal");
   if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");}
 }
+
+let pendingHighAmountInjunctionAction=null;
+function injunctionClaimAmount(d=currentDossier){
+  try{return Number(lateFeeBreakdown(d).total||0)}catch(_){return Number(principalBalance(d)||0)}
+}
+function openHighAmountInjunctionWarning(nextAction){
+  pendingHighAmountInjunctionAction=typeof nextAction==="function"?nextAction:null;
+  const amount=injunctionClaimAmount(currentDossier);
+  const el=$("highAmountClaimValue");if(el)el.textContent=formatCurrency(amount);
+  const modal=$("highAmountInjunctionModal");if(modal){modal.classList.add("open");modal.setAttribute("aria-hidden","false")}
+}
+function closeHighAmountInjunctionWarning(){
+  const modal=$("highAmountInjunctionModal");if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true")}
+  pendingHighAmountInjunctionAction=null;
+}
+function continueHighAmountInjunction(){
+  const fn=pendingHighAmountInjunctionAction;
+  const modal=$("highAmountInjunctionModal");if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true")}
+  pendingHighAmountInjunctionAction=null;
+  if(fn)fn();
+}
+function openOppositionModal(){
+  if(!currentDossier)return;
+  const date=$("oppositionDate");if(date)date.value=currentDossier.oppositionDate||isoToday();
+  const check=$("oppositionConfirmed");if(check)check.checked=false;
+  const amount=$("oppositionClaimValue");if(amount)amount.textContent=formatCurrency(injunctionClaimAmount(currentDossier));
+  const modal=$("oppositionModal");if(modal){modal.classList.add("open");modal.setAttribute("aria-hidden","false")}
+}
+function closeOppositionModal(){const modal=$("oppositionModal");if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true")}}
+async function saveOpposition(){
+  if(!currentUser||!currentDossier)return;
+  const date=clean($("oppositionDate")?.value),confirmed=!!$("oppositionConfirmed")?.checked;
+  if(!date){alert("Indiquez la date de notification de l’opposition.");return}
+  if(!confirmed){alert("Confirmez que vous avez reçu une notification d’opposition du tribunal.");return}
+  const amount=injunctionClaimAmount(currentDossier),requiresLawyer=amount>10000;
+  const btn=$("saveOppositionBtn");
+  try{
+    if(btn){btn.disabled=true;btn.textContent="Enregistrement..."}
+    const requestRef=doc(db,"users",currentUser.uid,"requests",currentDossier.id);
+    await updateDoc(requestRef,{oppositionReceived:true,oppositionDate:date,oppositionRequiresLawyer:requiresLawyer,updatedAt:serverTimestamp()});
+    await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
+      title:"Opposition du débiteur enregistrée",
+      description:`Notification d’opposition reçue du tribunal.${requiresLawyer?" Montant de la demande supérieur à 10 000 € : représentation par avocat requise dans le cas général.":""}`,
+      action:"injunction_opposition",type:"judicial",effectiveDate:date,claimAmount:Number(amount.toFixed(2)),requiresLawyer,createdAt:serverTimestamp()
+    });
+    currentDossier.oppositionReceived=true;currentDossier.oppositionDate=date;currentDossier.oppositionRequiresLawyer=requiresLawyer;
+    closeOppositionModal();
+    await loadDossiers(currentUser.uid);
+    if(requiresLawyer){
+      const amountEl=$("lawyerClaimValue");if(amountEl)amountEl.textContent=formatCurrency(amount);
+      const dateEl=$("lawyerOppositionDate");if(dateEl)dateEl.textContent=fmtDateFR(date);
+      const modal=$("lawyerRequiredModal");if(modal){modal.classList.add("open");modal.setAttribute("aria-hidden","false")}
+    }else{
+      showSuccessToast("Opposition enregistrée dans la chronologie");
+    }
+  }catch(err){console.error(err);alert("Impossible d’enregistrer l’opposition. Vérifiez les règles Firestore.")}
+  finally{if(btn){btn.disabled=false;btn.textContent="Enregistrer l’opposition"}}
+}
+function closeLawyerRequiredModal(){const modal=$("lawyerRequiredModal");if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true")}}
+
 function openDossierDetailModal(d){
   if(!d||!E.dossierDetailModal)return;
   currentDossier=d;
@@ -3446,7 +3531,7 @@ function openDossierDetailModal(d){
     d?.nextAction==="CLOTURE_INJONCTION"||judicialRegistered
   );
   if(judicialRegistered&&principalBalance(d)>0){
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance obtenue</strong><small>Faites signifier l’ordonnance au débiteur par un commissaire de justice.</small>${judicialDeadlineHtml(d,"certificate")}</div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la DATE de signification au débiteur</button><button class="btn" type="button" data-judicial-inline="non_opposition">Demander le certificat</button></div></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>En l’absence d’opposition, l’exécution forcée est possible après le délai légal.</small>${judicialDeadlineHtml(d,"enforcement")}</div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing"><strong>Procédure d’injonction préparée</strong><small>Le dossier judiciaire est enregistré. Vous pouvez enregistrer un règlement ou poursuivre les étapes postérieures à l’ordonnance.</small><div class="detail-payment-closing-actions"><button class="btn btn-secondary btn-payment" type="button" id="detailRecordPaymentBtn"><span class="action-tag">▣</span>Enregistrer un règlement</button><button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button></div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance obtenue</strong><small>Faites signifier l’ordonnance au débiteur par un commissaire de justice.</small>${judicialDeadlineHtml(d,"certificate")}</div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la DATE de signification au débiteur</button><button class="btn" type="button" data-judicial-inline="opposition">${d?.oppositionReceived?"Opposition enregistrée":"Enregistrer une opposition"}</button><button class="btn" type="button" data-judicial-inline="non_opposition">Demander le certificat</button></div>${d?.oppositionReceived?`<div class="opposition-recorded">Opposition enregistrée${d.oppositionDate?` le ${fmtDateFR(d.oppositionDate)}`:""}.${d.oppositionRequiresLawyer?" Créance supérieure à 10 000 € : avocat requis dans le cas général.":""}</div>`:""}</article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>En l’absence d’opposition, l’exécution forcée est possible après le délai légal.</small>${judicialDeadlineHtml(d,"enforcement")}</div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   if(judicialPaid){
     const fullyClosed=d?.status==="paid_closed"||d?.lifecycleStatus==="closed";
@@ -3454,7 +3539,7 @@ function openDossierDetailModal(d){
       ?`<strong>✓ Dossier clôturé</strong><small>La créance est soldée. Les actions judiciaires postérieures à l’ordonnance restent accessibles.</small>`
       :`<strong>✓ Paiement intégral reçu pendant la procédure</strong><small>Créance soldée. Finalisez la procédure judiciaire avant de clôturer le dossier.</small>`;
     const closeButton=fullyClosed?"":`<button class="btn btn-final-close" type="button" data-detail-action="closure">✓ Clôturer le dossier</button>`;
-    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance obtenue</strong><small>Faites signifier l’ordonnance au débiteur par un commissaire de justice.</small>${judicialDeadlineHtml(d,"certificate")}</div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la DATE de signification au débiteur</button><button class="btn" type="button" data-judicial-inline="non_opposition">Demander le certificat</button></div></article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>En l’absence d’opposition, l’exécution forcée est possible après le délai légal.</small>${judicialDeadlineHtml(d,"enforcement")}</div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
+    actionHtml=`<button class="btn judicial-folder-btn" type="button" data-detail-action="injunction"><span class="judicial-folder-title"><span class="action-tag">⚖</span>Dossier judiciaire</span><span class="judicial-folder-delay"><strong>Délai indicatif constaté :</strong><br>comptez souvent 2 à 6 semaines, mais ce délai peut être plus long selon la juridiction et sa charge de travail.</span></button><div class="detail-payment-closing">${closingText}<div class="detail-payment-closing-actions"><button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">⇩ Prévenir le débiteur</button><button class="btn btn-secondary" type="button" data-detail-action="court_closure">⇩ Prévenir la juridiction</button>${closeButton}</div></div><article class="judicial-follow-card"><div><strong>Après l’ordonnance obtenue</strong><small>Faites signifier l’ordonnance au débiteur par un commissaire de justice.</small>${judicialDeadlineHtml(d,"certificate")}</div><div class="judicial-card-actions"><button class="btn" type="button" data-judicial-inline="signification">Enregistrer la DATE de signification au débiteur</button><button class="btn" type="button" data-judicial-inline="opposition">${d?.oppositionReceived?"Opposition enregistrée":"Enregistrer une opposition"}</button><button class="btn" type="button" data-judicial-inline="non_opposition">Demander le certificat</button></div>${d?.oppositionReceived?`<div class="opposition-recorded">Opposition enregistrée${d.oppositionDate?` le ${fmtDateFR(d.oppositionDate)}`:""}.${d.oppositionRequiresLawyer?" Créance supérieure à 10 000 € : avocat requis dans le cas général.":""}</div>`:""}</article><article class="judicial-follow-card"><div><strong>Après le certificat</strong><small>En l’absence d’opposition, l’exécution forcée est possible après le délai légal.</small>${judicialDeadlineHtml(d,"enforcement")}</div><button class="btn" type="button" data-judicial-inline="enforcement">Préparer l’exécution forcée</button></article>`;
   }
   E.detailActions.classList.toggle("judicial-premium-row",judicialPaid||judicialRegistered);
   E.detailActions.innerHTML=actionHtml;
@@ -3466,7 +3551,15 @@ function openDossierDetailModal(d){
     if(action==="debtor_notice"){alert("Cette action sera raccordée au parcours Injonction lors de l’adaptation de cette étape.");return;}
     E.dossierDetailModal.classList.remove("open");
     // Appels directs : ne dépend plus des anciennes cartes/boutons cachés du tableau de bord.
-    if(action==="injunction"){returnToDetailAfterInjunction=true;openInjunctionModal();return;}
+    if(action==="injunction"){
+      returnToDetailAfterInjunction=true;
+      if(injunctionClaimAmount(currentDossier)>10000){
+        openHighAmountInjunctionWarning(()=>openInjunctionModal());
+      }else{
+        openInjunctionModal();
+      }
+      return;
+    }
     if(action==="debtor_closure"||action==="court_closure"){printJudicialClosureDirect(action);return;}
     if(action==="closure"){openClosureModal();return;}
     openTextModal(action);
@@ -3476,7 +3569,7 @@ function openDossierDetailModal(d){
     const kind=btn.dataset.judicialInline;
     runWithPaidJudicialWarning(()=>{
       E.dossierDetailModal.classList.remove("open");
-      if(kind==="signification")openSignificationModal(); else if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
+      if(kind==="signification")openSignificationModal(); else if(kind==="opposition")openOppositionModal(); else if(kind==="non_opposition")openPrepModal("nonOppositionPrepModal","nonOppositionDate"); else openPrepModal("enforcementPrepModal","enforcementDate");
     },currentDossier);
   }));
   E.detailInvoices.innerHTML=normalizeInvoices(d).map(inv=>`<div class="detail-invoice"><div><strong>${esc(inv.ref)}</strong><small>Émission ${esc(fmtDateFR(inv.issuedDate))} • Échéance ${esc(fmtDateFR(inv.dueDate))} • Taux ${Number(inv.lateRatePercent??8.25).toLocaleString("fr-FR")}%</small></div><strong>${formatCurrency(inv.amount)}</strong></div>`).join("")||'<div class="empty-state">Aucune facture.</div>';
@@ -4272,6 +4365,33 @@ if($("dossierDetailModal")){
 }
 
 </script>
+
+<div class="modal-backdrop" id="highAmountInjunctionModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="highAmountInjunctionTitle"><div class="modal-inner">
+    <div class="legal-alert-head"><div class="legal-alert-icon">⚖</div><div><h2 id="highAmountInjunctionTitle">Créance supérieure à 10 000 €</h2><div class="panel-sub">Montant actuel de la demande : <strong id="highAmountClaimValue">—</strong></div></div></div>
+    <div class="legal-alert-text">Vous pouvez déposer vous-même votre requête en injonction de payer. <strong>En revanche, si le débiteur forme opposition, la représentation par avocat sera en principe obligatoire.</strong></div>
+    <div class="legal-alert-note">Cette information ne bloque pas la préparation de l’injonction dans Axe Flow.</div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="highAmountCancelBtn" type="button">Annuler</button><button class="btn btn-primary" id="highAmountContinueBtn" type="button">Continuer vers l’injonction</button></div>
+  </div></div>
+</div>
+<div class="modal-backdrop" id="oppositionModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="oppositionTitle"><div class="modal-inner">
+    <div class="modal-head"><div><h2 id="oppositionTitle">Opposition du débiteur</h2><div class="panel-sub">Montant actuel de la demande : <strong id="oppositionClaimValue">—</strong></div></div><button class="close-btn" id="closeOppositionModal" type="button">×</button></div>
+    <div class="field"><label for="oppositionDate">Date de notification de l’opposition</label><input id="oppositionDate" type="date" /></div>
+    <label class="opposition-confirm"><input id="oppositionConfirmed" type="checkbox" /><span>Je confirme avoir reçu une notification d’opposition du tribunal.</span></label>
+    <div class="legal-alert-note">L’opposition sera enregistrée dans la chronologie du dossier.</div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="cancelOppositionBtn" type="button">Annuler</button><button class="btn btn-primary" id="saveOppositionBtn" type="button">Enregistrer l’opposition</button></div>
+  </div></div>
+</div>
+<div class="modal-backdrop" id="lawyerRequiredModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lawyerRequiredTitle"><div class="modal-inner">
+    <div class="legal-alert-head"><div class="legal-alert-icon">!</div><div><h2 id="lawyerRequiredTitle">Avocat requis</h2><div class="panel-sub">Opposition enregistrée le <strong id="lawyerOppositionDate">—</strong></div></div></div>
+    <div class="legal-alert-text">Le débiteur a formé opposition et le montant de la demande est de <strong id="lawyerClaimValue">—</strong>, soit plus de 10 000 €. <strong>La représentation par avocat est obligatoire dans le cas général pour la suite de la procédure.</strong></div>
+    <div class="legal-alert-note">Axe Flow conserve l’opposition dans la chronologie du dossier. Contactez rapidement un avocat afin de poursuivre la procédure.</div>
+    <div class="modal-actions"><button class="btn btn-primary" id="closeLawyerRequiredBtn" type="button">J’ai compris</button></div>
+  </div></div>
+</div>
+
 <div id="successToast" class="success-toast" role="status" aria-live="polite">
   <span class="success-toast-icon">✓</span>
   <span id="successToastText">Action enregistrée</span>
