@@ -3450,6 +3450,8 @@ function openOppositionModal(){
   if(!currentDossier)return;
   const date=$("oppositionDate");if(date)date.value=currentDossier.oppositionDate||isoToday();
   const check=$("oppositionConfirmed");if(check)check.checked=false;
+  const fileInput=$("oppositionFileInput");if(fileInput)fileInput.value="";
+  const fileName=$("oppositionFileName");if(fileName)fileName.textContent="Aucun fichier sélectionné";
   const amount=$("oppositionClaimValue");if(amount)amount.textContent=formatCurrency(injunctionClaimAmount(currentDossier));
   const modal=$("oppositionModal");if(modal){modal.classList.add("open");modal.setAttribute("aria-hidden","false")}
 }
@@ -3464,11 +3466,23 @@ async function saveOpposition(){
   try{
     if(btn){btn.disabled=true;btn.textContent="Enregistrement..."}
     const requestRef=doc(db,"users",currentUser.uid,"requests",currentDossier.id);
-    await updateDoc(requestRef,{oppositionReceived:true,oppositionDate:date,oppositionRequiresLawyer:requiresLawyer,updatedAt:serverTimestamp()});
+    const oppositionFile=$("oppositionFileInput")?.files?.[0]||null;
+    let oppositionFileData=null;
+    if(oppositionFile){
+      if(oppositionFile.type!=="application/pdf"&&!/\.pdf$/i.test(oppositionFile.name||"")){throw new Error("OPPOSITION_FILE_NOT_PDF")}
+      const safeName=String(oppositionFile.name||"notification-opposition.pdf").replace(/[^A-Za-z0-9_.-]+/g,"-");
+      const path=`users/${currentUser.uid}/requests/${currentDossier.id}/injunction/opposition_${Date.now()}_${safeName}`;
+      const r=storageRef(storage,path);
+      await uploadBytes(r,oppositionFile,{contentType:"application/pdf"});
+      const url=await getDownloadURL(r);
+      const fileDoc=await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"),{name:oppositionFile.name,filename:oppositionFile.name,url,path,type:"injunction_piece",subtype:"opposition_notification",label:"Notification d’opposition du tribunal",effectiveDate:date,mimeType:"application/pdf",size:oppositionFile.size||0,uploadedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+      oppositionFileData={id:fileDoc.id,name:oppositionFile.name,url,path};
+    }
+    await updateDoc(requestRef,{oppositionReceived:true,oppositionDate:date,oppositionRequiresLawyer:requiresLawyer,oppositionNotificationFile:oppositionFileData,updatedAt:serverTimestamp()});
     await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
       title:"Opposition du débiteur enregistrée",
-      description:`Notification d’opposition reçue du tribunal.${requiresLawyer?" Montant de la demande supérieur à 10 000 € : représentation par avocat requise dans le cas général.":""}`,
-      action:"injunction_opposition",type:"judicial",effectiveDate:date,claimAmount:Number(amount.toFixed(2)),requiresLawyer,createdAt:serverTimestamp()
+      description:`Notification d’opposition reçue du tribunal.${oppositionFileData?` Pièce jointe : ${oppositionFileData.name}.`:""}${requiresLawyer?" Montant de la demande supérieur à 10 000 € : représentation par avocat requise dans le cas général.":""}`,
+      action:"injunction_opposition",type:"judicial",effectiveDate:date,claimAmount:Number(amount.toFixed(2)),requiresLawyer,oppositionFileId:oppositionFileData?.id||null,createdAt:serverTimestamp()
     });
     currentDossier.oppositionReceived=true;currentDossier.oppositionDate=date;currentDossier.oppositionRequiresLawyer=requiresLawyer;
     closeOppositionModal();
@@ -3480,7 +3494,7 @@ async function saveOpposition(){
     }else{
       showSuccessToast("Opposition enregistrée dans la chronologie");
     }
-  }catch(err){console.error(err);alert("Impossible d’enregistrer l’opposition. Vérifiez les règles Firestore.")}
+  }catch(err){console.error(err);alert(err?.message==="OPPOSITION_FILE_NOT_PDF"?"Ajoutez uniquement un fichier PDF pour la notification d’opposition.":"Impossible d’enregistrer l’opposition ou sa pièce jointe. Vérifiez les règles Firebase.")}
   finally{if(btn){btn.disabled=false;btn.textContent="Enregistrer l’opposition"}}
 }
 function closeLawyerRequiredModal(){const modal=$("lawyerRequiredModal");if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true")}}
@@ -4367,6 +4381,8 @@ if($("dossierDetailModal")){
 $("highAmountCancelBtn")?.addEventListener("click",()=>{closeHighAmountInjunctionWarning();if(returnToDetailAfterInjunction&&currentDossier){returnToDetailAfterInjunction=false;openDossierDetailModal(currentDossier)}});
 $("highAmountContinueBtn")?.addEventListener("click",continueHighAmountInjunction);
 $("highAmountInjunctionModal")?.addEventListener("click",e=>{if(e.target===$("highAmountInjunctionModal"))closeHighAmountInjunctionWarning()});
+$("chooseOppositionFileBtn")?.addEventListener("click",()=>$("oppositionFileInput")?.click());
+$("oppositionFileInput")?.addEventListener("change",e=>{const f=e.target.files?.[0];const n=$("oppositionFileName");if(!f){if(n)n.textContent="Aucun fichier sélectionné";return}if(f.type!=="application/pdf"&&!/\.pdf$/i.test(f.name||"")){alert("Choisissez un fichier PDF.");e.target.value="";if(n)n.textContent="Aucun fichier sélectionné";return}if(n)n.textContent=f.name;});
 $("closeOppositionModal")?.addEventListener("click",closeOppositionModal);
 $("cancelOppositionBtn")?.addEventListener("click",closeOppositionModal);
 $("saveOppositionBtn")?.addEventListener("click",saveOpposition);
@@ -4388,7 +4404,8 @@ $("lawyerRequiredModal")?.addEventListener("click",e=>{if(e.target===$("lawyerRe
     <div class="modal-head"><div><h2 id="oppositionTitle">Opposition du débiteur</h2><div class="panel-sub">Montant actuel de la demande : <strong id="oppositionClaimValue">—</strong></div></div><button class="close-btn" id="closeOppositionModal" type="button">×</button></div>
     <div class="field"><label for="oppositionDate">Date de notification de l’opposition</label><input id="oppositionDate" type="date" /></div>
     <label class="opposition-confirm"><input id="oppositionConfirmed" type="checkbox" /><span>Je confirme avoir reçu une notification d’opposition du tribunal.</span></label>
-    <div class="legal-alert-note">L’opposition sera enregistrée dans la chronologie du dossier.</div>
+    <div class="field" style="margin-top:12px"><label>Notification d’opposition du tribunal <span style="font-weight:400;color:var(--muted)">(PDF — facultatif)</span></label><input id="oppositionFileInput" type="file" accept="application/pdf,.pdf" style="display:none" /><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn btn-secondary" id="chooseOppositionFileBtn" type="button">📎 Ajouter le PDF reçu du tribunal</button><span id="oppositionFileName" class="panel-sub">Aucun fichier sélectionné</span></div></div>
+    <div class="legal-alert-note">L’opposition sera enregistrée dans la chronologie du dossier. Le PDF ajouté sera également conservé dans les pièces du dossier d’injonction.</div>
     <div class="modal-actions"><button class="btn btn-secondary" id="cancelOppositionBtn" type="button">Annuler</button><button class="btn btn-primary" id="saveOppositionBtn" type="button">Enregistrer l’opposition</button></div>
   </div></div>
 </div>
