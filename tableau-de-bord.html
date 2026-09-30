@@ -3241,6 +3241,25 @@ async function loadDetailTimeline(d){
   try{
     const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"events")),events=[];
     snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))events.push(ev)});
+
+    // Affichage uniquement : retrouver les PDF d’opposition déjà présents dans les pièces
+    // afin d’ajouter « Voir » dans la chronologie du détail, sans aucune écriture Firebase.
+    const detailOppositionFiles=[];
+    try{
+      const filesSnap=await getDocs(collection(db,"users",currentUser.uid,"requests",d.id,"files"));
+      filesSnap.forEach(s=>{
+        const f={id:s.id,...s.data()};
+        if(f.type==="injunction_piece"&&String(f.name||f.filename||"").startsWith("OPPOSITION — Notification du tribunal —")) detailOppositionFiles.push(f);
+      });
+    }catch(err){console.warn("Pièces d’opposition non chargées dans le détail :",err)}
+    const oppositionFileForDate=eventDate=>{
+      const dateLabel=eventDate?fmtDateFR(eventDate):"";
+      return detailOppositionFiles.find(f=>{
+        const name=String(f.name||f.filename||"");
+        return !!f.url&&(!dateLabel||name.includes(`— ${dateLabel} —`));
+      })||null;
+    };
+
     const injunctionEvent=events.find(ev=>(ev.action||ev.type)==="injunction_prepared");
 
     const significationEvent=events.filter(ev=>(ev.action||ev.type)==="injunction_signification").sort((a,b)=>String(b.effectiveDate||b.date||"").localeCompare(String(a.effectiveDate||a.date||"")))[0];
@@ -3357,7 +3376,8 @@ async function loadDetailTimeline(d){
     E.detailTimeline.innerHTML=events.map(ev=>{
       const eventAction=ev.action||ev.type||"";
       const eventDate=ev.effectiveDate||ev.date||"";
-      const canView=["relance1","relance2","relance3","med","injunction_prepared","debtor_notice_sent","court_notice_sent","non_opposition_prepared","enforcement_prepared"].includes(eventAction);
+      const oppositionFile=eventAction==="injunction_opposition"?oppositionFileForDate(eventDate):null;
+      const canView=["relance1","relance2","relance3","med","injunction_prepared","debtor_notice_sent","court_notice_sent","non_opposition_prepared","enforcement_prepared"].includes(eventAction)||!!oppositionFile;
       const displayTitle=eventAction==="injunction_prepared"?"Dossier d’injonction enregistré — prêt à être déposé":(ev.title||ev.label||ev.action||"Action");
       const eventTag=eventAction==="payment_received"?"PAIEMENT":["judicial_partial_payment","judicial_full_payment"].includes(eventAction)?"Paiement judiciaire":"";
       const side=[eventTag?`<span class="detail-event-tag ${["judicial_partial_payment","judicial_full_payment"].includes(eventAction)?"judicial":""}">${esc(eventTag)}</span>`:"",canView?`<button class="detail-event-view" type="button" data-view-action="${esc(eventAction)}" data-view-date="${esc(eventDate)}">↗ Voir</button>`:""].filter(Boolean).join("");
@@ -3366,6 +3386,11 @@ async function loadDetailTimeline(d){
     E.detailTimeline.querySelectorAll("[data-view-action]").forEach(btn=>btn.addEventListener("click",()=>{
       const action=btn.dataset.viewAction;
       const eventDate=btn.dataset.viewDate||isoToday();
+      if(action==="injunction_opposition"){
+        const oppositionFile=oppositionFileForDate(eventDate);
+        if(oppositionFile?.url) window.open(oppositionFile.url,"_blank","noopener");
+        return;
+      }
       if(action==="injunction_prepared"){
         // « Voir » ouvre désormais un seul PDF historique : requête + Cerfa + décompte.
         openHistoricalInjunctionBundle(d,eventDate);
