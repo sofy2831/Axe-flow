@@ -3733,6 +3733,16 @@ async function renderTimeline(){
     return;
   }
   const snap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"));
+  // Pour les oppositions, récupérer les pièces déjà déposées afin de proposer « Voir »
+  // directement depuis la chronologie, sans modifier la structure Firestore existante.
+  const oppositionFiles=[];
+  try{
+    const filesSnap=await getDocs(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"files"));
+    filesSnap.forEach(s=>{
+      const f={id:s.id,...s.data()};
+      if(f.type==="injunction_piece"&&String(f.name||f.filename||"").startsWith("OPPOSITION — Notification du tribunal —")) oppositionFiles.push(f);
+    });
+  }catch(err){console.warn("Pièces d’opposition non chargées dans la chronologie :",err)}
   const all=[];
   snap.forEach(s=>{const ev={id:s.id,...s.data()};if(!["upload_injunction_files","delete_injunction_file"].includes(ev.action))all.push(ev)});
   all.sort((a,b)=>{
@@ -3761,7 +3771,17 @@ async function renderTimeline(){
       const date=ev.effectiveDate?fmtDateFR(ev.effectiveDate):(ev.createdAt?.toDate?.()?ev.createdAt.toDate().toLocaleDateString("fr-FR"):todayFR());
       const item=document.createElement("div");
       item.className="timeline-item";
-      item.innerHTML=`<div class="timeline-main"><span class="timeline-meta">${esc(date)}</span><strong>${esc(ev.title||"Action")}</strong><span>${esc(ev.description||"")}</span></div>`;
+      let oppositionView="";
+      if((ev.action||ev.type)==="injunction_opposition"){
+        const eventDate=clean(ev.effectiveDate||ev.date||"");
+        const dateLabel=eventDate?fmtDateFR(eventDate):"";
+        const match=oppositionFiles.find(f=>{
+          const name=String(f.name||f.filename||"");
+          return !!f.url && (!dateLabel || name.includes(`— ${dateLabel} —`));
+        });
+        if(match?.url) oppositionView=`<a class="timeline-view" href="${esc(match.url)}" target="_blank" rel="noopener">↗ Voir</a>`;
+      }
+      item.innerHTML=`<div class="timeline-main"><span class="timeline-meta">${esc(date)}</span><strong>${esc(ev.title||"Action")}</strong><span>${esc(ev.description||"")}</span></div>${oppositionView}`;
       E.timeline.appendChild(item);
     });
   }
