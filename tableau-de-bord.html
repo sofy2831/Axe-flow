@@ -1023,7 +1023,7 @@ function generateRef(){
   return `${prefix}${String(next).padStart(4,"0")}`;
 }
 function makeMailto(email,subject,body){return`mailto:${encodeURIComponent(email||"")}?subject=${encodeURIComponent(subject||"")}&body=${encodeURIComponent(body||"")}`}
-function creditorName(d=currentDossier){return clean(d?.creditorName)||clean(currentUserData?.businessProfile?.companyName)||clean(currentUserData?.displayName)||clean(currentUser?.email)||"Créancier"}
+function creditorName(d=currentDossier){return clean(currentUserData?.businessProfile?.companyName)||clean(d?.creditorName)||clean(currentUserData?.displayName)||clean(currentUser?.email)||"Créancier"}
 function creditorEmail(d=currentDossier){return clean(currentUserData?.businessProfile?.email)||clean(d?.creditorEmail)||clean(currentUser?.email)}
 function creditorAddress(d=currentDossier){return clean(currentUserData?.businessProfile?.address)||clean(d?.creditorAddress)}
 function creditorZip(d=currentDossier){const p=currentUserData?.businessProfile||{};return clean(p.zip)||clean(p.postalCode)||clean(d?.creditorZip)}
@@ -2352,9 +2352,9 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     put(page1,188,164,clean(p.companyName)||creditorName(currentDossier),8.425,352,true);
     put(page1,207,143,clean(p.representative||p.representant||""),9.23,333);
     put(page1,260,123,creditorAddress(currentDossier),9.23,280);
-    put(page1,171,103,creditorZip(currentDossier),9.23,75);
+    put(page1,154,103,creditorZip(currentDossier),9.23,88);
     put(page1,381,103,creditorCity(currentDossier),9.23,159);
-    put(page1,246,83,cem.left,9.01,301); put(page1,570,83,cem.right,9.01,0);
+    put(page1,220,83,cem.left,9.01,220); put(page1,452,83,cem.right,9.01,88);
     put(page1,248,63,creditorPhone(currentDossier),9.12,218);
   }else{
     const female=(cerfaGenerationOptions?.claimantGender||"female")==="female";
@@ -2396,7 +2396,7 @@ async function generateProfessionalCerfa12946Overlay(pdfDoc){
     put(page3,162.3,622,last2,10.20,55); // V4 : 2 derniers chiffres encore décalés à gauche d’environ 1,02 % de la largeur A4
   }
   put(page3,379,622,debtorCity(currentDossier),9.07,160);
-  put(page3,220,606,dem.left,10.00,245); put(page3,475,606,dem.right,10.00,165);
+  put(page3,205,606,dem.left,10.00,235); put(page3,450,606,dem.right,10.00,88);
   put(page3,198,586,clean(currentDossier.debtorPhone||currentDossier.phone||""),10.10,240);
 
   // PAGE 4 — JURIDICTION ET SOMMES DEMANDÉES
