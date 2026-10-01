@@ -1025,9 +1025,9 @@ function generateRef(){
 function makeMailto(email,subject,body){return`mailto:${encodeURIComponent(email||"")}?subject=${encodeURIComponent(subject||"")}&body=${encodeURIComponent(body||"")}`}
 function creditorName(d=currentDossier){return clean(d?.creditorName)||clean(currentUserData?.businessProfile?.companyName)||clean(currentUserData?.displayName)||clean(currentUser?.email)||"Créancier"}
 function creditorEmail(d=currentDossier){return clean(d?.creditorEmail)||clean(currentUserData?.businessProfile?.email)||clean(currentUser?.email)}
-function creditorAddress(d=currentDossier){return clean(d?.creditorAddress)||clean(currentUserData?.businessProfile?.address)}
-function creditorZip(d=currentDossier){return clean(d?.creditorZip)||clean(currentUserData?.businessProfile?.zip)}
-function creditorCity(d=currentDossier){return clean(d?.creditorCity)||clean(currentUserData?.businessProfile?.city)}
+function creditorAddress(d=currentDossier){return clean(currentUserData?.businessProfile?.address)||clean(d?.creditorAddress)}
+function creditorZip(d=currentDossier){const p=currentUserData?.businessProfile||{};return clean(p.zip)||clean(p.postalCode)||clean(d?.creditorZip)}
+function creditorCity(d=currentDossier){return clean(currentUserData?.businessProfile?.city)||clean(d?.creditorCity)}
 function creditorSignatureCity(d=currentDossier){const p=currentUserData?.businessProfile||{};return clean(p.signatureCity)||clean(p.signCity)||clean(p.city)||clean(d?.creditorCity)}
 function creditorPhone(d=currentDossier){return clean(d?.creditorPhone)||clean(currentUserData?.businessProfile?.phone)}
 function splitPersonName(value){
