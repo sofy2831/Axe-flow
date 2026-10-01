@@ -166,4 +166,8 @@
 
   show(0);
 })();
-</script></body></html>
+</script>
+<script>
+(()=>{const U="https://europe-west9-axe-flow.cloudfunctions.net/trackMarketingEvent",q=new URLSearchParams(location.search),baseSource=(q.get("src")||"direct").slice(0,53),source=(baseSource+"-metier").slice(0,60),campaign=(q.get("camp")||"sans-campagne").slice(0,80);let sid=sessionStorage.getItem("axeFlowProspectSession");if(!sid){sid=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);sessionStorage.setItem("axeFlowProspectSession",sid)}function t(type){fetch(U,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type,source,campaign,sessionId:sid}),credentials:"omit",keepalive:true}).catch(()=>{})}t("DEMO_VIEW");document.querySelectorAll('a[href*="index.html#tarifs"]').forEach(a=>{const u=new URL(a.href,location.href);u.searchParams.set("src",source);u.searchParams.set("camp",campaign);a.href=u.toString();a.addEventListener("click",()=>t("TARIFF_CLICK"))});document.querySelectorAll('a[href*="connexion.html"]').forEach(a=>{const u=new URL(a.href,location.href);u.searchParams.set("src",source);u.searchParams.set("camp",campaign);a.href=u.toString();a.addEventListener("click",()=>t("SIGNUP_CLICK"))})})();
+</script>
+</body></html>
