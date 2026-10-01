@@ -4198,6 +4198,11 @@ function simpleJudicialLetterHtml(title,body,d=currentDossier,options={}){
   const company=clean(profile.companyName)||clean(profile.raisonSociale)||creditorName(d)||"";
   const siret=clean(profile.siret)||"";
   const representative=clean(profile.representative)||creditorName(d)||"";
+  // Pour les courriers judiciaires, l'identité du créancier vient en priorité de « Mon entreprise ».
+  // Cela évite de réutiliser une ancienne adresse éventuellement figée dans le dossier.
+  const senderAddress=clean(profile.address)||creditorAddress(d)||"";
+  const senderZip=clean(profile.zip)||clean(profile.postalCode)||creditorZip(d)||"";
+  const senderCity=clean(profile.city)||creditorCity(d)||"";
   const recipientName=clean(options.recipientName)||c.name||"Juridiction compétente";
   const recipientAddress=clean(options.recipientAddress)||[c.address,[c.zip,c.city].filter(Boolean).join(" ")].filter(Boolean).join("\n");
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)} — ${escapeHtml(d?.ref||"")}</title><style>
@@ -4205,7 +4210,7 @@ function simpleJudicialLetterHtml(title,body,d=currentDossier,options={}){
   .top{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-bottom:13mm}.right{text-align:left;padding-top:12mm;white-space:pre-line}.date{margin:8mm 0 5mm;color:#667085}.subject{border-left:1.4mm solid #ff7f1f;background:#fff5ed;padding:3mm 4mm;font-weight:800;color:#0f1a33;margin-bottom:8mm}
   h1{font-size:16pt;color:#0f1a33;margin:0 0 2mm}.bar{width:25mm;height:1.2mm;background:#ff7f1f;margin-bottom:8mm}p{line-height:1.55;margin:0 0 4mm}.signature{margin-top:12mm}.signature img{display:block;max-width:52mm;max-height:24mm;object-fit:contain;margin-top:2mm}
   footer{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:1px solid #d5dae3;padding-top:2.5mm;display:flex;justify-content:space-between;font-size:8pt;color:#667085}
-  </style></head><body><section class="page"><div class="top"><div><strong>${escapeHtml(company)}</strong>${siret?`<br>SIRET : ${escapeHtml(siret)}`:""}<br>${escapeHtml(creditorAddress(d))}<br>${escapeHtml(creditorZip(d)+" "+creditorCity(d))}</div><div class="right"><strong>${escapeHtml(recipientName)}</strong><br>${escapeHtml(recipientAddress)}</div></div><div class="date">Fait à ${escapeHtml(creditorSignatureCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><div class="subject">Objet : ${escapeHtml(title)}</div><h1>${escapeHtml(title)}</h1><div class="bar"></div><div>${body}</div><div class="signature"><strong>${escapeHtml(company)}</strong>${representative&&representative!==company?`<br>${escapeHtml(representative)}`:""}${signatureImgHtml()}</div><footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>${escapeHtml(company)}</strong></footer></section></body></html>`;
+  </style></head><body><section class="page"><div class="top"><div><strong>${escapeHtml(company)}</strong>${siret?`<br>SIRET : ${escapeHtml(siret)}`:""}<br>${escapeHtml(senderAddress)}<br>${escapeHtml([senderZip,senderCity].filter(Boolean).join(" "))}</div><div class="right"><strong>${escapeHtml(recipientName)}</strong><br>${escapeHtml(recipientAddress)}</div></div><div class="date">Fait à ${escapeHtml(creditorSignatureCity(d)||"")}, le ${escapeHtml(fmtDateFR(date))}</div><div class="subject">Objet : ${escapeHtml(title)}</div><h1>${escapeHtml(title)}</h1><div class="bar"></div><div>${body}</div><div class="signature"><strong>${escapeHtml(company)}</strong>${representative&&representative!==company?`<br>${escapeHtml(representative)}`:""}${signatureImgHtml()}</div><footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>${escapeHtml(company)}</strong></footer></section></body></html>`;
 }
 function printHtmlDocument(html){
   const iframe=document.createElement("iframe");
