@@ -928,12 +928,28 @@
  <div class="prep-actions"><button class="btn btn-secondary" id="previewEnforcementBtn" type="button">◉ Prévisualiser le courrier</button><button class="btn btn-secondary" id="cancelEnforcementPrep" type="button">Annuler</button><button class="btn btn-primary" id="validateEnforcementBtn" type="button">Valider et enregistrer</button></div>
 </div></div></div>
 
+
+<!-- Modification ciblée des coordonnées du débiteur : ne touche pas aux factures ni à la chronologie -->
+<div class="modal-backdrop" id="debtorEditModal" style="z-index:160"><div class="modal" style="width:min(650px,calc(100vw - 24px));background:#101a31"><div class="modal-inner">
+<div class="modal-head"><div><h2>Modifier le débiteur</h2><p class="panel-sub">Les factures et les actions déjà enregistrées restent inchangées.</p></div><button class="close-btn" id="closeDebtorEditBtn" type="button">×</button></div>
+<form id="debtorEditForm"><div class="form-grid">
+<div class="field full"><label for="debtorEditName">Nom / raison sociale</label><input id="debtorEditName" required></div>
+<div class="field"><label for="debtorEditEmail">E-mail</label><input id="debtorEditEmail" type="email"></div>
+<div class="field"><label for="debtorEditPhone">Téléphone</label><input id="debtorEditPhone" type="tel"></div>
+<div class="field"><label for="debtorEditSiret">SIRET (si professionnel)</label><input id="debtorEditSiret" inputmode="numeric"></div>
+<div class="field full"><label for="debtorEditAddress">Adresse</label><input id="debtorEditAddress"></div>
+<div class="field"><label for="debtorEditZip">Code postal</label><input id="debtorEditZip"></div>
+<div class="field"><label for="debtorEditCity">Ville</label><input id="debtorEditCity"></div>
+</div><div class="modal-actions"><button class="btn btn-secondary" id="cancelDebtorEditBtn" type="button">Annuler</button><button class="btn btn-primary" id="saveDebtorEditBtn" type="submit">Enregistrer les modifications</button></div></form>
+</div></div></div>
+
 <div class="modal-backdrop" id="dossierDetailModal"><div class="modal"><div class="modal-inner">
   <div class="detail-head">
     <div>
       <div class="detail-tags" id="detailTags"></div>
       <h2 class="detail-name" id="detailDebtorName">—</h2>
       <div class="detail-contact" id="detailDebtorContact">—</div>
+      <button class="btn btn-secondary" id="detailEditDebtorBtn" type="button" style="margin-top:10px;min-height:35px;border-radius:9px;font-size:.78rem">✎ Modifier le débiteur</button>
     </div>
     <button class="close-btn" id="closeDossierDetailModal" type="button">×</button>
   </div>
@@ -3881,6 +3897,40 @@ E.debtorTypeProfessionalBtn?.addEventListener("click",()=>setCreateDebtorType("p
 E.debtorTypePrivateBtn?.addEventListener("click",()=>setCreateDebtorType("private"));
 E.closeCreateDossier.addEventListener("click",()=>E.createDossierModal.classList.remove("open"));
 E.createDossierModal.addEventListener("click",e=>{if(e.target===E.createDossierModal)E.createDossierModal.classList.remove("open")});
+
+// Édition dédiée du débiteur, sans modifier le dossier financier.
+function openDebtorEditFromDetail(){
+  const d=currentDossier;if(!d)return;
+  const values={debtorEditName:debtorName(d)==="Madame, Monsieur"?"":debtorName(d),debtorEditEmail:debtorEmail(d),debtorEditPhone:clean(d.debtorPhone||d.phone),debtorEditSiret:clean(d.debtorSiret||d.siret),debtorEditAddress:debtorAddress(d),debtorEditZip:debtorZip(d),debtorEditCity:debtorCity(d)};
+  Object.entries(values).forEach(([id,value])=>{$(id).value=value||""});
+  $("debtorEditModal").classList.add("open");
+}
+function closeDebtorEdit(){ $("debtorEditModal").classList.remove("open"); }
+$("detailEditDebtorBtn").addEventListener("click",openDebtorEditFromDetail);
+$("closeDebtorEditBtn").addEventListener("click",closeDebtorEdit);
+$("cancelDebtorEditBtn").addEventListener("click",closeDebtorEdit);
+$("debtorEditModal").addEventListener("click",e=>{if(e.target===$("debtorEditModal"))closeDebtorEdit()});
+$("debtorEditForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!currentUser||!currentDossier)return;
+  const name=clean($("debtorEditName").value);
+  if(!name){alert("Le nom du débiteur est obligatoire.");return;}
+  const email=clean($("debtorEditEmail").value),address=clean($("debtorEditAddress").value),zip=clean($("debtorEditZip").value),city=clean($("debtorEditCity").value);
+  const patch={debtorName:name,debiteurName:name,debtorEmail:email,debiteurEmail:email,debtorPhone:clean($("debtorEditPhone").value),debtorSiret:clean($("debtorEditSiret").value),debtorAddress:address,debiteurAddress:address,debtorZip:zip,debiteurZip:zip,debtorCity:city,debiteurCity:city,updatedAt:serverTimestamp()};
+  const id=currentDossier.id,button=$("saveDebtorEditBtn");
+  try{
+    button.disabled=true;button.textContent="Enregistrement...";
+    await updateDoc(doc(db,"users",currentUser.uid,"requests",id),patch);
+    currentDossier={...currentDossier,...patch};
+    closeDebtorEdit();
+    await loadDossiers(currentUser.uid);
+    const refreshed=dossiers.find(x=>x.id===id)||currentDossier;
+    openDossierDetailModal(refreshed);
+    showSuccessToast("Coordonnées du débiteur enregistrées");
+  }catch(err){console.error("Modification débiteur",err);alert("Enregistrement impossible. Vérifiez les autorisations Firebase pour les coordonnées du débiteur.");}
+  finally{button.disabled=false;button.textContent="Enregistrer les modifications";}
+});
+
 E.closeEditDossier.addEventListener("click",closeEditDossierModal);
 E.editDossierModal.addEventListener("click",e=>{if(e.target===E.editDossierModal)closeEditDossierModal()});
 fillInvoiceRows(E.invoiceRows,[{}]);
