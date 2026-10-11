@@ -3099,8 +3099,7 @@ async function markStep(action){
     // Ainsi, si Firestore refuse l'événement, le dossier ne passe plus en « clôturé » à moitié.
     const requestRef=doc(db,"users",currentUser.uid,"requests",currentDossier.id);
     const closureEventRef=doc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"));
-    if(!isSuperAdmin()){
-await runTransaction(db,async tx=>{
+    await runTransaction(db,async tx=>{
       tx.update(requestRef,patch);
       tx.set(closureEventRef,{
         title:"Dossier clôturé",
@@ -3112,7 +3111,6 @@ await runTransaction(db,async tx=>{
         createdAt:serverTimestamp()
       });
     });
-  }
     await releaseActiveEntitlementSlot(currentDossier);
     await loadDossiers(currentUser.uid);
     return;
