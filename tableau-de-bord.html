@@ -649,10 +649,10 @@
     <div class="field"><label>Représentant</label><input type="text" id="companyRepresentativeInput" /></div>
   </div>
   <div class="note-box soft" style="font-size:.78rem;margin:8px 0">Taux légal professionnel : 2,75 % au second semestre 2026, soit 8,25 % pour une clause « 3 fois le taux légal ». Les taux évoluent par semestre ; les taux non référencés doivent être vérifiés avant calcul. Le point de départ est le lendemain de l’échéance, non la date de facture.</div>
-  <div class="modal-actions"><button class="btn btn-primary" id="saveCompanyProfileBtn" type="submit">Enregistrer le profil</button></div>
+  <div class="modal-actions"><button class="btn btn-primary" id="saveCompanyProfileBtn" type="submit">Enregistrer le profil</button><span id="companyProfileSavedCheck" style="color:#3dd08f;font-weight:750" hidden>✓ Enregistré</span></div>
 </form>
-<div class="note-box soft" style="margin-top:18px"><strong style="color:#fff">Signature du créancier / représentant</strong><br><span>Importez une signature (PNG/JPG). Elle reste stockée localement dans ce navigateur pour les documents générés.</span><div style="margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div id="companySignaturePreviewWrap" style="display:none;width:92px;height:72px;border-radius:10px;background:#fff;border:1px solid rgba(255,255,255,.14);padding:6px;align-items:center;justify-content:center"><img id="companySignaturePreview" alt="Signature" style="max-width:100%;max-height:100%;object-fit:contain"></div><button class="btn btn-secondary" id="companySignatureUploadBtn" type="button">⇧ Importer une signature</button><button class="btn btn-danger" id="companySignatureClearBtn" type="button" style="display:none">Supprimer la signature</button><input id="companySignatureFileInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none"></div><div id="companySignatureStatus" class="upload-status">Aucune signature importée.</div></div>
-<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)"><h3 style="margin:0 0 12px;color:var(--accent);font-size:1rem">Délais suggérés (jours)</h3><div class="form-grid" style="grid-template-columns:repeat(4,1fr)"><div class="field"><label>R1 après échéance</label><input type="number" min="0" id="delayR1Input" value="3" /></div><div class="field"><label>Entre R1 → R2</label><input type="number" min="0" id="delayR2Input" value="8" /></div><div class="field"><label>Entre R2 → R3</label><input type="number" min="0" id="delayR3Input" value="8" /></div><div class="field"><label>Entre R3 → MED</label><input type="number" min="0" id="delayMedInput" value="8" /></div></div><div class="modal-actions"><button class="btn btn-primary" id="saveCompanyDelaysBtn" type="button">Enregistrer les délais</button></div></div>
+<div class="note-box soft" style="margin-top:18px"><strong style="color:#fff">Signature du créancier / représentant</strong><br><span>Importez une signature (PNG/JPG). Elle est conservée dans votre profil entreprise Firebase pour les prochaines connexions.</span><div style="margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div id="companySignaturePreviewWrap" style="display:none;width:92px;height:72px;border-radius:10px;background:#fff;border:1px solid rgba(255,255,255,.14);padding:6px;align-items:center;justify-content:center"><img id="companySignaturePreview" alt="Signature" style="max-width:100%;max-height:100%;object-fit:contain"></div><button class="btn btn-secondary" id="companySignatureUploadBtn" type="button">⇧ Importer une signature</button><button class="btn btn-danger" id="companySignatureClearBtn" type="button" style="display:none">Supprimer la signature</button><input id="companySignatureFileInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none"></div><div id="companySignatureStatus" class="upload-status">Aucune signature importée.</div></div>
+<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)"><h3 style="margin:0 0 12px;color:var(--accent);font-size:1rem">Délais suggérés (jours)</h3><div class="form-grid" style="grid-template-columns:repeat(4,1fr)"><div class="field"><label>R1 après échéance</label><input type="number" min="0" id="delayR1Input" value="3" /></div><div class="field"><label>Entre R1 → R2</label><input type="number" min="0" id="delayR2Input" value="8" /></div><div class="field"><label>Entre R2 → R3</label><input type="number" min="0" id="delayR3Input" value="8" /></div><div class="field"><label>Entre R3 → MED</label><input type="number" min="0" id="delayMedInput" value="8" /></div></div><div class="modal-actions"><button class="btn btn-primary" id="saveCompanyDelaysBtn" type="button">Enregistrer les délais</button><span id="companyDelaysSavedCheck" style="color:#3dd08f;font-weight:750" hidden>✓ Enregistré</span></div></div>
 </div></div></div>
 <div class="modal-backdrop" id="pro30ContactModal"><div class="modal small"><div class="modal-inner">
   <div class="modal-head">
@@ -3228,15 +3228,15 @@ async function saveCompanyProfile(){
   const profile={...existing,
     companyName:clean(E.companyNameInput?.value),legalForm:clean(E.companyLegalFormInput?.value),siret:clean(E.companySiretInput?.value),ape:clean($("companyApeInput")?.value).toUpperCase(),
     address:clean(E.companyAddressInput?.value),address2:clean(E.companyAddress2Input?.value),zip:clean(E.companyZipInput?.value),city:clean(E.companyCityInput?.value),country:clean(E.companyCountryInput?.value)||"France",
-    email:clean(E.companyEmailInput?.value),phone:clean(E.companyPhoneInput?.value),signatureCity:clean(E.companySignatureCityInput?.value),representative:clean(E.companyRepresentativeInput?.value)
+    email:clean(E.companyEmailInput?.value),phone:clean(E.companyPhoneInput?.value),signatureCity:clean(E.companySignatureCityInput?.value),representative:clean(E.companyRepresentativeInput?.value),signatureDataUrl:signatureDataUrl||""
   };
   try{
     E.saveCompanyProfileBtn.disabled=true;E.saveCompanyProfileBtn.textContent="Enregistrement...";
     await updateDoc(doc(db,"users",currentUser.uid),{businessProfile:profile,updatedAt:serverTimestamp()});
     currentUserData={...currentUserData,businessProfile:profile};
-    E.saveCompanyProfileBtn.textContent="Enregistré ✔";
+    E.saveCompanyProfileBtn.textContent="Enregistrer le profil";$("companyProfileSavedCheck").hidden=false;
     if(currentDossier)renderSummary();
-    setTimeout(()=>{E.saveCompanyProfileBtn.disabled=false;E.saveCompanyProfileBtn.textContent="Enregistrer le profil"},1000);
+    E.saveCompanyProfileBtn.disabled=false;
   }catch(err){console.error(err);alert("Impossible d’enregistrer le profil entreprise.");E.saveCompanyProfileBtn.disabled=false;E.saveCompanyProfileBtn.textContent="Enregistrer le profil"}
 }
 async function saveCompanyDelays(){
@@ -3244,7 +3244,7 @@ async function saveCompanyDelays(){
   const p=companyProfile();
   const recoveryDelays={r1AfterDue:Math.max(0,Number(E.delayR1Input?.value||0)),r1ToR2:Math.max(0,Number(E.delayR2Input?.value||0)),r2ToR3:Math.max(0,Number(E.delayR3Input?.value||0)),r3ToMed:Math.max(0,Number(E.delayMedInput?.value||0))};
   const profile={...p,recoveryDelays};
-  try{E.saveCompanyDelaysBtn.disabled=true;E.saveCompanyDelaysBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid),{businessProfile:profile,updatedAt:serverTimestamp()});currentUserData={...currentUserData,businessProfile:profile};E.saveCompanyDelaysBtn.textContent="Enregistré ✔";setTimeout(()=>{E.saveCompanyDelaysBtn.disabled=false;E.saveCompanyDelaysBtn.textContent="Enregistrer les délais"},1000)}catch(err){console.error(err);alert("Impossible d’enregistrer les délais.");E.saveCompanyDelaysBtn.disabled=false;E.saveCompanyDelaysBtn.textContent="Enregistrer les délais"}
+  try{E.saveCompanyDelaysBtn.disabled=true;E.saveCompanyDelaysBtn.textContent="Enregistrement...";await updateDoc(doc(db,"users",currentUser.uid),{businessProfile:profile,updatedAt:serverTimestamp()});currentUserData={...currentUserData,businessProfile:profile};E.saveCompanyDelaysBtn.textContent="Enregistrer les délais";E.saveCompanyDelaysBtn.disabled=false;$("companyDelaysSavedCheck").hidden=false}catch(err){console.error(err);alert("Impossible d’enregistrer les délais.");E.saveCompanyDelaysBtn.disabled=false;E.saveCompanyDelaysBtn.textContent="Enregistrer les délais"}
 }
 
 function addMonthsSafe(iso, months){
@@ -3607,6 +3607,7 @@ function openDossierDetailModal(d){
     if(step<5)actionHtml+=`<button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer</button>`;
     if(step>=5)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="debtor_notice"><span class="action-tag">✉</span>Prévenir le débiteur</button>`;
   }else{
+    if(step<5 && d?.lifecycleStatus!=="closed" && d?.status!=="paid_closed")actionHtml+=`<button class="btn btn-secondary btn-close-dossier" type="button" data-detail-action="closure"><span class="action-tag">✓</span>Clôturer le dossier</button>`;
     actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="debtor_closure">Informer le débiteur</button>`;
     if(step>=5||d?.injunctionPublished)actionHtml+=`<button class="btn btn-secondary" type="button" data-detail-action="court_closure">Informer la juridiction</button>`;
   }
@@ -3856,7 +3857,7 @@ async function renderTimeline(){
   }
 }
 async function renderAll(){renderOverview();renderDossiers();renderSummary();renderActions();renderAddButton();await renderTimeline()}
-async function loadUserData(uid){try{const s=await getDoc(doc(db,"users",uid));currentUserData=s.exists()?(s.data()||{}):{}}catch{currentUserData={}}}
+async function loadUserData(uid){try{const s=await getDoc(doc(db,"users",uid));currentUserData=s.exists()?(s.data()||{}):{};signatureDataUrl=clean(currentUserData?.businessProfile?.signatureDataUrl)||"";refreshCompanySignaturePreview();renderCompanySignatureStatus();$("companyProfileSavedCheck").hidden=!currentUserData?.businessProfile?.companyName;$("companyDelaysSavedCheck").hidden=!currentUserData?.businessProfile?.recoveryDelays}catch{currentUserData={}}}
 async function loadEntitlements(uid){
   currentEntitlements=[];
   try{
@@ -4454,12 +4455,14 @@ E.companyProfileBtn?.addEventListener("click",openCompanyProfileModal);
 E.topNewDossierBtn?.addEventListener("click",()=>E.addDossierBtn?.click());
 E.closeCompanyProfileModal?.addEventListener("click",closeCompanyProfileModal);
 E.companyProfileModal?.addEventListener("click",e=>{if(e.target===E.companyProfileModal)closeCompanyProfileModal()});
+E.companyProfileForm?.addEventListener("input",()=>{$("companyProfileSavedCheck").hidden=true});
+["delayR1Input","delayR2Input","delayR3Input","delayMedInput"].forEach(id=>$(id)?.addEventListener("input",()=>{$("companyDelaysSavedCheck").hidden=true}));
 E.companyProfileForm?.addEventListener("submit",async e=>{e.preventDefault();await saveCompanyProfile()});
 E.saveCompanyDelaysBtn?.addEventListener("click",saveCompanyDelays);
 E.companySignatureUploadBtn?.addEventListener("click",()=>E.companySignatureFileInput?.click());
-E.companySignatureFileInput?.addEventListener("change",e=>{const file=e.target.files?.[0];if(!file)return;if(!/^image\/(png|jpeg|webp)$/i.test(file.type)){alert("Choisissez une image PNG, JPG ou WEBP.");return}const reader=new FileReader();reader.onload=()=>{signatureDataUrl=String(reader.result||"");refreshCompanySignaturePreview();try{localStorage.setItem("axeFlowSignatureDataUrl",signatureDataUrl)}catch{}renderCompanySignatureStatus()};reader.readAsDataURL(file);e.target.value=""});
-E.companySignatureClearBtn?.addEventListener("click",()=>{signatureDataUrl="";refreshCompanySignaturePreview();try{localStorage.removeItem("axeFlowSignatureDataUrl")}catch{}renderCompanySignatureStatus()});
-try{signatureDataUrl=localStorage.getItem("axeFlowSignatureDataUrl")||signatureDataUrl}catch{}
+E.companySignatureFileInput?.addEventListener("change",e=>{const file=e.target.files?.[0];if(!file)return;if(!/^image\/(png|jpeg|webp)$/i.test(file.type)){alert("Choisissez une image PNG, JPG ou WEBP.");return}const reader=new FileReader();reader.onload=async()=>{const value=String(reader.result||"");if(value.length>650000){alert("Signature trop volumineuse. Utilisez une image inférieure à 450 Ko.");return}try{const profile={...companyProfile(),signatureDataUrl:value};await updateDoc(doc(db,"users",currentUser.uid),{businessProfile:profile,updatedAt:serverTimestamp()});currentUserData={...currentUserData,businessProfile:profile};signatureDataUrl=value;refreshCompanySignaturePreview();renderCompanySignatureStatus();$("companyProfileSavedCheck").hidden=false;showSuccessToast("Signature enregistrée dans votre profil")}catch(err){console.error(err);alert("Impossible de conserver la signature dans Firebase.")}};reader.readAsDataURL(file);e.target.value=""});
+E.companySignatureClearBtn?.addEventListener("click",async()=>{try{const profile={...companyProfile(),signatureDataUrl:""};await updateDoc(doc(db,"users",currentUser.uid),{businessProfile:profile,updatedAt:serverTimestamp()});currentUserData={...currentUserData,businessProfile:profile};signatureDataUrl="";refreshCompanySignaturePreview();renderCompanySignatureStatus();showSuccessToast("Signature supprimée")}catch(err){console.error(err);alert("Impossible de supprimer la signature dans Firebase.")}});
+// La signature est rechargée depuis le profil Firebase dans loadUserData().
 initOverviewControls();
 
 // V6 — aperçu signature entreprise
