@@ -495,6 +495,29 @@ exports.stripeWebhook = onRequest(
 const MARKETING_EVENT_TYPES = new Set(["DEMO_VIEW","TARIFF_CLICK","SIGNUP_CLICK"]);
 function cleanMarketingValue(value,maxLen){return String(value||"").trim().toLowerCase().replace(/[^a-z0-9àâäéèêëîïôöùûüç._-]/gi,"-").replace(/-+/g,"-").slice(0,maxLen);}
 
+// Suivi Axe Flow : identifiant navigateur uniquement après consentement.
+const FLOW_DEVICE_COLLECTION = "marketingAdminDevices";
+async function verifyFlowAdmin(req) {
+  const h = String(req.headers.authorization || "");
+  if (!h.startsWith("Bearer ")) return null;
+  const decoded = await admin.auth().verifyIdToken(h.slice(7));
+  const snap = await db.collection("users").doc(decoded.uid).get();
+  const u = snap.exists ? snap.data() : {};
+  return (u.role === "admin" || u.isAdmin === true || u.plan === "superadmin" || u.planType === "superadmin" || decoded.admin === true) ? decoded : null;
+}
+exports.registerFlowAdminDevice = onRequest({cors:true}, async(req,res)=>{
+  try {
+    if(req.method !== "POST") return res.status(405).json({error:"Méthode non autorisée"});
+    const user = await verifyFlowAdmin(req);
+    if(!user) return res.status(403).json({error:"Accès administrateur requis"});
+    const visitorId = cleanMarketingValue(req.body?.visitorId,100);
+    const label = String(req.body?.label||"Mon appareil").trim().slice(0,60);
+    if(!/^[a-z0-9_-]{16,100}$/.test(visitorId)) return res.status(400).json({error:"Identifiant appareil invalide"});
+    await db.collection(FLOW_DEVICE_COLLECTION).doc(visitorId).set({label,registeredBy:user.uid,updatedAt:admin.firestore.Timestamp.now()},{merge:true});
+    return res.json({ok:true,label});
+  } catch(e){console.error("registerFlowAdminDevice",e);return res.status(500).json({error:"Enregistrement impossible"});}
+});
+
 exports.trackMarketingEvent=onRequest({cors:true},async(req,res)=>{
   try{
     if(req.method!=="POST")return res.status(405).json({error:"Méthode non autorisée"});
@@ -509,11 +532,13 @@ exports.trackMarketingEvent=onRequest({cors:true},async(req,res)=>{
     const source=cleanMarketingValue(payload?.source||"direct",60)||"direct";
     const campaign=cleanMarketingValue(payload?.campaign||"sans-campagne",80)||"sans-campagne";
     const sessionId=cleanMarketingValue(payload?.sessionId,100);
+    const visitorId=cleanMarketingValue(payload?.visitorId,100);
     if(!sessionId)return res.status(400).json({error:"Session manquante"});
     const docId=Buffer.from(`${campaign}__${source}__${sessionId}__${type}`).toString("base64url").slice(0,900);
     const ref=db.collection("marketingEvents").doc(docId);
     const existing=await ref.get();
-    if(!existing.exists)await ref.set({type,source,campaign,sessionId,dayKey:new Date().toISOString().slice(0,10),createdAt:admin.firestore.Timestamp.now()});
+    if(existing.exists){if(visitorId && !existing.data()?.visitorId) await ref.update({visitorId});}
+    else await ref.set({type,source,campaign,sessionId,visitorId: /^[a-z0-9_-]{16,100}$/.test(visitorId)?visitorId:null,dayKey:new Date().toISOString().slice(0,10),createdAt:admin.firestore.Timestamp.now()});
     return res.status(200).json({ok:true});
   }catch(error){console.error("trackMarketingEvent ERROR",error);return res.status(500).json({error:"Erreur de suivi"});}
 });
@@ -521,20 +546,13 @@ exports.trackMarketingEvent=onRequest({cors:true},async(req,res)=>{
 exports.marketingStats=onRequest({cors:true},async(req,res)=>{
   try{
     if(req.method!=="GET")return res.status(405).json({error:"Méthode non autorisée"});
-    const h=req.headers.authorization||"";
-    if(!h.startsWith("Bearer "))return res.status(401).json({error:"Connexion requise"});
-    const decoded=await admin.auth().verifyIdToken(h.slice(7));
-    const us=await db.collection("users").doc(decoded.uid).get(),u=us.exists?us.data():{};
-    const isAdmin =
-      u.role === "admin" ||
-      u.isAdmin === true ||
-      u.plan === "superadmin" ||
-      u.planType === "superadmin" ||
-      decoded.admin === true;
-    if(!isAdmin)return res.status(403).json({error:"Accès administrateur requis"});
+    const verified = await verifyFlowAdmin(req);
+    if(!verified)return res.status(403).json({error:"Accès administrateur requis"});
+    const devicesSnap = await db.collection(FLOW_DEVICE_COLLECTION).get();
+    const adminIds = new Set(devicesSnap.docs.map(d=>d.id));
     const snap=await db.collection("marketingEvents").orderBy("createdAt","desc").limit(5000).get(),groups={};
-    snap.forEach(d=>{const e=d.data(),k=`${e.source||"direct"}||${e.campaign||"sans-campagne"}`;if(!groups[k])groups[k]={source:e.source||"direct",campaign:e.campaign||"sans-campagne",demoViews:0,tariffClicks:0,signupClicks:0,lastActivity:0};if(e.type==="DEMO_VIEW")groups[k].demoViews++;if(e.type==="TARIFF_CLICK")groups[k].tariffClicks++;if(e.type==="SIGNUP_CLICK")groups[k].signupClicks++;const ms=e.createdAt?.toMillis?e.createdAt.toMillis():0;if(ms>groups[k].lastActivity)groups[k].lastActivity=ms;});
-    return res.status(200).json({ok:true,rows:Object.values(groups).sort((a,b)=>b.lastActivity-a.lastActivity),totalEvents:snap.size});
+    snap.forEach(d=>{const e=d.data(),k=`${e.source||"direct"}||${e.campaign||"sans-campagne"}`;if(!groups[k])groups[k]={source:e.source||"direct",campaign:e.campaign||"sans-campagne",demoViews:0,tariffClicks:0,signupClicks:0,adminViews:0,externalViews:0,uniqueIds:new Set(),lastActivity:0};if(e.type==="DEMO_VIEW"){groups[k].demoViews++;if(e.visitorId){groups[k].uniqueIds.add(e.visitorId);if(adminIds.has(e.visitorId))groups[k].adminViews++;else groups[k].externalViews++;}}if(e.type==="TARIFF_CLICK")groups[k].tariffClicks++;if(e.type==="SIGNUP_CLICK")groups[k].signupClicks++;const ms=e.createdAt?.toMillis?e.createdAt.toMillis():0;if(ms>groups[k].lastActivity)groups[k].lastActivity=ms;});
+    return res.status(200).json({ok:true,rows:Object.values(groups).map(g=>({...g,uniqueVisitors:g.uniqueIds.size,uniqueVisitorIds:[...g.uniqueIds],uniqueIds:undefined})).sort((a,b)=>b.lastActivity-a.lastActivity),totalEvents:snap.size});
   }catch(error){console.error("marketingStats ERROR",error);return res.status(500).json({error:"Impossible de charger les statistiques"});}
 });
 
