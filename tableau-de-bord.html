@@ -2284,6 +2284,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   // PAGE 3 — VOTRE DEMANDE. Les options juridiques facultatives restent décochées.
   // Le bloc libre est prérempli dynamiquement à partir DU dossier particulier courant.
   const page3=pages[2];
+  const cerfaSnapshot=dossierSnapshotAtDate(currentDossier,injunctionPreparationIso());
   const demandInvoices=normalizeInvoices(currentDossier);
   const demandCalc=lateFeeBreakdown(dossierSnapshotAtDate(currentDossier,injunctionPreparationIso()),injunctionPreparationDateObj());
   const demandRefs=demandInvoices.map(i=>clean(i.ref)).filter(Boolean);
@@ -2315,7 +2316,6 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
 
   // PAGE 4 — SOMMES DEMANDÉES / FONDEMENT / DATE
   // Même photographie financière que la page 3 : le Cerfa reste figé à sa date de préparation.
-  const cerfaSnapshot=dossierSnapshotAtDate(currentDossier,injunctionPreparationIso());
   const calc=lateFeeBreakdown(cerfaSnapshot,injunctionPreparationDateObj());
   const legal=!isProfessionalDebtor(cerfaSnapshot)?injunctionLegalInterest(cerfaSnapshot,injunctionPreparationDateObj()):{enabled:false,amount:0};
   const invoices=normalizeInvoices(cerfaSnapshot);
