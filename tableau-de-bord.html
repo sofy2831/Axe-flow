@@ -1562,7 +1562,7 @@ ${invoiceLines}
 
 Malgré l’arrivée à échéance des factures, aucun règlement intégral n’est intervenu.
 
-${relances.length?`Démarches amiables effectuées :\n- ${relances.join("\n- ")}\n`:""}La créance est certaine, liquide et exigible. Elle est fondée sur : ${contractBasis(d)}.
+${relances.length?`Démarches amiables effectuées :\n- ${relances.join("\n- ")}\n`:""}La créance est certaine, liquide et exigible. Elle est fondée sur : ${contractBasis(d).replace(/[.\s]+$/,"")}.
 
 DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${todayFR()}
 
@@ -1758,7 +1758,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <ol>${invoiceHtml}</ol>
   <p>Malgré l’arrivée à échéance des factures, aucun règlement intégral n’est intervenu.</p>
   ${relanceHtml}
-  <p>La créance est certaine, liquide et exigible. Elle est fondée sur : ${escapeHtml(contractBasis(d))}.</p>
+  <p>La créance est certaine, liquide et exigible. Elle est fondée sur : ${escapeHtml(contractBasis(d).replace(/[.\s]+$/,""))}.</p>
 
   <h2>DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${escapeHtml(prepFr)}</h2>
   <div class="amount-box">
@@ -2293,7 +2293,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     return `${clean(i.ref)||"facture"} d'un montant de ${formatCurrency(amount)}`;
   });
   const demandText=[
-    `${contractBasis(cerfaSnapshot).replace(/[.\\s]+$/,"")}. Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${formatCurrency(demandCalc.principal)}.`,
+    `${contractBasis(cerfaSnapshot).replace(/[.\s]+$/,"")}. Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${formatCurrency(demandCalc.principal)}.`,
     `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${formatCurrency(demandCalc.principal)} reste due.`,
     `Les factures, relances, mise en demeure et décompte actualisé sont joints à la présente requête.`
   ].join(' ');
