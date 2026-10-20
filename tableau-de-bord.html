@@ -853,7 +853,7 @@
   <section class="inj-date-box">
     <div class="inj-section-title"><span>Date de l’injonction / date de préparation</span></div>
     <div class="field"><label>Date proposée (modifiable)</label><input id="injunctionPreparationDate" type="date"></div>
-    <div class="inj-date-help" id="injunctionDateHelp">Cette date est utilisée pour la requête, la synthèse, le décompte et la chronologie. Elle ne signifie pas que le dossier a été déposé au tribunal.</div>
+    <div class="field" style="margin-top:12px"><label for="injunctionLegalInterestStart">Départ des intérêts au taux légal (facultatif, date de mise en demeure)</label><input id="injunctionLegalInterestStart" type="date"><small>À laisser vide si les intérêts ne sont pas demandés. Le taux dépend du créancier, et non du type de débiteur.</small></div><div class="inj-date-help" id="injunctionDateHelp">Cette date est utilisée pour la requête, la synthèse, le décompte et la chronologie. Elle ne signifie pas que le dossier a été déposé au tribunal.</div>
   </section>
 
   <div class="inj-doc-grid">
@@ -1612,6 +1612,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   const calc=lateFeeBreakdown(d,prepDate);
   const invoices=normalizeInvoices(d);
   const pro=isProfessionalDebtor(d);
+  const legal=pro?{enabled:false,amount:0}:injunctionLegalInterest(d,prepDate);
   const reference=clean(d?.ref)||"—";
   const profile=currentUserData?.businessProfile||{};
   const reqCompany=clean(profile.companyName)||clean(profile.raisonSociale)||creditorName(d)||"Créancier";
@@ -1631,7 +1632,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
     `<li>Facture ${escapeHtml(x.ref)}, émise le ${escapeHtml(fmtDateFR(x.issuedDate))}, échue le ${escapeHtml(fmtDateFR(x.dueDate))}, d’un montant de ${escapeHtml(formatCurrency(x.amount))}.</li>`
   ).join("");
 
-  const interestHtml=calc.rows.map(x=>
+  const interestHtml=(!pro&&legal.enabled)?`<li>Intérêts au taux légal à compter du ${escapeHtml(fmtDateFR(legal.startIso))}, arrêtés au ${escapeHtml(prepFr)} : ${escapeHtml(formatCurrency(legal.amount))}.</li>`:calc.rows.map(x=>
     `<li>Facture ${escapeHtml(x.ref)} : ${x.days} jour(s) de retard, intérêts arrêtés au ${escapeHtml(prepFr)} : ${escapeHtml(formatCurrency(x.interests))}${pro?`, indemnité forfaitaire : ${escapeHtml(formatCurrency(x.recoveryFee))}`:""}.</li>`
   ).join("");
 
@@ -1761,9 +1762,9 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <h2>DÉCOMPTE DE LA CRÉANCE ARRÊTÉ AU ${escapeHtml(prepFr)}</h2>
   <div class="amount-box">
     <p>Principal : <strong>${escapeHtml(formatCurrency(calc.principal))}</strong></p>
-    ${pro?`<p>Pénalités de retard calculées selon le taux applicable à chaque facture : <strong>${escapeHtml(formatCurrency(calc.interests))}</strong></p>`:""}
+    ${pro?`<p>Pénalités de retard calculées selon le taux applicable à chaque facture : <strong>${escapeHtml(formatCurrency(calc.interests))}</strong></p>`:legal.enabled?`<p>Intérêts au taux légal depuis le ${escapeHtml(fmtDateFR(legal.startIso))} : <strong>${escapeHtml(formatCurrency(legal.amount))}</strong></p>`:""}
     ${pro?`<p>Indemnités forfaitaires de recouvrement : <strong>${escapeHtml(formatCurrency(calc.recoveryFees))}</strong></p>`:""}
-    <p class="total">TOTAL RÉCLAMÉ : ${escapeHtml(formatCurrency(calc.total))}</p>
+    <p class="total">TOTAL RÉCLAMÉ : ${escapeHtml(formatCurrency(calc.total+(!pro?legal.amount:0)))}</p>
   </div>
 
   <p><strong>Détail :</strong></p>
@@ -1780,7 +1781,7 @@ function injunctionRequestPrintHtml(d,currentCourtName="",currentCourtAddress=""
   <p>Il est demandé au juge de :</p>
   <ol>
     <li>Enjoindre au débiteur de payer au requérant la somme principale de ${escapeHtml(formatCurrency(calc.principal))} ;</li>
-    ${pro?`<li>Ajouter les pénalités de retard arrêtées au ${escapeHtml(prepFr)}, soit ${escapeHtml(formatCurrency(calc.interests))}, avec poursuite de leur calcul jusqu’au complet paiement ;</li>`:""}
+    ${pro?`<li>Ajouter les pénalités de retard arrêtées au ${escapeHtml(prepFr)}, soit ${escapeHtml(formatCurrency(calc.interests))}, avec poursuite de leur calcul jusqu’au complet paiement ;</li>`:legal.enabled?`<li>Accorder les intérêts au taux légal sur le principal de ${escapeHtml(formatCurrency(calc.principal))} à compter du ${escapeHtml(fmtDateFR(legal.startIso))}, jusqu’au complet paiement, sous réserve de l’appréciation du juge ;</li>`:""}
     ${pro?`<li>Ajouter les indemnités forfaitaires de recouvrement, soit ${escapeHtml(formatCurrency(calc.recoveryFees))} ;</li>`:""}
     <li>Mettre à la charge du débiteur les frais de la procédure selon décision du juge.</li>
   </ol>
@@ -2316,11 +2317,17 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   // Même photographie financière que la page 3 : le Cerfa reste figé à sa date de préparation.
   const cerfaSnapshot=dossierSnapshotAtDate(currentDossier,injunctionPreparationIso());
   const calc=lateFeeBreakdown(cerfaSnapshot,injunctionPreparationDateObj());
+  const legal=!isProfessionalDebtor(cerfaSnapshot)?injunctionLegalInterest(cerfaSnapshot,injunctionPreparationDateObj()):{enabled:false,amount:0};
   const invoices=normalizeInvoices(cerfaSnapshot);
   put(page4,217,725,amountForCerfa(calc.principal)+" EUR",8.6,139,true); // principal
   const rates=[...new Set(invoices.map(i=>Number(i.lateRatePercent??currentDossier.lateRatePercent??0)).filter(n=>Number.isFinite(n)))];
   const rate=rates.length===1?rates[0]:0;
-  if(rate>0){
+  if(legal.enabled){
+    // Les intérêts légaux sont demandés à compter de la date indiquée, sans les confondre avec les pénalités contractuelles.
+    mark(page4,42.9,611.6,true);
+    put(page4,84,599,"Taux légal dès "+fmtDateFR(legal.startIso),7.2,110);
+    put(page4,216,598,amountForCerfa(legal.amount)+" EUR",8.323,139);
+  }else if(rate>0&&isProfessionalDebtor(cerfaSnapshot)){
     mark(page4,42.9,611.6,true);
     put(page4,84,599,String(rate).replace(".",",")+" %",8.323,101);
     put(page4,216,598,amountForCerfa(calc.interests)+" EUR",8.323,139);
@@ -2530,6 +2537,7 @@ function debtStatementHtml(d=currentDossier){
   // Figer le décompte à la date de préparation de l’injonction : les paiements postérieurs sont exclus.
   d=dossierSnapshotAtDate(d,prepIso);
   const calc=lateFeeBreakdown(d,prepDate);
+  const legal=isProfessionalDebtor(d)?{enabled:false,amount:0}:injunctionLegalInterest(d,prepDate);
   const rows=calc.rows.map(x=>`<tr><td><strong>${escapeHtml(x.ref)}</strong></td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");
   return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Décompte actualisé — ${escapeHtml(d?.ref||"")}</title><style>
   @page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fff}
@@ -2545,7 +2553,7 @@ function debtStatementHtml(d=currentDossier){
   <div class="meta"><div><strong>Dossier</strong><br>${escapeHtml(d?.ref||"—")}</div><div><strong>Arrêté au</strong><br>${escapeHtml(prepFr)}</div><div><strong>Créancier</strong><br>${escapeHtml(creditorName(d))}</div><div><strong>Débiteur</strong><br>${escapeHtml(debtorName(d))}</div></div>
   <div class="section">Détail des factures</div>
   <table><thead><tr><th>Facture</th><th>Échéance</th><th>Principal</th><th>Jours</th><th>Intérêts</th>${isProfessionalDebtor(d)?"<th>Indemnité</th>":""}</tr></thead><tbody>${rows}</tbody></table>
-  <table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr><tr><td>${isProfessionalDebtor(d)?"Pénalités de retard selon taux de chaque facture":`Pénalités de retard (${calc.annualRate.toLocaleString("fr-FR")}% l’an)`}</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>TOTAL RÉCLAMÉ</td><td>${escapeHtml(formatCurrency(calc.total))}</td></tr></table>
+  <table class="totals"><tr><td>Montant initial des factures</td><td>${escapeHtml(formatCurrency(calc.initialPrincipal))}</td></tr><tr><td>Paiements reçus</td><td>- ${escapeHtml(formatCurrency(calc.payments))}</td></tr><tr><td>Principal restant dû</td><td>${escapeHtml(formatCurrency(calc.principal))}</td></tr>${isProfessionalDebtor(d)?`<tr><td>Pénalités de retard selon taux de chaque facture</td><td>${escapeHtml(formatCurrency(calc.interests))}</td></tr>`:legal.enabled?`<tr><td>Intérêts légaux depuis le ${escapeHtml(fmtDateFR(legal.startIso))}</td><td>${escapeHtml(formatCurrency(legal.amount))}</td></tr>`:""}${isProfessionalDebtor(d)?`<tr><td>Indemnités forfaitaires</td><td>${escapeHtml(formatCurrency(calc.recoveryFees))}</td></tr>`:""}<tr class="grand"><td>TOTAL RÉCLAMÉ</td><td>${escapeHtml(formatCurrency(calc.total+(!isProfessionalDebtor(d)?legal.amount:0)))}</td></tr></table>
   <div class="note">Décompte établi à la date de préparation du dossier. Les intérêts, lorsqu’ils sont applicables, continuent à courir jusqu’au complet paiement.</div>
   <footer><span>Axe Flow — ${escapeHtml(d?.ref||"")}</span><strong>Décompte de créance</strong></footer></section></body></html>`}
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
@@ -4145,6 +4153,25 @@ function injunctionCourtAddressLabel(){
   return [address,[zip,city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 }
 
+// Intérêts légaux simples : le taux « autres cas » s'applique à un créancier professionnel.
+const LEGAL_OTHER_RATES_2026={"2026-1":2.62,"2026-2":2.75};
+function injunctionLegalInterest(d=currentDossier,asOf=injunctionPreparationDateObj()){
+  const startIso=clean($("injunctionLegalInterestStart")?.value);
+  if(!startIso)return {enabled:false,startIso:"",amount:0,days:0,rate:null};
+  const start=parseLocalDate(startIso),end=new Date(asOf.getFullYear(),asOf.getMonth(),asOf.getDate());
+  if(!start||start>end)throw new Error("La date de départ des intérêts doit précéder la date de préparation.");
+  let total=0,days=0,cursor=new Date(start);
+  while(cursor<=end){
+    const semester=`${cursor.getFullYear()}-${cursor.getMonth()<6?1:2}`;
+    const rate=LEGAL_OTHER_RATES_2026[semester];
+    if(rate===undefined)throw new Error("Taux légal non disponible pour "+semester+" : vérifier le barème officiel.");
+    const next=new Date(cursor.getFullYear(),cursor.getMonth()<6?6:12,1);
+    const until=new Date(Math.min(end.getTime(),next.getTime()-86400000));
+    const n=Math.round((until-cursor)/86400000)+1;
+    total+=principalBalance(d)*rate/100*n/365;days+=n;cursor=new Date(until);cursor.setDate(cursor.getDate()+1);
+  }
+  return {enabled:true,startIso,amount:Number(total.toFixed(2)),days,rate:2.75};
+}
 function injunctionPreparationIso(){
   // Priorité à la date affichée, puis à la date historique de l’injonction enregistrée.
   // Ainsi le Cerfa reste figé à la situation financière de sa date de préparation.
