@@ -2325,14 +2325,14 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     // Les intérêts légaux sont demandés à compter de la date indiquée, sans les confondre avec les pénalités contractuelles.
     mark(page4,42.9,669,true); // case « intérêts au taux légal », et non « contractuel »
     put(page4,216,669,amountForCerfa(legal.amount)+" EUR",8.323,139);
-    put(page4,159,596,fmtDateFR(legal.startIso).replace(/\//g," "),8.323,110);
+    // La date de départ des intérêts légaux figure dans le fondement, sans empiéter sur la zone des intérêts contractuels.
   }else if(rate>0&&isProfessionalDebtor(cerfaSnapshot)){
     mark(page4,42.9,611.6,true);
     put(page4,84,599,String(rate).replace(".",",")+" %",8.323,101);
     put(page4,216,598,amountForCerfa(calc.interests)+" EUR",8.323,139);
   }
   const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
-  const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
+  const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),...(legal.enabled?[`Intérêts légaux dès le ${fmtDateFR(legal.startIso)}`]:[]),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
   let yy=724; for(const line of basis){put(page4,384,yy,line,7.5,169);yy-=13}
   put(page4,83,459.2,injunctionPreparationFr(),8.4,102,true);   // champ Date remonté d’environ 0,5 % de la hauteur A4
 
