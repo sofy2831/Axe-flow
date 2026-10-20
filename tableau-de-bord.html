@@ -2293,7 +2293,7 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
     return `${clean(i.ref)||"facture"} d'un montant de ${formatCurrency(amount)}`;
   });
   const demandText=[
-    `${contractBasis(cerfaSnapshot)}. Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${formatCurrency(demandCalc.principal)}.`,
+    `${contractBasis(cerfaSnapshot).replace(/[.\\s]+$/,"")}. Créance résultant de ${demandInvoices.length>1?demandInvoices.length+" factures":"la facture"} de prestation demeurée${demandInvoices.length>1?"s":""} impayée${demandInvoices.length>1?"s":""} à ${demandInvoices.length>1?"leurs":"son"} échéance${demandInvoices.length>1?"s":""} : ${demandDetails.join(", ")}, soit un principal total de ${formatCurrency(demandCalc.principal)}.`,
     `Malgré les relances amiables et la mise en demeure demeurées sans règlement intégral, la somme de ${formatCurrency(demandCalc.principal)} reste due.`,
     `Les factures, relances, mise en demeure et décompte actualisé sont joints à la présente requête.`
   ].join(' ');
@@ -2334,7 +2334,20 @@ async function generatePrivateCerfa12948Overlay(pdfDoc){
   }
   const refs=invoices.map(i=>i.ref).filter(Boolean).join(", ");
   const basis=[`Facture(s) : ${refs}`,contractBasis(currentDossier),...(legal.enabled?[`Intérêts légaux dès le ${fmtDateFR(legal.startIso)}`]:[]),`Principal : ${amountForCerfa(calc.principal)} EUR`,`Relances + mise en demeure + décompte joints`].filter(Boolean);
-  let yy=724; for(const line of basis){put(page4,384,yy,line,7.5,169);yy-=13}
+  // La colonne « Fondement » permet plusieurs lignes : ne jamais tronquer le motif.
+  let yy=724;
+  for(const item of basis){
+    let line="";
+    for(const word of sanitizePdfText(item).split(/\s+/)){
+      const candidate=line?line+" "+word:word;
+      if(font.widthOfTextAtSize(candidate,7.5)>169&&line){
+        put(page4,384,yy,line,7.5,169);
+        yy-=13;
+        line=word;
+      }else line=candidate;
+    }
+    if(line){put(page4,384,yy,line,7.5,169);yy-=13}
+  }
   put(page4,83,459.2,injunctionPreparationFr(),8.4,102,true);   // champ Date remonté d’environ 0,5 % de la hauteur A4
 
   // Signature dans la zone officielle, à gauche et juste sous « Votre signature ».
