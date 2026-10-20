@@ -4265,12 +4265,13 @@ E.markInjunctionBtn.addEventListener("click",async()=>{
     // la sous-collection events, déjà autorisée par les règles existantes.
     await addDoc(collection(db,"users",currentUser.uid,"requests",currentDossier.id,"events"),{
       type:"injunction_prepared",action:"injunction_prepared",title:"Dossier d’injonction enregistré — prêt à être déposé",label:"Dossier d’injonction enregistré — prêt à être déposé",
-      date:prepDate,effectiveDate:prepDate,courtName:court.name||"",description:`Date de préparation : ${fmtDateFR(prepDate)}`,
+      date:prepDate,effectiveDate:prepDate,courtName:court.name||"",injunctionLegalInterestStart:legalStart,description:`Date de préparation : ${fmtDateFR(prepDate)}${legalStart?` ; intérêts légaux à compter du ${fmtDateFR(legalStart)}`:""}`,
       createdAt:serverTimestamp()
     });
     // Mémoriser immédiatement la date figée dans l’objet courant ; le rechargement suivant
     // la retrouvera également depuis l’événement de chronologie.
     currentDossier.__injunctionPreparationDate=prepDate;
+    currentDossier.injunctionLegalInterestStart=legalStart;
     showSuccessToast?.("✓ Injonction préparée enregistrée");
     currentDossier.__injunctionRegistered=true;
     E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Injonction enregistrée";
