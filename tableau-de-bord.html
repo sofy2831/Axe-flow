@@ -2538,7 +2538,7 @@ function debtStatementHtml(d=currentDossier){
   d=dossierSnapshotAtDate(d,prepIso);
   const calc=lateFeeBreakdown(d,prepDate);
   const legal=isProfessionalDebtor(d)?{enabled:false,amount:0}:injunctionLegalInterest(d,prepDate);
-  const rows=calc.rows.map(x=>`<tr><td><strong>${escapeHtml(x.ref)}</strong></td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${x.days}</td><td>${escapeHtml(formatCurrency(x.interests))}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");
+  const rows=calc.rows.map(x=>`<tr><td><strong>${escapeHtml(x.ref)}</strong></td><td>${escapeHtml(fmtDateFR(x.dueDate))}</td><td>${escapeHtml(formatCurrency(x.amount))}</td><td>${isProfessionalDebtor(d)?x.days:"—"}</td><td>${isProfessionalDebtor(d)?escapeHtml(formatCurrency(x.interests)):"—"}</td>${isProfessionalDebtor(d)?`<td>${escapeHtml(formatCurrency(x.recoveryFee))}</td>`:""}</tr>`).join("");
   return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Décompte actualisé — ${escapeHtml(d?.ref||"")}</title><style>
   @page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fff}
   .page{width:210mm;min-height:297mm;padding:15mm 17mm 18mm;border-top:5mm solid #0f1a33;position:relative}
@@ -2969,6 +2969,8 @@ function openInjunctionModal(){
   // Si l’injonction a déjà été enregistrée, conserver sa date historique.
   // Ne jamais remplacer cette date par la date du jour lors d’une réouverture du dossier.
   if(dateInput)dateInput.value=currentDossier.injunctionPreparationDate||currentDossier.__injunctionPreparationDate||new Date().toISOString().slice(0,10);
+  const legalStartInput=$("injunctionLegalInterestStart");
+  if(legalStartInput)legalStartInput.value=clean(currentDossier.injunctionLegalInterestStart)||"";
   const injunctionAlreadyRegistered=!!currentDossier.__injunctionRegistered;
   if(dateInput)dateInput.disabled=injunctionAlreadyRegistered;
   const markBtn=$("markInjunctionBtn"),preparedSaved=$("injunctionPreparedSaved");
@@ -4130,16 +4132,14 @@ function injunctionCourtData(){
 function injunctionCourtLabel(){
   const c=injunctionCourtData();
   const pro=isProfessionalDebtor(currentDossier);
-  const city=clean(c.city||debtorCity(currentDossier));
+  const city=clean(c.city);
   const expected=pro?"Tribunal de commerce":"Tribunal judiciaire";
   // Le type de juridiction dépend du débiteur, même si un ancien dossier
   // contient encore l'autre libellé.
-  if(city)return `${expected} de ${city.toUpperCase()}`;
   const raw=clean(c.name);
-  if(!raw)return expected;
-  return raw
-    .replace(/^Tribunal\s+judiciaire(?:\s+de)?/i,expected)
-    .replace(/^Tribunal\s+de\s+commerce(?:\s+de)?/i,expected);
+  if(raw)return raw;
+  if(city)return `${expected} de ${city.toUpperCase()}`;
+  return ""; // Juridiction non renseignée : ne pas en inventer une.
 }
 function injunctionCourtAddressLabel(){
   const c=injunctionCourtData();
@@ -4156,7 +4156,7 @@ function injunctionCourtAddressLabel(){
 // Intérêts légaux simples : le taux « autres cas » s'applique à un créancier professionnel.
 const LEGAL_OTHER_RATES_2026={"2026-1":2.62,"2026-2":2.75};
 function injunctionLegalInterest(d=currentDossier,asOf=injunctionPreparationDateObj()){
-  const startIso=clean($("injunctionLegalInterestStart")?.value);
+  const startIso=clean($("injunctionLegalInterestStart")?.value)||clean(d?.injunctionLegalInterestStart);
   if(!startIso)return {enabled:false,startIso:"",amount:0,days:0,rate:null};
   const start=parseLocalDate(startIso),end=new Date(asOf.getFullYear(),asOf.getMonth(),asOf.getDate());
   if(!start||start>end)throw new Error("La date de départ des intérêts doit précéder la date de préparation.");
@@ -4256,6 +4256,7 @@ if(E.injunctionFilesList){E.injunctionFilesList.addEventListener("click",e=>{con
 E.markInjunctionBtn.addEventListener("click",async()=>{
   if(!currentUser||!currentDossier)return;
   const prepDate=clean($("injunctionPreparationDate")?.value)||new Date().toISOString().slice(0,10);
+  const legalStart=clean($("injunctionLegalInterestStart")?.value);
   const court=injunctionCourtData();
   try{
     E.markInjunctionBtn.disabled=true;E.markInjunctionBtn.textContent="Enregistrement…";
