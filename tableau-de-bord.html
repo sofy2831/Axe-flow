@@ -4168,7 +4168,10 @@ function injunctionCourtAddressLabel(){
 }
 
 // Intérêts légaux simples : le taux « autres cas » s'applique à un créancier professionnel.
-const LEGAL_OTHER_RATES_2026={"2026-1":2.62,"2026-2":2.75};
+// Taux légaux simples « autres cas » (créancier professionnel), 2015–2026.
+// Source : https://www.service-public.gouv.fr/particuliers/vosdroits/F20688
+// Ajouter les nouveaux semestres uniquement après publication officielle.
+const LEGAL_OTHER_RATES_2026={"2015-1":0.93,"2015-2":0.99,"2016-1":1.01,"2016-2":0.93,"2017-1":0.9,"2017-2":0.9,"2018-1":0.89,"2018-2":0.88,"2019-1":0.86,"2019-2":0.87,"2020-1":0.87,"2020-2":0.84,"2021-1":0.79,"2021-2":0.76,"2022-1":0.76,"2022-2":0.77,"2023-1":2.06,"2023-2":4.22,"2024-1":5.07,"2024-2":4.92,"2025-1":3.71,"2025-2":2.76,"2026-1":2.62,"2026-2":2.75};
 function injunctionLegalInterest(d=currentDossier,asOf=injunctionPreparationDateObj()){
   const startIso=clean($("injunctionLegalInterestStart")?.value)||clean(d?.injunctionLegalInterestStart);
   if(!startIso)return {enabled:false,startIso:"",amount:0,days:0,rate:null};
@@ -4178,13 +4181,13 @@ function injunctionLegalInterest(d=currentDossier,asOf=injunctionPreparationDate
   while(cursor<=end){
     const semester=`${cursor.getFullYear()}-${cursor.getMonth()<6?1:2}`;
     const rate=LEGAL_OTHER_RATES_2026[semester];
-    if(rate===undefined)throw new Error("Taux légal non disponible pour "+semester+" : vérifier le barème officiel.");
+    if(rate===undefined)throw new Error("Taux légal non publié ou non référencé pour le semestre "+semester+". Aucun montant ne peut être calculé : vérifier le barème officiel sur service-public.gouv.fr et mettre à jour Axe Flow avant de générer les PDF.");
     const next=new Date(cursor.getFullYear(),cursor.getMonth()<6?6:12,1);
     const until=new Date(Math.min(end.getTime(),next.getTime()-86400000));
     const n=Math.round((until-cursor)/86400000)+1;
     total+=principalBalance(d)*rate/100*n/365;days+=n;cursor=new Date(until);cursor.setDate(cursor.getDate()+1);
   }
-  return {enabled:true,startIso,amount:Number(total.toFixed(2)),days,rate:2.75};
+  return {enabled:true,startIso,amount:Number(total.toFixed(2)),days,rate:LEGAL_OTHER_RATES_2026[`${end.getFullYear()}-${end.getMonth()<6?1:2}`]};
 }
 function injunctionPreparationIso(){
   // Priorité à la date affichée, puis à la date historique de l’injonction enregistrée.
