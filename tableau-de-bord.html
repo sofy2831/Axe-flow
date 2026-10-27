@@ -2550,8 +2550,28 @@ function debtStatementHtml(d=currentDossier){
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
 async function htmlStringToPdfBlob(html,zipMode=false){
   if(!window.html2pdf)throw new Error("html2pdf n’est pas chargé");
-  const holder=document.createElement("div");holder.style.cssText="position:fixed;left:-100000px;top:0;width:794px;background:white";holder.innerHTML=html;document.body.appendChild(holder);
-  try{return await window.html2pdf().set({margin:0,filename:"document.pdf",image:{type:"jpeg",quality:zipMode?.88:.98},html2canvas:{scale:zipMode?1.15:1.5,useCORS:true},jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}}).from(holder).outputPdf("blob")}finally{holder.remove()}
+  // html2canvas ne capture pas correctement un élément placé à -100000px.
+  // Monter le document dans la zone visible, au-dessus de l’interface, le temps du rendu.
+  const parsed=new DOMParser().parseFromString(html,"text/html");
+  const holder=document.createElement("div");
+  holder.setAttribute("aria-hidden","true");
+  holder.style.cssText="position:fixed;left:0;top:0;width:794px;min-height:1123px;background:#fff;color:#111;z-index:2147483646;pointer-events:none;overflow:visible";
+  for(const style of parsed.head.querySelectorAll("style"))holder.appendChild(style.cloneNode(true));
+  const content=document.createElement("div");
+  content.innerHTML=parsed.body.innerHTML;
+  holder.appendChild(content);
+  document.body.appendChild(holder);
+  try{
+    await document.fonts?.ready;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const blob=await window.html2pdf().set({
+      margin:0,filename:"document.pdf",image:{type:"jpeg",quality:zipMode?.88:.98},
+      html2canvas:{scale:zipMode?1.15:1.5,useCORS:true,scrollX:0,scrollY:0,windowWidth:Math.max(794,window.innerWidth)},
+      jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}
+    }).from(holder).outputPdf("blob");
+    if(!blob||blob.size<5000)throw new Error("PDF généré anormalement petit : vérifiez le document avant de créer le ZIP.");
+    return blob;
+  }finally{holder.remove()}
 }
 async function downloadCompleteInjunctionZip(){
   if(!currentUser||!currentDossier)return;
