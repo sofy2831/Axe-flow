@@ -2550,28 +2550,38 @@ function debtStatementHtml(d=currentDossier){
 function printDebtStatement(){if(!currentDossier){alert("Sélectionnez un dossier.");return}const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";document.body.appendChild(iframe);const w=iframe.contentWindow;w.document.open();w.document.write(debtStatementHtml(currentDossier));w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>iframe.remove(),1000)},300)}
 async function htmlStringToPdfBlob(html,zipMode=false){
   if(!window.html2pdf)throw new Error("html2pdf n’est pas chargé");
-  // html2canvas ne capture pas correctement un élément placé à -100000px.
-  // Monter le document dans la zone visible, au-dessus de l’interface, le temps du rendu.
+  // html2pdf/html2canvas peut produire une page blanche si la source est
+  // positionnée en fixed ou retirée de la zone de mise en page.
+  // Le document est monté dans le flux normal, avec une largeur A4 stable.
   const parsed=new DOMParser().parseFromString(html,"text/html");
   const holder=document.createElement("div");
-  holder.setAttribute("aria-hidden","true");
-  holder.style.cssText="position:fixed;left:0;top:0;width:794px;min-height:1123px;background:#fff;color:#111;z-index:2147483646;pointer-events:none;overflow:visible";
+  holder.setAttribute("data-axe-flow-pdf-source","true");
+  holder.style.cssText="position:relative;display:block;box-sizing:border-box;width:794px;min-height:1123px;margin:0;padding:0;background:#fff;color:#111;overflow:visible;isolation:isolate";
   for(const style of parsed.head.querySelectorAll("style"))holder.appendChild(style.cloneNode(true));
   const content=document.createElement("div");
   content.innerHTML=parsed.body.innerHTML;
   holder.appendChild(content);
+  // Ne pas insérer dans une modale : ses styles/overflow peuvent masquer le contenu.
   document.body.appendChild(holder);
+  const oldScrollX=window.scrollX,oldScrollY=window.scrollY;
   try{
     await document.fonts?.ready;
+    holder.scrollIntoView({block:"start",behavior:"instant"});
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    if(holder.getBoundingClientRect().width<100||holder.getBoundingClientRect().height<100)
+      throw new Error("La mise en page du document PDF est vide.");
     const blob=await window.html2pdf().set({
-      margin:0,filename:"document.pdf",image:{type:"jpeg",quality:zipMode?.88:.98},
-      html2canvas:{scale:zipMode?1.15:1.5,useCORS:true,scrollX:0,scrollY:0,windowWidth:Math.max(794,window.innerWidth)},
-      jsPDF:{unit:"pt",format:"a4",orientation:"portrait"}
+      margin:0,filename:"document.pdf",image:{type:"jpeg",quality:zipMode?.9:.98},
+      html2canvas:{scale:zipMode?1.5:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:Math.max(794,document.documentElement.scrollWidth)},
+      jsPDF:{unit:"pt",format:"a4",orientation:"portrait"},
+      pagebreak:{mode:["css","legacy"]}
     }).from(holder).outputPdf("blob");
-    if(!blob||blob.size<5000)throw new Error("PDF généré anormalement petit : vérifiez le document avant de créer le ZIP.");
+    if(!blob||blob.size<5000)throw new Error("Le PDF est encore anormalement petit : génération interrompue pour éviter un document vide.");
     return blob;
-  }finally{holder.remove()}
+  }finally{
+    holder.remove();
+    window.scrollTo(oldScrollX,oldScrollY);
+  }
 }
 async function downloadCompleteInjunctionZip(){
   if(!currentUser||!currentDossier)return;
