@@ -1,4 +1,5 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -556,3 +557,125 @@ exports.marketingStats=onRequest({cors:true},async(req,res)=>{
   }catch(error){console.error("marketingStats ERROR",error);return res.status(500).json({error:"Impossible de charger les statistiques"});}
 });
 
+
+
+// ===== Axe Flow : alertes d'échéances internes à « Mon entreprise » =====
+// Une alerte J-1 et une alerte J0, à 08:00 Europe/Paris.
+// Aucun message n'est adressé au débiteur.
+const BREVO_API_KEY = defineSecret("BREVO_API_KEY");
+const ALERT_STAGES = {
+  RELANCE_1: "Première relance à préparer",
+  RELANCE_2: "Deuxième relance à préparer",
+  RELANCE_3: "Troisième relance à préparer",
+  MED: "Mise en demeure à préparer",
+  INJONCTION: "Injonction de payer à préparer",
+};
+const ALERT_SENDER = { name: "Axe Flow", email: "contact@axe-dossier.fr" };
+
+function parisDay(offset = 0) {
+  const now = new Date(Date.now() + offset * 86400000);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(now);
+}
+function dateOnly(value) {
+  if (!value) return "";
+  if (typeof value === "string") return /^\d{4}-\d{2}-\d{2}$/.test(value.slice(0, 10)) ? value.slice(0, 10) : "";
+  const date = typeof value.toDate === "function" ? value.toDate() : value instanceof Date ? value : null;
+  return date && !Number.isNaN(date.getTime())
+    ? new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(date)
+    : "";
+}
+function plusCalendarDays(iso, n) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function dueForCase(d, profile) {
+  if (d.nextActionAt) return dateOnly(d.nextActionAt);
+  if (d.nextAction !== "RELANCE_1") return "";
+  const invoices = Array.isArray(d.invoices) ? d.invoices : [];
+  const dueDates = invoices.map(x => dateOnly(x.dueDate)).filter(Boolean).sort();
+  const due = dueDates[0] || dateOnly(d.dueDate);
+  if (!due) return "";
+  const delay = Number(profile?.recoveryDelays?.r1AfterDue ?? 3);
+  return plusCalendarDays(due, Number.isFinite(delay) ? Math.max(0, Math.min(365, delay)) : 3);
+}
+function safeText(value) {
+  return String(value || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+}
+async function sendBrevoAlert({to, subject, html}) {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": BREVO_API_KEY.value(), "Content-Type": "application/json", accept: "application/json" },
+    body: JSON.stringify({ sender: ALERT_SENDER, to: [{ email: to }], subject, htmlContent: html }),
+  });
+  if (!response.ok) throw new Error(`Brevo HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
+}
+exports.sendCompanyDeadlineAlerts = onSchedule({
+  schedule: "0 8 * * *",
+  timeZone: "Europe/Paris",
+  secrets: [BREVO_API_KEY],
+  timeoutSeconds: 540,
+  memory: "256MiB",
+}, async () => {
+  const today = parisDay();
+  const tomorrow = plusCalendarDays(today, 1);
+  let checked = 0, sent = 0, failed = 0;
+  // Parcours des dossiers sans index composite supplémentaire.
+  let cursor = null;
+  while (true) {
+    let query = db.collectionGroup("requests").orderBy(admin.firestore.FieldPath.documentId()).limit(250);
+    if (cursor) query = query.startAfter(cursor);
+    const page = await query.get();
+    if (page.empty) break;
+    const userCache = new Map();
+    for (const docSnap of page.docs) {
+      const d = docSnap.data() || {};
+      checked++;
+      if (!ALERT_STAGES[d.nextAction] || d.lifecycleStatus === "closed" || d.lifecycleStatus === "closing" || d.status === "paid_closed" || d.status === "paid_pending_closure" || Number(d.principalBalance ?? d.amountTTC ?? 0) <= 0) continue;
+      const userRef = docSnap.ref.parent.parent;
+      if (!userRef || userRef.parent.id !== "users") continue;
+      let user = userCache.get(userRef.id);
+      if (!user) {
+        const snap = await userRef.get();
+        user = snap.exists ? snap.data() || {} : {};
+        userCache.set(userRef.id, user);
+      }
+      const email = String(user.businessProfile?.email || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
+      const due = dueForCase(d, user.businessProfile);
+      const timing = due === today ? "jour-j" : due === tomorrow ? "veille" : "";
+      if (!timing) continue;
+      const alertId = `deadline_${d.nextAction}_${due}_${timing}`;
+      const alertRef = docSnap.ref.collection("emailAlerts").doc(alertId);
+      try {
+        // Création atomique : empêche deux exécutions concurrentes de renvoyer le même mail.
+        await alertRef.create({ status: "sending", recipient: email, stage: d.nextAction, dueDate: due, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+      } catch (err) {
+        if (err.code === 6 || err.code === "already-exists") continue;
+        console.error("Alerte verrouillage impossible", docSnap.ref.path, err);
+        failed++;
+        continue;
+      }
+      const name = String(d.debtorName || d.debiteurName || "Dossier");
+      const stage = ALERT_STAGES[d.nextAction];
+      const subject = `Axe Flow — ${timing === "veille" ? "Demain" : "Aujourd'hui"} : ${stage}`;
+      const html = `<p>Bonjour,</p><p>Rappel Axe Flow : <strong>${safeText(stage)}</strong> ${timing === "veille" ? "demain" : "aujourd'hui"} (${safeText(due)}).</p><p>Dossier : <strong>${safeText(name)}</strong><br>Référence : ${safeText(d.reference || d.ref || docSnap.id)}</p><p>Consultez votre <a href="https://flow.axe-dossier.fr/tableau-de-bord.html">tableau de bord Axe Flow</a> pour préparer l'action.</p><p>Cette notification est réservée à votre entreprise. Aucun e-mail n'a été envoyé au débiteur.</p>`;
+      try {
+        await sendBrevoAlert({ to: email, subject, html });
+        await alertRef.update({ status: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp() });
+        sent++;
+      } catch (err) {
+        failed++;
+        console.error("Alerte Brevo échouée", docSnap.ref.path, err);
+        // Laisser une trace d'échec ; pas de réenvoi automatique sans vérification.
+        await alertRef.update({ status: "failed", error: String(err.message || err).slice(0, 300) });
+      }
+    }
+    cursor = page.docs[page.docs.length - 1];
+    if (page.size < 250) break;
+  }
+  console.log("Alertes Axe Flow", { today, checked, sent, failed });
+});
