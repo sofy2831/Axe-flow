@@ -746,6 +746,13 @@
     <div class="create-section">
       <div class="invoice-editor">
         <div class="invoice-editor-head"><div><strong>Factures (<span id="createInvoiceCount">1</span>)</strong></div><button class="btn btn-secondary" id="addInvoiceRowBtn" type="button">＋ Ajouter une facture</button></div>
+        <div class="note-box soft" style="display:grid;gap:9px">
+          <strong>Importer un relevé de factures (PDF)</strong>
+          <small>Format CleanUp Manager — factures intégralement impayées, sans avoir. Vérifiez les lignes et les pénalités avant de créer le dossier.</small>
+          <input type="file" id="statementPdfInput" accept="application/pdf,.pdf" hidden>
+          <button class="btn btn-secondary" type="button" id="importStatementBtn">Importer un relevé PDF</button>
+          <div id="statementImportStatus" role="status" aria-live="polite" style="white-space:pre-line"></div>
+        </div>
         <div class="invoice-rows" id="invoiceRows"></div>
         <div class="rate-note" id="createInvoiceRateNote">Chaque facture peut avoir un taux annuel différent. Reprenez le taux indiqué sur votre facture ou vos CGV.</div>
       </div>
@@ -2695,6 +2702,7 @@ function setCreateDebtorType(type){
 
 function updateCreateInvoiceCount(){const host=E.invoiceRows;if(!host)return;const n=host.querySelectorAll(".invoice-row").length;const c=$("createInvoiceCount");if(c)c.textContent=String(Math.max(1,n));}
 function openCreateDossierModal(){
+  $("statementImportStatus").textContent="";
   $("dossierRef").value=generateRef();
   $("creditorNameInput").value=creditorName();
   $("creditorEmailInput").value=creditorEmail();
@@ -3970,6 +3978,62 @@ fillInvoiceRows(E.invoiceRows,[{}]);
 E.addInvoiceRowBtn.addEventListener("click",()=>{addInvoiceRow(E.invoiceRows,{});updateCreateInvoiceCount();});
 E.editAddInvoiceRowBtn.addEventListener("click",()=>addInvoiceRow(E.editInvoiceRows,{}));
 new MutationObserver(updateCreateInvoiceCount).observe(E.invoiceRows,{childList:true});
+
+// Import local : aucune transmission du PDF à un service d'extraction.
+function parseStatementRows(lines){
+  const money=/(-?\d[\d .\u00a0\u202f]*,\d{2})\s*€/g;
+  const cents=v=>Math.round(Number(v.replace(/[ .\u00a0\u202f]/g,"").replace(",","."))*100);
+  const rows=[]; const refs=new Set();
+  const full=lines.join("\n");
+  if(!/Relevé de factures/i.test(full)||!/CleanUp|Conciergerie/i.test(full))throw Error("Format de relevé non reconnu.");
+  if(!/\b0\s+avoirs\b/i.test(full))throw Error("Les relevés avec avoirs ou sans compteur d’avoirs doivent être saisis manuellement.");
+  const count=full.match(/\b(\d+)[ \t]+factures?\b/i);
+  for(const line of lines){
+    if(!/^Facture\s+/i.test(line))continue;
+    const m=line.match(/^Facture\s+(\S+)\s+(\d{4}-\d{2}-\d{2})\s+(\d{4}-\d{2}-\d{2})\s+/i);
+    if(!m)throw Error("Ligne de facture non reconnue : "+line);
+    const amounts=[...line.slice(m[0].length).matchAll(money)].map(x=>cents(x[1]));
+    if(amounts.length!==5||amounts[3]!==0||amounts[2]!==amounts[4]||amounts[2]<=0||amounts[0]+amounts[1]!==amounts[2])throw Error("Montants, avoirs ou règlements à vérifier : "+m[1]);
+    if(refs.has(m[1]))throw Error("Facture en double : "+m[1]);
+    refs.add(m[1]);
+    rows.push({ref:m[1],issuedDate:m[2],dueDate:m[3],amount:amounts[2]/100,lateRatePercent:0});
+  }
+  if(!rows.length||!count||Number(count[1])!==rows.length)throw Error("Nombre de factures incohérent ou format non pris en charge.");
+  const totals=lines.findIndex(l=>/Montant réglé.*Reste dû/i.test(l));
+  const summary=totals>=0?[...(lines[totals+1]||"").matchAll(money)].map(x=>cents(x[1])):[];
+  if(summary.length<2||summary[0]!==0||summary[1]!==rows.reduce((t,r)=>t+Math.round(r.amount*100),0))throw Error("Le total du relevé ne correspond pas aux factures importées.");
+  return rows;
+}
+const statementInput=$("statementPdfInput"),statementStatus=$("statementImportStatus"),statementBtn=$("importStatementBtn");
+statementBtn.addEventListener("click",()=>statementInput.click());
+statementInput.addEventListener("change",async()=>{
+  const file=statementInput.files[0];if(!file)return;
+  statementBtn.disabled=true;statementStatus.textContent="Lecture du relevé…";
+  try{
+    if(file.size>20*1024*1024)throw Error("PDF limité à 20 Mo.");
+    const pdfjs=await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
+    pdfjs.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+    const pdf=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;
+    const lines=[];
+    try{for(let n=1;n<=pdf.numPages;n++){
+      const page=await pdf.getPage(n),content=await page.getTextContent(),groups=[];
+      for(const item of content.items){if(!item.str?.trim())continue;const [x,y]=item.transform.slice(4);let g=groups.find(g=>Math.abs(g.y-y)<2.5);if(!g){g={y,items:[]};groups.push(g)}g.items.push({x,str:item.str});}
+      groups.sort((a,b)=>b.y-a.y).forEach(g=>lines.push(g.items.sort((a,b)=>a.x-b.x).map(i=>i.str.trim()).join(" ").replace(/\s+/g," ")));
+    }}finally{await pdf.destroy();}
+    const rows=parseStatementRows(lines);
+    if(!E.createDossierModal.classList.contains("open"))return;
+    if([...E.invoiceRows.querySelectorAll("[data-invoice-ref],[data-invoice-amount]")].some(i=>i.value.trim())&&!confirm("Remplacer les factures déjà saisies par le relevé importé ?")){statementStatus.textContent="Import annulé.";return;}
+    fillInvoiceRows(E.invoiceRows,rows);updateCreateInvoiceCount();
+    if($("debiteurTypeInput").value!=="private")E.invoiceRows.querySelectorAll("[data-invoice-rate]").forEach(i=>i.value="");
+    const title=lines.find(l=>/•\s*\d{4}-\d{2}-\d{2}/.test(l));
+    const email=lines.join(" ").match(/\bEmail\s+([^\s]+@[^\s]+\.[^\s]+)/i);
+    if(title&&!$("debtorNameInput").value)$("debtorNameInput").value=title.split("•")[0].trim();
+    if(email&&!$("debtorEmailInput").value)$("debtorEmailInput").value=email[1];
+    statementStatus.textContent=`${rows.length} factures importées — ${formatCurrency(rows.reduce((t,r)=>t+r.amount,0))}. Vérifiez le débiteur, son statut et les taux de pénalités. Joignez le relevé et les factures originales aux justificatifs.`;
+  }catch(err){statementStatus.textContent="Import impossible : "+(err.message||err)+" Saisie manuelle toujours disponible.";}
+  finally{statementBtn.disabled=false;statementInput.value="";}
+});
+
 E.createDossierForm.addEventListener("submit",async e=>{
   e.preventDefault();
 
