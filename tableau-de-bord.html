@@ -3990,13 +3990,14 @@ function parseStatementRows(lines){
   const count=full.match(/\b(\d+)[ \t]+factures?\b/i);
   for(const line of lines){
     if(!/^Facture\s+/i.test(line))continue;
-    const m=line.match(/^Facture\s+(\S+)\s+(\d{4}-\d{2}-\d{2})\s+(\d{4}-\d{2}-\d{2})\s+/i);
+    const m=line.match(/^Facture\s+(.+?)\s+(\d{4}-\d{2}-\d{2})\s+(\d{4}-\d{2}-\d{2})\s+/i);
     if(!m)throw Error("Ligne de facture non reconnue : "+line);
     const amounts=[...line.slice(m[0].length).matchAll(money)].map(x=>cents(x[1]));
     if(amounts.length!==5||amounts[3]!==0||amounts[2]!==amounts[4]||amounts[2]<=0||amounts[0]+amounts[1]!==amounts[2])throw Error("Montants, avoirs ou règlements à vérifier : "+m[1]);
-    if(refs.has(m[1]))throw Error("Facture en double : "+m[1]);
-    refs.add(m[1]);
-    rows.push({ref:m[1],issuedDate:m[2],dueDate:m[3],amount:amounts[2]/100,lateRatePercent:0});
+    const ref=m[1].replace(/\s+/g,"");
+    if(refs.has(ref))throw Error("Facture en double : "+ref);
+    refs.add(ref);
+    rows.push({ref,issuedDate:m[2],dueDate:m[3],amount:amounts[2]/100,lateRatePercent:0});
   }
   if(!rows.length||!count||Number(count[1])!==rows.length)throw Error("Nombre de factures incohérent ou format non pris en charge.");
   const totals=lines.findIndex(l=>/Montant réglé.*Reste dû/i.test(l));
