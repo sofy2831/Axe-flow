@@ -753,6 +753,14 @@
           <button class="btn btn-secondary" type="button" id="importStatementBtn">Importer un relevé PDF</button>
           <div id="statementImportStatus" role="status" aria-live="polite" style="white-space:pre-line"></div>
         </div>
+        <div class="note-box soft" id="bulkPenaltyBox" style="display:grid;gap:9px">
+          <strong>Paramétrage collectif des pénalités</strong>
+          <small>Choisissez les conditions prévues par vos factures ou CGV. Chaque ligne reste modifiable.</small>
+          <div class="field"><label for="bulkPenaltyMode">Mode de calcul</label><select id="bulkPenaltyMode"><option value="">Sélectionner un mode</option><option value="triple_legal">3 × taux légal (évolutif)</option><option value="fixed">Taux contractuel fixe</option></select></div>
+          <div class="field" id="bulkPenaltyRateWrap" hidden><label for="bulkPenaltyRate">Taux annuel (%)</label><input id="bulkPenaltyRate" type="number" min="0" step="0.01" disabled></div>
+          <button class="btn btn-secondary" id="applyBulkPenalty" type="button">Appliquer à toutes les factures</button>
+          <div id="bulkPenaltyStatus" role="status" aria-live="polite"></div>
+        </div>
         <div class="invoice-rows" id="invoiceRows"></div>
         <div class="rate-note" id="createInvoiceRateNote">Chaque facture peut avoir un taux annuel différent. Reprenez le taux indiqué sur votre facture ou vos CGV.</div>
       </div>
@@ -2700,9 +2708,20 @@ function setCreateDebtorType(type){
   }
 }
 
-function updateCreateInvoiceCount(){const host=E.invoiceRows;if(!host)return;const n=host.querySelectorAll(".invoice-row").length;const c=$("createInvoiceCount");if(c)c.textContent=String(Math.max(1,n));}
+function syncBulkPenaltyBox(){
+  const box=$("bulkPenaltyBox"),privateDebtor=$("debiteurTypeInput").value==="private";
+  box.style.display=privateDebtor?"none":"grid";
+  $("applyBulkPenalty").disabled=privateDebtor;
+}
+function resetBulkPenalty(){
+  $("bulkPenaltyMode").value="";$("bulkPenaltyRate").value="";
+  $("bulkPenaltyRate").disabled=true;$("bulkPenaltyRateWrap").style.display="none";
+  $("bulkPenaltyStatus").textContent="";syncBulkPenaltyBox();
+}
+function updateCreateInvoiceCount(){syncBulkPenaltyBox();const host=E.invoiceRows;if(!host)return;const n=host.querySelectorAll(".invoice-row").length;const c=$("createInvoiceCount");if(c)c.textContent=String(Math.max(1,n));}
 function openCreateDossierModal(){
   $("statementImportStatus").textContent="";
+  resetBulkPenalty();
   $("dossierRef").value=generateRef();
   $("creditorNameInput").value=creditorName();
   $("creditorEmailInput").value=creditorEmail();
@@ -3978,6 +3997,25 @@ fillInvoiceRows(E.invoiceRows,[{}]);
 E.addInvoiceRowBtn.addEventListener("click",()=>{addInvoiceRow(E.invoiceRows,{});updateCreateInvoiceCount();});
 E.editAddInvoiceRowBtn.addEventListener("click",()=>addInvoiceRow(E.editInvoiceRows,{}));
 new MutationObserver(updateCreateInvoiceCount).observe(E.invoiceRows,{childList:true});
+resetBulkPenalty();
+$("bulkPenaltyMode").addEventListener("change",()=>{
+  const mode=$("bulkPenaltyMode").value,rate=$("bulkPenaltyRate");
+  const fixed=mode==="fixed";rate.disabled=!fixed;
+  $("bulkPenaltyRateWrap").style.display=fixed?"grid":"none";
+  $("bulkPenaltyStatus").textContent="";
+});
+$("applyBulkPenalty").addEventListener("click",()=>{
+  if($("debiteurTypeInput").value==="private")return;
+  const mode=$("bulkPenaltyMode").value,field=$("bulkPenaltyRate"),status=$("bulkPenaltyStatus");
+  if(!["fixed","triple_legal"].includes(mode)){status.textContent="Sélectionnez un mode de calcul.";return;}
+  if(mode==="fixed"&&(!field.value.trim()||!field.checkValidity())){status.textContent="Renseignez un taux annuel valide.";return;}
+  const rows=[...E.invoiceRows.querySelectorAll(".invoice-row")];
+  const rates=rows.map(row=>mode==="fixed"?Number(field.value):autoTripleRate(row.querySelector("[data-invoice-due]").value));
+  if(rates.some(rate=>rate===null||!Number.isFinite(rate)||rate<0)){status.textContent="Échéance ou barème légal manquant : vérifiez les dates avant application.";return;}
+  rows.forEach((row,i)=>{row.querySelector("[data-invoice-rate-mode]").value=mode;row.querySelector("[data-invoice-rate]").value=String(rates[i]);});
+  status.textContent=`Conditions appliquées à ${rows.length} facture(s). Vérifiez les lignes avant émission.`;
+});
+
 
 // Import local : aucune transmission du PDF à un service d'extraction.
 function parseStatementRows(lines){
@@ -4024,7 +4062,7 @@ statementInput.addEventListener("change",async()=>{
     const rows=parseStatementRows(lines);
     if(!E.createDossierModal.classList.contains("open"))return;
     if([...E.invoiceRows.querySelectorAll("[data-invoice-ref],[data-invoice-amount]")].some(i=>i.value.trim())&&!confirm("Remplacer les factures déjà saisies par le relevé importé ?")){statementStatus.textContent="Import annulé.";return;}
-    fillInvoiceRows(E.invoiceRows,rows);updateCreateInvoiceCount();
+    fillInvoiceRows(E.invoiceRows,rows);updateCreateInvoiceCount();resetBulkPenalty();
     if($("debiteurTypeInput").value!=="private")E.invoiceRows.querySelectorAll("[data-invoice-rate]").forEach(i=>i.value="");
     const title=lines.find(l=>/•\s*\d{4}-\d{2}-\d{2}/.test(l));
     const email=lines.join(" ").match(/\bEmail\s+([^\s]+@[^\s]+\.[^\s]+)/i);
